@@ -456,11 +456,12 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
 			data << uint32(0);
 	}
 
+    float rates = sWorld->getRate(RATE_XP_QUEST);
+    if (pSession->GetPlayer() && pSession->GetPlayer()->getLevel() >= 80)
+        rates = 5.0f;
+
 	data << uint32(pQuest->GetRewOrReqMoney());
-	data
-			<< uint32(
-					pQuest->XPValue(pSession->GetPlayer())
-							* sWorld->getRate(RATE_XP_QUEST));
+	data << uint32(pQuest->XPValue(pSession->GetPlayer()) * rates);
 
 	data << uint32(pQuest->GetCharTitleId());
 	data << uint32(0); // unknow 4.0.1

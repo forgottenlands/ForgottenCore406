@@ -173,8 +173,13 @@ inline uint32 Gain(Player *pl, Unit *u) {
 		}
 
 	    float premium_rate = pl->GetSession()->IsPremium() ? sWorld->getRate(RATE_XP_KILL_PREMIUM) : 1.0f;
+        
+        uint32 expamount = uint32(gain*sWorld->getRate(RATE_XP_KILL)*premium_rate);
 
-            return uint32(gain*sWorld->getRate(RATE_XP_KILL)*premium_rate);
+        if (pl->getLevel() >= 80)
+            expamount = uint32(gain*5.0f*premium_rate);
+
+            return expamount;
 	}
 
 	sScriptMgr->OnGainCalculation(gain, pl, u);
