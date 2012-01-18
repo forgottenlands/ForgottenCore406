@@ -15436,13 +15436,7 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
     if (getLevel() >= 80)
         rates = 5.0f;
 
-    float raf_rate = 1.0f;
-    if (GetsRecruitAFriendBonus(true))
-    {
-        raf_rate = (1+sWorld->getRate(RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS));
-    }
-
-	uint32 XP = rewarded ? 0 : uint32(pQuest->XPValue(this)* rates * raf_rate);
+	uint32 XP = rewarded ? 0 : uint32(pQuest->XPValue(this)* rates);
 
 	// handle SPELL_AURA_MOD_XP_QUEST_PCT auras
 	Unit::AuraEffectList const& ModXPPctAuras = GetAuraEffectsByType(

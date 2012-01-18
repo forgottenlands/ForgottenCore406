@@ -173,9 +173,10 @@ inline uint32 Gain(Player *pl, Unit *u) {
 		}
 
 	    float premium_rate = pl->GetSession()->IsPremium() ? sWorld->getRate(RATE_XP_KILL_PREMIUM) : 1.0f;
-        float level_rate = pl->getLevel() >= 80 ? 5.0 : sWorld->getRate(RATE_XP_KILL);
-        float raf_rate = pl->GetsRecruitAFriendBonus(true) ? (1 + sWorld->getRate(RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS)) : 1.0f;
-        uint32 expamount = uint32(gain*premium_rate*level_rate*raf_rate);
+        uint32 expamount = uint32(gain*sWorld->getRate(RATE_XP_KILL)*premium_rate);
+
+        if (pl->getLevel() >= 80)
+           expamount = uint32(gain*5.0f*premium_rate);
 
             return expamount;
 	}
