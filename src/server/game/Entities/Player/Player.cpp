@@ -3159,8 +3159,7 @@ void Player::GiveLevel(uint8 level) {
 		CharacterDatabase.CommitTransaction(trans);
 	}
 
-	GetAchievementMgr().UpdateAchievementCriteria(
-			ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
+	GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
 
     if (level == 85 || level == 50)
     {
@@ -15437,7 +15436,13 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
     if (getLevel() >= 80)
         rates = 5.0f;
 
-	uint32 XP = rewarded ? 0 : uint32(pQuest->XPValue(this)* rates);
+    float raf_rate = 1.0f;
+    if (GetsRecruitAFriendBonus(true))
+    {
+        raf_rate = (1+sWorld->getRate(RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS));
+    }
+
+	uint32 XP = rewarded ? 0 : uint32(pQuest->XPValue(this)* rates * raf_rate);
 
 	// handle SPELL_AURA_MOD_XP_QUEST_PCT auras
 	Unit::AuraEffectList const& ModXPPctAuras = GetAuraEffectsByType(
