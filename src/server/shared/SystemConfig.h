@@ -29,7 +29,7 @@
 #include "Define.h"
 #include "revision.h"
 
-#define _PACKAGENAME "ArkCORE"
+#define _PACKAGENAME "ForgottenCore - Fork of ArkCORE"
 #define _CODENAME "COLD_DAY_IN_HELL"
 
 #if ARKCORE_ENDIAN == ARKCORE_BIGENDIAN
