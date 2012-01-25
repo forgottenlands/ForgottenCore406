@@ -1372,6 +1372,22 @@ public:
  }
  };*/
 
+class crowley_horse : public CreatureScript
+{
+    public:
+        crowley_horse() : CreatureScript("crowley_horse") 
+        {  }
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            if (pPlayer->GetQuestStatus(14212) == QUEST_STATUS_INCOMPLETE)
+                pPlayer->TeleportTo(638, -1538.80f, 1995.18f, 26.5364f, 1.2149f, 0);
+
+            pPlayer->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+};
+
 void AddSC_gilneas() {
 	new npc_gilneas_city_guard_phase1();
 	new npc_gilneas_city_guard_phase2();
@@ -1392,4 +1408,5 @@ void AddSC_gilneas() {
 	new npc_lord_darius_crowley_c3();
 	new npc_king_genn_greymane_c2();
 	//new spell_keg_placed();
+    new crowley_horse();
 }
