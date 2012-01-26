@@ -603,6 +603,7 @@ void AddSC_zangarmarsh();
 // Maelstrom
 void AddSC_deepholm();
 void AddSC_kezan();
+void AddSC_lost_isles();
 //void AddSC_tol_barad();
 
 void AddSC_the_stonecore();					 //TheStonecore
@@ -1341,6 +1342,7 @@ void AddMaelstromScripts()
 #ifdef SCRIPTS
     AddSC_deepholm();
     AddSC_kezan();
+    AddSC_lost_isles();
     //AddSC_tol_barad();
 #endif
 }

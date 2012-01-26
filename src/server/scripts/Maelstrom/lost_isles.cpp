@@ -16,3 +16,26 @@
 */
 
 #include "ScriptPCH.h"
+
+// Quest: (14242) Precious cargo
+class npc_gyrochoppa: public CreatureScript 
+{
+    public:
+	    npc_gyrochoppa() : CreatureScript("npc_gyrochoppa")
+        { }
+
+	bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) 
+    {
+		if (quest->GetQuestId() == 14242) 
+        {
+			player->CompleteQuest(14242);
+            player->TeleportTo(648, 987.350f, 3824.70f, 12.431f, 1.24f);
+		}
+		return true;
+	}
+};
+
+void AddSC_lost_isles()
+{
+    new  npc_gyrochoppa();
+}
