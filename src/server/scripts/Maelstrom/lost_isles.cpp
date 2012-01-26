@@ -88,9 +88,27 @@ class npc_sling_rocket : public CreatureScript
         }
 };
 
+//  Trhall endgame
+class npc_thrall_goblin_end: public CreatureScript 
+{
+    public:
+	    npc_thrall_goblin_end() : CreatureScript("npc_thrall_goblin_end")
+        { }
+
+	bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) 
+    {
+		if (quest->GetQuestId() == 25266) 
+        {
+			player->TeleportTo(1, 1469.031f, -5012.521f, 11.7414f, 3.324f);
+		}
+		return true;
+	}
+};
+
 void AddSC_lost_isles()
 {
     new npc_gyrochoppa();
     new npc_thrall_goblin();
     new npc_sling_rocket();
+    new npc_thrall_goblin_end();
 }
