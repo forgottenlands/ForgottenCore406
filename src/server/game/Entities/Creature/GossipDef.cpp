@@ -480,7 +480,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
 		data << int32(pQuest->RewRepValue[i]);
 
 	data << int32(pQuest->GetRewSpellCast());
-	data << uint32(0); // unknow 4.0.1 Spellcast?
+	data << int32(pQuest->GetRewSpellHiddenCast());
 
 	for (int i = 0; i < 4; i++)
 		data << uint32(0);
@@ -762,7 +762,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID,
 		data << int32(pQuest->RewRepValue[i]);
 
 	data << int32(pQuest->GetRewSpellCast());
-	data << uint32(0); // Probably invisible spell cast ;/
+	data << int32(pQuest->GetRewSpellHiddenCast());
 
 	for (int i = 0; i < 4; i++)
 		data << uint32(0);
