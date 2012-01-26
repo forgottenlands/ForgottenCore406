@@ -69,8 +69,28 @@ class npc_thrall_goblin: public CreatureScript
     }
 };
             
+class npc_sling_rocket : public CreatureScript
+{
+    public:
+        npc_sling_rocket() : CreatureScript("npc_sling_rocket") 
+        {  }
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            if (pPlayer->GetQuestStatus(14244) != QUEST_STATUS_NONE)
+            {
+                pPlayer->CompleteQuest(14244);
+                pPlayer->TeleportTo(648, 905.36f, 2326.437f, 5.155f, 5.113f, 0);
+            }
+
+            pPlayer->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+};
+
 void AddSC_lost_isles()
 {
     new npc_gyrochoppa();
     new npc_thrall_goblin();
+    new npc_sling_rocket();
 }
