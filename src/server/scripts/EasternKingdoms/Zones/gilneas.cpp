@@ -1380,8 +1380,8 @@ class crowley_horse : public CreatureScript
 
         bool OnGossipHello(Player* pPlayer, Creature* pCreature)
         {
-            if (pPlayer->GetQuestStatus(14212) == QUEST_STATUS_INCOMPLETE)
-                pPlayer->TeleportTo(638, -1538.80f, 1995.18f, 26.5364f, 1.2149f, 0);
+            if (pPlayer->GetQuestStatus(14212) != QUEST_STATUS_NONE)
+                pPlayer->TeleportTo(638, -1540.80f, 1575.18f, 29.5364f, 4.2149f, 0);
 
             pPlayer->CLOSE_GOSSIP_MENU();
             return true;
