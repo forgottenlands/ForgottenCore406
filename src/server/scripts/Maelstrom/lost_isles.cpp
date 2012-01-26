@@ -35,7 +35,42 @@ class npc_gyrochoppa: public CreatureScript
 	}
 };
 
+// Quest: (14242) Warchief Revenge
+class npc_thrall_goblin: public CreatureScript 
+{
+    public:
+	    npc_thrall_goblin() : CreatureScript("npc_thrall_goblin")
+        { }
+
+	bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {
+        if (pPlayer->GetQuestStatus(14243) == QUEST_STATUS_COMPLETE)
+        {
+		    pPlayer->PrepareGossipMenu(pCreature);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to Wild Overlook", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            pPlayer->SEND_GOSSIP_MENU(1, pCreature->GetGUID());
+            return true;
+        }
+        return false;
+	}
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+       
+        switch(uiAction)
+        {
+            case GOSSIP_ACTION_INFO_DEF:
+                pPlayer->TeleportTo(648, 866.22f, 2779.55f, 114.20f, 6.233f, 0); 
+                break;
+        }
+        pPlayer->PlayerTalkClass->CloseGossip();
+        return true;
+    }
+};
+            
 void AddSC_lost_isles()
 {
-    new  npc_gyrochoppa();
+    new npc_gyrochoppa();
+    new npc_thrall_goblin();
 }
