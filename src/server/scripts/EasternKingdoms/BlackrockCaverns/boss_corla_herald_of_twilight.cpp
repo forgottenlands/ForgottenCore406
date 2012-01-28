@@ -84,9 +84,9 @@ public:
 		return new boss_corla_herald_of_twilightAI (creature);
 	}
 
-	struct boss_corla_herald_of_twilightAI : public ScriptedAI
+	struct boss_corla_herald_of_twilightAI : public BossAI
 	{
-		boss_corla_herald_of_twilightAI(Creature* creature) : ScriptedAI(creature)
+		boss_corla_herald_of_twilightAI(Creature* creature) : BossAI(creature, DATA_CORLA_EVENT)
 		{
 			instance = creature->GetInstanceScript();
 
@@ -343,9 +343,13 @@ public:
 				if(channelTarget->GetAuraCount(SPELL_EVOLUTION) == 100)
 				{
 					if(channelTarget == zealot)
-					channelTarget->RemoveAllAuras();
+                    {
+					    channelTarget->RemoveAllAuras();
+    					zealot->CastSpell(channelTarget, SPELL_TWILIGHT_EVOLUTION, true);
+                    }
 
-					zealot->CastSpell(channelTarget, SPELL_TWILIGHT_EVOLUTION, true);
+                    if (channelTarget->ToPlayer())
+                        channelTarget->Kill(channelTarget, true);
 				}
 
 				uiCheckPlayerIsBetween = 175;
