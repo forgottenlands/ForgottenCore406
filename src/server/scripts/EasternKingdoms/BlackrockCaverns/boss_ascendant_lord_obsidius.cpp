@@ -25,7 +25,7 @@
 
 enum Spells
 {
-	SPELL_THUNDERCLAP = 76186,
+	SPELL_THUNDERCLAP = 84622, 
 	SPELL_TWILIGHT_CORRUPTION = 93613,
 	SPELL_STONE_BLOW = 76185,
 };
@@ -178,8 +178,81 @@ public:
 		}
 	};
 };
+enum shadowEvents
+{
+    EVENT_CREPUSCOLAR_VEIL = 1,
+};
+
+enum shadowSpells
+{
+    SPELL_CREPUSCOLAR_VEIL                        = 76189,
+    SPELL_TWITCHY                                 = 76167,
+};
+
+class npc_shadow_obsidius : public CreatureScript
+{
+public:
+    npc_shadow_obsidius() : CreatureScript("npc_shadow_obsidius") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_shadow_obsidiusAI (creature);
+    }
+
+    struct npc_shadow_obsidiusAI : public ScriptedAI
+    {
+        npc_shadow_obsidiusAI(Creature* creature) : ScriptedAI(creature)
+        {
+            instance = creature->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+
+        void Reset()
+        {
+            events.Reset();
+            me->AddAura(SPELL_TWITCHY, me);
+            me->AddAura(87427, me);
+        }
+
+        void DamageTaken(Unit *who, uint32 &damage)
+        {
+            damage = 0;
+            me->Attack(who, true);
+            me->GetMotionMaster()->MoveChase(who, 2.0f, 0.0f);
+        }
+
+        void EnterCombat(Unit* /*who*/) 
+        {
+            events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CREPUSCOLAR_VEIL:
+                        DoCastVictim(SPELL_CREPUSCOLAR_VEIL);
+                        events.ScheduleEvent(EVENT_CREPUSCOLAR_VEIL, urand(3000, 4000), 0, 0);
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
 
 void AddSC_boss_ascendant_lord_obsidius()
 {
 	new boss_ascendant_lord_obsidius();
+    new npc_shadow_obsidius();
 }
