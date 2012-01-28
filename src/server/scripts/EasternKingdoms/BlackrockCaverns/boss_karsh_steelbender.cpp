@@ -64,9 +64,9 @@ public:
         return new boss_karsh_steelbenderAI (creature);
     }
 
-    struct boss_karsh_steelbenderAI : public ScriptedAI
+    struct boss_karsh_steelbenderAI : public BossAI
     {
-        boss_karsh_steelbenderAI(Creature* creature) : ScriptedAI(creature)
+        boss_karsh_steelbenderAI(Creature* creature) : BossAI(creature, DATA_KARSH_STEELBENDER_EVENT)
         {
             instance = creature->GetInstanceScript();
 
@@ -162,12 +162,6 @@ public:
 
             DoMeleeAttackIfReady();
         }
-
-		void DamageDealt(Unit* victim, uint32& damage, DamageEffectType /*damageType*/)
-		{
-			if(damage > 0 && me->HasAura(SPELL_SUPERHEATED_QUECKSILVER_ARMOR))
-				DoCastVictim(SPELL_BURNING_METAL);
-		}
 
 		void SummonedCreatureDespawn(Creature* summon)
 		{
