@@ -640,6 +640,7 @@ void AddSC_instance_blackrock_caverns();	//Blackrock Caverns
 void AddSC_boss_romogg_bonecrusher();
 void AddSC_boss_corla_herald_of_twilight();
 void AddSC_boss_karsh_steelbender();
+void AddSC_boss_beauty();
 void AddSC_boss_ascendant_lord_obsidius();
 void AddSC_boss_chogall(); 					//BastionOfTwilight
 void AddSC_boss_ascendant_council();
@@ -1319,6 +1320,7 @@ void AddNorthrendScripts() {
 	AddSC_boss_romogg_bonecrusher();
 	AddSC_boss_corla_herald_of_twilight();
 	AddSC_boss_karsh_steelbender();
+    AddSC_boss_beauty();
 	AddSC_boss_ascendant_lord_obsidius();
 
 #endif
