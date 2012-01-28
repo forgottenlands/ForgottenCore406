@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `modelid1`=33553, `modelid2`=0 WHERE  `entry`=40447;
