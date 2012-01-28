@@ -4670,6 +4670,13 @@ void SpellMgr::LoadSpellCustomAttr() {
 				spellInfo->SpellFamilyFlags[0] |= 0x40;
 			count++;
 			break;
+        case SPELLFAMILY_PRIEST:
+            // Holy Nova 10yd
+            if (spellInfo->Id == 15237)
+            {
+                spellInfo->EffectRadiusIndex[0] = 13; // 10yd
+            }
+            break;
 		}
 	}
 
