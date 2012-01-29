@@ -7254,55 +7254,63 @@ void Player::RewardOnKill(Unit *victim, float rate)
 }
 
 //Calculate how many reputation points player gain with the quest
-void Player::RewardReputation(Quest const *pQuest) {
-	bool recruitAFriend = GetsRecruitAFriendBonus(false);
+void Player::RewardReputation(Quest const *pQuest) 
+{
+    bool recruitAFriend = GetsRecruitAFriendBonus(false);
 
-	// quest reputation reward/loss
-	for (uint8 i = 0; i < QUEST_REPUTATIONS_COUNT; ++i) {
-		if (!pQuest->RewRepFaction[i])
-			continue;
-		if (pQuest->RewRepValue[i]) {
-			int32 rep = CalculateReputationGain(GetQuestLevel(pQuest),
-					pQuest->RewRepValue[i] / 100, pQuest->RewRepFaction[i],
-					true, true);
+    // quest reputation reward/loss
+    for (uint8 i = 0; i < QUEST_REPUTATIONS_COUNT; ++i) 
+    {
+        if (!pQuest->RewRepFaction[i])
+            continue;
+        if (pQuest->RewRepValue[i]) 
+        {
+            int32 rep = CalculateReputationGain(GetQuestLevel(pQuest), pQuest->RewRepValue[i] / 100, pQuest->RewRepFaction[i], true, true);
 
-			if (recruitAFriend)
-				rep =
-						int32(
-								rep
-										* (1
-												+ sWorld->getRate(
-														RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS)));
+            if (recruitAFriend)
+                rep = int32(rep * (1 + sWorld->getRate(RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS)));
 
-			if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->RewRepFaction[i]))
-				GetReputationMgr().ModifyReputation(factionEntry, rep);
-		} else {
-			uint32 row = ((pQuest->RewRepValueId[i] < 0) ? 1 : 0) + 1;
-			uint32 field = abs(pQuest->RewRepValueId[i]);
+            if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->RewRepFaction[i]))
+                GetReputationMgr().ModifyReputation(factionEntry, rep);
+        } 
+        else 
+        {
+            uint32 row = ((pQuest->RewRepValueId[i] < 0) ? 1 : 0) + 1;
+            uint32 field = abs(pQuest->RewRepValueId[i]);
 
-			if (const QuestFactionRewEntry *pRow = sQuestFactionRewardStore.LookupEntry(row)) {
-				int32 repPoints = pRow->QuestRewFactionValue[field];
+            if (const QuestFactionRewEntry *pRow = sQuestFactionRewardStore.LookupEntry(row)) 
+            {
+                int32 repPoints = pRow->QuestRewFactionValue[field];
 
-				if (!repPoints)
-					continue;
+                if (!repPoints)
+                    continue;
 
-				repPoints = CalculateReputationGain(GetQuestLevel(pQuest),
-						repPoints, pQuest->RewRepFaction[i], true);
+                repPoints = CalculateReputationGain(GetQuestLevel(pQuest), repPoints, pQuest->RewRepFaction[i], true);
 
-				if (recruitAFriend)
-					repPoints =
-							int32(
-									repPoints
-											* (1
-													+ sWorld->getRate(
-															RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS)));
+                if (recruitAFriend)
+                    repPoints = int32(repPoints * (1 + sWorld->getRate(RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS)));
 
-				if (const FactionEntry* factionEntry = sFactionStore.LookupEntry(pQuest->RewRepFaction[i]))
-					GetReputationMgr().ModifyReputation(factionEntry,
-							repPoints);
-			}
-		}
-	}
+                if (const FactionEntry* factionEntry = sFactionStore.LookupEntry(pQuest->RewRepFaction[i]))
+                    GetReputationMgr().ModifyReputation(factionEntry,  repPoints);
+            }
+        }
+        // Give guild rep on completed quest
+        if (sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
+        {
+            if (Guild * pGuild = sObjectMgr->GetGuildById(GetGuildId()))
+            {
+                if (uint32 exp = pQuest->XPValue(this))
+                {
+                    uint32 gRep = exp / 450;
+                    if (gRep <= 0)
+                        gRep = 1;
+
+                    if (FactionEntry const* guildEntry = sFactionStore.LookupEntry(1168))
+                        GetReputationMgr().ModifyReputation(guildEntry, gRep);
+                }
+            }
+        }
+    }
 }
 
 void Player::UpdateHonorFields() {
