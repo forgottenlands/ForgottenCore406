@@ -7153,11 +7153,11 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     break;
                 // Glyph of Hemorrhage
                 case 56807:
-                    if (procSpell->Id == 16511)
-                    {
-                        triggered_spell_id = 89775;
-                        basepoints0 = (damage*0.4f)/8;
-                    }
+                    if (procSpell->Id != 16511)
+                        return false;
+
+                    triggered_spell_id = 89775;
+                    basepoints0 = (damage*0.4f)/8;
                     break;
 			}
 			// Deadly Brew
