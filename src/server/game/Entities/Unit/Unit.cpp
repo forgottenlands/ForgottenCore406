@@ -7156,7 +7156,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     if (procSpell->Id == 16511)
                     {
                         triggered_spell_id = 89775;
-                        basepoints0 = damage*0.4f;
+                        basepoints0 = (damage*0.4f)/8;
                     }
                     break;
 			}
