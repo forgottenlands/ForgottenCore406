@@ -5201,20 +5201,22 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
 		}
 		case SPELLFAMILY_ROGUE:
 		{
-			// Fan of Knives, Hemorrhage, Ghostly Strike
-			if ((m_spellInfo->SpellFamilyFlags [1] & 0x40000)
-					|| (m_spellInfo->SpellFamilyFlags [0] & 0x6000000))
+			if (m_spellInfo->Id == 16511 || m_spellInfo->Id == 8676)
 			{
-				// Hemorrhage
-				if (m_spellInfo->SpellFamilyFlags [0] & 0x2000000)
-				{
-					if (m_caster->GetTypeId() == TYPEID_PLAYER) m_caster->ToPlayer()->AddComboPoints(
-							unitTarget, 1, this);
-				}
 				// 50% more damage with daggers
-				if (m_caster->GetTypeId() == TYPEID_PLAYER) if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true)) if (item->GetProto()->SubClass
-						== ITEM_SUBCLASS_WEAPON_DAGGER) totalDamagePercentMod *=
-						1.5f;
+				if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
+                    {
+                        if (item->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER) 
+                        {
+                            if (m_spellInfo->Id == 16511)
+                                totalDamagePercentMod *= 1.5f;
+                            else if (m_spellInfo->Id == 8676)
+                                totalDamagePercentMod *= 1.8f;
+                        }
+                    }
+                }
 			}
 			// Mutilate (for each hand)
 			else if (m_spellInfo->SpellFamilyFlags [1] & 0x6)
