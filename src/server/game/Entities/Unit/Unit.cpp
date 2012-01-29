@@ -7083,7 +7083,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
 		case SPELLFAMILY_ROGUE:
 		{
 			switch (dummySpell->Id)
-			{
+            {
 				// Glyph of Backstab
 				case 56800:
 				{
@@ -7149,6 +7149,14 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                                 caster->AddSpellCooldown(79136, 0, time(NULL)+1);
                             }
                         }
+                    }
+                    break;
+                // Glyph of Hemorrhage
+                case 56807:
+                    if (procSpell->Id == 16511)
+                    {
+                        triggered_spell_id = 89775;
+                        basepoints0 = damage*0.4f;
                     }
                     break;
 			}
