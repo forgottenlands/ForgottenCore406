@@ -7116,22 +7116,27 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     }
                     break;
                 }
-			}
-			// Cut to the Chase
-			if (dummySpell->SpellIconID == 2909)
-			{
-				// "refresh your Slice and Dice duration to its 5 combo point maximum"
-				// lookup Slice and Dice
-				if (AuraEffect const* aur = GetAuraEffect(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_ROGUE, 0x40000, 0, 0))
-				{
-					aur->GetBase()->SetDuration(
-							GetSpellMaxDuration(aur->GetSpellProto()), true);
-					return true;
-				}
-				return false;
+                // Cut to the Chase
+                case 51664:
+                case 51665:
+                case 51667:
+                    if (procSpell->Id == 2098 || procSpell->Id == 32645)
+                    {
+                        if (Player* caster = ToPlayer())
+                        {
+                            if (caster->HasAura(5171))
+                            {
+                                if (Aura* sliceaura = caster->GetAura(5171))
+                                {
+                                    sliceaura->SetDuration(GetSpellMaxDuration(sliceaura->GetSpellProto()));
+                                }
+                            }
+                        }
+                    }
+                    break;
 			}
 			// Deadly Brew
-			else if (dummySpell->SpellIconID == 2963)
+			if (dummySpell->SpellIconID == 2963)
 			{
 				triggered_spell_id = 3409;
 				break;
