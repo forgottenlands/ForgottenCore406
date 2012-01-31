@@ -126,7 +126,7 @@ public:
                                     if (i->getSource()->isAlive())
                                     {
                                         me->AddAura(SPELL_QUAKE, i->getSource());
-                                        if ((count / 2) == 0)
+                                        if ((count / 2) == 0 && me->GetMap()->IsHeroic())
                                         {
                                             Position pos;
                                             i->getSource()->GetPosition(&pos);
