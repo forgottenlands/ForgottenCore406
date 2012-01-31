@@ -118,16 +118,21 @@ public:
                         {
                             for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
                             {
+                                uint8 count = 0;
                                 if (!i->getSource()->HasAura(SPELL_QUAKE))
                                 {
                                     if (i->getSource()->isAlive())
                                     {
                                         me->AddAura(SPELL_QUAKE, i->getSource());
-                                        Position pos;
-                                        i->getSource()->GetPosition(&pos);
-                                        me->SummonCreature(NPC_ANGERED_EARTH, pos, TEMPSUMMON_CORPSE_DESPAWN);
+                                        if ((count / 2) == 0)
+                                        {
+                                            Position pos;
+                                            i->getSource()->GetPosition(&pos);
+                                            me->SummonCreature(NPC_ANGERED_EARTH, pos, TEMPSUMMON_CORPSE_DESPAWN);
+                                        }
                                     }
                                 }
+                                ++count;
                             }
                         }
                         events.ScheduleEvent(EVENT_QUAKE, urand(15000, 18000), 0, 0);
@@ -143,7 +148,7 @@ public:
                                 ++count;
                                 if (i->getSource()->isAlive())
                                 {
-                                    i->getSource()->TeleportTo(me->GetMapId(), me->GetPositionX()+2.0f+count, me->GetPositionY()-2.0f-count, me->GetPositionZ(), me->GetOrientation()/2, 0);
+                                    i->getSource()->TeleportTo(me->GetMapId(), me->GetPositionX()+1.0f+count, me->GetPositionY()-1.0f-count, me->GetPositionZ(), me->GetOrientation()/2, 0);
                                 }
                             }
                         }
