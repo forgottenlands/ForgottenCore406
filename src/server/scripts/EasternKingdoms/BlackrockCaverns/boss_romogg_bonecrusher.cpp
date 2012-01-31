@@ -66,6 +66,7 @@ public:
         bool firstSkull;
         bool secondSkull;
         uint8 count;
+        Position chainPos;
 
         void Reset() 
         {
@@ -73,6 +74,7 @@ public:
             summons.DespawnAll();
             firstSkull = false;
             secondSkull = false;
+            me->GetPosition(&chainPos);
         }
 
         void EnterCombat(Unit* who)
@@ -140,7 +142,9 @@ public:
                     case EVENT_SKULLCRAKER_P1:
                         me->MonsterYell("Stand still! Rom'ogg crack your skulls!", LANG_UNIVERSAL, NULL);
                         DoCast(SPELL_CHAINS_OF_WOE);
-                        count = 0;
+                        events.ScheduleEvent(EVENT_SKULLCRAKER_P2, 1500, 0, 0);
+                        break;
+                    case EVENT_SKULLCRAKER_P2:
                         if (!me->GetMap()->GetPlayers().isEmpty())
                         {
                             for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
@@ -148,13 +152,10 @@ public:
                                 ++count;
                                 if (i->getSource()->isAlive())
                                 {
-                                    i->getSource()->TeleportTo(me->GetMapId(), me->GetPositionX()+1.0f+count, me->GetPositionY()-1.0f-count, me->GetPositionZ(), me->GetOrientation()/2, 0);
+                                    i->getSource()->TeleportTo(me->GetMapId(), chainPos.m_positionX, chainPos.m_positionY, chainPos.m_positionZ, chainPos.m_orientation, 0);
                                 }
                             }
                         }
-                        events.ScheduleEvent(EVENT_SKULLCRAKER_P2, 1000, 0, 0);
-                        break;
-                    case EVENT_SKULLCRAKER_P2: 
                         DoCastAOE(SPELL_THE_SKULLCRACKER);
                         break;
                     case EVENT_WOUNDING_STRIKE:
@@ -172,6 +173,7 @@ public:
             summons.Summon(summoned);
             if (summoned->GetEntry() == NPC_CHAINS_OF_WOE)
             {
+                summoned->GetPosition(&chainPos);
                 summoned->CastSpell(summoned, SPELL_CHAINS_OF_WOE_VISUAL, true);
             }
         }
