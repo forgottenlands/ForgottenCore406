@@ -5206,6 +5206,11 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
 		}
 		case SPELLFAMILY_ROGUE:
 		{
+            // Hemorrhage Combo points
+            if (m_spellInfo->Id == 16511)
+                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    m_caster->ToPlayer()->AddComboPoints(unitTarget, 1, this);
+
 			if (m_spellInfo->Id == 16511 || m_spellInfo->Id == 8676)
 			{
 				// 50% more damage with daggers
@@ -5249,6 +5254,16 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
 
 				if (found) totalDamagePercentMod *= 1.2f; // 120% if poisoned
 			}
+
+            // Finishing moves Revealing Strike increased damage
+            if (m_spellInfo->Id == 32645 || m_spellInfo->Id == 2098 || m_spellInfo->Id == 1943 || m_spellInfo->Id == 26679)
+            {
+                // Revealing strike effect
+                if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_ROGUE, 4531, 2))
+                {
+                    AddPctN(damage, aurEff->GetAmount()); 
+                }
+            }
 			break;
 		}
 		case SPELLFAMILY_PALADIN:
