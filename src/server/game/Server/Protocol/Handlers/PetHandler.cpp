@@ -117,18 +117,19 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data) {
 
 	if (GetPlayer()->m_Controlled.size() == 1)
 		HandlePetActionHelper(pet, guid1, spellid, flag, guid2);
-	else {
+	else 
+    {
 		//If a pet is dismissed, m_Controlled will change
 		std::vector<Unit*> controlled;
-		for (Unit::ControlList::iterator itr =
-				GetPlayer()->m_Controlled.begin();
-				itr != GetPlayer()->m_Controlled.end(); ++itr)
+		for (Unit::ControlList::iterator itr = GetPlayer()->m_Controlled.begin(); itr != GetPlayer()->m_Controlled.end(); ++itr)
 			if ((*itr)->GetEntry() == pet->GetEntry() && (*itr)->isAlive())
 				controlled.push_back(*itr);
-		for (std::vector<Unit*>::iterator itr = controlled.begin();
-				itr != controlled.end(); ++itr)
+		for (std::vector<Unit*>::iterator itr = controlled.begin(); itr != controlled.end(); ++itr)
 			HandlePetActionHelper(*itr, guid1, spellid, flag, guid2);
 	}
+
+    if (pet->GetTypeId() != TYPEID_PLAYER && flag == ACT_COMMAND && spellid == COMMAND_MOVE)
+        pet->SendMonsterMove(pos_x, pos_y, pos_z, 3000);
 }
 
 void WorldSession::HandlePetStopAttack(WorldPacket &recv_data) {
