@@ -2517,8 +2517,6 @@ void Player::RegenerateAll() {
 		}
 
 		Regenerate(POWER_RAGE);
-        if (getClass() == CLASS_PALADIN)
-            Regenerate(POWER_HOLY_POWER);
         if (getClass() == CLASS_DEATH_KNIGHT)
             Regenerate(POWER_RUNIC_POWER);
         if (getClass() == CLASS_HUNTER)
