@@ -7682,6 +7682,16 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
 					target = pVictim;
 					break;
 				}
+                // Grand Crusader Proc
+                case 85416:
+                    if (Player* caster = ToPlayer())
+                    {
+                        if (caster->HasSpellCooldown(31935))
+                        {
+                            caster->RemoveSpellCooldown(31935, true);
+                        }
+                    }
+                    break;
 			}
 			break;
 		}
@@ -9037,7 +9047,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
 
 	// Try handle unknown trigger spells
 	if (sSpellStore.LookupEntry(trigger_spell_id) == NULL)
-	{
+    {
 		switch (auraSpellInfo->SpellFamilyName)
 		{
 			case SPELLFAMILY_GENERIC:
@@ -9752,6 +9762,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
 			target = pVictim;
 			break;
 		}
+        // Grand Crusader procEx
+        case 75806:
+        case 85043:
+            if (procSpell->Id != 35395 && procSpell->Id != 53595)
+                return false;
+            else
+                trigger_spell_id = 85416;
+            break;
 		default:
 			break;
 	}
