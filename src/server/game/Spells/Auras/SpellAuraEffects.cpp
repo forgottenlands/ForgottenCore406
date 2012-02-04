@@ -1528,12 +1528,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const {
 			}
 			// Explosive Shot
 			if (GetSpellProto()->Id == 53301)
-				damage =
-						int32(
-								damage
-										+ (0.232f
-												* GetBase()->GetCaster()->GetTotalAttackPowerValue(
-														RANGED_ATTACK)));
+				damage = int32((damage + (0.232f	* GetBase()->GetCaster()->GetTotalAttackPowerValue(RANGED_ATTACK))) / GetBase()->GetEffect(0)->GetTotalTicks());
 
 			// Serpent Sting
 			if (GetSpellProto()->Id == 1978)
@@ -2748,8 +2743,7 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const {
 			break;
 			// Mana Tide
 		case 16191:
-			target->CastCustomSpell(triggerTarget, triggerSpellId, &m_amount,
-					NULL, NULL, true, NULL, this);
+			target->CastCustomSpell(triggerTarget, triggerSpellId, &m_amount, NULL, NULL, true, NULL, this);
 			return;
 			// Negative Energy Periodic
 		case 46284:
