@@ -4656,8 +4656,7 @@ void SpellMgr::LoadSpellCustomAttr() {
 			break;
 		case SPELLFAMILY_PALADIN:
 			// Seals of the Pure should affect Seal of Righteousness
-			if (spellInfo->SpellIconID == 25
-					&& spellInfo->Attributes & SPELL_ATTR0_PASSIVE)
+			if (spellInfo->SpellIconID == 25 && spellInfo->Attributes & SPELL_ATTR0_PASSIVE)
 				spellInfo->EffectSpellClassMask[0][1] |= 0x20000000;
 			else
 				break;
