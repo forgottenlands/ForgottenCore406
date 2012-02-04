@@ -3346,31 +3346,28 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
 						>= unitTarget->GetMaxHealth())) unitTarget->RemoveAura(
 				48920);
 
-		//Echo of Light
-		if (m_caster->getClass() == CLASS_PRIEST)
-		{
-			if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
-			{
-				if (m_caster->ToPlayer()->GetTalentBranchSpec(
-						m_caster->ToPlayer()->GetActiveSpec())
-						== BS_PRIEST_HOLY)
-				{
-					int32 bp0 =
-							int32(
-									addhealth
-											* (10.0f
-													+ (1.25f
-															* m_caster->ToPlayer()->GetMasteryPoints()))
-											/ 100);
-					bp0 = bp0 / 6;
-					if (unitTarget->HasAura(77489, m_caster->GetGUID())) bp0 +=
-							unitTarget->GetAura(77489, m_caster->GetGUID())->GetEffect(
-									0)->GetAmount();
-					m_caster->CastCustomSpell(unitTarget, 77489, &bp0, NULL,
-							NULL, true);
-				}
-			}
-		}
+        // Nature's Blessing
+        if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2012, 0))
+        {
+            if (unitTarget->HasAura(974))
+                AddPctN(addhealth, aurEff->GetAmount());
+        }
+
+        //Echo of Light
+        if (m_caster->getClass() == CLASS_PRIEST)
+        {
+            if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
+            {
+                if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_PRIEST_HOLY)
+                {
+                    int32 bp0 = int32(addhealth	* (10.0f + (1.25f * m_caster->ToPlayer()->GetMasteryPoints())) / 100);
+                    bp0 = bp0 / 6;
+                    if (unitTarget->HasAura(77489, m_caster->GetGUID())) 
+                        bp0 +=	unitTarget->GetAura(77489, m_caster->GetGUID())->GetEffect(0)->GetAmount();
+                    m_caster->CastCustomSpell(unitTarget, 77489, &bp0, NULL, NULL, true);
+                }
+            }
+        }
 
 		m_damage -= addhealth;
 	}
