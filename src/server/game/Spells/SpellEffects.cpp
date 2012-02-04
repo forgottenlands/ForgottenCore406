@@ -5258,10 +5258,13 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             // Finishing moves Revealing Strike increased damage
             if (m_spellInfo->Id == 32645 || m_spellInfo->Id == 2098 || m_spellInfo->Id == 1943 || m_spellInfo->Id == 26679)
             {
-                // Revealing strike effect
-                if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_ROGUE, 4531, 2))
+                if (unitTarget->HasAura(84617))
                 {
-                    AddPctN(damage, aurEff->GetAmount()); 
+                    // Revealing strike effect
+                    if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_ROGUE, 4531, 2))
+                    {
+                        AddPctN(damage, aurEff->GetAmount()); 
+                    }
                 }
             }
 			break;
