@@ -9770,6 +9770,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
             else
                 trigger_spell_id = 85416;
             break;
+        // Vindication
+        case 26016:
+            if (procSpell->Id != 35395 && procSpell->Id != 53595)
+                return false;
+            break;
 		default:
 			break;
 	}
