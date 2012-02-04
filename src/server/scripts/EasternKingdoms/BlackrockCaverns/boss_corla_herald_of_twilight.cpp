@@ -142,7 +142,8 @@ public:
 		void EnterCombat(Unit* /*who*/)
 		{
 			me->CastStop();
-			me->GetMotionMaster()->MoveChase(me->getVictim());
+            if (me->getVictim())
+			    me->GetMotionMaster()->MoveChase(me->getVictim());
 
 			events.ScheduleEvent(EVENT_DARK_COMMAND, 20000);
 
