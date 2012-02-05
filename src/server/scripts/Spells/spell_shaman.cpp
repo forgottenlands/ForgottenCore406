@@ -527,6 +527,52 @@ class spell_sha_healing_rain : public SpellScriptLoader
             return new spell_sha_healing_rain_AuraScript();
         }
 };
+
+// 77829 Ancestral Resolve
+class spell_sha_ancestral_resolve: public SpellScriptLoader 
+{
+public:
+    spell_sha_ancestral_resolve() : SpellScriptLoader("spell_sha_ancestral_resolve")
+    {}
+
+    class spell_sha_ancestral_resolve_AuraScript: public AuraScript 
+    {
+        PrepareAuraScript(spell_sha_ancestral_resolve_AuraScript);
+
+        uint32 absorbPct;
+
+        bool Load() 
+        {
+            absorbPct = SpellMgr::CalculateSpellEffectAmount(GetSpellProto(), EFFECT_0, GetCaster());
+            return true;
+        }
+
+        void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        {
+            // Set absorbtion amount to unlimited
+            amount = -1;
+        }
+
+        void Absorb(AuraEffect * /*aurEff*/, DamageInfo &dmgInfo, uint32 &absorbAmount) 
+        {
+            // reduces all damage taken while Stunned in Cat Form
+            if ((GetTarget()->ToPlayer()->HasUnitState(UNIT_STAT_CASTING)))
+                absorbAmount = CalculatePctN(dmgInfo.GetDamage(), absorbPct);
+        }
+
+        void Register() 
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_sha_ancestral_resolve_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_sha_ancestral_resolve_AuraScript::Absorb, EFFECT_0);
+        }
+    };
+
+    AuraScript *GetAuraScript() const 
+    {
+        return new spell_sha_ancestral_resolve_AuraScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts() {
 	new spell_sha_astral_shift();
 	new spell_sha_fire_nova();
@@ -537,4 +583,5 @@ void AddSC_shaman_spell_scripts() {
 	new spell_sha_healing_rain();
     new spell_sha_earthquake();
     new spell_sha_searing_bolt();
+    new spell_sha_ancestral_resolve();
 }
