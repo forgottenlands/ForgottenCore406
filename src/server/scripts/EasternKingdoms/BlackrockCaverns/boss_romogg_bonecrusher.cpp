@@ -80,7 +80,7 @@ public:
         void EnterCombat(Unit* who)
         {
             DoCast(me, SPELL_CALL_FOR_HELP);
-            events.ScheduleEvent(EVENT_QUAKE, urand(15000, 18000), 0, 0);
+            events.ScheduleEvent(EVENT_QUAKE, urand(40000, 60000), 0, 0);
             events.ScheduleEvent(EVENT_WOUNDING_STRIKE, urand(2000, 4000), 0, 0);
         }
 
@@ -137,7 +137,7 @@ public:
                                 ++count;
                             }
                         }
-                        events.ScheduleEvent(EVENT_QUAKE, urand(15000, 18000), 0, 0);
+                        events.ScheduleEvent(EVENT_QUAKE, urand(40000, 60000), 0, 0);
                         break;
                     case EVENT_SKULLCRAKER_P1:
                         me->MonsterYell("Stand still! Rom'ogg crack your skulls!", LANG_UNIVERSAL, NULL);
