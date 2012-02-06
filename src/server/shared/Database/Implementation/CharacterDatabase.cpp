@@ -592,7 +592,7 @@ void CharacterDatabaseConnection::DoPrepareStatements() {
 			//          0          1       2             3              4              5              6
 			"SELECT g.guildid, g.name, g.leaderguid, g.EmblemStyle, g.EmblemColor, g.BorderStyle, g.BorderColor, "
 			//   7                  8       9       10            11           12                  13  14
-			"g.BackgroundColor, g.info, g.motd, g.createdate, g.BankMoney, COUNT(gbt.guildid), xp, level "
+			"g.BackgroundColor, g.info, g.motd, g.createdate, g.BankMoney, COUNT(gbt.guildid), xp, level , m_today_xp, m_xp_cap "
 			"FROM guild g LEFT JOIN guild_bank_tab gbt ON g.guildid = gbt.guildid GROUP BY g.guildid ORDER BY g.guildid ASC",
 			CONNECTION_SYNCH);
 	//                                              0        1    2      3       4

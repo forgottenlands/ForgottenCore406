@@ -3924,31 +3924,47 @@ void ObjectMgr::LoadGuilds() {
 	PreparedStatement* stmt = NULL;
 	PreparedQueryResult result;
 
+    // 1. Load all guilds
+    uint32 oldMSTime = getMSTime();
 	sLog->outString("Loading Guilds...");
 	stmt = CharacterDatabase.GetPreparedStatement(CHAR_LOAD_GUILDS);
 	result = CharacterDatabase.Query(stmt);
-	if (!result) {
+
+	if (!result) 
+    {
 		sLog->outString(">> Loaded 0 guild definitions");
 		sLog->outString();
 		return;
-	}
-	mGuildMap.resize(m_guildId, NULL); // Reserve space and initialize storage for loading guilds
-	// 1. Load all guilds
-	uint64 rowCount = result->GetRowCount();
-	do {
-		Field* fields = result->Fetch();
-		Guild* pNewGuild = new Guild();
-		if (!pNewGuild->LoadFromDB(fields)) {
-			delete pNewGuild;
-			continue;
-		}
-		AddGuild(pNewGuild);
-	} while (result->NextRow());
-	sLog->outString();
-	sLog->outString(">> Loaded " UI64FMTD " guilds definitions", rowCount);
-	sLog->outString();
+	} else
+    {
+        uint32 count = 0;
+        do
+        {
+            Field* fields = result->Fetch();
+            Guild* guild = new Guild();
+
+            if (!guild->LoadFromDB(fields))
+            {
+                delete guild;
+                continue;
+            }
+
+            QueryResult guildNews = CharacterDatabase.PQuery("SELECT type, date, value1, value2, source_guid, flags FROM guild_news WHERE guildid = %u ORDER BY date DESC", guild->GetId());
+            if (guildNews)
+            {
+                Field* fields = guildNews->Fetch();
+                guild->LoadGuildNewsFromDB(fields);
+            }
+            AddGuild(guild);
+             ++count;
+        }
+        while (result->NextRow());
+        sLog->outString(">> Loaded %u guild definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+        sLog->outString();
+    }
 
 	// 2. Load all guild ranks
+    uint64 rowCount;
 	sLog->outString("Loading guild ranks...");
 	stmt = CharacterDatabase.GetPreparedStatement(CHAR_LOAD_GUILD_RANKS);
 	result = CharacterDatabase.Query(stmt);

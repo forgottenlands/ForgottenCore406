@@ -1251,12 +1251,14 @@ void Guild::SendUpdateRoster(WorldSession* session /*= NULL*/) {
 }
 
 void Guild::OnPlayerStatusChange(Player* plr, uint32 flag, bool state) {
-	if (Member* pMember = GetMember(plr->GetGUID())) {
+	if (Member* pMember = GetMember(plr->GetGUID())) 
+    {
 		if (state)
 			pMember->AddFlag(flag);
 		else
 			pMember->RemFlag(flag);
 	}
+    HandleRoster();
 }
 
 // HANDLE CLIENT COMMANDS
@@ -1268,7 +1270,7 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
     data << uint32(m_members.size());
 
     // Packed uint8 - each bit resembles some flag.
-    uint32 totalBytesToSend = uint32(uint32(m_members.size()) / uint32(8)) + 1;
+    uint32 totalBytesToSend = uint32(ceil(float(m_members.size()) / 8.0f));
     for(uint32 i = 0; i < totalBytesToSend; ++i)
         data << uint8(0); //unk
 
@@ -1537,6 +1539,7 @@ void Guild::HandleSetBankTabInfo(WorldSession* session, uint8 tabId,
 		SendBankTabsInfo(session);
 		_SendBankContent(session, tabId);
 	}
+    HandleRoster();
 }
 
 void Guild::HandleSetMemberNote(WorldSession* session, uint64 guid,
@@ -1663,6 +1666,8 @@ void Guild::HandleInviteMember(WorldSession* session, const std::string& name) {
 	data << std::string(GetName());
 	pInvitee->GetSession()->SendPacket(&data);
 
+    HandleRoster();
+
 	sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent (SMSG_GUILD_INVITE)");
 }
 
@@ -1673,11 +1678,20 @@ void Guild::HandleAcceptMember(WorldSession* session) {
 					!= sObjectMgr->GetPlayerTeamByGUID(GetLeaderGUID()))
 		return;
 
-	if (AddMember(player->GetGUID())) {
+	if (AddMember(player->GetGUID())) 
+    {
+        player->SetUInt32Value(PLAYER_GUILDLEVEL, uint32(GetLevel()));
+        player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GLEVEL_ENABLED);
+        /// Learn perks to him
+        for (int i = 0; i < GetLevel()-1; ++i)
+            if (const GuildPerksEntry* perk = sGuildPerksStore.LookupEntry(i))
+                player->learnSpell(perk->SpellId, true);
+
 		_LogEvent(GUILD_EVENT_LOG_JOIN_GUILD, player->GetGUIDLow());
 		_BroadcastEvent(GE_JOINED, player->GetGUID(), player->GetName());
 		player->SetReputation(1168, 1);
 	}
+    HandleRoster();
 }
 
 void Guild::HandleLeaveMember(WorldSession* session) {
@@ -1696,9 +1710,9 @@ void Guild::HandleLeaveMember(WorldSession* session) {
 		_BroadcastEvent(GE_LEFT, player->GetGUID(), player->GetName());
 		player->SetReputation(1168, -1);
 
-		SendCommandResult(session, GUILD_QUIT_S, ERR_PLAYER_NO_MORE_IN_GUILD,
-				m_name);
+		SendCommandResult(session, GUILD_QUIT_S, ERR_PLAYER_NO_MORE_IN_GUILD, m_name);
 	}
+    HandleRoster();
 }
 
 void Guild::HandleRemoveMember(WorldSession* session, uint64 guid) {
@@ -1726,6 +1740,7 @@ void Guild::HandleRemoveMember(WorldSession* session, uint64 guid) {
 			player->SetReputation(1168, -1);
 		}
 	}
+    HandleRoster();
 }
 
 void Guild::HandleUpdateMemberRank(WorldSession* session, uint64 guid,
@@ -1858,6 +1873,7 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount) {
 	SendBankTabsInfo(session);
 	_SendBankContent(session, 0);
 	_SendBankMoneyUpdate(session);
+    HandleRoster();
 }
 
 bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount,
@@ -1921,6 +1937,7 @@ void Guild::HandleMemberLogout(WorldSession* session) {
 		pMember->ResetFlags();
 	}
 	_BroadcastEvent(GE_SIGNED_OFF, player->GetGUID(), player->GetName());
+    HandleRoster();
 }
 
 void Guild::HandleDisband(WorldSession* session) {
@@ -2050,6 +2067,7 @@ void Guild::SendLoginInfo(WorldSession* session) {
 		pMember->SetStats(session->GetPlayer());
 		pMember->AddFlag(GUILD_MEMBER_FLAG_ONLINE);
 	}
+    HandleRoster();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2398,6 +2416,8 @@ bool Guild::AddMember(const uint64& guid, uint8 rankId) {
 		player->SetInGuild(m_id);
 		player->SetRank(rankId);
 		player->SetGuildIdInvited(0);
+        player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GLEVEL_ENABLED);
+        player->SetUInt32Value(PLAYER_GUILDLEVEL, uint32(GetLevel()));
 	}
 
 	_UpdateAccountsNumber();
@@ -2405,6 +2425,7 @@ bool Guild::AddMember(const uint64& guid, uint8 rankId) {
 	// Call scripts if member was succesfully added (and stored to database)
 	sScriptMgr->OnGuildAddMember(this, player, rankId);
 
+    HandleRoster();
 	return true;
 }
 
@@ -2732,12 +2753,12 @@ inline uint32 Guild::_GetMemberRemainingMoney(const uint64& guid) const {
 	return 0;
 }
 
-inline void Guild::_DecreaseMemberRemainingSlots(SQLTransaction& trans,
-		const uint64& guid, uint8 tabId) {
+inline void Guild::_DecreaseMemberRemainingSlots(SQLTransaction& trans, const uint64& guid, uint8 tabId) 
+{
 	// Remaining slots must be more then 0
 	if (uint32 remainingSlots = _GetMemberRemainingSlots(guid, tabId))
 		// Ignore guild master
-		if (remainingSlots < GUILD_WITHDRAW_SLOT_UNLIMITED)
+		if (remainingSlots < uint32(GUILD_WITHDRAW_SLOT_UNLIMITED))
 			if (Member* pMember = GetMember(guid))
 				pMember->DecreaseBankRemainingValue(trans, tabId, 1);
 }
