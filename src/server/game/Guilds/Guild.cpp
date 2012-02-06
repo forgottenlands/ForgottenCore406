@@ -1099,7 +1099,8 @@ Guild::~Guild() {
 }
 
 // Creates new guild with default data and saves it to database.
-bool Guild::Create(Player* pLeader, const std::string& name) {
+bool Guild::Create(Player* pLeader, const std::string& name) 
+{
 	// Check if guild with such name already exists
 	if (sObjectMgr->GetGuildByName(name))
 		return false;
@@ -1117,12 +1118,13 @@ bool Guild::Create(Player* pLeader, const std::string& name) {
 	m_createdDate = ::time(NULL);
 	m_level = 1;
 	m_xp = 0;
+    m_today_xp = 0;
+    GenerateXPCap();
 	m_nextLevelXP = sObjectMgr->GetXPForGuildLevel(m_level);
 	_CreateLogHolders();
 
-	sLog->outDebug(LOG_FILTER_GUILD,
-			"GUILD: creating guild [%s] for leader %s (%u)", name.c_str(),
-			pLeader->GetName(), GUID_LOPART(m_leaderGuid));
+	sLog->outDebug(LOG_FILTER_GUILD, "GUILD: creating guild [%s] for leader %s (%u)", 
+        name.c_str(), pLeader->GetName(), GUID_LOPART(m_leaderGuid));
 
 	PreparedStatement* stmt = NULL;
 	SQLTransaction trans = CharacterDatabase.BeginTransaction();
@@ -1146,6 +1148,8 @@ bool Guild::Create(Player* pLeader, const std::string& name) {
 	stmt->setUInt32(++index, m_emblemInfo.GetBackgroundColor());
 	stmt->setUInt64(++index, m_bankMoney);
 	stmt->setUInt64(++index, m_xp);
+    stmt->setUInt64(++index, m_today_xp);
+    stmt->setUInt64(++index, m_xp_cap);
 	stmt->setUInt32(++index, m_level);
 	trans->Append(stmt);
 
@@ -1353,12 +1357,40 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
 
    sLog->outDebug(LOG_FILTER_GUILD, "WORLD: Sent (SMSG_GUILD_ROSTER)");
 }
+void Guild::SetGuildNews(WorldPacket &data)
+{
+    data << uint32(m_guild_news.size());
+
+    for(GuildNewsList::iterator itr = m_guild_news.begin(); itr != m_guild_news.end(); ++itr)
+        data << uint32(0);
+
+    for(GuildNewsList::iterator itr = m_guild_news.begin(); itr != m_guild_news.end(); ++itr)
+        data << uint32(getMSTime() - itr->m_timestamp);
+
+    for(GuildNewsList::iterator itr = m_guild_news.begin(); itr != m_guild_news.end(); ++itr)
+        data << uint64(MAKE_NEW_GUID(itr->m_source_guid, 0, HIGHGUID_PLAYER));
+
+    for(GuildNewsList::iterator itr = m_guild_news.begin(); itr != m_guild_news.end(); ++itr)
+    {
+        data << uint32(itr->m_value1);
+        data << uint32(itr->m_value2);
+    }
+
+    for(GuildNewsList::iterator itr = m_guild_news.begin(); itr != m_guild_news.end(); ++itr)
+        data << uint32(itr->m_type);
+
+    for(GuildNewsList::iterator itr = m_guild_news.begin(); itr != m_guild_news.end(); ++itr)
+        data << uint32(itr->m_flags);
+
+    for(GuildNewsList::iterator itr = m_guild_news.begin(); itr != m_guild_news.end(); ++itr)
+        data << uint32(0);
+}
 
 void Guild::SendGuildRankInfo(WorldSession* session)
 {
     WorldPacket data7(SMSG_GUILD_RANK);
     data7 << uint32(_GetRanksSize());
-    for(uint32 i = 0; i < _GetRanksSize(); i++)
+    for (uint32 i = 0; i < _GetRanksSize(); i++)
     {
         //data7 << uint32(m_ranks[i].GetId());
         data7 << uint32(i);
@@ -1366,12 +1398,12 @@ void Guild::SendGuildRankInfo(WorldSession* session)
         data7 << m_ranks[i].GetName();
         data7 << uint32(m_ranks[i].GetRights());
 
-        for(int j = 0; j < GUILD_BANK_MAX_TABS; j++)
-            data7 << uint32(0xFFFFFFFF);
-        for(int j = 0; j < GUILD_BANK_MAX_TABS; j++)
-            data7 << uint32(0xFFFFFFFF);
+        for (int j = 0; j < GUILD_BANK_MAX_TABS; j++)
+            data7 << uint32(m_ranks[i].GetBankTabRights(j));
+        for (int j = 0; j < GUILD_BANK_MAX_TABS; j++)
+            data7 << uint32(m_ranks[i].GetBankTabSlotsPerDay(j));
 
-        data7 << uint32(0xFFFFFFFF); // GuildBankRightsAndSlots
+        data7 << uint32(m_ranks[i].GetBankMoneyPerDay()); // GuildBankRightsAndSlots
     }
 
     if (session)
@@ -2030,14 +2062,14 @@ bool Guild::LoadFromDB(Field* fields) {
 	 "g.BackgroundColor, g.info, g.motd, g.createdate, g.BankMoney, COUNT(gbt.guildid), xp, level "
 	 "FROM guild g LEFT JOIN guild_bank_tab gbt ON g.guildid = gbt.guildid GROUP BY g.guildid ORDER BY g.guildid ASC", CONNECTION_SYNCH);
 	 */
-	m_id = fields[0].GetUInt32();
-	m_name = fields[1].GetString();
-	m_leaderGuid = MAKE_NEW_GUID(fields[2].GetUInt32(), 0, HIGHGUID_PLAYER);
+	m_id            = fields[0].GetUInt32();
+	m_name          = fields[1].GetString();
+	m_leaderGuid    = MAKE_NEW_GUID(fields[2].GetUInt32(), 0, HIGHGUID_PLAYER);
 	m_emblemInfo.LoadFromDB(fields);
-	m_info = fields[8].GetString();
-	m_motd = fields[9].GetString();
-	m_createdDate = fields[10].GetUInt32(); //64 bits?
-	m_bankMoney = fields[11].GetUInt64();
+	m_info          = fields[8].GetString();
+	m_motd          = fields[9].GetString();
+	m_createdDate   = time_t(fields[10].GetUInt32());
+	m_bankMoney     = fields[11].GetUInt64();
 
 	uint8 purchasedTabs = uint8(fields[12].GetUInt32());
 	if (purchasedTabs > GUILD_BANK_MAX_TABS)
@@ -2049,13 +2081,44 @@ bool Guild::LoadFromDB(Field* fields) {
 
 	m_xp = fields[13].GetUInt64();
 	m_level = fields[14].GetUInt32();
+    m_today_xp = fields[15].GetUInt64();
+    m_xp_cap = fields[16].GetUInt64();
+
 	if (m_level == 0)
 		m_level = 1;
+
+    if (m_xp_cap == 0)
+        GenerateXPCap();
 
 	m_nextLevelXP = sObjectMgr->GetXPForGuildLevel(m_level);
 
 	_CreateLogHolders();
 	return true;
+}
+
+void Guild::LoadGuildNewsFromDB(Field* fields)
+{
+    GuildNews guildNews;
+
+    guildNews.m_type = fields[0].GetUInt32();
+    guildNews.m_timestamp = fields[1].GetUInt64();
+    guildNews.m_value1 = fields[2].GetUInt32();
+    guildNews.m_value2 = fields[3].GetUInt32();
+    guildNews.m_source_guid = fields[4].GetUInt64();
+    guildNews.m_flags = fields[5].GetUInt32();
+
+    m_guild_news.push_back(guildNews);
+}
+
+void Guild::GenerateXPCap()
+{
+    uint64 baseXP = sObjectMgr->GetXPForGuildLevel(m_level);
+    uint64 diff = (uint64)(baseXP * 15 / 100);
+
+    if (diff < baseXP)
+        m_xp_cap = diff + m_xp;
+    else
+        m_xp_cap = baseXP;
 }
 
 bool Guild::LoadRankFromDB(Field* fields) {
@@ -2966,33 +3029,54 @@ void Guild::_BroadcastEvent(GuildEvents guildEvent, const uint64& guid,
 }
 
 // Guild Advancement
-void Guild::GainXP(uint64 xp) {
-	if (!xp)
-		return;
-	if (!sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
-		return;
-	if (GetLevel() >= sWorld->getIntConfig(CONFIG_GUILD_ADVANCEMENT_MAX_LEVEL))
-		return;
+void Guild::GainXP(uint64 xp) 
+{
+    if (!xp)
+        return;
+    if (!sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
+        return;
+    if (GetLevel() >= sWorld->getIntConfig(CONFIG_GUILD_ADVANCEMENT_MAX_LEVEL))
+        return;
 
-	uint64 new_xp = m_xp + xp;
-	uint64 nextLvlXP = GetNextLevelXP();
-	uint8 level = GetLevel();
-	while (new_xp >= nextLvlXP
-			&& level < sWorld->getIntConfig(CONFIG_GUILD_ADVANCEMENT_MAX_LEVEL)) {
-		new_xp -= nextLvlXP;
+    uint64 new_xp = m_xp + xp;
+    uint64 nextLvlXP = GetNextLevelXP();
+    uint8 level = GetLevel();
 
-		if (level < sWorld->getIntConfig(CONFIG_GUILD_ADVANCEMENT_MAX_LEVEL)) {
-			LevelUp();
-			++level;
-			nextLvlXP = GetNextLevelXP();
-		}
-	}
+    if (new_xp > m_xp_cap)
+        return;
 
-	m_xp = new_xp;
-	SaveXP();
+    while (new_xp >= nextLvlXP && level < sWorld->getIntConfig(CONFIG_GUILD_ADVANCEMENT_MAX_LEVEL)) 
+    {
+        new_xp -= nextLvlXP;
+
+        if (level < sWorld->getIntConfig(CONFIG_GUILD_ADVANCEMENT_MAX_LEVEL)) 
+        {
+            LevelUp();
+            ++level;
+            nextLvlXP = GetNextLevelXP();
+        }
+    }
+
+    m_xp = new_xp;
+    m_today_xp += xp;
+    SaveXP();
+
+    WorldPacket data(SMSG_GUILD_XP_UPDATE, 8*5);
+    data << uint64(GetXPCap());       // max daily xp
+    data << uint64(GetNextLevelXP()); // next level XP
+    data << uint64(GetXPCap());       // weekly xp
+    data << uint64(GetCurrentXP());   // Curr exp
+    data << uint64(GetTodayXP());     // Today exp
+
+    AddGuildNews(GUILD_NEWS_GUILD_LEVEL_REACHED, 0, level, 0);
+
+    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        if (Player* player = itr->second->FindPlayer())
+            player->GetSession()->SendPacket(&data);
 }
 
-void Guild::LevelUp() {
+void Guild::LevelUp() 
+{
 	if (!sWorld->getBoolConfig(CONFIG_GUILD_ADVANCEMENT_ENABLED))
 		return;
 
@@ -3001,11 +3085,11 @@ void Guild::LevelUp() {
 	m_nextLevelXP = sObjectMgr->GetXPForGuildLevel(level);
 
 	WorldPacket data(SMSG_GUILD_XP_UPDATE, 8 * 5);
-	data << uint64(0x37); // max daily xp
+	data << uint64(GetXPCap());       // max daily xp
 	data << uint64(GetNextLevelXP()); // next level XP
-	data << uint64(0x37); // weekly xp
-	data << uint64(GetCurrentXP()); // Curr exp
-	data << uint64(0); // Today exp (not supported yet)
+	data << uint64(GetXPCap());       // weekly xp
+	data << uint64(GetCurrentXP());   // Curr exp
+	data << uint64(GetTodayXP());     // Today exp
 
 	// Find perk to gain
 	uint32 spellId = 0;
@@ -3013,27 +3097,73 @@ void Guild::LevelUp() {
 		spellId = perk->SpellId;
 
 	// Notify players of level change
-	for (Members::const_iterator itr = m_members.begin();
-			itr != m_members.end(); ++itr)
-		if (Player *player = itr->second->FindPlayer()) {
+	for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    {
+		if (Player *player = itr->second->FindPlayer())
+        {
 			player->SetUInt32Value(PLAYER_GUILDLEVEL, level);
 			player->GetSession()->SendPacket(&data);
 
 			if (spellId)
 				player->learnSpell(spellId, true);
+
+            player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_GUILD_LEVEL);
 		}
+    }
 }
 
-void Guild::SaveXP() {
-	if (getMSTime() - m_lastXPSave >= 60000) // 1 minute. Hardcoded value for now
-			{
-		m_lastXPSave = getMSTime();
+void Guild::SaveXP() 
+{
+    if (getMSTime() - m_lastXPSave >= 60000) // 1 minute. Hardcoded value for now
+    {
+        m_lastXPSave = getMSTime();
 
-		PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(
-				CHAR_GUILD_SAVE_XP);
-		stmt->setUInt64(0, m_xp);
-		stmt->setUInt32(1, uint32(m_level));
-		stmt->setUInt32(2, m_id);
-		CharacterDatabase.Execute(stmt);
-	}
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_GUILD_SAVE_XP);
+        stmt->setUInt64(0, m_xp);
+        stmt->setUInt64(1, m_today_xp);
+        stmt->setUInt64(2, m_xp_cap);
+        stmt->setUInt32(3, uint32(m_level));
+        stmt->setUInt32(4, m_id);
+        CharacterDatabase.Execute(stmt);
+    }
+}
+
+void Guild::AddGuildNews(uint32 type, uint64 source_guild, int value1, int value2, int flags)
+{
+    GuildNews guildNews;
+
+    guildNews.m_type = type;
+    guildNews.m_timestamp = getMSTime();
+    guildNews.m_value1 = value1;
+    guildNews.m_value2 = value2;
+    guildNews.m_source_guid = source_guild;
+    guildNews.m_flags = flags;
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_ADD_GUILD_NEWS);
+    stmt->setUInt32(0, GetId());
+    stmt->setUInt32(1, type);
+    stmt->setUInt8 (2, guildNews.m_timestamp);
+    stmt->setUInt32(3, value1);
+    stmt->setUInt32(4, value2);
+    stmt->setUInt8 (5, source_guild);
+    stmt->setUInt64(6, flags);
+    CharacterDatabase.ExecuteOrAppend(trans, stmt);
+
+    WorldPacket data(SMSG_GUILD_NEWS_UPDATE, 8*5);
+    data << uint32(1);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint64(source_guild);
+    data << uint32(value1);
+    data << uint32(value2);
+    data << uint32(type);
+    data << uint32(0);
+    data << uint32(0);
+
+    for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        if (Player *player = itr->second->FindPlayer())
+            player->GetSession()->SendPacket(&data);
+
+    m_guild_news.push_back(guildNews);
 }
