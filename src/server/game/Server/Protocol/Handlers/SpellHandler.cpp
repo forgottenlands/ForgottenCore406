@@ -38,6 +38,7 @@
 #include "CreatureAI.h"
 #include "ScriptMgr.h"
 #include "GameObjectAI.h"
+#include "SpellAuraEffects.h"
 
 void WorldSession::HandleClientCastFlags(WorldPacket& recvPacket,
 		uint8 castFlags, SpellCastTargets & targets) {
@@ -329,12 +330,9 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket) {
 	uint8 castCount, castFlags;
 	recvPacket >> castCount >> spellId >> glyphIndex >> castFlags;
 
-	sLog->outDebug(
-			LOG_FILTER_NETWORKIO,
-			"WORLD: got cast spell packet, castCount: %u, spellId: %u, glyphIndex: %u, castFlags: %u, data length = %u",
-			castCount, spellId, glyphIndex, castFlags,
-			(uint32) recvPacket.size());
-
+	sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: got cast spell packet, castCount: %u, spellId: %u, glyphIndex: %u, castFlags: %u, data length = %u", 
+        castCount, spellId, glyphIndex, castFlags,(uint32) recvPacket.size());
+   
 	// ignore for remote control state (for player case)
 	Unit* mover = _player->m_mover;
 	if (mover != _player && mover->GetTypeId() == TYPEID_PLAYER) {
@@ -350,22 +348,24 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket) {
 		return;
 	}
 
-	if (mover->GetTypeId() == TYPEID_PLAYER) {
+	if (mover->GetTypeId() == TYPEID_PLAYER) 
+    {
 		if (mover->ToPlayer()->GetEmoteState())
 			mover->ToPlayer()->SetEmoteState(0);
 
 		// not have spell in spellbook or spell passive and not casted by client
-		if (!mover->ToPlayer()->HasActiveSpell(spellId)
-				|| IsPassiveSpell(spellId)) {
+		if (!mover->ToPlayer()->HasActiveSpell(spellId) || IsPassiveSpell(spellId)) 
+        {
 			//cheater? kick? ban?
 			recvPacket.rfinish(); // prevent spam at ignore packet
 			return;
 		}
-	} else {
+	}
+    else 
+    {
 		// not have spell in spellbook or spell passive and not casted by client
-		if ((mover->GetTypeId() == TYPEID_UNIT
-				&& !mover->ToCreature()->HasSpell(spellId))
-				|| IsPassiveSpell(spellId)) {
+		if ((mover->GetTypeId() == TYPEID_UNIT && !mover->ToCreature()->HasSpell(spellId)) || IsPassiveSpell(spellId)) 
+        {
 			//cheater? kick? ban?
 			recvPacket.rfinish(); // prevent spam at ignore packet
 			return;
@@ -374,10 +374,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket) {
 
 	// Client is resending autoshot cast opcode when other spell is casted during shoot rotation
 	// Skip it to prevent "interrupt" message
-	if (IsAutoRepeatRangedSpell(spellInfo)
-			&& _player->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL)
-			&& _player->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL)->m_spellInfo
-					== spellInfo) {
+	if (IsAutoRepeatRangedSpell(spellInfo) && _player->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL) && _player->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL)->m_spellInfo == spellInfo) 
+    {
 		recvPacket.rfinish();
 		return;
 	}
@@ -394,15 +392,31 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket) {
 	HandleClientCastFlags(recvPacket, castFlags, targets);
 
 	// auto-selection buff level base at target level (in spellInfo)
-	if (targets.getUnitTarget()) {
-		SpellEntry const *actualSpellInfo =
-				sSpellMgr->SelectAuraRankForPlayerLevel(spellInfo,
-						targets.getUnitTarget()->getLevel());
+	if (targets.getUnitTarget())
+    {
+		SpellEntry const *actualSpellInfo = sSpellMgr->SelectAuraRankForPlayerLevel(spellInfo, targets.getUnitTarget()->getLevel());
 
 		// if rank not found then function return NULL but in explicit cast case original spell can be casted and later failed with appropriate error message
 		if (actualSpellInfo)
 			spellInfo = actualSpellInfo;
-	}
+	
+        // Override action bar spell
+        if (mover->HasAuraType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS))
+        {
+            flag96 spellFamilyMask = spellInfo->SpellFamilyFlags;
+            Unit::AuraEffectList const& overrideAuras = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+            for (Unit::AuraEffectList::const_iterator i = overrideAuras.begin(); i != overrideAuras.end(); ++i)
+            {
+                if ((*i)->GetSpellProto()->EffectSpellClassMask[(*i)->GetEffIndex()] & spellFamilyMask)
+                {
+                    uint32 overrideSpellId = (*i)->GetAmount();
+                    if (SpellEntry const *overrideSpellInfo = sSpellStore.LookupEntry(overrideSpellId))
+                        spellInfo = overrideSpellInfo;
+                }
+            }
+        }  
+            
+    }
 
 	Spell *spell = new Spell(mover, spellInfo, false);
 	spell->m_cast_count = castCount; // set count of casts
