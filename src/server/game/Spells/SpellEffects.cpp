@@ -1079,10 +1079,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 			case SPELLFAMILY_MAGE:
 			{
 				// Deep Freeze should deal damage to permanently stun-immune targets.
-				if (m_spellInfo->Id == 71757) if (unitTarget->GetTypeId()
-						!= TYPEID_UNIT
-						|| !(unitTarget->IsImmunedToSpellEffect(
-								sSpellStore.LookupEntry(44572), 0))) return;
+				if (m_spellInfo->Id == 71757) 
+                    if (unitTarget->GetTypeId() != TYPEID_UNIT || !(unitTarget->IsImmunedToSpellEffect(sSpellStore.LookupEntry(44572), 0))) return;
+
+                switch (m_spellInfo->Id)
+				{   
+                    // Pyroblast! (Hot Streak)
+                    case 92315:
+                        if (m_caster->HasAura(48108))
+                            m_caster->RemoveAura(48108);
+                        break;
+                }
 				break;
 			}
 		}
