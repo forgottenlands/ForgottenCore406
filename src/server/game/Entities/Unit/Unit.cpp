@@ -9849,6 +9849,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
             if (procSpell->Id != 35395 && procSpell->Id != 53595)
                 return false;
             break;
+        // Masochism
+        case 88994:
+        case 88995:
+            if (damage < uint32(GetMaxHealth()*0.1))
+                return false;
+            break;
 		default:
 			break;
 	}
