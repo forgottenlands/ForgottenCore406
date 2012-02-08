@@ -2002,12 +2002,12 @@ public:
 	void RemoveAurasWithAttribute(uint32 flags);
 	void RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1,
 			uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID);
-    void Unit::RemoveAndSaveSoulSwapDots(Unit* caster);
-    bool Unit::CastSavedSoulSwapDots(Unit* target);
-    bool Unit::SaveSoulSwapAura(Aura* savedAura, uint8 number);
-    bool Unit::SaveSoulSwapDotSource(uint64 dotSourceUnitGUID);
-    void Unit::ResetSoulSwapDots();
-    uint64 Unit::GetSourceOfSoulSwapDots();
+    void RemoveAndSaveSoulSwapDots(Unit* caster);
+    bool CastSavedSoulSwapDots(Unit* target);
+    bool SaveSoulSwapAura(Aura* savedAura, uint8 number);
+    bool SaveSoulSwapDotSource(uint64 dotSourceUnitGUID);
+    void ResetSoulSwapDots();
+    uint64 GetSourceOfSoulSwapDots();
 	void RemoveAurasWithMechanic(uint32 mechanic_mask,
 			AuraRemoveMode removemode = AURA_REMOVE_BY_DEFAULT, uint32 except =
 					0, int32 count = 0);
