@@ -644,16 +644,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 			case SPELLFAMILY_WARLOCK:
 			{
 				// Incinerate Rank 1 & 2
-				if ((m_spellInfo->SpellFamilyFlags [1] & 0x000040)
-						&& m_spellInfo->SpellIconID == 2128)
+				if ((m_spellInfo->SpellFamilyFlags [1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
 				{
 					// Incinerate does more dmg (dmg*0.25) if the target have Immolate debuff.
 					// Check aura state for speed but aura state set not only for Immolate spell
 					if (unitTarget->HasAuraState(AURA_STATE_CONFLAGRATE))
 					{
-						if (unitTarget->GetAuraEffect(
-								SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK,
-								0x4, 0, 0)) damage += damage / 4;
+						if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x4, 0, 0)) 
+                            damage += damage / 4;
 					}
 				}
 				// Conflagrate - consumes Immolate
@@ -661,16 +659,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 				{
 					AuraEffect const* aura = NULL; // found req. aura for damage calculation
 
-					Unit::AuraEffectList const &mPeriodic =
-							unitTarget->GetAuraEffectsByType(
-									SPELL_AURA_PERIODIC_DAMAGE);
-					for (Unit::AuraEffectList::const_iterator i =
-							mPeriodic.begin(); i != mPeriodic.end(); ++i)
+					Unit::AuraEffectList const &mPeriodic = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+					for (Unit::AuraEffectList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
 					{
 						// for caster applied auras only
-						if ((*i)->GetSpellProto()->SpellFamilyName
-								!= SPELLFAMILY_WARLOCK
-								|| (*i)->GetCasterGUID() != m_caster->GetGUID()) continue;
+						if ((*i)->GetSpellProto()->SpellFamilyName != SPELLFAMILY_WARLOCK || (*i)->GetCasterGUID() != m_caster->GetGUID()) 
+                            continue;
 
 						// Immolate
 						if ((*i)->GetSpellProto()->SpellFamilyFlags [0] & 0x4)
@@ -683,26 +677,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 					// found Immolate
 					if (aura)
 					{
-						uint32 pdamage =
-								aura->GetAmount() > 0 ? aura->GetAmount() : 0;
-						pdamage = m_caster->SpellDamageBonus(unitTarget,
-								aura->GetSpellProto(), effIndex, pdamage, DOT,
-								aura->GetBase()->GetStackAmount());
-						uint32 pct_dir = m_caster->CalculateSpellDamage(
-								unitTarget, m_spellInfo, (effIndex + 1));
-						uint8 baseTotalTicks =
-								uint8(
-										m_caster->CalcSpellDuration(
-												aura->GetSpellProto())
-												/ aura->GetSpellProto()->EffectAmplitude [2]);
+						uint32 pdamage = aura->GetAmount() > 0 ? aura->GetAmount() : 0;
+						pdamage = m_caster->SpellDamageBonus(unitTarget, aura->GetSpellProto(), effIndex, pdamage, DOT, aura->GetBase()->GetStackAmount());
+						uint32 pct_dir = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 1));
+						uint8 baseTotalTicks = uint8(m_caster->CalcSpellDuration(aura->GetSpellProto()) / aura->GetSpellProto()->EffectAmplitude [2]);
 						damage += pdamage * baseTotalTicks * pct_dir / 100;
 
-						uint32 pct_dot = m_caster->CalculateSpellDamage(
-								unitTarget, m_spellInfo, (effIndex + 2)) / 3;
-						m_spellValue->EffectBasePoints [1] =
-								SpellMgr::CalculateSpellEffectBaseAmount(
-										pdamage * baseTotalTicks * pct_dot
-												/ 100, m_spellInfo, 1);
+						uint32 pct_dot = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 2)) / 3;
+						m_spellValue->EffectBasePoints [1] = SpellMgr::CalculateSpellEffectBaseAmount(pdamage * baseTotalTicks * pct_dot / 100, m_spellInfo, 1);
 
 						apply_direct_bonus = false;
 						break;
@@ -711,20 +693,30 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 				// Shadow Bite
 				else if (m_spellInfo->SpellFamilyFlags [1] & 0x400000)
 				{
-					if (m_caster->GetTypeId() == TYPEID_UNIT
-							&& m_caster->ToCreature()->isPet())
+					if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet())
 					{
 						if (Player* owner = m_caster->GetOwner()->ToPlayer())
 						{
 							if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 214, 0))
 							{
 								int32 bp0 = aurEff->GetId() == 54037 ? 4 : 8;
-								m_caster->CastCustomSpell(m_caster, 54425, &bp0,
-										NULL, NULL, true);
+								m_caster->CastCustomSpell(m_caster, 54425, &bp0, NULL, NULL, true);
 							}
 						}
 					}
-				}
+				} 
+                // Soul Swap (remove/save dots and add buff)
+                else if (m_spellInfo->Id == 86121)
+                {
+                    unitTarget->RemoveAndSaveSoulSwapDots(m_caster);
+                    m_caster->CastSpell(m_caster, 86211, true);
+                }
+                // Soul Swap Exhale
+                else if (m_spellInfo->Id == 86213)
+                {
+                    if (m_caster->CastSavedSoulSwapDots(unitTarget))
+                        m_caster->RemoveAura(86211);
+                }
 				break;
 			}
 			case SPELLFAMILY_PRIEST:

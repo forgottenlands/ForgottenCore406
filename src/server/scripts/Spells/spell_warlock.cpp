@@ -402,6 +402,85 @@ public:
 	}
 };
 
+class spell_soul_swap_buff : public SpellScriptLoader
+{
+    public:
+        spell_soul_swap_buff() : SpellScriptLoader("spell_soul_swap_buff") { }
+
+        class spell_soul_swap_buffAuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_soul_swap_buffAuraScript)
+
+            void HandleEffectRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes mode)
+            {
+                Unit * target = GetTarget();
+                Unit * caster = GetCaster();
+
+                if (!caster)
+                    return;
+
+                caster->ResetSoulSwapDots();
+            }
+
+            // function registering
+            void Register()
+            {
+                OnEffectRemove += AuraEffectRemoveFn(spell_soul_swap_buffAuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript *GetAuraScript() const
+        {
+            return new spell_soul_swap_buffAuraScript();
+        }
+};
+
+class spell_soul_swap_exhale : public SpellScriptLoader
+{
+    public:
+        spell_soul_swap_exhale() : SpellScriptLoader("spell_soul_swap_exhale") { }
+
+        class spell_soul_swap_exhaleSpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_soul_swap_exhaleSpellScript)
+
+            SpellCastResult CheckRequirementInternal(SpellCustomErrors& extendedError)
+            {
+                return SPELL_CAST_OK;
+            }
+
+            SpellCastResult CheckRequirement()
+            {
+                if (!GetTargetUnit())
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                if (GetTargetUnit()->GetGUID() == GetCaster()->GetSourceOfSoulSwapDots())
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                SpellCustomErrors extension = SPELL_CUSTOM_ERROR_NONE;
+                SpellCastResult result = CheckRequirementInternal(extension);
+
+                if (result != SPELL_CAST_OK)
+                {
+                    Spell::SendCastResult(GetTargetUnit()->ToPlayer(), GetSpellInfo(), 0, result, extension);
+                    return result;
+                }
+
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_soul_swap_exhaleSpellScript::CheckRequirement);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_soul_swap_exhaleSpellScript();
+        }
+};
+
 void AddSC_warlock_spell_scripts() {
 	new spell_warl_demonic_empowerment();
 	new spell_warl_everlasting_affliction();
@@ -412,4 +491,6 @@ void AddSC_warlock_spell_scripts() {
 	new spell_warl_seed_of_corruption();
 	new spell_warl_shadow_bite();
 	new spell_warl_drain_life();
+    new spell_soul_swap_buff();
+    new spell_soul_swap_exhale();
 }
