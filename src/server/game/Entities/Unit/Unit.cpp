@@ -8640,6 +8640,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                 if (procSpell->EffectBasePoints[0] > 50000 || procSpell->EffectBasePoints[1] > 50000 || procSpell->EffectBasePoints[1] > 50000)
                     return false;
                 
+                if (procSpell->manaCost < 0)
+                    return false;
+
                 int32 bp0 = int32(procSpell->Id);
                 if (Player* simulacrumDk = triggeredByAura->GetCaster()->ToPlayer())
                 {
