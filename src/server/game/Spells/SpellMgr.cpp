@@ -4605,6 +4605,9 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectBasePoints[0] = 1;
             count++;
             break;
+        case 77616: // Dark simulacrum
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS;
+            break;
 		default:
 			break;
 		}

@@ -8634,8 +8634,21 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
 				for (uint32 i = 0; i < MAX_RUNES; ++i)
 					if (this->ToPlayer()->GetRuneCooldown(i) == 0) return false;
 			}
+            // Dark Simulacrum
+            if (dummySpell->Id == 77606)
+            {
+                if (procSpell->EffectBasePoints[0] > 50000 || procSpell->EffectBasePoints[1] > 50000 || procSpell->EffectBasePoints[1] > 50000)
+                    return false;
+                
+                int32 bp0 = int32(procSpell->Id);
+                if (Player* simulacrumDk = triggeredByAura->GetCaster()->ToPlayer())
+                {
+                    simulacrumDk->CastCustomSpell(simulacrumDk, 77616, &bp0, 0, 0, true);
+                    simulacrumDk->ApplyCastTimePercentMod(10000.0f, true);
+                }                
+            }
 			break;
-		}
+		}   
 		case SPELLFAMILY_POTION:
 		{
 			// alchemist's stone
