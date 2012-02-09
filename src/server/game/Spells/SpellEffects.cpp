@@ -3359,7 +3359,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 AddPctN(addhealth, aurEff->GetAmount());
         }
 
-        //Echo of Light
+        //Echo of Light (holy Priest Mastery)
         if (m_caster->getClass() == CLASS_PRIEST)
         {
             if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
@@ -3371,6 +3371,21 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                     if (unitTarget->HasAura(77489, m_caster->GetGUID())) 
                         bp0 +=	unitTarget->GetAura(77489, m_caster->GetGUID())->GetEffect(0)->GetAmount();
                     m_caster->CastCustomSpell(unitTarget, 77489, &bp0, NULL, NULL, true);
+                }
+            }
+        }
+
+        // Deep Healing (Resto Shaman Mastery)
+        if (m_caster->getClass() == CLASS_SHAMAN)
+        {
+            if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
+            {
+                if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_SHAMAN_RESTORATION)
+                {
+                    // % Heal bonus = (1 - 0.hp)*%masery
+                    float healtPct = unitTarget->GetHealthPct()/100;
+                    int32 healBonus = int32(addhealth * ((1-healtPct) * (24.0f + (3.0f * m_caster->ToPlayer()->GetMasteryPoints()))) / 100);
+                    addhealth+= healBonus;
                 }
             }
         }
