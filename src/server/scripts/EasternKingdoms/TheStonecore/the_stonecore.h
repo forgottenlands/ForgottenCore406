@@ -64,8 +64,18 @@ enum CreatureIds
     NPC_EARTHWARDEN_YRSA                          = 50048,
     NPC_STONECORE_TELEPORTER1                     = 51396,
     NPC_STONECORE_TELEPORTER2                     = 51397,
+
+    // Slabhide npc
+    NPC_STALACTITE_TRIGGER                        = 43159,
+    NPC_LAVA_FISSURE                              = 43242,
 };
 
+enum sharedActions
+{
+    ACTION_START_LAVA_FISSURE = 1,
+    ACTION_START_STALACTITE   = 2,
+    ACTION_CAST               = 3,
+};
 enum GameObjectIds 
 {
     GO_BROKEN_PILLAR = 207407, 

@@ -4608,6 +4608,9 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 77616: // Dark simulacrum
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS;
             break;
+        case 81801: // Thrashing Charge
+            spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+            break;
 		default:
 			break;
 		}
