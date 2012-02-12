@@ -573,6 +573,51 @@ public:
     }
 };
 
+// Cleasing spirit
+class spell_sha_cleanse_spirit: public SpellScriptLoader 
+{
+public:
+    spell_sha_cleanse_spirit() : SpellScriptLoader("spell_sha_cleanse_spirit") 
+    {}
+
+    class spell_sha_cleanse_spiritSpellScript: public SpellScript 
+    {
+        PrepareSpellScript(spell_sha_cleanse_spiritSpellScript)
+
+        void HandleHeal(SpellEffIndex effIndex) 
+        {
+            // make caster cast a spell on a unit target of effect
+
+            Unit *target = GetHitUnit();
+
+            Unit *caster = GetCaster();
+
+            if (!target || !caster)
+                return;
+
+            if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2020, 0))
+            {
+                uint32 trigger_id = 86961;
+                if (aurEff->GetBase()->GetId() == 86962)
+                    trigger_id = 86958;
+                
+                caster->CastSpell(GetHitUnit(), trigger_id, true);
+            }
+            
+        }
+
+        void Register() 
+        {
+            OnEffect += SpellEffectFn(spell_sha_cleanse_spiritSpellScript::HandleHeal, EFFECT_FIRST_FOUND, SPELL_EFFECT_ANY);
+        }
+    };
+
+    SpellScript *GetSpellScript() const 
+    {
+        return new spell_sha_cleanse_spiritSpellScript();
+    }
+};
+
 void AddSC_shaman_spell_scripts() {
 	new spell_sha_astral_shift();
 	new spell_sha_fire_nova();
@@ -584,4 +629,5 @@ void AddSC_shaman_spell_scripts() {
     new spell_sha_earthquake();
     new spell_sha_searing_bolt();
     new spell_sha_ancestral_resolve();
+    new spell_sha_cleanse_spirit();
 }
