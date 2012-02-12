@@ -11951,6 +11951,19 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto,
 				}
 			}
 
+            // Frostburn Frost Mastery
+            if (owner->getClass() == CLASS_MAGE && (pVictim->HasAura(82691) || pVictim->HasAura(44572) 
+                    || pVictim->HasAura(22645) || pVictim->HasAura(83302) || pVictim->HasAura(83301)))
+            {
+                if (owner->HasAuraType(SPELL_AURA_MASTERY))
+                {
+                    if (owner->ToPlayer()->GetTalentBranchSpec(owner->ToPlayer()->GetActiveSpec()) == BS_MAGE_FROST)
+                    {
+                        DoneTotalMod *= (1.20f + owner->ToPlayer()->GetMasteryPoints() * 1.25f);
+                    }
+                }
+            }
+
 			// Torment the weak
 			if (spellProto->SpellFamilyFlags [0] & 0x20200021
 					|| spellProto->SpellFamilyFlags [1] & 0x9000) if (pVictim->HasAuraType(
