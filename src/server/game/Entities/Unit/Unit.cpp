@@ -11964,6 +11964,20 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto,
                 }
             }
 
+            // Mana Adept - Arcane Mastery
+            if (owner->getClass() == CLASS_MAGE)
+            {
+                if (owner->HasAuraType(SPELL_AURA_MASTERY))
+                {
+                    if (owner->ToPlayer()->GetTalentBranchSpec(owner->ToPlayer()->GetActiveSpec()) == BS_MAGE_ARCANE)
+                    {
+                        // [1 + (0.12 + 0.015*M)*(mana atm)/(max mana)]*100%
+                        float manaPct = 100.f * owner->GetPower(POWER_MANA) / owner->GetMaxPower(POWER_MANA);
+                        DoneTotalMod *= (1+ ((0.12f + (owner->ToPlayer()->GetMasteryPoints() * 0.015f)) * manaPct/100));
+                    }
+                }
+            }
+
 			// Torment the weak
 			if (spellProto->SpellFamilyFlags [0] & 0x20200021
 					|| spellProto->SpellFamilyFlags [1] & 0x9000) if (pVictim->HasAuraType(
