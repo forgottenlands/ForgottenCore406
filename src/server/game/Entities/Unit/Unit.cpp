@@ -11959,7 +11959,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto,
                 {
                     if (owner->ToPlayer()->GetTalentBranchSpec(owner->ToPlayer()->GetActiveSpec()) == BS_MAGE_FROST)
                     {
-                        DoneTotalMod *= (1.20f + owner->ToPlayer()->GetMasteryPoints() * 1.25f);
+                        DoneTotalMod *= (1.20f + (owner->ToPlayer()->GetMasteryPoints() * 0.025f));
                     }
                 }
             }
