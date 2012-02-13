@@ -177,6 +177,26 @@ public:
                 summoned->CastSpell(summoned, SPELL_CHAINS_OF_WOE_VISUAL, true);
             }
         }
+
+        void SummonedCreatureDespawn(Creature* summon)
+        {
+            if (summon->GetEntry() == NPC_CHAINS_OF_WOE)
+            {
+                if (!me->GetMap()->GetPlayers().isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
+                    {
+                        if (i->getSource())
+                        {
+                            if (i->getSource()->HasAura(SPELL_CHAINS_OF_WOE_AURA))
+                            {
+                                i->getSource()->RemoveAura(SPELL_CHAINS_OF_WOE_AURA);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     };
 };
 
