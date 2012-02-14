@@ -3413,6 +3413,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             m_caster->RemoveAura(77616);
         }
 
+        // Reduce Healing in Bg or Arena
+        if (m_caster->ToPlayer()->InBattleground() || m_caster->ToPlayer()->InArena())
+            addhealth *= 0.9f;
+
 		m_damage -= addhealth;
 	}
 }
