@@ -10073,16 +10073,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
 		case 53817:
 		{
 			// Item - Shaman T10 Enhancement 4P Bonus
-			if (AuraEffect const* aurEff = GetAuraEffect(70832, 0)) if (Aura const* maelstrom = GetAura(53817)) if ((maelstrom->GetStackAmount()
-					== maelstrom->GetSpellProto()->StackAmount)
-					&& roll_chance_i(aurEff->GetAmount())) CastSpell(this,
-					70831, true, castItem, triggeredByAura);
-
-			// have rank dependent proc chance, ignore too often cases
-			// PPM = 2.5 * (rank of talent),
-			uint32 rank = sSpellMgr->GetSpellRank(auraSpellInfo->Id);
-			// 5 rank -> 100% 4 rank -> 80% and etc from full rate
-			if (!roll_chance_i(20 * rank) + 1) return false;
+			if (AuraEffect const* aurEff = GetAuraEffect(70832, 0)) 
+                if (Aura const* maelstrom = GetAura(53817)) 
+                    if ((maelstrom->GetStackAmount() == maelstrom->GetSpellProto()->StackAmount) && roll_chance_i(aurEff->GetAmount())) 
+                    CastSpell(this,	70831, true, castItem, triggeredByAura);           
 			break;
 		}
 			// Rolling Thunder
