@@ -9430,18 +9430,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
 				if (auraSpellInfo->SpellIconID == 3247) // Piercing Shots 1, 2, 3
 				{
 					trigger_spell_id = 63468;
-					SpellEntry const *TriggerPS = sSpellStore.LookupEntry(
-							trigger_spell_id);
+					SpellEntry const *TriggerPS = sSpellStore.LookupEntry(trigger_spell_id);
 					if (!TriggerPS) return false;
-					basepoints0 =
-							int32(
-									(damage
-											* (auraSpellInfo->EffectBasePoints [0]
-													/ 100))
-											/ (GetSpellMaxDuration(TriggerPS)
-													/ 1000));
-					basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(),
-							trigger_spell_id);
+					basepoints0 += (damage * auraSpellInfo->EffectBasePoints[0] / 100) / 8;
 					break;
 				}
 				if (auraSpellInfo->SpellIconID == 2225) // Serpent Spread 1, 2
