@@ -946,25 +946,15 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 							uint32 doses = aurEff->GetBase()->GetStackAmount();
 							if (doses > combo) doses = combo;
 							// Master Poisoner
-							Unit::AuraEffectList const& auraList =
-									m_caster->ToPlayer()->GetAuraEffectsByType(
-											SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL_NOT_STACK);
-							for (Unit::AuraEffectList::const_iterator iter =
-									auraList.begin(); iter != auraList.end();
-									++iter)
+							Unit::AuraEffectList const& auraList = m_caster->ToPlayer()->GetAuraEffectsByType(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL_NOT_STACK);
+							for (Unit::AuraEffectList::const_iterator iter = auraList.begin(); iter != auraList.end(); ++iter)
 							{
-								if ((*iter)->GetSpellProto()->SpellFamilyName
-										== SPELLFAMILY_ROGUE
-										&& (*iter)->GetSpellProto()->SpellIconID
-												== 1960)
+								if ((*iter)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && (*iter)->GetSpellProto()->SpellIconID == 1960)
 								{
-									uint32 chance =
-											SpellMgr::CalculateSpellEffectAmount(
-													(*iter)->GetSpellProto(), 2,
-													m_caster);
+									uint32 chance = SpellMgr::CalculateSpellEffectAmount((*iter)->GetSpellProto(), 2, m_caster);
 
-									if (chance && roll_chance_i(chance)) needConsume =
-											false;
+									if (chance && roll_chance_i(chance)) 
+										needConsume = false;
 
 									break;
 								}
@@ -973,15 +963,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 							if (needConsume) for (uint32 i = 0; i < doses; ++i)
 								unitTarget->RemoveAuraFromStack(spellId);
 							damage *= doses;
-							damage +=
-									int32(
-											((Player*) m_caster)->GetTotalAttackPowerValue(
-													BASE_ATTACK) * 0.09f
-													* doses);
+							damage += int32(((Player*) m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
 						}
 						// Eviscerate and Envenom Bonus Damage (item set effect)
-						if (m_caster->HasAura(37169)) damage +=
-								((Player*) m_caster)->GetComboPoints() * 40;
+						if (m_caster->HasAura(37169)) 
+							damage += ((Player*) m_caster)->GetComboPoints() * 40;
 					}
 				}
 				// Eviscerate
