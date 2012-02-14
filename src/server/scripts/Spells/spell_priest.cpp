@@ -443,6 +443,44 @@ class spell_pri_power_word_fortitude : public SpellScriptLoader
         }
 };
 
+// Power Word: Shield
+// Spell Id: 17
+class spell_pri_power_word_shield : public SpellScriptLoader
+{
+    public:
+        spell_pri_power_word_shield() : SpellScriptLoader("spell_pri_power_word_shield") { }
+
+        class spell_pri_power_word_shield_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_power_word_shield_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if(Unit* caster = GetCaster())
+                {
+                    if (!caster->ToPlayer())
+                        return;
+
+                    if (GetHitUnit() != caster)
+                        return;
+
+                    if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 5338, 0))
+                        caster->CastSpell(caster, 96219, true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_pri_power_word_shield_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pri_power_word_shield_SpellScript;
+        }
+};
+
 void AddSC_priest_spell_scripts() {
 	new spell_pri_guardian_spirit();
 	new spell_pri_mana_burn;
@@ -454,4 +492,5 @@ void AddSC_priest_spell_scripts() {
 	new spell_pri_shadow_word_death();
 	new spell_pri_mind_blast();
 	new spell_pri_power_word_fortitude();
+    new spell_pri_power_word_shield();
 }
