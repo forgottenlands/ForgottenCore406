@@ -272,7 +272,14 @@ public:
                 {
                     case EVENT_ROCK_BORE:
                         if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-                            DoCast(pTarget, SPELL_ROCK_BORE);
+                        {
+                            if (pTarget->HasAura(SPELL_ROCK_BORE))
+                            {
+                                if (pTarget->HasAura(SPELL_ROCK_BORE, me->GetGUID()))
+                                    DoCast(pTarget, SPELL_ROCK_BORE);
+                            } else
+                                DoCast(pTarget, SPELL_ROCK_BORE);
+                        }
                         events.RescheduleEvent(EVENT_ROCK_BORE, 1000);
                         return;
                 }
