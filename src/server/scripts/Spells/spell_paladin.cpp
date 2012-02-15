@@ -619,6 +619,72 @@ class spell_pal_judgements_of_the_wise : public SpellScriptLoader
         }
 };
 
+class spell_pal_light_of_dawn: public SpellScriptLoader
+{
+public:
+	spell_pal_light_of_dawn() : SpellScriptLoader("spell_pal_light_of_dawn")
+	{}
+
+	class spell_pal_light_of_dawn_SpellScript: public SpellScript 
+	{
+		PrepareSpellScript(spell_pal_light_of_dawn_SpellScript);
+
+		uint32 totalheal;
+
+		bool Load() 
+		{
+			if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+				return false;
+
+			return true;
+		}
+
+		void ChangeHeal(SpellEffIndex /*effIndex*/) 
+		{
+			Unit* caster = GetCaster();
+			Unit* target = GetHitUnit();
+
+			if (!target)
+				return;
+			
+			if (target == caster)
+				return;
+
+			switch (caster->GetPower(POWER_HOLY_POWER)) 
+			{
+				case 0: // 1 Holy Power
+				{
+					totalheal = GetHitHeal();
+					break;
+				}
+				case 1: // 2 Holy Power
+				{
+					totalheal = GetHitHeal() * 2;
+					break;
+				}
+				case 2: // 3 Holy Power
+				{
+					totalheal = GetHitHeal() * 3;
+					break;
+				}
+			}
+			SetHitHeal(totalheal);
+			caster->SetPower(POWER_HOLY_POWER, 0);
+		}
+
+		void Register() 
+		{
+			OnEffect += SpellEffectFn(spell_pal_light_of_dawn_SpellScript::ChangeHeal, EFFECT_0, SPELL_EFFECT_HEAL);     
+		}
+	};
+
+	SpellScript* GetSpellScript() const
+	{
+		return new spell_pal_light_of_dawn_SpellScript();
+	}
+};
+
+
 void AddSC_paladin_spell_scripts() {
 	new spell_pal_ardent_defender();
 	new spell_pal_blessing_of_faith();
@@ -632,4 +698,5 @@ void AddSC_paladin_spell_scripts() {
     new spell_pal_judgement_of_command();
     new spell_pal_shield_of_righteous();
     new spell_pal_judgements_of_the_wise();	
+    new spell_pal_light_of_dawn();
 }
