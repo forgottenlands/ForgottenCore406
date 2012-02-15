@@ -185,15 +185,17 @@ public:
 	}
 };
 
-class spell_pal_holy_shock: public SpellScriptLoader {
+class spell_pal_holy_shock: public SpellScriptLoader 
+{
 public:
-	spell_pal_holy_shock() :
-			SpellScriptLoader("spell_pal_holy_shock") {
-	}
+	spell_pal_holy_shock() : SpellScriptLoader("spell_pal_holy_shock") 
+    {}
 
-	class spell_pal_holy_shock_SpellScript: public SpellScript {
+	class spell_pal_holy_shock_SpellScript: public SpellScript 
+    {
 		PrepareSpellScript(spell_pal_holy_shock_SpellScript)
-		bool Validate(SpellEntry const *spellEntry) {
+		bool Validate(SpellEntry const *spellEntry) 
+        {
 			if (!sSpellStore.LookupEntry(PALADIN_SPELL_HOLY_SHOCK_R1))
 				return false;
 
@@ -203,59 +205,45 @@ public:
 				return false;
 
 			uint8 rank = sSpellMgr->GetSpellRank(spellEntry->Id);
-			if (!sSpellMgr->GetSpellWithRank(PALADIN_SPELL_HOLY_SHOCK_R1_DAMAGE,
-					rank, true))
+
+			if (!sSpellMgr->GetSpellWithRank(PALADIN_SPELL_HOLY_SHOCK_R1_DAMAGE, rank, true))
 				return false;
-			if (!sSpellMgr->GetSpellWithRank(
-					PALADIN_SPELL_HOLY_SHOCK_R1_HEALING, rank, true))
+
+			if (!sSpellMgr->GetSpellWithRank(PALADIN_SPELL_HOLY_SHOCK_R1_HEALING, rank, true))
 				return false;
 
 			return true;
 		}
 
-		void HandleDummy(SpellEffIndex /*effIndex*/) {
-			if (Unit *unitTarget = GetHitUnit()) {
+		void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+			if (Unit *unitTarget = GetHitUnit())
+            {
 				Unit *caster = GetCaster();
 
 				uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
 
-				if (caster->IsFriendlyTo(unitTarget)) {
-					caster->CastSpell(
-							unitTarget,
-							sSpellMgr
-									->GetSpellWithRank(PALADIN_SPELL_HOLY_SHOCK_R1_HEALING, rank), true, 0);
+				if (caster->IsFriendlyTo(unitTarget)) 
+                {
+					caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(PALADIN_SPELL_HOLY_SHOCK_R1_HEALING, rank), true, 0);
+                }
+                else
+                    caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(PALADIN_SPELL_HOLY_SHOCK_R1_DAMAGE, rank), true, 0);
+            }
+        }
+        
+        void Register()
+        {
+            // add dummy effect spell handler to Holy Shock
+            OnEffect += SpellEffectFn(spell_pal_holy_shock_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
 
-							if (caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
-							{
-								if (caster->ToPlayer()->getClass() == CLASS_PALADIN)
-								{
-									if (caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == BS_PALADIN_HOLY)
-									{
-										int32 bp0 = int32(caster->ToPlayer()->GetHealingDoneInPastSecs(15) * (12.0f + (1.5f * caster->ToPlayer()->GetMasteryPoints())) /100);
-										caster->CastCustomSpell(caster, 86273, &bp0, NULL, NULL, true);
-										caster->ToPlayer()->ResetHealingDoneInPastSecs(15);
-									}
-								}
-							}
-						}
-
-						else
-						caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(PALADIN_SPELL_HOLY_SHOCK_R1_DAMAGE, rank), true, 0);
-					}
-				}
-
-				void Register()
-				{
-					// add dummy effect spell handler to Holy Shock
-					OnEffect += SpellEffectFn(spell_pal_holy_shock_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-				}
-			};
-
-			SpellScript *GetSpellScript() const
-			{
-				return new spell_pal_holy_shock_SpellScript();
-			}
-		};
+    SpellScript *GetSpellScript() const
+    {
+        return new spell_pal_holy_shock_SpellScript();
+    }
+};
 
 class spell_pal_judgements_of_the_bold: public SpellScriptLoader {
 public:
