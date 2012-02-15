@@ -5348,7 +5348,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
 				case 53351: // Kill Shot
 				{
 					// "You attempt to finish the wounded target off, firing a long range attack dealing % weapon damage plus RAP*0.30+543."
-					shotMod = 0.45f;
+					shotMod = 0.3f;
 					break;
 				}
 				case 56641: // Steady Shot
