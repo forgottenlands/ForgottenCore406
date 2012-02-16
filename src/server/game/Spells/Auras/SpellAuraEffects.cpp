@@ -6884,12 +6884,12 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode,
                             case 57821: FactionID = 1090; DungeonLevel = 80; break; // Kirin Tor
                             case 57822: FactionID = 1091; DungeonLevel = 80; break; // The Wyrmrest Accord
                             // Cataclysm factions
-                            case 93337: FactionID = 1173; DungeonLevel = 85; break; // Ramkahen
-                            case 93339: FactionID = 1135; DungeonLevel = 85; break; // The Earthen Ring
-                            case 93341: FactionID = 1158; DungeonLevel = 85; break; // Guardians of Hyjal
-                            case 93347: FactionID = 1171; DungeonLevel = 85; break; // Therazane
-                            case 93368: FactionID = 1174; DungeonLevel = 85; break; // Wildhammer Clan
-                            case 94158: FactionID = 1172; DungeonLevel = 85; break; // Dragonmaw Clan
+                            case 93337: FactionID = 1173; DungeonLevel = 80; break; // Ramkahen
+                            case 93339: FactionID = 1135; DungeonLevel = 80; break; // The Earthen Ring
+                            case 93341: FactionID = 1158; DungeonLevel = 80; break; // Guardians of Hyjal
+                            case 93347: FactionID = 1171; DungeonLevel = 80; break; // Therazane
+                            case 93368: FactionID = 1174; DungeonLevel = 80; break; // Wildhammer Clan
+                            case 94158: FactionID = 1172; DungeonLevel = 80; break; // Dragonmaw Clan
                             // Alliance factions
                             case 93795: FactionID = 72;   DungeonLevel = 0;  break; // Stormwind
                             case 93805: FactionID = 47;   DungeonLevel = 0;  break; // Ironforge
