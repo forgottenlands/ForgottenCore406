@@ -480,6 +480,60 @@ class spell_soul_swap_exhale : public SpellScriptLoader
             return new spell_soul_swap_exhaleSpellScript();
         }
 };
+// spell_warl_fel_flame
+class spell_warl_fel_flame: public SpellScriptLoader 
+{
+public:
+	spell_warl_fel_flame() : SpellScriptLoader("spell_warl_fel_flame") {
+	}
+
+	class spell_warl_fel_flame_SpellScript: public SpellScript
+    {
+		PrepareSpellScript(spell_warl_fel_flame_SpellScript)
+
+		void HandleScriptEffect(SpellEffIndex /*effIndex*/) 
+        {
+			Unit* target = GetHitUnit();
+            Unit* caster = GetCaster();
+
+            if (!target)
+                return;
+
+            if (!caster)
+                return;
+            
+            if (target->HasAura(348, caster->GetGUID()))
+            {
+                int32 newDuration = target->GetAura(348, caster->GetGUID())->GetDuration();
+                if (newDuration >= GetEffectValue()*1000)
+                    newDuration = target->GetAura(348, caster->GetGUID())->GetMaxDuration();
+                else
+                    newDuration += (GetEffectValue()*1000);
+
+                target->GetAura(348, caster->GetGUID())->SetDuration(newDuration, true);
+            } else if (target->HasAura(30108, caster->GetGUID()))
+            {
+                int32 newDuration = target->GetAura(30108, caster->GetGUID())->GetDuration();
+                if (newDuration >= GetEffectValue()*1000)
+                    newDuration = target->GetAura(30108, caster->GetGUID())->GetMaxDuration();
+                else
+                    newDuration += (GetEffectValue()*1000);
+
+                target->GetAura(30108, caster->GetGUID())->SetDuration(newDuration, true);
+            }            
+		}
+
+		void Register()
+        {
+			OnEffect += SpellEffectFn(spell_warl_fel_flame_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+		}
+	};
+
+	SpellScript* GetSpellScript() const 
+    {
+		return new spell_warl_fel_flame_SpellScript();
+	}
+};
 
 void AddSC_warlock_spell_scripts() {
 	new spell_warl_demonic_empowerment();
@@ -493,4 +547,5 @@ void AddSC_warlock_spell_scripts() {
 	new spell_warl_drain_life();
     new spell_soul_swap_buff();
     new spell_soul_swap_exhale();
+    new spell_warl_fel_flame();
 }
