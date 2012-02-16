@@ -4022,29 +4022,26 @@ inline void Unit::RemoveAuraFromStack(AuraMap::iterator &iter,
 	if (iter->second->ModStackAmount(-1)) RemoveOwnedAura(iter, removeMode);
 }
 
-void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID,
-		Unit *dispeller)
+void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID,	Unit *dispeller)
 {
-	for (AuraMap::iterator iter = m_ownedAuras.lower_bound(spellId);
-			iter != m_ownedAuras.upper_bound(spellId);)
+	for (AuraMap::iterator iter = m_ownedAuras.lower_bound(spellId); iter != m_ownedAuras.upper_bound(spellId);)
 	{
 		Aura * aura = iter->second;
 		if (aura->GetCasterGUID() == casterGUID)
 		{
-			if (aura->GetSpellProto()->AttributesEx7
-					& SPELL_ATTR7_DISPEL_CHARGES) aura->DropCharge();
-			else RemoveAuraFromStack(iter, AURA_REMOVE_BY_ENEMY_SPELL);
+			if (aura->GetSpellProto()->AttributesEx7 & SPELL_ATTR7_DISPEL_CHARGES) 
+                aura->DropCharge();
+			else 
+                RemoveAuraFromStack(iter, AURA_REMOVE_BY_ENEMY_SPELL);
 
 			// Unstable Affliction (crash if before removeaura?)
-			if (aura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK
-					&& (aura->GetSpellProto()->SpellFamilyFlags [1] & 0x0100))
+			if (aura->GetSpellProto()->Id == 30108)
 			{
-				if (AuraEffect const * aurEff = aura->GetEffect(0))
+				if (AuraEffect const * aurEff = aura->GetEffect(1))
 				{
 					int32 damage = aurEff->GetAmount() * 9;
 					// backfire damage and silence
-					dispeller->CastCustomSpell(dispeller, 31117, &damage, NULL,
-							NULL, true, NULL, NULL, aura->GetCasterGUID());
+					dispeller->CastCustomSpell(dispeller, 31117, &damage, NULL, NULL, true, NULL, NULL, aura->GetCasterGUID());    
 				}
 			}
 			// Flame Shock
