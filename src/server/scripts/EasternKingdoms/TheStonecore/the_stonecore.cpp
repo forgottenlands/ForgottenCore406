@@ -271,14 +271,14 @@ public:
                 switch (eventId)
                 {
                     case EVENT_ROCK_BORE:
-                        if (Unit *pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
+                        if (Unit *target = me->getVictim())
                         {
-                            if (!pTarget->HasAura(SPELL_ROCK_BORE))
+                            if (!target->HasAura(SPELL_ROCK_BORE))
                             {
-                                DoCast(pTarget, SPELL_ROCK_BORE);
+                                DoCast(target, SPELL_ROCK_BORE);
                             }
                         }
-                        events.RescheduleEvent(EVENT_ROCK_BORE, 1000);
+                        events.RescheduleEvent(EVENT_ROCK_BORE, 5000);
                         return;
                 }
             }
