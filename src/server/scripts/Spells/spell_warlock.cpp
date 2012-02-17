@@ -484,16 +484,16 @@ class spell_soul_swap_exhale : public SpellScriptLoader
 class spell_warl_fel_flame: public SpellScriptLoader 
 {
 public:
-	spell_warl_fel_flame() : SpellScriptLoader("spell_warl_fel_flame") {
-	}
+    spell_warl_fel_flame() : SpellScriptLoader("spell_warl_fel_flame") {
+    }
 
-	class spell_warl_fel_flame_SpellScript: public SpellScript
+    class spell_warl_fel_flame_SpellScript: public SpellScript
     {
-		PrepareSpellScript(spell_warl_fel_flame_SpellScript)
+        PrepareSpellScript(spell_warl_fel_flame_SpellScript)
 
-		void HandleScriptEffect(SpellEffIndex /*effIndex*/) 
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/) 
         {
-			Unit* target = GetHitUnit();
+            Unit* target = GetHitUnit();
             Unit* caster = GetCaster();
 
             if (!target)
@@ -521,18 +521,18 @@ public:
 
                 target->GetAura(30108, caster->GetGUID())->SetDuration(newDuration, true);
             }            
-		}
+        }
 
-		void Register()
+        void Register()
         {
-			OnEffect += SpellEffectFn(spell_warl_fel_flame_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-		}
-	};
+            OnEffect += SpellEffectFn(spell_warl_fel_flame_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
 
-	SpellScript* GetSpellScript() const 
+    SpellScript* GetSpellScript() const 
     {
-		return new spell_warl_fel_flame_SpellScript();
-	}
+        return new spell_warl_fel_flame_SpellScript();
+    }
 };
 
 // sspell_shadow_ward
@@ -589,5 +589,6 @@ void AddSC_warlock_spell_scripts()
 	new spell_warl_drain_life();
     new spell_soul_swap_buff();
     new spell_soul_swap_exhale();
+    new spell_warl_fel_flame();
     new spell_shadow_ward();
 }
