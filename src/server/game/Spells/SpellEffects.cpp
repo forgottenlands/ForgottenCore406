@@ -983,6 +983,29 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             damage += combo * 40;
 					}
 				}
+                
+                // Finishing moves scripts (Envenom, Eviscerate)
+                if (m_spellInfo->Id == 32645 || m_spellInfo->Id == 2098)
+                {
+                    // Revealing Strike
+                    if (unitTarget->HasAura(84617))
+                    {
+                        // Revealing strike effect
+                        if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_ROGUE, 4531, 2))
+                        {
+                            AddPctN(damage, aurEff->GetAmount()); 
+                        }
+                    }
+
+                    // Mastery Subtlety Executione
+                    if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
+                    {
+                        if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_ROGUE_SUBTLETY)
+                        {
+                            damage += int32(damage * (20.0f + (2.5f *  m_caster->ToPlayer()->GetMasteryPoints())) / 100);
+                        }
+                    }
+                }
 				break;
 			}
 			case SPELLFAMILY_HUNTER:
@@ -5286,15 +5309,25 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
 				if (found) totalDamagePercentMod *= 1.2f; // 120% if poisoned
 			}
 
-            // Finishing moves Revealing Strike increased damage
-            if (m_spellInfo->Id == 32645 || m_spellInfo->Id == 2098 || m_spellInfo->Id == 1943 || m_spellInfo->Id == 26679)
+            // Finishing moves scripts (Deadly thrown)
+            if (m_spellInfo->Id == 26679)
             {
+                // Revealing Strike
                 if (unitTarget->HasAura(84617))
                 {
                     // Revealing strike effect
                     if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_ROGUE, 4531, 2))
                     {
                         AddPctN(damage, aurEff->GetAmount()); 
+                    }
+                }
+
+                // Mastery Subtlety Executioner (Deadly Thrown)
+                if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
+                {
+                    if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_ROGUE_SUBTLETY)
+                    {
+                        damage += int32(damage * (20.0f + (2.5f *  m_caster->ToPlayer()->GetMasteryPoints())) / 100);
                     }
                 }
             }
