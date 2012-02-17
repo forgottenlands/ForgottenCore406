@@ -457,8 +457,6 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
 	}
 
     float rates = sWorld->getRate(RATE_XP_QUEST);
-    if (pSession->GetPlayer() && pSession->GetPlayer()->getLevel() >= 80)
-        rates = 5.0f;
 
 	data << uint32(pQuest->GetRewOrReqMoney());
 	data << uint32(pQuest->XPValue(pSession->GetPlayer()) * rates);

@@ -15439,10 +15439,8 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
 
 	// Not give XP in case already completed once repeatable quest
     float rates = sWorld->getRate(RATE_XP_QUEST);
-    if (getLevel() >= 80)
-        rates = 5.0f;
 
-	uint32 XP = rewarded ? 0 : uint32(pQuest->XPValue(this)* rates);
+    uint32 XP = rewarded ? 0 : uint32(pQuest->XPValue(this)* rates);
     uint32 guildXP = uint32(pQuest->XPValue(this)* rates);
 
 	// handle SPELL_AURA_MOD_XP_QUEST_PCT auras
