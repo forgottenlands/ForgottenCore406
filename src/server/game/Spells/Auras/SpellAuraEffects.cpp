@@ -688,8 +688,8 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
 		if (!caster)
 			break;
 		// Rupture
-		if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE
-				&& m_spellProto->SpellFamilyFlags[0] & 0x100000) {
+		if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellProto->Id == 1943)
+        {
 			m_canBeRecalculated = false;
 			if (caster->GetTypeId() != TYPEID_PLAYER)
 				break;
@@ -698,14 +698,31 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
 			//3 points: ${($m1+$b1*3+0.03*$AP)*6} damage over 12 secs
 			//4 points: ${($m1+$b1*4+0.03428571*$AP)*7} damage over 14 secs
 			//5 points: ${($m1+$b1*5+0.0375*$AP)*8} damage over 16 secs
-			float AP_per_combo[6] = { 0.0f, 0.015f, 0.024f, 0.03f, 0.03428571f,
-					0.0375f };
+			float AP_per_combo[6] = { 0.0f, 0.015f, 0.024f, 0.03f, 0.03428571f, 0.0375f };
 			uint8 cp = caster->ToPlayer()->GetComboPoints();
 			if (cp > 5)
 				cp = 5;
-			amount += int32(
-					caster->GetTotalAttackPowerValue(BASE_ATTACK)
-							* AP_per_combo[cp]);
+
+			amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * AP_per_combo[cp]);
+
+            // Revealing Strike
+            if (GetBase()->GetUnitOwner()->HasAura(84617))
+            {
+                // Revealing strike effect
+                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_ROGUE, 4531, 2))
+                {
+                    AddPctN(amount, aurEff->GetAmount()); 
+                }
+            }
+
+            // Mastery Subtlety Executione
+            if (caster->HasAuraType(SPELL_AURA_MASTERY))
+            {
+                if (caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == BS_ROGUE_SUBTLETY)
+                {
+                    amount += int32(amount * (20.0f + (2.5f *  caster->ToPlayer()->GetMasteryPoints())) / 100);
+                }
+            }
 		}
 		// Rip
 		else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
