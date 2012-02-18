@@ -1,32 +1,36 @@
 /*
- * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
- * 
- * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
- * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2011 - 2012 Forgotten Core <http://www.forgottenlands.eu/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
-#include "vortex_pinnacle.h"
+/**********
+* ScriptAuthor: dimiandre
+* Script Complete 0%
+**********/
+
 #include "ScriptPCH.h"
+#include "vortex_pinnacle.h"
 
-enum eSpells
+enum Spells
 {
-    SPELL_CIILLING_BREATH_N       = 88308,
-    SPELL_CIILLING_BREATH_H       = 93989,
 };
+
+enum Events
+{
+};
+
 
 class boss_altairus : public CreatureScript
 {
@@ -38,55 +42,38 @@ public:
         return new boss_altairusAI (creature);
     }
 
-    struct boss_altairusAI : public ScriptedAI
+    struct boss_altairusAI : public BossAI
     {
-        boss_altairusAI(Creature* creature) : ScriptedAI(creature)
+        boss_altairusAI(Creature* creature) : BossAI(creature, DATA_ALTAIRUS_EVENT)
         {
             instance = creature->GetInstanceScript();
         }
 
         InstanceScript* instance;
-
-        uint32 ChillingBreathTimer;
-
+		EventMap events;
         void Reset()
-        {
-            ChillingBreathTimer = 15000;
-        }
+		{
+			events.Reset();
+		}
 
         void EnterCombat(Unit* /*who*/)
-        {
-        }
-
-        void JustDied(Unit* /*Killer*/)
-        {
-            instance->SetData(DATA_ALTAIRUS, DONE);
-
-            Creature* Slipstream = me->SummonCreature(NPC_SLIPSTREAM, -1190.88f, 125.20f, 737.62f, 1.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
-            Slipstream->SetUInt32Value(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_GOSSIP);
-
-            Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-
-            if (PlList.isEmpty())
-                return;
-
-            for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-                if (Player* player = i->getSource())
-                    player->ModifyCurrency(395, DUNGEON_MODE(3000, 7000));
-        }
+		{
+		}
 
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
 
-            if (ChillingBreathTimer <= diff)
-            {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                    me->CastSpell(target, DUNGEON_MODE(SPELL_CIILLING_BREATH_N, SPELL_CIILLING_BREATH_H), true);
+			events.Update(diff);
 
-                ChillingBreathTimer = urand(12*IN_MILLISECONDS,17*IN_MILLISECONDS);
-            } else ChillingBreathTimer -= diff;
+			while (uint32 eventId = events.ExecuteEvent())
+			{
+				switch (eventId)
+				{
+				
+				}
+			}
 
             DoMeleeAttackIfReady();
         }
