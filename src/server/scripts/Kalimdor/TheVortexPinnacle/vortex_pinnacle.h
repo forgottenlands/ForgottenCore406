@@ -42,6 +42,6 @@ enum CreatureIds
     BOSS_ASAAD                                    = 43875,
 
     // Vortici
-
+    NPC_ERTAN_VORTEX                              = 46007,
 };
 #endif
