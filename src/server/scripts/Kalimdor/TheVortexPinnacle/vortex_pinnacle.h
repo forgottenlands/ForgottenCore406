@@ -43,5 +43,6 @@ enum CreatureIds
 
     // Vortici
     NPC_ERTAN_VORTEX                              = 46007,
+    NPC_TWISTER                                   = 47342,
 };
 #endif

@@ -4614,6 +4614,9 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 81801: // Thrashing Charge
             spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
             break;
+        case 88313: // Twister aura
+            spellInfo->EffectAmplitude[0] = 2000;
+            break;
 		default:
 			break;
 		}
