@@ -56,7 +56,6 @@ public:
             
             if (me->GetDistance(who) <= 3.0f)
             {
-                sLog->outString("Distance %d %d", instance->GetData(DATA_GRAND_VIZIER_ERTAN_EVENT), instance->GetData(DATA_ALTAIRUS_EVENT));
                 if (instance->GetData(DATA_GRAND_VIZIER_ERTAN_EVENT) == DONE && instance->GetData(DATA_ALTAIRUS_EVENT) == DONE)
                     who->ToPlayer()->TeleportTo(657, -1189.04f, 475.85f, 634.78f, 0.46f);
                 else if (instance->GetData(DATA_GRAND_VIZIER_ERTAN_EVENT) == DONE)

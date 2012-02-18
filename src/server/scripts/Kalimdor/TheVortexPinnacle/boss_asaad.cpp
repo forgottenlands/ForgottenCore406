@@ -17,7 +17,7 @@
 
 /**********
 * ScriptAuthor: dimiandre
-* Script Complete 0%
+* Script Complete 10%
 **********/
 
 #include "ScriptPCH.h"
@@ -25,16 +25,13 @@
 
 enum Spells
 {
+    SPELL_CHAIN                                   = 87622,
 };
 
 enum Events
-{
+{   
+    EVENT_CHAIN =1,
 };
-
-enum Actions
-{
-};
-
 
 class boss_asaad : public CreatureScript
 {
@@ -64,6 +61,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            events.ScheduleEvent(EVENT_CHAIN, 2050, 0, 0);
         }
 
         void UpdateAI(const uint32 diff)
@@ -77,6 +75,12 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_CHAIN:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        me->CastSpell(target, SPELL_CHAIN, true);
+                    
+                     events.ScheduleEvent(EVENT_CHAIN, 2050, 0, 0);
+                     break;
                 }
             }
 
@@ -85,7 +89,7 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
-            
+            instance->SetData(DATA_ASAAD_EVENT, DONE);
         }
 
     };
