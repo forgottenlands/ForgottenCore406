@@ -50,30 +50,30 @@ public:
         }
 
         InstanceScript* instance;
-		EventMap events;
+        EventMap events;
         void Reset()
-		{
-			events.Reset();
-		}
+        {
+            events.Reset();
+        }
 
         void EnterCombat(Unit* /*who*/)
-		{
-		}
+        {
+        }
 
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
 
-			events.Update(diff);
+            events.Update(diff);
 
-			while (uint32 eventId = events.ExecuteEvent())
-			{
-				switch (eventId)
-				{
-				
-				}
-			}
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                
+                }
+            }
 
             DoMeleeAttackIfReady();
         }

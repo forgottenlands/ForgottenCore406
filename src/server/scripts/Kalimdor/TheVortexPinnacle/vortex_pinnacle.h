@@ -22,24 +22,24 @@
 
 enum Data 
 {
-	DATA_GRAND_VIZIER_ERTAN_EVENT,
-	DATA_ALTAIRUS_EVENT,
-	DATA_ASAAD_EVENT,
+    DATA_GRAND_VIZIER_ERTAN_EVENT,
+    DATA_ALTAIRUS_EVENT,
+    DATA_ASAAD_EVENT,
 };
 
 enum Data64 
 {
-	DATA_GRAND_VIZIER_ERTAN,
-	DATA_ALTAIRUS,
-	DATA_ASAAD,
+    DATA_GRAND_VIZIER_ERTAN,
+    DATA_ALTAIRUS,
+    DATA_ASAAD,
 };
 
 enum CreatureIds
 {
-	// Dungeon Bosses
-	BOSS_GRAND_VIZIER_ERTAN                       = 43878,
-	BOSS_ALTAIRUS                                 = 43873,
-	BOSS_ASAAD                                    = 43875,
+    // Dungeon Bosses
+    BOSS_GRAND_VIZIER_ERTAN                       = 43878,
+    BOSS_ALTAIRUS                                 = 43873,
+    BOSS_ASAAD                                    = 43875,
 
     // Vortici
 

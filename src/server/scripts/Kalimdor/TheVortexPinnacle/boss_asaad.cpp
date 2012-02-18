@@ -39,61 +39,61 @@ enum Actions
 class boss_asaad : public CreatureScript
 {
 public:
-	boss_asaad() : CreatureScript("boss_asaad") { }
+    boss_asaad() : CreatureScript("boss_asaad") { }
 
-	CreatureAI* GetAI(Creature* creature) const
-	{
-		return new boss_asaadAI (creature);
-	}
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_asaadAI (creature);
+    }
 
-	struct boss_asaadAI : public BossAI
-	{
-		boss_asaadAI(Creature* creature) : BossAI(creature, DATA_ASAAD_EVENT)
-		{
-			instance = creature->GetInstanceScript();
-		}
+    struct boss_asaadAI : public BossAI
+    {
+        boss_asaadAI(Creature* creature) : BossAI(creature, DATA_ASAAD_EVENT)
+        {
+            instance = creature->GetInstanceScript();
+        }
 
-		InstanceScript* instance;
-		EventMap events;
+        InstanceScript* instance;
+        EventMap events;
 
-		void Reset()
-		{
-			events.Reset();
-			
-		}
+        void Reset()
+        {
+            events.Reset();
+            
+        }
 
-		void EnterCombat(Unit* /*who*/)
-		{
-		}
+        void EnterCombat(Unit* /*who*/)
+        {
+        }
 
-		void UpdateAI(const uint32 diff)
-		{
-			if (!UpdateVictim())
-				return;
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-			events.Update(diff);
+            events.Update(diff);
 
-			while (uint32 eventId = events.ExecuteEvent())
-			{
-				switch (eventId)
-				{
-				}
-			}
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                }
+            }
 
-			DoMeleeAttackIfReady();
-		}
+            DoMeleeAttackIfReady();
+        }
 
-		void JustDied(Unit* /*killer*/)
-		{
-			
-		}
+        void JustDied(Unit* /*killer*/)
+        {
+            
+        }
 
-	};
+    };
 };
 
 
 
 void AddSC_boss_asaad()
 {
-	new boss_asaad();
+    new boss_asaad();
 }
