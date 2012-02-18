@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `ScriptName`='npc_slipstream' WHERE  `entry`=45455;

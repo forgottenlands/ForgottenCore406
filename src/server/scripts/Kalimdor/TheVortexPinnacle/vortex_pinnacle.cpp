@@ -29,40 +29,41 @@ class npc_slipstream : public CreatureScript
 public:
     npc_slipstream() : CreatureScript("npc_slipstream") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 Sender, uint32 action)
+    CreatureAI* GetAI(Creature* creature) const
     {
-        player->PlayerTalkClass->ClearMenus();
+        return new npc_slipstreamAI (creature);
+    }
 
-        if (Sender != GOSSIP_SENDER_MAIN)
-            return true;
-        if (!player->getAttackers().empty())
-            return true;
-
-        switch (action)
+    struct npc_slipstreamAI : public ScriptedAI
+    {
+        npc_slipstreamAI(Creature* creature) : ScriptedAI(creature)
         {
-            case GOSSIP_ACTION_INFO_DEF+1:
-                player->TeleportTo(657, -914.87f, -190.27f, 664.50f, 2.43f);
-            break;
-            case GOSSIP_ACTION_INFO_DEF+2:
-                player->TeleportTo(657, -1189.04f, 475.85f, 634.78f, 0.46f);
-            break;
+            instance = creature->GetInstanceScript();
         }
-        return true;
-    }
 
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        InstanceScript* instance = creature->GetInstanceScript();
+        InstanceScript* instance;
 
-        if (instance && instance->GetData(DATA_GRAND_VIZIER_ERTAN)==DONE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to platform 2", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!who)
+                return;
 
-        if (instance && instance->GetData(DATA_ALTAIRUS)==DONE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to platform 3", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+            if (!who->ToPlayer())
+                return;
 
-        player->SEND_GOSSIP_MENU(2475, creature->GetGUID());
-        return true;
-    }
+            if (!instance)
+                return;
+            
+            if (me->GetDistance(who) <= 3.0f)
+            {
+                sLog->outString("Distance %d %d", instance->GetData(DATA_GRAND_VIZIER_ERTAN_EVENT), instance->GetData(DATA_ALTAIRUS_EVENT));
+                if (instance->GetData(DATA_GRAND_VIZIER_ERTAN_EVENT) == DONE && instance->GetData(DATA_ALTAIRUS_EVENT) == DONE)
+                    who->ToPlayer()->TeleportTo(657, -1189.04f, 475.85f, 634.78f, 0.46f);
+                else if (instance->GetData(DATA_GRAND_VIZIER_ERTAN_EVENT) == DONE)
+                    who->ToPlayer()->TeleportTo(657, -914.87f, -190.27f, 664.50f, 2.43f);
+            }
+        }
+    };
 };
 
 void AddSC_vortex_pinnacle()
