@@ -724,27 +724,45 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
                 }
             }
 		}
-		// Rip
-		else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
-				&& m_spellProto->SpellFamilyFlags[0] & 0x00800000
-				&& GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE) {
-			m_canBeRecalculated = false;
-			// 0.01*$AP*cp
-			if (caster->GetTypeId() != TYPEID_PLAYER)
-				break;
+        // Rip
+        else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags[0] & 0x00800000 && GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE) 
+        {
+            m_canBeRecalculated = false;
+            // 0.01*$AP*cp
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                break;
 
-			uint8 cp = caster->ToPlayer()->GetComboPoints();
+            uint8 cp = caster->ToPlayer()->GetComboPoints();
 
-			// Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
-			if (AuraEffect const * aurEff = caster->GetAuraEffect(34241, 0))
-				amount += cp * aurEff->GetAmount();
+            // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
+            if (AuraEffect const * aurEff = caster->GetAuraEffect(34241, 0))
+                amount += cp * aurEff->GetAmount();
 
-			amount += CalculatePctF(
-					caster->GetTotalAttackPowerValue(BASE_ATTACK), cp);
-		}
+            amount += CalculatePctF(caster->GetTotalAttackPowerValue(BASE_ATTACK), cp);
+
+            // Druid Mastery Razor Claws (Rip)
+            if (caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
+            {
+                if (caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == BS_DRUID_FERAL_COMBAT)
+                    amount += int32(amount * (25.04f + (3.1f *  caster->ToPlayer()->GetMasteryPoints())) / 100);
+            }
+        } 
+        // Rake
+        else if (GetSpellProto()->Id == 1822)
+        {
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                break;
+
+            // Druid Mastery Razor Claws (Rake)
+            if (caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
+            {
+                if (caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == BS_DRUID_FERAL_COMBAT)
+                    amount += int32(amount * (25.04f + (3.1f *  caster->ToPlayer()->GetMasteryPoints())) / 100);
+            }
+        }
 		// Rend
-		else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR
-				&& GetSpellProto()->SpellFamilyFlags[0] & 0x20) {
+		else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR && GetSpellProto()->SpellFamilyFlags[0] & 0x20)
+        {
 			m_canBeRecalculated = false;
 			// $0.2*(($MWB+$mwb)/2+$AP/14*$MWS) bonus per tick
 			float ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
