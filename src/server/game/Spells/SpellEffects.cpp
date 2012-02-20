@@ -6956,9 +6956,13 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 			if (m_spellInfo->SpellFamilyFlags [2] & 0x400000)
 			{
 				m_caster->CastSpell(m_caster, 91954, true);
-				if (unitTarget->GetAura(1978)) unitTarget->GetAura(1978)->SetDuration(
-						(unitTarget->GetAura(1978)->GetDuration() + 6000),
-						true);
+				if (unitTarget->GetAura(1978)) 
+                {
+                    uint32 duration = unitTarget->GetAura(1978)->GetDuration() + 6000;
+                    if (duration > 15000)
+                        duration = 15000;
+                    unitTarget->GetAura(1978)->SetDuration(duration, true);
+                }
 			}
 			// chimera shot health effect + serpent sting refresh
 			if (m_spellInfo->SpellFamilyFlags [2] & 0x1)
