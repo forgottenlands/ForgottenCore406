@@ -1972,7 +1972,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     break;
                 case 32960: // Mark of Kazzak
                     int32 modifier = int32(target->GetPower(power) * 0.05f);
-                    target->ModifyPower(power, -modifier)
+                    target->ModifyPower(power, -modifier);
                     if (target->GetPower(power) == 0) 
                     {
                         target->CastSpell(target, 32961, true, 0, this);
