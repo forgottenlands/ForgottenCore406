@@ -866,336 +866,263 @@ bool Pet::CreateBaseAtTamed(CreatureInfo const * cinfo, Map * map,
 // TODO: Move stat mods code to pet passive auras
 bool Guardian::InitStatsForLevel(uint8 petlevel)
 {
-	CreatureInfo const *cinfo = GetCreatureInfo();
-	ASSERT(cinfo);
+    CreatureInfo const *cinfo = GetCreatureInfo();
+    ASSERT(cinfo);
 
-	SetLevel(petlevel);
+    SetLevel(petlevel);
 
-	//Determine pet type
-	PetType petType = MAX_PET_TYPE;
-	if (isPet() && m_owner->GetTypeId() == TYPEID_PLAYER)
-	{
-		if ((m_owner->getClass() == CLASS_WARLOCK)
-				|| (m_owner->getClass() == CLASS_SHAMAN) // Fire Elemental
-		|| (m_owner->getClass() == CLASS_PRIEST) // Shadowfiend
-		|| (m_owner->getClass() == CLASS_MAGE) // Water Element
-		|| (m_owner->getClass() == CLASS_DEATH_KNIGHT)) // Risen Ghoul
-		petType = SUMMON_PET;
-		else if (m_owner->getClass() == CLASS_HUNTER)
-		{
-			petType = HUNTER_PET;
-			m_unitTypeMask |= UNIT_MASK_HUNTER_PET;
-		}
-		else
-		sLog->outError("Unknown type pet %u is summoned by player class %u",
-				GetEntry(), m_owner->getClass());
-	}
+    //Determine pet type
+    PetType petType = MAX_PET_TYPE;
+    if (isPet() && m_owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        if ((m_owner->getClass() == CLASS_WARLOCK) || (m_owner->getClass() == CLASS_SHAMAN) // Fire Elemental
+            || (m_owner->getClass() == CLASS_PRIEST) // Shadowfiend
+            || (m_owner->getClass() == CLASS_MAGE) // Water Element
+            || (m_owner->getClass() == CLASS_DEATH_KNIGHT)) // Risen Ghoul
+        {
+            petType = SUMMON_PET;
+        }
+        else if (m_owner->getClass() == CLASS_HUNTER)
+        {
+            petType = HUNTER_PET;
+            m_unitTypeMask |= UNIT_MASK_HUNTER_PET;
+        }
+        else
+        sLog->outError("Unknown type pet %u is summoned by player class %u", GetEntry(), m_owner->getClass());
+    }
 
-	uint32 creature_ID = (petType == HUNTER_PET) ? 1 : cinfo->Entry;
+    uint32 creature_ID = (petType == HUNTER_PET) ? 1 : cinfo->Entry;
 
-	SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
+    SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
 
-	SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(petlevel * 50));
+    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(petlevel * 50));
 
-	SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
-	SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
-	SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
+    SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
+    SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
+    SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
 
-	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
+    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 
-	//scale
-	CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(
-			cinfo->family);
-	if (cFamily && cFamily->minScale > 0.0f && petType == HUNTER_PET)
-	{
-		float scale;
-		// min scale = 0.8 // max scale = 1.8 <-Changed to 1.0 //
-		scale = 0.8 + (getLevel() * ((1.0 - 0.8) / 85));
+    //scale
+    CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
+    if (cFamily && cFamily->minScale > 0.0f && petType == HUNTER_PET)
+    {
+        float scale;
+        // min scale = 0.8 // max scale = 1.8 <-Changed to 1.0 //
+        scale = 0.8 + (getLevel() * ((1.0 - 0.8) / 85));
 
-		SetFloatValue(OBJECT_FIELD_SCALE_X, scale);
-	}
+        SetFloatValue(OBJECT_FIELD_SCALE_X, scale);
+    }
 
-	//resistance
-	int32 createResistance [MAX_SPELL_SCHOOL] =
-	{ 0, 0, 0, 0, 0, 0, 0 };
-	if (cinfo && petType != HUNTER_PET)
-	{
-		createResistance [SPELL_SCHOOL_HOLY] = cinfo->resistance1;
-		createResistance [SPELL_SCHOOL_FIRE] = cinfo->resistance2;
-		createResistance [SPELL_SCHOOL_NATURE] = cinfo->resistance3;
-		createResistance [SPELL_SCHOOL_FROST] = cinfo->resistance4;
-		createResistance [SPELL_SCHOOL_SHADOW] = cinfo->resistance5;
-		createResistance [SPELL_SCHOOL_ARCANE] = cinfo->resistance6;
-	}
-	for (uint8 i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-		SetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE,
-				float(createResistance [i]));
+    //resistance
+    int32 createResistance [MAX_SPELL_SCHOOL] = { 0, 0, 0, 0, 0, 0, 0 };
+    if (cinfo && petType != HUNTER_PET)
+    {
+        createResistance [SPELL_SCHOOL_HOLY] = cinfo->resistance1;
+        createResistance [SPELL_SCHOOL_FIRE] = cinfo->resistance2;
+        createResistance [SPELL_SCHOOL_NATURE] = cinfo->resistance3;
+        createResistance [SPELL_SCHOOL_FROST] = cinfo->resistance4;
+        createResistance [SPELL_SCHOOL_SHADOW] = cinfo->resistance5;
+        createResistance [SPELL_SCHOOL_ARCANE] = cinfo->resistance6;
+    }
+    for (uint8 i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
+        SetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE, float(createResistance [i]));
 
-	//health, mana, armor and resistance
-	PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(creature_ID,
-			petlevel);
-	if (pInfo) // exist in DB
-	{
-		SetCreateHealth(pInfo->health);
-		if (petType != HUNTER_PET) //hunter pet use focus
-		SetCreateMana(pInfo->mana);
+    //health, mana, armor and resistance
+    PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(creature_ID, petlevel);
+    if (pInfo) // exist in DB
+    {
+        SetCreateHealth(pInfo->health);
+        if (petType != HUNTER_PET) //hunter pet use focus
+        SetCreateMana(pInfo->mana);
 
-		if (pInfo->armor > 0) SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE,
-				float(pInfo->armor));
+        if (pInfo->armor > 0) SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
 
-		for (uint8 stat = 0; stat < MAX_STATS; ++stat)
-			SetCreateStat(Stats(stat), float(pInfo->stats [stat]));
-	}
-	else // not exist in DB, use some default fake data
-	{
-		// remove elite bonuses included in DB values
-		CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(petlevel, cinfo->unit_class);
-		SetCreateHealth(stats->BaseHealth [cinfo->expansion]);
-		SetCreateMana(stats->BaseMana);
+        for (uint8 stat = 0; stat < MAX_STATS; ++stat)
+            SetCreateStat(Stats(stat), float(pInfo->stats [stat]));
+    }
+    else // not exist in DB, use some default fake data
+    {
+        // remove elite bonuses included in DB values
+        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(petlevel, cinfo->unit_class);
+        SetCreateHealth(stats->BaseHealth [cinfo->expansion]);
+        SetCreateMana(stats->BaseMana);
 
-		SetCreateStat(STAT_STRENGTH, 22);
-		SetCreateStat(STAT_AGILITY, 22);
-		SetCreateStat(STAT_STAMINA, 25);
-		SetCreateStat(STAT_INTELLECT, 28);
-		SetCreateStat(STAT_SPIRIT, 27);
-	}
+        SetCreateStat(STAT_STRENGTH, 22);
+        SetCreateStat(STAT_AGILITY, 22);
+        SetCreateStat(STAT_STAMINA, 25);
+        SetCreateStat(STAT_INTELLECT, 28);
+        SetCreateStat(STAT_SPIRIT, 27);
+    }
 
-	SetBonusDamage(0);
-	switch (petType)
-	{
-		case SUMMON_PET:
-		{
-			//the damage bonus used for pets is either fire or shadow damage, whatever is higher
-			uint32 fire = m_owner->GetUInt32Value(
-					PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE);
-			uint32 shadow = m_owner->GetUInt32Value(
-					PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW);
-			uint32 val = (fire > shadow) ? fire : shadow;
-			SetBonusDamage(int32(val * 0.15f));
-			//bonusAP += val * 0.57;
+    SetBonusDamage(0);
+    switch (petType)
+    {
+        case SUMMON_PET:
+        {
+            //the damage bonus used for pets is either fire or shadow damage, whatever is higher
+            uint32 fire = m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE);
+            uint32 shadow = m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW);
+            uint32 val = (fire > shadow) ? fire : shadow;
+            SetBonusDamage(int32(val * 0.15f));
+            //bonusAP += val * 0.57;
 
-			SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE,
-					float(petlevel - (petlevel / 4)));
-			SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE,
-					float(petlevel + (petlevel / 4)));
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE,	float(petlevel - (petlevel / 4)));
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE,	float(petlevel + (petlevel / 4)));
 
-			//SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
-			break;
-		}
-		case HUNTER_PET:
-		{
-			SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32(sObjectMgr->GetXPForLevel(petlevel) * PET_XP_FACTOR));
-			//these formula may not be correct; however, it is designed to be close to what it should be
-			//this makes dps 0.5 of pets level
-			SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4))); //damage range is then petlevel / 2
-			//damage range is then petlevel / 2
-			SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+            //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
+            break;
+        }
+        case HUNTER_PET:
+        {
+            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32(sObjectMgr->GetXPForLevel(petlevel) * PET_XP_FACTOR));
+            //these formula may not be correct; however, it is designed to be close to what it should be
+            //this makes dps 0.5 of pets level
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4))); //damage range is then petlevel / 2
+            //damage range is then petlevel / 2
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
             //damage is increased afterwards as strength and pet scaling modify attack power
             SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.7f);  //  Bonus Armor (70% of player armor)
-			break;
-		}
-		default:
-		{
-			switch (GetEntry())
-			{
-				case 510: // mage Water Elemental
-				{
-					SetBonusDamage(
-							int32(
-									m_owner->SpellBaseDamageBonus(
-											SPELL_SCHOOL_MASK_FROST) * 0.33f));
-					break;
-				}
-				case 1964: //force of nature
-				{
-					if (!pInfo) SetCreateHealth(30 + 30 * petlevel);
-					float bonusDmg = m_owner->SpellBaseDamageBonus(
-							SPELL_SCHOOL_MASK_NATURE) * 0.15f;
-					SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE,
-							float(petlevel * 2.5f - (petlevel / 2) + bonusDmg));
-					SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE,
-							float(petlevel * 2.5f + (petlevel / 2) + bonusDmg));
-					break;
-				}
-				case 15352: //earth elemental 36213
-				{
-					if (!pInfo) SetCreateHealth(100 + 120 * petlevel);
-					SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE,
-							float(petlevel - (petlevel / 4)));
-					SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE,
-							float(petlevel + (petlevel / 4)));
-					break;
-				}
-				case 15438: //fire elemental
-				{
-					if (!pInfo)
-					{
-						SetCreateHealth(40 * petlevel);
-						SetCreateMana(28 + 10 * petlevel);
-					}
-					SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE,
-							float(petlevel * 4 - petlevel));
-					SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE,
-							float(petlevel * 4 + petlevel));
-					break;
-				}
-				case 19668: // Shadowfiend
-				{
-					if (!pInfo)
-					{
-						SetCreateMana(28 + 10 * petlevel);
-						SetCreateHealth(28 + 30 * petlevel);
-					}
-					int32 bonus_dmg = (int32(
-							m_owner->SpellBaseDamageBonus(
-									SPELL_SCHOOL_MASK_SHADOW) * 0.3f));
-					SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE,
-							float((petlevel * 4 - petlevel) + bonus_dmg));
-					SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE,
-							float((petlevel * 4 + petlevel) + bonus_dmg));
+            break;
+        }
+        default:
+        {
+            sLog->outString("dento def");
+            switch (GetEntry())
+            {
+                case 1964: //force of nature
+                {
+                    if (!pInfo) SetCreateHealth(30 + 30 * petlevel);
+                    float bonusDmg = m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_NATURE) * 0.15f;
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 2.5f - (petlevel / 2) + bonusDmg));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE,	float(petlevel * 2.5f + (petlevel / 2) + bonusDmg));
+                    break;
+                }
+                case 15352: //earth elemental 36213
+                {
+                    if (!pInfo) SetCreateHealth(100 + 120 * petlevel);
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                    break;
+                }
+                case 15438: //fire elemental
+                {
+                    if (!pInfo)
+                    {
+                        SetCreateHealth(40 * petlevel);
+                        SetCreateMana(28 + 10 * petlevel);
+                    }
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 4 - petlevel));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 4 + petlevel));
+                    break;
+                }
+                case 19668: // Shadowfiend
+                {
+                    if (!pInfo)
+                    {
+                        SetCreateMana(28 + 10 * petlevel);
+                        SetCreateHealth(28 + 30 * petlevel);
+                    }
+                    int32 bonus_dmg = (int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW) * 0.3f));
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + bonus_dmg));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + bonus_dmg));
 
-					break;
-				}
-				case 19833: //Snake Trap - Venomous Snake
-				{
-					SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE,
-							float((petlevel / 2) - 25));
-					SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE,
-							float((petlevel / 2) - 18));
-					break;
-				}
-				case 19921: //Snake Trap - Viper
-				{
-					SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE,
-							float(petlevel / 2 - 10));
-					SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE,
-							float(petlevel / 2));
-					break;
-				}
-				case 29264: // Feral Spirit
-				{
-					if (!pInfo) SetCreateHealth(30 * petlevel);
+                    break;
+                }
+                case 19833: //Snake Trap - Venomous Snake
+                {
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel / 2) - 25));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel / 2) - 18));
+                    break;
+                }
+                case 19921: //Snake Trap - Viper
+                {
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel / 2 - 10));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel / 2));
+                    break;
+                }
+                case 29264: // Feral Spirit
+                {
+                    if (!pInfo) SetCreateHealth(30 * petlevel);
 
-					float dmg_multiplier = 0.3f;
-					if (m_owner->GetAuraEffect(63271, 0)) // Glyph of Feral Spirit
-					dmg_multiplier = 0.6f;
+                    float dmg_multiplier = 0.3f;
+                    if (m_owner->GetAuraEffect(63271, 0)) // Glyph of Feral Spirit
+                    dmg_multiplier = 0.6f;
 
-					SetBonusDamage(
-							int32(
-									m_owner->GetTotalAttackPowerValue(
-											BASE_ATTACK) * dmg_multiplier));
+                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier));
 
-					// 14AP == 1dps, wolf's strike speed == 2s so dmg = basedmg + AP / 14 * 2
-					SetBaseWeaponDamage(
-							BASE_ATTACK,
-							MINDAMAGE,
-							float(
-									(petlevel * 4 - petlevel)
-											+ (m_owner->GetTotalAttackPowerValue(
-													BASE_ATTACK)
-													* dmg_multiplier * 2 / 14)));
-					SetBaseWeaponDamage(
-							BASE_ATTACK,
-							MAXDAMAGE,
-							float(
-									(petlevel * 4 + petlevel)
-											+ (m_owner->GetTotalAttackPowerValue(
-													BASE_ATTACK)
-													* dmg_multiplier * 2 / 14)));
+                    // 14AP == 1dps, wolf's strike speed == 2s so dmg = basedmg + AP / 14 * 2
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 2 / 14)));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 2 / 14)));
 
-					SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE,
-							float(m_owner->GetArmor()) * 0.35f); //  Bonus Armor (35% of player armor)
-					SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE,
-							float(m_owner->GetStat(STAT_STAMINA)) * 0.3f); //  Bonus Stamina (30% of player stamina)
-					if (!HasAura(58877)) //prevent apply twice for the 2 wolves
-					AddAura(58877, this); //Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
-					break;
-				}
-				case 31216: // Mirror Image
-				{
-					SetBonusDamage(
-							int32(
-									m_owner->SpellBaseDamageBonus(
-											SPELL_SCHOOL_MASK_FROST) * 0.33f));
-					SetDisplayId(m_owner->GetDisplayId());
-					if (!pInfo)
-					{
-						SetCreateMana(28 + 30 * petlevel);
-						SetCreateHealth(28 + 10 * petlevel);
-					}
-					break;
-				}
-				case 27829: // Ebon Gargoyle
-				{
-					if (!pInfo)
-					{
-						SetCreateMana(28 + 10 * petlevel);
-						SetCreateHealth(28 + 30 * petlevel);
-					}
-					// Impurity
-					float impurityMod = 1.0f;
-					if (Player * p_owner = m_owner->ToPlayer())
-					{
-						PlayerSpellMap playerSpells = p_owner->GetSpellMap();
-						for (PlayerSpellMap::const_iterator itr =
-								playerSpells.begin(); itr != playerSpells.end();
-								++itr)
-						{
-							if (itr->second->state == PLAYERSPELL_REMOVED
-									|| itr->second->disabled) continue;
-							switch (itr->first)
-							{
-								case 49220:
-								case 49633:
-								case 49635:
-								case 49636:
-								case 49638:
-								{
-									if (const SpellEntry *proto=sSpellStore.LookupEntry(itr->first)) AddPctN(
-											impurityMod,
-											SpellMgr::CalculateSpellEffectAmount(
-													proto, 0));
-								}
-									break;
-							}
-						}
-					}
-					SetBonusDamage(
-							int32(
-									m_owner->GetTotalAttackPowerValue(
-											BASE_ATTACK) * 0.5f * impurityMod));
-					SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE,
-							float(petlevel - (petlevel / 4)));
-					SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE,
-							float(petlevel + (petlevel / 4)));
-					break;
-				}
-				case 28017: // Bloodworms
-				{
-					SetCreateHealth(4 * petlevel);
-					SetBaseWeaponDamage(
-							BASE_ATTACK,
-							MINDAMAGE,
-							float(petlevel - 30 - (petlevel / 4))
-									+ m_owner->GetTotalAttackPowerValue(
-											BASE_ATTACK) * 0.006f);
-					SetBaseWeaponDamage(
-							BASE_ATTACK,
-							MAXDAMAGE,
-							float(petlevel - 30 + (petlevel / 4))
-									+ m_owner->GetTotalAttackPowerValue(
-											BASE_ATTACK) * 0.006f);
-				}
-			}
-			break;
-		}
-	}
+                    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f); //  Bonus Armor (35% of player armor)
+                    SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f); //  Bonus Stamina (30% of player stamina)
+                    if (!HasAura(58877)) //prevent apply twice for the 2 wolves
+                        AddAura(58877, this); //Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
+                    break;
+                }
+                case 31216: // Mirror Image
+                {
+                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+                    SetDisplayId(m_owner->GetDisplayId());
+                    if (!pInfo)
+                    {
+                        SetCreateMana(28 + 30 * petlevel);
+                        SetCreateHealth(28 + 10 * petlevel);
+                    }
+                    break;
+                }
+                case 27829: // Ebon Gargoyle
+                {
+                    if (!pInfo)
+                    {
+                        SetCreateMana(28 + 10 * petlevel);
+                        SetCreateHealth(28 + 30 * petlevel);
+                    }
+                    // Impurity
+                    float impurityMod = 1.0f;
+                    if (Player * p_owner = m_owner->ToPlayer())
+                    {
+                        PlayerSpellMap playerSpells = p_owner->GetSpellMap();
+                        for (PlayerSpellMap::const_iterator itr = playerSpells.begin(); itr != playerSpells.end(); ++itr)
+                        {
+                            if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled) continue;
+                            switch (itr->first)
+                            {
+                                case 49220:
+                                case 49633:
+                                case 49635:
+                                case 49636:
+                                case 49638:
+                                {
+                                    if (const SpellEntry *proto=sSpellStore.LookupEntry(itr->first)) 
+                                        AddPctN(impurityMod, SpellMgr::CalculateSpellEffectAmount(proto, 0));
+                                }
+                                    break;
+                            }
+                        }
+                    }
+                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f * impurityMod));
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                    break;
+                }
+                case 28017: // Bloodworms
+                {
+                    SetCreateHealth(4 * petlevel);
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - 30 - (petlevel / 4)) + m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f);
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)) + m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f);
+                }
+            }
+            break;
+        }
+    }
 
-	UpdateAllStats();
+    UpdateAllStats();
 
-	SetFullHealth();
-	SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
-	return true;
+    SetFullHealth();
+    SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+    return true;
 }
 
 bool Pet::HaveInDiet(ItemPrototype const* item) const

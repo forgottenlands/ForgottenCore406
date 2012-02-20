@@ -1390,133 +1390,101 @@ void Guardian::UpdateMaxPower(Powers power)
 
 void Guardian::UpdateAttackPowerAndDamage(bool ranged)
 {
-	if (ranged) return;
+    if (ranged) return;
 
-	float val = 0.0f;
-	float bonusAP = 0.0f;
-	UnitMods unitMod_pos = UNIT_MOD_ATTACK_POWER_POS;
-	UnitMods unitMod_neg = UNIT_MOD_ATTACK_POWER_NEG;
+    float val = 0.0f;
+    float bonusAP = 0.0f;
+    UnitMods unitMod_pos = UNIT_MOD_ATTACK_POWER_POS;
+    UnitMods unitMod_neg = UNIT_MOD_ATTACK_POWER_NEG;
 
-	if (GetEntry() == ENTRY_IMP) // imp's attack power
-	val = GetStat(STAT_STRENGTH) - 10.0f;
-	else val = 2 * GetStat(STAT_STRENGTH) - 20.0f;
+    if (GetEntry() == ENTRY_IMP) // imp's attack power
+        val = GetStat(STAT_STRENGTH) - 10.0f;
+    else 
+        val = 2 * GetStat(STAT_STRENGTH) - 20.0f;
 
-	Unit* owner = GetOwner();
-	if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-	{
-		if (isHunterPet()) //hunter pets benefit from owner's attack power
-		{
-			float mod = 1.0f; //Hunter contribution modifier
-			if (isPet())
-			{
-				PetSpellMap::const_iterator itr = ToPet()->m_spells.find(62758); //Wild Hunt rank 1
-				if (itr == ToPet()->m_spells.end()) itr =
-						ToPet()->m_spells.find(62762); //Wild Hunt rank 2
+    Unit* owner = GetOwner();
+    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (isHunterPet()) //hunter pets benefit from owner's attack power
+        {
+            float mod = 1.0f; //Hunter contribution modifier
+            if (isPet())
+            {
+                PetSpellMap::const_iterator itr = ToPet()->m_spells.find(62758); //Wild Hunt rank 1
+                if (itr == ToPet()->m_spells.end()) 
+                    itr = ToPet()->m_spells.find(62762); //Wild Hunt rank 2
 
-				if (itr != ToPet()->m_spells.end()) // If pet has Wild Hunt
-				{
-					SpellEntry const* sProto = sSpellStore.LookupEntry(
-							itr->first); // Then get the SpellProto and add the dummy effect value
-					mod += (SpellMgr::CalculateSpellEffectAmount(sProto, 1)
-							/ 100.0f);
-				}
-			}
+                if (itr != ToPet()->m_spells.end()) // If pet has Wild Hunt
+                {
+                    SpellEntry const* sProto = sSpellStore.LookupEntry(itr->first); // Then get the SpellProto and add the dummy effect value
+                    mod += (SpellMgr::CalculateSpellEffectAmount(sProto, 1) / 100.0f);
+                }
+            }
 
-			bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f
-					* mod;
-			SetBonusDamage(
-					int32(
-							owner->GetTotalAttackPowerValue(RANGED_ATTACK)
-									* 0.425f * mod));
-		}
-		else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
-		{
-			bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.22f;
-			SetBonusDamage(
-					int32(
-							owner->GetTotalAttackPowerValue(BASE_ATTACK)
-									* 0.1287f));
-		}
-		//demons benefit from warlocks shadow or fire damage
-		else if (isPet())
-		{
-			int32 fire = int32(
-					owner->GetUInt32Value(
-							PLAYER_FIELD_MOD_DAMAGE_DONE_POS
-									+ SPELL_SCHOOL_FIRE))
-					- owner->GetUInt32Value(
-							PLAYER_FIELD_MOD_DAMAGE_DONE_NEG
-									+ SPELL_SCHOOL_FIRE);
-			int32 shadow = int32(
-					owner->GetUInt32Value(
-							PLAYER_FIELD_MOD_DAMAGE_DONE_POS
-									+ SPELL_SCHOOL_SHADOW))
-					- owner->GetUInt32Value(
-							PLAYER_FIELD_MOD_DAMAGE_DONE_NEG
-									+ SPELL_SCHOOL_SHADOW);
-			int32 maximum = (fire > shadow) ? fire : shadow;
-			if (maximum < 0) maximum = 0;
-			SetBonusDamage(int32(maximum * 0.15f));
-			bonusAP = maximum * 0.57f;
-		}
-		//water elementals benefit from mage's frost damage
-		else if (GetEntry() == ENTRY_WATER_ELEMENTAL)
-		{
-			int32 frost = int32(
-					owner->GetUInt32Value(
-							PLAYER_FIELD_MOD_DAMAGE_DONE_POS
-									+ SPELL_SCHOOL_FROST))
-					- owner->GetUInt32Value(
-							PLAYER_FIELD_MOD_DAMAGE_DONE_NEG
-									+ SPELL_SCHOOL_FROST);
-			if (frost < 0) frost = 0;
-			SetBonusDamage(int32(frost * 0.4f));
-		}
-		else if (GetEntry() == ENTRY_INFERNAL)
-		{
-			int32 fire = int32(
-					owner->GetUInt32Value(
-							PLAYER_FIELD_MOD_DAMAGE_DONE_POS
-									+ SPELL_SCHOOL_FIRE))
-					- owner->GetUInt32Value(
-							PLAYER_FIELD_MOD_DAMAGE_DONE_NEG
-									+ SPELL_SCHOOL_FIRE);
-			if (fire < 0) fire = 0;
-			SetBonusDamage(int32(fire * 0.15f));
-			bonusAP = fire * 0.57f;
-		}
-	}
+            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod;
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.425f * mod));
+        }
+        else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
+        {
+            bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.22f;
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.1287f));
+        }
+        //demons benefit from warlocks shadow or fire damage
+        else if (isPet())
+        {
+            int32 fire = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+            int32 shadow = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
+            int32 maximum = (fire > shadow) ? fire : shadow;
+            if (maximum < 0)
+                maximum = 0;
+            SetBonusDamage(int32(maximum * 0.15f));
+            bonusAP = maximum * 0.57f;
+        }
 
-	if (bonusAP > 0)
-	{
-		SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, val + bonusAP);
-	}
-	else
-	{
-		SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, val);
-		SetModifierValue(UNIT_MOD_ATTACK_POWER_NEG, BASE_VALUE, -bonusAP);
-	}
+        //water elementals benefit from mage's frost damage
+        if (GetEntry() == ENTRY_WATER_ELEMENTAL)
+        {
+            int32 frost = m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST);
+            if (frost < 0) 
+                frost = 0;
+            SetBonusDamage(int32(frost * 0.4252f));
+        }
+        else if (GetEntry() == ENTRY_INFERNAL)
+        {
+            int32 fire = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+            if (fire < 0) 
+                fire = 0;
+            SetBonusDamage(int32(fire * 0.15f));
+            bonusAP = fire * 0.57f;
+        }
+    }
 
-	//in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
-	float base_attPower = (GetModifierValue(unitMod_pos, BASE_VALUE)
-			- GetModifierValue(unitMod_neg, BASE_VALUE))
-			* (GetModifierValue(unitMod_pos, BASE_PCT)
-					+ (1 - GetModifierValue(unitMod_neg, BASE_PCT)));
-	float attPowerMod_pos = GetModifierValue(unitMod_pos, TOTAL_VALUE);
-	float attPowerMod_neg = GetModifierValue(unitMod_neg, TOTAL_VALUE);
-	float attPowerMultiplier = (GetModifierValue(unitMod_pos, TOTAL_PCT)
-			+ (1 - GetModifierValue(unitMod_neg, TOTAL_PCT))) - 1.0f;
+    if (bonusAP > 0)
+    {
+        SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, val + bonusAP);
+    }
+    else
+    {
+        SetModifierValue(UNIT_MOD_ATTACK_POWER_POS, BASE_VALUE, val);
+        SetModifierValue(UNIT_MOD_ATTACK_POWER_NEG, BASE_VALUE, -bonusAP);
+    }
 
-	//UNIT_FIELD_(RANGED)_ATTACK_POWER field
-	SetInt32Value(UNIT_FIELD_ATTACK_POWER, (int32) base_attPower);
-	//UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
-	SetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_POS, (int32) attPowerMod_pos);
-	SetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_NEG, (int32) attPowerMod_neg);
-	//UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
-	SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);
+    //in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
+    float base_attPower = (GetModifierValue(unitMod_pos, BASE_VALUE) - GetModifierValue(unitMod_neg, BASE_VALUE)) * (GetModifierValue(unitMod_pos, BASE_PCT) + (1 - GetModifierValue(unitMod_neg, BASE_PCT)));
+    float attPowerMod_pos = GetModifierValue(unitMod_pos, TOTAL_VALUE);
+    float attPowerMod_neg = GetModifierValue(unitMod_neg, TOTAL_VALUE);
+    float attPowerMultiplier = (GetModifierValue(unitMod_pos, TOTAL_PCT) + (1 - GetModifierValue(unitMod_neg, TOTAL_PCT))) - 1.0f;
 
-	//automatically update weapon damage after attack power modification
-	UpdateDamagePhysical(BASE_ATTACK);
+    //UNIT_FIELD_(RANGED)_ATTACK_POWER field
+    SetInt32Value(UNIT_FIELD_ATTACK_POWER, (int32) base_attPower);
+    //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
+    SetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_POS, (int32) attPowerMod_pos);
+    SetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_NEG, (int32) attPowerMod_neg);
+    //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
+    SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);
+
+    //automatically update weapon damage after attack power modification
+    UpdateDamagePhysical(BASE_ATTACK);
 }
 
 void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
