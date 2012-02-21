@@ -7470,7 +7470,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     target = this;
                     triggered_spell_id = 31930;
                     basepoints0 = int32(target->GetCreateMana() * 0.030);
-       target->CastCustomSpell(target, 31930, &basepoints0, 0, 0, true, 0, triggeredByAura);
+                    target->CastCustomSpell(target, 31930, &basepoints0, 0, 0, true, 0, triggeredByAura);
                     break;
                 }
 					// Selfless Healer
@@ -7768,6 +7768,17 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                         {
                             caster->RemoveSpellCooldown(31935, true);
                         }
+                    }
+                    break;
+                // Hand of light (Paladin Retribution Mastery)
+                case 76672:
+                    if (procSpell->Id != 35395 && procSpell->Id != 53385 && procSpell->Id != 85256)
+                        return false;
+
+                    if (Player* caster = ToPlayer())
+                    {
+                        int32 bp0 = int32(damage * (16.8f + (2.1f *  caster->GetMasteryPoints())) / 100);
+                        caster->CastCustomSpell(target, 96172, &bp0, 0, 0, true, 0, 0, 0);
                     }
                     break;
 			}

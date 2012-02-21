@@ -25714,12 +25714,13 @@ void Player::SendToManyPets(Player *pl) {
 	ChatHandler(pl).PSendSysMessage(LANG_FAILED_NO_PLACE_FOR_PET);
 }
 
-void Player::RemoveOrAddMasterySpells() {
+void Player::RemoveOrAddMasterySpells() 
+{
 	if (!isAlive())
 		return;
 
-	if (!HasAuraType(SPELL_AURA_MASTERY)
-			|| GetTalentBranchSpec(GetActiveSpec()) == 0) {
+	if (!HasAuraType(SPELL_AURA_MASTERY) || GetTalentBranchSpec(GetActiveSpec()) == 0) 
+    {
 		if (HasAura(77514))
 			RemoveAurasDueToSpell(77514);
 
@@ -25746,7 +25747,12 @@ void Player::RemoveOrAddMasterySpells() {
 
 		if (HasAura(76857))
 			RemoveAurasDueToSpell(76857);
-	} else if (HasAuraType(SPELL_AURA_MASTERY)) {
+
+        if (HasAura(76672))
+            RemoveAurasDueToSpell(76672);
+	} 
+    else if (HasAuraType(SPELL_AURA_MASTERY)) 
+    {
 		if (GetTalentBranchSpec(GetActiveSpec()) == BS_DEATH_KNIGHT_FROST)
 			if (!HasAura(77514))
 				AddAura(77514, this);
@@ -25782,5 +25788,9 @@ void Player::RemoveOrAddMasterySpells() {
 		if (GetTalentBranchSpec(GetActiveSpec()) == BS_WARRIOR_PROTECTION)
 			if (!HasAura(76857))
 				AddAura(76857, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_PALADIN_RETRIBUTION)
+            if (!HasAura(76672))
+                AddAura(76672, this);
 	}
 }

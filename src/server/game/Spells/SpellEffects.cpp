@@ -5589,11 +5589,11 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
 				}
 			}
 		}
-		if (spell_bonus) spell_bonus = int32(spell_bonus * weapon_total_pct);
+		if (spell_bonus) 
+            spell_bonus = int32(spell_bonus * weapon_total_pct);
 	}
 
-	int32 weaponDamage = m_caster->CalculateDamage(m_attackType, normalized,
-			true);
+	int32 weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
 
 	// Sequence is important
 	for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
@@ -5614,17 +5614,17 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
 		}
 	}
 
-	if (spell_bonus) weaponDamage += spell_bonus;
+	if (spell_bonus) 
+        weaponDamage += spell_bonus;
 
-	if (totalDamagePercentMod != 1.0f) weaponDamage = int32(
-			weaponDamage * totalDamagePercentMod);
+	if (totalDamagePercentMod != 1.0f) 
+        weaponDamage = int32(weaponDamage * totalDamagePercentMod);
 
 	// prevent negative damage
 	uint32 eff_damage = uint32(weaponDamage > 0 ? weaponDamage : 0);
 
 	// Add melee damage bonuses (also check for negative)
-	m_caster->MeleeDamageBonus(unitTarget, &eff_damage, m_attackType,
-			m_spellInfo);
+	m_caster->MeleeDamageBonus(unitTarget, &eff_damage, m_attackType, m_spellInfo);
 	m_damage += eff_damage;
 }
 
