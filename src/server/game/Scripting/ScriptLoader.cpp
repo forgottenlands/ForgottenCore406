@@ -627,6 +627,7 @@ void AddSC_lost_city_of_the_tolvir();		//The Lost City of the Tol'vir
 void AddSC_instance_lost_city_of_the_tolvir();
 void AddSC_boss_lockmaw();
 void AddSC_boss_high_prophet_barim();
+void AddSC_boss_general_husam();
 void AddSC_boss_altairus();                  //Vortex Pinnacle
 void AddSC_boss_asaad();
 void AddSC_boss_grand_vizier_ertan();
@@ -1311,6 +1312,7 @@ void AddNorthrendScripts() {
 	AddSC_instance_lost_city_of_the_tolvir();
 	AddSC_boss_lockmaw();
 	AddSC_boss_high_prophet_barim();
+    AddSC_boss_general_husam();
     AddSC_boss_altairus();                  //Vortex Pinnacle
     AddSC_boss_asaad();
     AddSC_boss_grand_vizier_ertan();
