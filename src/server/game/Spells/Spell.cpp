@@ -2534,6 +2534,12 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
+                if (m_spellInfo->Id == 81942 || m_spellInfo->Id == 90040)
+                {
+                    radius = 4;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, false);
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
