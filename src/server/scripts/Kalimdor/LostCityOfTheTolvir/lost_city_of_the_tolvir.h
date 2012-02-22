@@ -77,8 +77,10 @@ enum CreatureIds {
 	NPC_WIND_TUNNEL = 48092,
 };
 
-enum GameObjectIds {
+enum GameObjectIds
+{
 	GO_TOLVIR_GRAVE = 207409,
+    GO_SIAMAT_PLATFORM = 205365,
 };
 
 #endif

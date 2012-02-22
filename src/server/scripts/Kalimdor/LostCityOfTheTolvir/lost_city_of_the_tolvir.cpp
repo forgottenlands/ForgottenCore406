@@ -858,8 +858,74 @@ public:
 		}
 	};
 };
+/*
+class npc_wind_tunnel: public CreatureScript 
+{
+public:
+    npc_wind_tunnel() : CreatureScript("npc_pygmy_scout") { }
 
-void AddSC_lost_city_of_the_tolvir() {
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (!player)
+            return false;
+
+        player->AddAura(130, player);
+        player->TeleportTo(755, -10939.2f, -1355.87f, 38.0f, 4.59f, 0);
+        return true;
+    }
+};*/
+
+class npc_wind_tunnel : public CreatureScript
+{
+    public:
+
+        npc_wind_tunnel() : CreatureScript("npc_wind_tunnel") { }
+
+        struct npc_wind_tunnelAI : public ScriptedAI
+        {
+            npc_wind_tunnelAI(Creature* creature) : ScriptedAI(creature)
+            {
+                m_pInstance = (InstanceScript*)creature->GetInstanceScript();
+            }
+
+            InstanceScript* m_pInstance;
+
+            void Reset()
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            }
+
+            void AttackStart(Unit* /*who*/) {}
+        };
+
+        bool OnGossipHello(Player* player, Creature* creature)
+        {
+            InstanceScript* instanceScript = creature->GetInstanceScript();
+            if (!instanceScript)
+                return true;
+
+            if (player->isInCombat() || instanceScript->IsEncounterInProgress())
+                return true;
+            
+            player->AddAura(130, player);
+            player->TeleportTo(755, -10939.2f, -1355.87f, 38.0f, 4.59f, 0);
+
+            return true;
+        }
+
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+        {
+            return true;
+        }
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_wind_tunnelAI(creature);
+        }
+};
+
+void AddSC_lost_city_of_the_tolvir() 
+{
 	new npc_neferset_darkcaster();
 	new npc_neferset_plaguebringer();
 	new npc_neferset_theurgist();
@@ -873,4 +939,5 @@ void AddSC_lost_city_of_the_tolvir() {
 	new npc_pygmy_brute();
 	new npc_pygmy_firebreather();
 	new npc_pygmy_scout();
+    new npc_wind_tunnel();
 }

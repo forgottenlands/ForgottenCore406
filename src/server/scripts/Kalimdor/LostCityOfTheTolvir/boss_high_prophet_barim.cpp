@@ -93,7 +93,15 @@ public:
         {
             summons.DespawnAll();
             if (pInstance)
+            {
                 pInstance->SetData(DATA_HIGH_PROPHET_BARIM_EVENT, DONE);
+
+                if (pInstance->GetData(DATA_LOCKMAW) == DONE)
+                {
+                    if (GameObject* platform = me->FindNearestGameObject(GO_SIAMAT_PLATFORM, 5000.0f))
+                        platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+                }
+            }
         }
 
         void EnterCombat(Unit* who) 
