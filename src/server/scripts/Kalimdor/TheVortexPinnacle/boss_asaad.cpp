@@ -79,7 +79,7 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
                         me->CastSpell(target, SPELL_CHAIN, true);
                     
-                     events.ScheduleEvent(EVENT_CHAIN, 2050, 0, 0);
+                     events.ScheduleEvent(EVENT_CHAIN, 3200, 0, 0);
                      break;
                 }
             }
