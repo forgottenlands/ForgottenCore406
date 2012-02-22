@@ -20,129 +20,261 @@
 #include"ScriptPCH.h"
 #include"WorldPacket.h"
 #include"lost_city_of_the_tolvir.h"
-#include"ScriptMgr.h"
-#include"ScriptedCreature.h"
-#include"SpellScript.h"
-#include"SpellAuraEffects.h"
 
-enum Spells {
-	SPELL_DUST_FLAIL = 81642,
-	SPELL_SCENT_OF_BLOOD = 81690,
-	H_SPELL_SCENT_OF_BLOOD = 89998,
-	SPELL_VENOMOUS_RAGE = 81706,
-	SPELL_VISCOUS_POISON = 81630,
-	H_SPELL_VISCOUS_POISON = 90004,
+enum Spells 
+{
+    SPELL_DUST_FLAIL = 81642,
+    SPELL_SCENT_OF_BLOOD = 81690,
+    SPELL_VENOMOUS_RAGE = 81706,
+    SPELL_VISCOUS_POISON = 81630,
 };
 
-enum Events {
-	EVENT_DUST_FLAIL = 1,
-	EVENT_SCENT_OF_BLOOD = 2,
-	EVENT_VENOMOUS_RAGE = 3,
-	EVENT_VISCOUS_POISON = 4,
+enum Events 
+{
+    EVENT_DUST_FLAIL = 1,
+    EVENT_SCENT_OF_BLOOD = 2,
+    EVENT_VENOMOUS_RAGE = 3,
+    EVENT_VISCOUS_POISON = 4,
 };
 
-enum SummonIds {
-	NPC_FRENZIED_CROCOLISK = 43658,
+enum SummonIds 
+{
+    NPC_FRENZIED_CROCOLISK = 43658,
 };
 
-const Position SummonLocations[4] = {
-//Frenzied Crocolisks
-		{ -11033.29f, -1674.57f, -0.56f, 1.09f }, { -11029.84f, -1673.09f,
-				-0.37f, 2.33f }, { -11007.25f, -1666.37f, -0.23f, 2.46f }, {
-				-11006.83f, -1666.85f, -0.25f, 2.23f }, };
+const Position SummonLocations[4] = 
+{
+    //Frenzied Crocolisks
+    {-11033.29f, -1674.57f, -0.56f, 1.09f},
+    {-11003.77f, -1668.24f, -0.35f, 2.41f}, 
+    {-11056.49f, -1606.93f, -0.31f, 5.35f}, 
+    {-11084.05f, -1630.60f, -0.50f, 5.98f},
+};
 
-class boss_lockmaw: public CreatureScript {
+class boss_lockmaw: public CreatureScript 
+{
 public:
-	boss_lockmaw() :
-			CreatureScript("boss_lockmaw") {
-	}
+    boss_lockmaw() : CreatureScript("boss_lockmaw") { }
 
-	CreatureAI* GetAI(Creature* pCreature) const {
-		return new boss_lockmawAI(pCreature);
-	}
-	struct boss_lockmawAI: public ScriptedAI {
-		boss_lockmawAI(Creature* pCreature) :
-				ScriptedAI(pCreature), Summons(me) {
-			pInstance = pCreature->GetInstanceScript();
-		}
+    CreatureAI* GetAI(Creature* pCreature) const 
+    {
+        return new boss_lockmawAI(pCreature);
+    }
 
-		InstanceScript* pInstance;
-		EventMap events;
-		SummonList Summons;
-		bool check_in;
+    struct boss_lockmawAI: public BossAI 
+    {
+        boss_lockmawAI(Creature* pCreature) : BossAI(pCreature, DATA_LOCKMAW_EVENT), Summons(me)
+        {
+            pInstance = pCreature->GetInstanceScript();
+        }
 
-		void Reset() {
-			events.Reset();
-			Summons.DespawnAll();
+        InstanceScript* pInstance;
+        EventMap events;
+        SummonList Summons;
 
-			if (pInstance
-					&& (pInstance->GetData(DATA_LOCKMAW_EVENT) != DONE
-							&& !check_in))
-				pInstance->SetData(DATA_LOCKMAW_EVENT, NOT_STARTED);
+        void Reset() 
+        {
+            events.Reset();
+            Summons.DespawnAll();
 
-			check_in = false;
-		}
+            if (pInstance)
+                pInstance->SetData(DATA_LOCKMAW_EVENT, NOT_STARTED);
+        }
 
-		void JustDied(Unit* /*Kill*/) {
-			Summons.DespawnAll();
-			if (pInstance)
-				pInstance->SetData(DATA_LOCKMAW_EVENT, DONE);
-		}
+        void JustDied(Unit* /*Killer*/) 
+        {
+            Summons.DespawnAll();
+            if (pInstance)
+                pInstance->SetData(DATA_LOCKMAW_EVENT, DONE);
 
-		void EnterCombat(Unit* /*Ent*/) {
-			if (pInstance)
-				pInstance->SetData(DATA_LOCKMAW_EVENT, IN_PROGRESS);
+            if (me->GetMap()->IsHeroic())
+            {
+                if (Creature* augh = me->FindNearestCreature(BOSS_AUGH, 5000.0f, true))
+                {
+                    augh->AI()->DoAction(ACTION_START_COMBAT);  
+                }
+            }
+        }
 
-			DoZoneInCombat();
-		}
+        void JustSummoned(Creature* summoned)
+        {
+            Summons.Summon(summoned);
+        }
 
-		void UpdateAI(const uint32 uiDiff) {
-			if (!UpdateVictim()) /* No target to kill */
-				return;
+        void EnterCombat(Unit* /*who*/) 
+        {
+            if (pInstance)
+                pInstance->SetData(DATA_LOCKMAW_EVENT, IN_PROGRESS);
 
-			events.Update(uiDiff);
+            events.ScheduleEvent(EVENT_DUST_FLAIL, urand(6000, 10000));
+            events.ScheduleEvent(EVENT_VISCOUS_POISON, urand(6000, 10000));
+            events.ScheduleEvent(EVENT_SCENT_OF_BLOOD, urand(12000, 19000));
 
-			if (me->HasUnitState(UNIT_STAT_CASTING))
-				return;
+            DoZoneInCombat();
+        }
 
-			while (uint32 eventId = events.ExecuteEvent()) {
-				switch (eventId) {
-				case EVENT_DUST_FLAIL:
-					DoCast(me->getVictim(), SPELL_DUST_FLAIL);
-					events.ScheduleEvent(EVENT_DUST_FLAIL, urand(6000, 10000));
-					return;
-				case EVENT_VISCOUS_POISON:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
-						DoCast(me->getVictim(), SPELL_VISCOUS_POISON);
-					events.ScheduleEvent(EVENT_VISCOUS_POISON, 2000);
-					return;
-				case EVENT_SCENT_OF_BLOOD:
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
-						DoCast(me->getVictim(), SPELL_SCENT_OF_BLOOD);
-					for (uint8 i = 0; i < 4; i++) {
-						Creature* Crocolisk = me->SummonCreature(
-								NPC_FRENZIED_CROCOLISK, SummonLocations[i],
-								TEMPSUMMON_CORPSE_DESPAWN);
-						Crocolisk->AddThreat(me->getVictim(), 0.0f);
-						DoZoneInCombat(Crocolisk);
-					}
-					events.ScheduleEvent(EVENT_SCENT_OF_BLOOD, 6000);
-					return;
-				case EVENT_VENOMOUS_RAGE:
-					if (me->GetHealthPct() < 30)
-						DoCast(me, SPELL_VENOMOUS_RAGE);
-					events.ScheduleEvent(EVENT_VENOMOUS_RAGE, 1000);
-					return;
-				default:
-					break;
-				}
-			}
+        void UpdateAI(const uint32 uiDiff) 
+        {
+            if (!UpdateVictim())
+                return;
 
-			DoMeleeAttackIfReady();
-		}
-	};
+            if (me->HasUnitState(UNIT_STAT_CASTING))
+                return;
+
+            if (me->GetHealthPct() < 30)
+            {
+                if (!me->HasAura(SPELL_VENOMOUS_RAGE))
+                    DoCast(me, SPELL_VENOMOUS_RAGE);
+            }
+
+            events.Update(uiDiff);
+
+            while (uint32 eventId = events.ExecuteEvent()) 
+            {
+                switch (eventId) 
+                {
+                    case EVENT_DUST_FLAIL:
+                        me->CastSpell(me, SPELL_DUST_FLAIL, true);
+                        events.ScheduleEvent(EVENT_DUST_FLAIL, urand(6000, 10000));
+                        break;
+                    case EVENT_VISCOUS_POISON:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            DoCast(target, SPELL_VISCOUS_POISON);
+                        events.ScheduleEvent(EVENT_VISCOUS_POISON, urand(6000, 10000));
+                        break;
+                    case EVENT_SCENT_OF_BLOOD:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                        {
+                            DoCast(target, SPELL_SCENT_OF_BLOOD);
+                            for (uint8 i = 0; i < 4; i++)
+                            {
+                                if (Creature* Crocolisk = me->SummonCreature(NPC_FRENZIED_CROCOLISK, SummonLocations[i], TEMPSUMMON_CORPSE_DESPAWN))
+                                {
+                                    Crocolisk->AddThreat(target, 10.0f);
+                                    DoZoneInCombat(Crocolisk);
+                                }
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_SCENT_OF_BLOOD, urand(12000, 19000));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
 };
 
-void AddSC_boss_lockmaw() {
-	new boss_lockmaw();
+enum aughSpells 
+{
+    SPELL_BLADESTORM                              = 91408,
+    SPELL_PARALYTIC                               = 89989,
+    SPELL_DRAGON_BREATH                           = 90026,
+    SPELL_FRENZY                                  = 91415,
+};
+
+enum aughEvents 
+{
+    EVENT_BLADE = 1,
+    EVENT_PARALYTIC_BLOW,
+    EVENT_DRAGON_BREATH,
+};
+
+class boss_augh: public CreatureScript 
+{
+public:
+    boss_augh() : CreatureScript("boss_augh") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const 
+    {
+        return new boss_aughAI(pCreature);
+    }
+    struct boss_aughAI: public ScriptedAI 
+    {
+        boss_aughAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            pInstance = pCreature->GetInstanceScript();
+        }
+
+        InstanceScript* pInstance;
+        EventMap events;
+
+        void Reset() 
+        {
+            events.Reset();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
+            if (Creature* lockmaw = me->FindNearestCreature(BOSS_LOCKMAW, 5000.0f, false))
+            {
+                if (!lockmaw->isAlive())
+                    lockmaw->Respawn(true);
+            }
+        }
+
+        void EnterCombat(Unit* /*who*/) 
+        {
+            DoZoneInCombat();
+        }
+
+        void DoAction(const int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_START_COMBAT:
+                    DoZoneInCombat(me);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    events.ScheduleEvent(EVENT_BLADE, urand(6000, 9000));
+                    events.ScheduleEvent(EVENT_PARALYTIC_BLOW, urand(6000, 10000));
+                    if (me->GetMap()->IsHeroic())
+                        events.ScheduleEvent(EVENT_DRAGON_BREATH, urand(6000, 15000));
+                    break;
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) 
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->HasUnitState(UNIT_STAT_CASTING))
+                return;
+
+            if (me->GetMap()->IsHeroic() && me->GetHealthPct() < 30 && !me->HasAura(SPELL_FRENZY))
+                DoCast(me, SPELL_FRENZY);
+
+            events.Update(uiDiff);
+
+            while (uint32 eventId = events.ExecuteEvent()) 
+            {
+                switch (eventId) 
+                {
+                    case EVENT_BLADE:
+                        DoCastVictim(SPELL_BLADESTORM);
+                        events.ScheduleEvent(EVENT_BLADE, urand(6000, 9000));
+                        break;
+                    case EVENT_PARALYTIC_BLOW:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                            me->AddAura(SPELL_PARALYTIC, target);
+
+                        events.ScheduleEvent(EVENT_PARALYTIC_BLOW, urand(6000, 10000));
+                        break;
+                    case EVENT_DRAGON_BREATH:
+                        DoCastVictim(SPELL_DRAGON_BREATH);
+                        events.ScheduleEvent(EVENT_DRAGON_BREATH, urand(6000, 15000));
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
+void AddSC_boss_lockmaw() 
+{
+    new boss_lockmaw();
+    new boss_augh();
 }

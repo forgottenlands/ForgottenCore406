@@ -37,6 +37,11 @@ enum Data64 {
 	DATA_SIAMAT,
 };
 
+enum sharedAction
+{
+    ACTION_START_COMBAT = 1,
+};
+
 enum CreatureIds {
 	// Dungeon Bosses
 
