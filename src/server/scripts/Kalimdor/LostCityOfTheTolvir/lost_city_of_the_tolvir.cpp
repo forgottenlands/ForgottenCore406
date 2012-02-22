@@ -741,12 +741,13 @@ public:
 			while (uint32 eventId = events.ExecuteEvent()) {
 				switch (eventId) {
 				case EVENT_IMPALE:
-					DoCast(me->getVictim(), SPELL_IMPALE);
-					events.RescheduleEvent(EVENT_IMPALE, 1000);
+                    if (!me->getVictim()->HasAura(SPELL_IMPALE))
+					    DoCast(me->getVictim(), SPELL_IMPALE);
+					events.RescheduleEvent(EVENT_IMPALE, 6000);
 					return;
 				case EVENT_SHOCKWAVE:
 					DoCast(me->getVictim(), SPELL_SHOCKWAVE);
-					events.RescheduleEvent(EVENT_SHOCKWAVE, 4000);
+					events.RescheduleEvent(EVENT_SHOCKWAVE, urand(7000, 10000));
 					return;
 				}
 			}
