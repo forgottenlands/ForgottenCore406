@@ -75,6 +75,7 @@ enum CreatureIds {
 
 	NPC_CAPTAIN_HADAN = 50038,
 	NPC_WIND_TUNNEL = 48092,
+    NPC_CLOUD_BURST = 44541,
 };
 
 enum GameObjectIds
