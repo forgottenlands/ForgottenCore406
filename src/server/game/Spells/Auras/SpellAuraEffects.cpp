@@ -1569,6 +1569,17 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 if (GetSpellProto()->Id == 1978)
                     damage = int32((GetBase()->GetCaster()->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4f + (damage * 15 / 3)) / GetBase()->GetEffect(0)->GetTotalTicks());
 
+                // Fiery Apocalypse (Warlock Destrucion Mastery) DOTs
+                if (GetBase()->GetCaster()->HasAuraType(SPELL_AURA_MASTERY) && GetBase()->GetSpellProto()->SchoolMask == SPELL_SCHOOL_MASK_FIRE && GetBase()->GetCaster()->getClass() == CLASS_WARLOCK)
+                {
+                    if (GetBase()->GetCaster()->ToPlayer()->GetTalentBranchSpec(GetBase()->GetCaster()->ToPlayer()->GetActiveSpec()) == BS_WARLOCK_DESTRUCTION)
+                    {
+                        // Increase fire damage by 1.35*Mastery points
+                        uint32 pct = uint32(10.8f + 1.35f * GetBase()->GetCaster()->ToPlayer()->GetMasteryPoints());
+                        AddPctN(damage, pct);
+                    }
+                }
+
                 if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
                 {
                     switch (GetId()) 

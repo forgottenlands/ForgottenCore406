@@ -722,17 +722,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster->CastSavedSoulSwapDots(unitTarget))
                         m_caster->RemoveAura(86211);
                 }
-                
-                // Fiery Apocalypse (Warlock Destrucion Mastery)
-                if (m_caster->HasAuraType(SPELL_AURA_MASTERY) && m_spellInfo->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
-                {
-                    if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_WARLOCK_DESTRUCTION)
-                    {
-                        // Increase fire damage by 1.35*Mastery points
-                        uint32 pct = uint32(1.35f * m_caster->ToPlayer()->GetMasteryPoints());
-                        AddPctN(damage, pct);
-                    }
-                }
 				break;
 			}
 			case SPELLFAMILY_PRIEST:
@@ -1117,9 +1106,21 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             m_caster->RemoveAura(77616);
         }
 
-		if (m_originalCaster && damage > 0 && apply_direct_bonus) damage =
-				m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo,
-						effIndex, (uint32) damage, SPELL_DIRECT_DAMAGE);
+		if (m_originalCaster && damage > 0 && apply_direct_bonus) 
+            damage = m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo, effIndex, (uint32) damage, SPELL_DIRECT_DAMAGE);
+
+        // Effects that should be applied after spellpower calculation
+
+        // Fiery Apocalypse (Warlock Destrucion Mastery)
+        if (m_caster->HasAuraType(SPELL_AURA_MASTERY) && m_spellInfo->SchoolMask == SPELL_SCHOOL_MASK_FIRE && m_caster->getClass() == CLASS_WARLOCK)
+        {
+            if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_WARLOCK_DESTRUCTION)
+            {
+                // Increase fire damage by 1.35*Mastery points
+                uint32 pct = uint32(10.8f + 1.35f * m_caster->ToPlayer()->GetMasteryPoints());
+                AddPctN(damage, pct);
+            }
+        }
 
 		m_damage += damage;
 	}
