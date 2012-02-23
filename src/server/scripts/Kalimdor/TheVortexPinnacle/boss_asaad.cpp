@@ -90,6 +90,20 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             instance->SetData(DATA_ASAAD_EVENT, DONE);
+
+            if (me->GetMap()->IsHeroic())
+            {
+                if (!me->GetMap()->GetPlayers().isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
+                    {
+                        if (i->getSource()->isAlive())
+                        {
+                            i->getSource()->KilledMonsterCredit(43876, 0);
+                        }
+                    }
+                }
+            }
         }
 
     };

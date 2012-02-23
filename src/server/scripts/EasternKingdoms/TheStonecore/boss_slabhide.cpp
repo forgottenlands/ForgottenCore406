@@ -122,6 +122,20 @@ class boss_slabhide: public CreatureScript
         void JustDied(Unit* killer)
         {
             summons.DespawnAll();
+
+            if (me->GetMap()->IsHeroic())
+            {
+                if (!me->GetMap()->GetPlayers().isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
+                    {
+                        if (i->getSource()->isAlive())
+                        {
+                            i->getSource()->KilledMonsterCredit(49538, 0);
+                        }
+                    }
+                }
+            }
         }
 
         void UpdateAI(const uint32 diff)
