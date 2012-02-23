@@ -1579,6 +1579,16 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         AddPctN(damage, pct);
                     }
                 }
+                
+                // Potent Afflictions (Warlock Afflyction Mastery)
+                if (GetBase()->GetCaster()->HasAuraType(SPELL_AURA_MASTERY) && GetBase()->GetSpellProto()->SchoolMask == SPELL_SCHOOL_MASK_SHADOW && GetBase()->GetCaster()->getClass() == CLASS_WARLOCK)
+                {
+                    if (GetBase()->GetCaster()->ToPlayer()->GetTalentBranchSpec(GetBase()->GetCaster()->ToPlayer()->GetActiveSpec()) == BS_WARLOCK_AFFLICTION)
+                    {
+                        uint32 pct = uint32(13.0f + 1.63f * GetBase()->GetCaster()->ToPlayer()->GetMasteryPoints());
+                        AddPctN(damage, pct);
+                    }
+                }
 
                 if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
                 {
