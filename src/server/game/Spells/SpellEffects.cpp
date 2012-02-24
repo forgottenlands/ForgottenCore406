@@ -722,6 +722,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster->CastSavedSoulSwapDots(unitTarget))
                         m_caster->RemoveAura(86211);
                 }
+
+                // Searing pain with soulburn
+                if (m_spellInfo->Id == 5676 && m_caster->HasAura(74434))
+                {
+                    m_caster->RemoveAura(74434);
+                    m_caster->AddAura(79440, m_caster);
+                }
 				break;
 			}
 			case SPELLFAMILY_PRIEST:

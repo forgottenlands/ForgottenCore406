@@ -4539,6 +4539,11 @@ void SpellMgr::LoadSpellCustomAttr() {
 			break;
 		case 74434: // Soulburn
 			spellInfo->procCharges = 1;
+            spellInfo->Effect[2] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectBasePoints[2] = 100;
+            spellInfo->EffectApplyAuraName[2] = SPELL_AURA_ADD_FLAT_MODIFIER;
+            spellInfo->EffectMiscValue[2] = SPELLMOD_CRITICAL_CHANCE;
+            spellInfo->EffectSpellClassMask[2][2] |= 0x00000100;
 			count++;
 			break;
 		case 81008: //Quake - Crystalspawn Giant
