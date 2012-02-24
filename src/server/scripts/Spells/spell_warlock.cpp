@@ -580,13 +580,12 @@ public:
 class spell_warl_soul_link : public SpellScriptLoader
 {
 public:
-    spell_warl_soul_link() : SpellScriptLoader("spell_warl_soul_link") {
-    }
+    spell_warl_soul_link() : SpellScriptLoader("spell_warl_soul_link")
+    { }
 
     class spell_warl_soul_link_SpellScript: public SpellScript 
     {
         PrepareSpellScript(spell_warl_soul_link_SpellScript)
-        static uint32 const iTypes[8][3];
 
         void HandleScriptEffect(SpellEffIndex effIndex) 
         {
@@ -608,6 +607,41 @@ public:
     }
 };
 
+// soulburn demonic circle teleport
+class spell_warl_demonic_circle_teleport : public SpellScriptLoader
+{
+public:
+    spell_warl_demonic_circle_teleport() : SpellScriptLoader("spell_warl_demonic_circle_teleport") {
+    }
+
+    class spell_warl_demonic_circle_teleport_SpellScript: public SpellScript 
+    {
+        PrepareSpellScript(spell_warl_demonic_circle_teleport_SpellScript)
+
+        void HandleScriptEffect(SpellEffIndex effIndex) 
+        {
+            if (Unit* caster = GetHitUnit()) 
+            {
+                if (caster->HasAura(74434))
+                {
+                    caster->CastSpell(caster, 79438, true);
+                    caster->RemoveAura(74434);
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_warl_demonic_circle_teleport_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_demonic_circle_teleport_SpellScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
 	new spell_warl_demonic_empowerment();
@@ -624,4 +658,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_fel_flame();
     new spell_shadow_ward();
     new spell_warl_soul_link();
+    new spell_warl_demonic_circle_teleport();
 }
