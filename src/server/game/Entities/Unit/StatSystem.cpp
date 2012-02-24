@@ -1432,12 +1432,12 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
         //demons benefit from warlocks shadow or fire damage
         else if (isPet())
         {
-            int32 fire = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
-            int32 shadow = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
+            int32 fire = m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE);
+            int32 shadow = m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW);
             int32 maximum = (fire > shadow) ? fire : shadow;
             if (maximum < 0)
                 maximum = 0;
-            SetBonusDamage(int32(maximum * 0.15f));
+            SetBonusDamage(int32(maximum * 0.329f));
             bonusAP = maximum * 0.57f;
         }
 
