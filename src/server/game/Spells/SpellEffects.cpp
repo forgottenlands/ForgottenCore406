@@ -6864,17 +6864,13 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 		}
 		case SPELLFAMILY_WARLOCK:
 		{
-			case 6201:
-			DoCreateItem(effIndex, 19005);
-			break;
-			case 693:
-			DoCreateItem(effIndex, 5232);
-			break;
 			if (m_spellInfo->Id == 77801) // Demon Soul
 			{
 				if (m_caster)
 				{
-					if (!unitTarget || !unitTarget->isAlive()) return;
+					if (!unitTarget || !unitTarget->isAlive()) 
+                        return;
+                    sLog->outString("Unitt %d %s", unitTarget->GetEntry(), unitTarget->GetName());
 					if (unitTarget->GetEntry() == 416) // Summoned Imp
 					m_caster->CastSpell(m_caster, 79459, true);
 					if (unitTarget->GetEntry() == 1860) // Summoned Voidwalker
