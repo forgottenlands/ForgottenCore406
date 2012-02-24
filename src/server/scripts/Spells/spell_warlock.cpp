@@ -576,6 +576,38 @@ public:
 	}
 };
 
+// soul link
+class spell_warl_soul_link : public SpellScriptLoader
+{
+public:
+    spell_warl_soul_link() : SpellScriptLoader("spell_warl_soul_link") {
+    }
+
+    class spell_warl_soul_link_SpellScript: public SpellScript 
+    {
+        PrepareSpellScript(spell_warl_soul_link_SpellScript)
+        static uint32 const iTypes[8][3];
+
+        void HandleScriptEffect(SpellEffIndex effIndex) 
+        {
+            if (Unit* pet = GetHitUnit()) 
+            {
+                pet->CastSpell(pet, 25228, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_warl_soul_link_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_soul_link_SpellScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
 	new spell_warl_demonic_empowerment();
@@ -591,4 +623,5 @@ void AddSC_warlock_spell_scripts()
     new spell_soul_swap_exhale();
     new spell_warl_fel_flame();
     new spell_shadow_ward();
+    new spell_warl_soul_link();
 }

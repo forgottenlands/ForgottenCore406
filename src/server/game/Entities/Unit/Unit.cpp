@@ -1874,8 +1874,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask,
 		if (level == BOSS_LEVEL) resistanceConstant = BOSS_RESISTANCE_CONSTANT;
 		else resistanceConstant = level * 5.0f;
 
-		float averageResist = victimResistance
-				/ (victimResistance + resistanceConstant);
+		float averageResist = victimResistance / (victimResistance + resistanceConstant);
 		float discreteResistProbability [11];
 		for (uint32 i = 0; i < 11; ++i)
 		{
@@ -1932,23 +1931,20 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask,
 				(*itr)->GetAmount());
 	}
 
-	AuraEffectList const & AbsIgnoreAurasB = GetAuraEffectsByType(
-			SPELL_AURA_MOD_TARGET_ABILITY_ABSORB_SCHOOL);
+	AuraEffectList const & AbsIgnoreAurasB = GetAuraEffectsByType(SPELL_AURA_MOD_TARGET_ABILITY_ABSORB_SCHOOL);
 	for (AuraEffectList::const_iterator itr = AbsIgnoreAurasB.begin();
 			itr != AbsIgnoreAurasB.end(); ++itr)
 	{
 		if (!((*itr)->GetMiscValue() & schoolMask)) continue;
 
 		if (((*itr)->GetAmount() > auraAbsorbMod)
-				&& (*itr)->IsAffectedOnSpell(spellInfo)) auraAbsorbMod = float(
-				(*itr)->GetAmount());
+				&& (*itr)->IsAffectedOnSpell(spellInfo)) auraAbsorbMod = float((*itr)->GetAmount());
 	}
 	RoundToInterval(auraAbsorbMod, 0.0f, 100.0f);
 
 	// We're going to call functions which can modify content of the list during iteration over it's elements
 	// Let's copy the list so we can prevent iterator invalidation
-	AuraEffectList vSchoolAbsorbCopy(
-			pVictim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB));
+	AuraEffectList vSchoolAbsorbCopy(pVictim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_ABSORB));
 	vSchoolAbsorbCopy.sort(Trinity::AbsorbAuraOrderPred());
 
 	// absorb without mana cost
@@ -1983,8 +1979,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask,
 		AddPctF(currentAbsorb, -auraAbsorbMod);
 
 		// absorb must be smaller than the damage itself
-		currentAbsorb = RoundToInterval(currentAbsorb, 0,
-				int32(dmgInfo.GetDamage()));
+		currentAbsorb = RoundToInterval(currentAbsorb, 0, int32(dmgInfo.GetDamage()));
 
 		dmgInfo.AbsorbDamage(currentAbsorb);
 
@@ -2115,42 +2110,42 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask,
 
 		// We're going to call functions which can modify content of the list during iteration over it's elements
 		// Let's copy the list so we can prevent iterator invalidation
-		AuraEffectList vSplitDamagePctCopy(
-				pVictim->GetAuraEffectsByType(SPELL_AURA_SPLIT_DAMAGE_PCT));
-		for (AuraEffectList::iterator itr = vSplitDamagePctCopy.begin(), next;
-				(itr != vSplitDamagePctCopy.end()) && (dmgInfo.GetDamage() > 0);
-				++itr)
+		AuraEffectList vSplitDamagePctCopy(pVictim->GetAuraEffectsByType(SPELL_AURA_SPLIT_DAMAGE_PCT));
+		for (AuraEffectList::iterator itr = vSplitDamagePctCopy.begin(), next; (itr != vSplitDamagePctCopy.end()) && (dmgInfo.GetDamage() > 0); ++itr)
 		{
 			// Check if aura was removed during iteration - we don't need to work on such auras
-			if (!((*itr)->GetBase()->IsAppliedOnTarget(pVictim->GetGUID()))) continue;
+			if (!((*itr)->GetBase()->IsAppliedOnTarget(pVictim->GetGUID()))) 
+                continue;
 			// check damage school mask
-			if (!((*itr)->GetMiscValue() & schoolMask)) continue;
+			if (!((*itr)->GetMiscValue() & schoolMask)) 
+                continue;
 
 			// Damage can be splitted only if aura has an alive caster
 			Unit * caster = (*itr)->GetCaster();
-			if (!caster || (caster == pVictim) || !caster->IsInWorld()
-					|| !caster->isAlive()) continue;
 
-			int32 splitDamage = CalculatePctN(dmgInfo.GetDamage(),
-					(*itr)->GetAmount());
+            // If there isn't caster check if caster should be the pet. ex warlock soul link
+            if (!caster && pVictim && (*itr)->GetBase()->GetSpellProto()->Effect[(*itr)->GetEffIndex()] == SPELL_EFFECT_APPLY_AREA_AURA_OWNER)
+                caster = ObjectAccessor::GetPet(*pVictim, pVictim->GetPetGUID())->ToUnit();
+
+			if (!caster || (caster == pVictim) || !caster->IsInWorld() || !caster->isAlive())
+                continue;
+
+			int32 splitDamage = CalculatePctN(dmgInfo.GetDamage(), (*itr)->GetAmount());
 
 			// absorb must be smaller than the damage itself
-			splitDamage = RoundToInterval(splitDamage, 0,
-					int32(dmgInfo.GetDamage()));
+			splitDamage = RoundToInterval(splitDamage, 0, int32(dmgInfo.GetDamage()));
 
-			dmgInfo.ModifyDamage(splitDamage);
+			dmgInfo.AbsorbDamage(splitDamage);
 
-			uint32 splitted = splitDamage;
+            uint32 splitted = splitDamage;
 			uint32 split_absorb = 0;
 			DealDamageMods(caster, splitted, &split_absorb);
 
-			SendSpellNonMeleeDamageLog(caster, (*itr)->GetSpellProto()->Id,
-					splitted, schoolMask, split_absorb, 0, false, 0, false);
+			SendSpellNonMeleeDamageLog(caster, (*itr)->GetSpellProto()->Id, splitted, schoolMask, split_absorb, 0, false, 0, false);
 
-			CleanDamage cleanDamage = CleanDamage(splitted, 0, BASE_ATTACK,
-					MELEE_HIT_NORMAL);
-			DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE,
-					schoolMask, (*itr)->GetSpellProto(), false);
+			CleanDamage cleanDamage = CleanDamage(splitted, 0, BASE_ATTACK, MELEE_HIT_NORMAL);
+			DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*itr)->GetSpellProto(), false);
+            
 		}
 	}
 
