@@ -110,6 +110,7 @@ public:
 		return m_needClientUpdate;
 	}
 	void ClientUpdate(bool remove = false);
+    void SendFakeAuraUpdate(uint32 auraId, bool remove);
 };
 
 class Aura {

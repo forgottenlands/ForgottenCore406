@@ -4710,6 +4710,9 @@ uint32 Unit::GetAuraCount(uint32 spellId) const
 bool Unit::HasAura(uint32 spellId, uint64 casterGUID, uint64 itemCasterGUID,
 		uint8 reqEffMask) const
 {
+    // Demonic Circle workaround
+    if (spellId==62388)
+        return HasAura(48018, casterGUID);
 	if (GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask)) return true;
 	return false;
 }

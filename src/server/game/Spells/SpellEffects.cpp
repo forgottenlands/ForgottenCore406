@@ -6870,7 +6870,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 				{
 					if (!unitTarget || !unitTarget->isAlive()) 
                         return;
-                    sLog->outString("Unitt %d %s", unitTarget->GetEntry(), unitTarget->GetName());
 					if (unitTarget->GetEntry() == 416) // Summoned Imp
 					m_caster->CastSpell(m_caster, 79459, true);
 					if (unitTarget->GetEntry() == 1860) // Summoned Voidwalker

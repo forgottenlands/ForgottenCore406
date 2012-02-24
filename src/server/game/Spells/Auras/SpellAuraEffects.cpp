@@ -2268,18 +2268,21 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const {
 					m_spellProto->EffectTriggerSpell[m_effIndex], true);
 		break;
 	}
-	case SPELLFAMILY_WARLOCK: {
-		switch (GetSpellProto()->Id) {
-		// Demonic Circle
-		case 48018:
-			if (GameObject *obj = target->GetGameObject(GetSpellProto()->Id)) {
-				if (target->IsWithinDist(obj, GetSpellMaxRange(48020, true))) {
-					if (!target->HasAura(48018))
-						target->CastSpell(target, 48018, true);
-				} else
-					target->RemoveAura(48018);
-			}
-			break;
+	case SPELLFAMILY_WARLOCK: 
+    {
+		switch (GetSpellProto()->Id) 
+        {
+		    // Demonic Circle
+		    case 48018:
+			    if (GameObject *obj = target->GetGameObject(GetSpellProto()->Id)) 
+                {
+                    AuraApplication* aurApp = GetBase()->GetApplicationOfTarget(target->GetGUID());
+				    if (target->IsWithinDist(obj, GetSpellMaxRange(48020, true)))
+                        aurApp->SendFakeAuraUpdate(62388, false);
+                    else
+                        aurApp->SendFakeAuraUpdate(62388, true);
+			    }
+			    break;
 		}
 		break;
 	}
