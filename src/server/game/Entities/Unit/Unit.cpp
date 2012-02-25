@@ -10235,7 +10235,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
         // Demonic Circle: Summon
         case 48018:
         {
-            sLog->outString("dentro");
             if (HasAura(48018)) 
                 target->RemoveAura(48018);
             return false;

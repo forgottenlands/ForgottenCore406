@@ -987,7 +987,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         }
         default:
         {
-            sLog->outString("dento def");
             switch (GetEntry())
             {
                 case 1964: //force of nature
