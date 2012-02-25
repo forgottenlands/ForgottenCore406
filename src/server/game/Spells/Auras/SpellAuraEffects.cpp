@@ -728,17 +728,14 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
         else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags[0] & 0x00800000 && GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE) 
         {
             m_canBeRecalculated = false;
-            // 0.01*$AP*cp
+            // (56 + 161 * 1 + 0.0207 * AP * 8)
             if (caster->GetTypeId() != TYPEID_PLAYER)
                 break;
 
             uint8 cp = caster->ToPlayer()->GetComboPoints();
+            uint32 AP = caster->GetTotalAttackPowerValue(BASE_ATTACK);
 
-            // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
-            if (AuraEffect const * aurEff = caster->GetAuraEffect(34241, 0))
-                amount += cp * aurEff->GetAmount();
-
-            amount += CalculatePctF(caster->GetTotalAttackPowerValue(BASE_ATTACK), cp);
+            amount = int32(56 + (161 * cp) +  (0.0207f * cp) * AP);
 
             // Druid Mastery Razor Claws (Rip)
             if (caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
