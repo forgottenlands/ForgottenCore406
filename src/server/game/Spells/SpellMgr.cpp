@@ -4620,6 +4620,11 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectBasePoints[2] = 6229;
             count++;
             break;
+        case 81208: // Chakra Serenity Chakra sanctuary
+        case 81206:
+            spellInfo->EffectBasePoints[2] = 88625;
+            count++;
+            break;
         case 81801: // Thrashing Charge
             spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
             count++;

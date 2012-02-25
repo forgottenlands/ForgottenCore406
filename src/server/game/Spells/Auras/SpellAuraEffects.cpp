@@ -7440,6 +7440,28 @@ void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mo
         } else
             overrideId = 6229;
     }
+
+    // Serenity
+    if (GetSpellProto()->Id == 81208)
+    {
+        if (target->HasAura(88627))
+        {
+            affspell = 88625;
+            overrideId = 88684;
+        } else
+            overrideId = 88625;
+    }
+
+    // Sanctuary
+    if (GetSpellProto()->Id == 81206)
+    {
+        if (target->HasAura(88627))
+        {
+            affspell = 88625;
+            overrideId = 88686;
+        } else
+            overrideId = 88625;
+    }
   
     if (overrideId == 93402)            // Sunfire
     {
