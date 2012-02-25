@@ -3104,8 +3104,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(
         else if (spellproto->SpellFamilyFlags[0] & 0x40000)
             return DIMINISHING_FEAR_BLIND;
         // Charge Stun
-        else if (spellproto->SpellFamilyFlags[0] & 0x01000000)
-            return DIMINISHING_NONE;
+        else if (spellproto->Id == 20252 || spellproto->Id == 100)
+            return DIMINISHING_CONTROL_STUN;
         break;
     }
     case SPELLFAMILY_PALADIN: {
