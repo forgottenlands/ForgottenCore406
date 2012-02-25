@@ -398,24 +398,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket) {
 
 		// if rank not found then function return NULL but in explicit cast case original spell can be casted and later failed with appropriate error message
 		if (actualSpellInfo)
-			spellInfo = actualSpellInfo;
-	
-       /* // Override action bar spell
-        if (mover->HasAuraType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS))
-        {
-            flag96 spellFamilyMask = spellInfo->SpellFamilyFlags;
-            Unit::AuraEffectList const& overrideAuras = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
-            for (Unit::AuraEffectList::const_iterator i = overrideAuras.begin(); i != overrideAuras.end(); ++i)
-            {
-                if ((*i)->GetSpellProto()->EffectSpellClassMask[(*i)->GetEffIndex()] & spellFamilyMask)
-                {
-                    uint32 overrideSpellId = (*i)->GetAmount();
-                    if (SpellEntry const *overrideSpellInfo = sSpellStore.LookupEntry(overrideSpellId))
-                        spellInfo = overrideSpellInfo;
-                }
-            }
-        }  */
-            
+			spellInfo = actualSpellInfo;            
     }
 
 	Spell *spell = new Spell(mover, spellInfo, false);

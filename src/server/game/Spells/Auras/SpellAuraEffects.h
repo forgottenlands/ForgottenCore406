@@ -191,7 +191,6 @@ public:
 			bool apply) const;
 	void HandleModInvisibility(AuraApplication const * aurApp, uint8 mode,
 			bool apply) const;
-	void HandleOverrideCustom(AuraApplication const * aurApp, uint8 mode, bool apply) const;
 	void HandleAuraSaleForGuild(AuraApplication const * aurApp, uint8 mode,
 			bool apply) const;
 	void HandleModCamouflage(AuraApplication const * aurApp, uint8 mode,

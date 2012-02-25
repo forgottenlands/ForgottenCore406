@@ -3189,33 +3189,6 @@ void AuraEffect::HandleModStealthDetect(AuraApplication const * aurApp,
     target->UpdateObjectVisibility();
 }
 
-// Override spell custom ids
-void AuraEffect::HandleOverrideCustom(AuraApplication const *aurApp, uint8 mode, bool apply) const 
-{
-    if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
-            return;
-
-    Unit* target = aurApp->GetTarget();
-    int32 overrideSpellId = 0;
-    uint32 effect = EFFECT_0;
-
-    switch (aurApp->GetBase()->GetSpellProto()->Id)
-    {
-        // Demon and Fel armory (Nether Ward)
-        case 687:
-        case 28176:
-            overrideSpellId = 6229;
-            if (AuraEffect* aurEff = target->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 2365, 0))
-                overrideSpellId = 91711;
-
-            effect = EFFECT_2;
-            break;
-    }
-
-    if (overrideSpellId != 0)
-        aurApp->GetBase()->GetEffect(effect)->SetAmount(overrideSpellId);
-}
-
 //TODO: Thats way? (for guild bonus spell)
 void AuraEffect::HandleAuraSaleForGuild(AuraApplication const *aurApp,
         uint8 mode, bool apply) const {

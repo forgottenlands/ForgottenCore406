@@ -535,47 +535,6 @@ public:
     }
 };
 
-// sspell_shadow_ward
-class spell_shadow_ward: public SpellScriptLoader 
-{
-public:
-	spell_shadow_ward() : SpellScriptLoader("spell_shadow_ward") {}
-
-	class spell_shadow_ward_SpellScript: public SpellScript
-    {
-		PrepareSpellScript(spell_shadow_ward_SpellScript)
-
-		void HandleScriptEffect(SpellEffIndex effIndex) 
-        {
-			Unit* target = GetHitUnit();
-            Unit* caster = GetCaster();
-
-            if (!target)
-                return;
-
-            if (!caster)
-                return;
-            
-           if (caster->HasAura(91713) && (caster->HasAura(687) || caster->HasAura(28176)))
-            {
-                caster->RemoveAura(6229);
-                caster->ToPlayer()->RemoveSpellCooldown(91711, true);
-                caster->CastSpell(caster, 91711, true);
-            }
-		}
-
-		void Register()
-        {
-			OnEffect += SpellEffectFn(spell_shadow_ward_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-		}
-	};
-
-	SpellScript* GetSpellScript() const 
-    {
-		return new spell_shadow_ward_SpellScript();
-	}
-};
-
 // soul link
 class spell_warl_soul_link : public SpellScriptLoader
 {
@@ -656,7 +615,6 @@ void AddSC_warlock_spell_scripts()
     new spell_soul_swap_buff();
     new spell_soul_swap_exhale();
     new spell_warl_fel_flame();
-    new spell_shadow_ward();
     new spell_warl_soul_link();
     new spell_warl_demonic_circle_teleport();
 }
