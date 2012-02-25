@@ -793,7 +793,7 @@ void Battleground::EndBattleground(uint32 winner)
 
                 winner_arena_team->MemberWon(plr, loser_matchmaker_rating, winner_change);
 
-                plr->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, sWorld->getIntConfig(CONFIG_ARENA_CONQUEST_POINTS_REWARD) * PLAYER_CURRENCY_PRECISION);
+                // plr->ModifyCurrency(CURRENCY_TYPE_CONQUEST_POINTS, sWorld->getIntConfig(CONFIG_ARENA_CONQUEST_POINTS_REWARD) * PLAYER_CURRENCY_PRECISION);
                 plr->UpdateMaxWeekRating(CP_SOURCE_ARENA, winner_arena_team->GetSlot());
             }
             else
@@ -803,6 +803,7 @@ void Battleground::EndBattleground(uint32 winner)
                 // Arena lost => reset the win_rated_arena having the "no_lose" condition
                 plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, ACHIEVEMENT_CRITERIA_CONDITION_NO_LOSE);
             }
+
         }
 
         uint32 winner_kills = plr->GetRandomWinner() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
