@@ -9423,14 +9423,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
                         }
                         break;
                     }
-                    // Shooting Stars
-                    case 93398: // Rank 1
-                    case 93399: // Rank 2
-                    {
-                        if (GetTypeId() == TYPEID_PLAYER)
-                            ToPlayer()->RemoveSpellCooldown(78674, true); // Remove cooldown of Starsurge
-                        break;
-                    }
                     default:
                         break;
                 }
@@ -9892,6 +9884,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
             if (damage < uint32(GetMaxHealth()*0.1))
                 return false;
             break;
+        // Shooting Stars
+        case 93398: // Rank 1
+        case 93399: // Rank 2
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+                ToPlayer()->RemoveSpellCooldown(78674, true); // Remove cooldown of Starsurge
+            break;
+        }
         default:
             break;
     }
