@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
- * 
+ *
  * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
@@ -788,12 +788,13 @@ public:
 };
 
 /*######
- ## go_merchant_square_door
+ ## go_merchant_square_door - crash fixed by john2308
  ######*/
 
 enum eMerchant_square_door {
 #define SUMMON1_TTL 300000
 #define QUEST_EVAC_MERC_SQUA 14098
+#define DOOR_TIMER 30*IN_MILLISECONDS
 };
 
 class go_merchant_square_door: public GameObjectScript {
@@ -807,14 +808,16 @@ public:
 	uint8 spawnKind;
 	Player* aPlayer;
 	GameObject* pGO;
+	uint32 DoorTimer;
 
 	bool OnGossipHello(Player *player, GameObject *pGO) {
-		if (player->GetQuestStatus(QUEST_EVAC_MERC_SQUA)
-				== QUEST_STATUS_INCOMPLETE) {
+		if (player->GetQuestStatus(QUEST_EVAC_MERC_SQUA) == QUEST_STATUS_INCOMPLETE && pGO->GetGoState() == GO_STATE_READY)
+		{
 			aPlayer = player;
 			opened = 1;
 			tQuestCredit = 2500;
-			pGO->Use(player);
+			pGO->SetGoState(GO_STATE_ACTIVE);
+            DoorTimer = DOOR_TIMER;
 			spawnKind = urand(1, 3); //1,2=citizen, 3=citizen&worgen (66%,33%)
 			angle = pGO->GetOrientation();
 			x = pGO->GetPositionX() - cos(angle) * 2;
@@ -856,6 +859,15 @@ public:
 			} else
 				tQuestCredit -= ((float) diff / 8);
 		}
+		if (DoorTimer <= diff)
+        {
+          if(pGO->GetGoState() == GO_STATE_ACTIVE)
+            pGO->SetGoState(GO_STATE_READY);
+      
+          DoorTimer = DOOR_TIMER;
+        }
+        else 
+            DoorTimer -= diff;
 	}
 };
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
- * 
+ *
  * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
@@ -425,7 +425,7 @@ class spell_soul_swap_buff : public SpellScriptLoader
             // function registering
             void Register()
             {
-                OnEffectRemove += AuraEffectRemoveFn(spell_soul_swap_buffAuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_soul_swap_buffAuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_332_REPLACE_SPELL, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
@@ -556,7 +556,7 @@ public:
             if (!caster)
                 return;
             
-            if (caster->HasAura(91713) && (caster->HasAura(687) || caster->HasAura(28176)))
+           if (caster->HasAura(91713) && (caster->HasAura(687) || caster->HasAura(28176)))
             {
                 caster->RemoveAura(6229);
                 caster->ToPlayer()->RemoveSpellCooldown(91711, true);

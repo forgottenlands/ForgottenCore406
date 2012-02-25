@@ -4,7 +4,7 @@
  * Copyright (C) 2008 - 2012 Trinity <http://www.trinitycore.org/>
  *
  * Copyright (C) 2010 - 2012 ProjectSkyfire <http://www.projectskyfire.org/>
- * 
+ *
  * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -400,7 +400,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket) {
 		if (actualSpellInfo)
 			spellInfo = actualSpellInfo;
 	
-        // Override action bar spell
+       /* // Override action bar spell
         if (mover->HasAuraType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS))
         {
             flag96 spellFamilyMask = spellInfo->SpellFamilyFlags;
@@ -414,7 +414,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket) {
                         spellInfo = overrideSpellInfo;
                 }
             }
-        }  
+        }  */
             
     }
 
