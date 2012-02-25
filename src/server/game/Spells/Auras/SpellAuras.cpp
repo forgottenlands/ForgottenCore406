@@ -1449,8 +1449,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         // to prevent remove GO added by new spell
                         // old one is already removed
                         if (!onReapply)
+                        {
                             target->RemoveGameObject(GetId(), true);
-                        target->RemoveAura(48018);
+                        } else
+                            target->RemoveAura(48018);
                     break;
                     default:
                         break;

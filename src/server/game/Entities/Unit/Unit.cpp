@@ -9747,11 +9747,23 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
             if (!HealthBelowPct(30)) return false;
             break;
         }
-            // Improved Hamstring
+        // Improved Hamstring
         case 12289:
         case 12668:
         {
-            if (!pVictim->HasAura(1715)) return false;
+            if (!pVictim->HasAura(1715)) 
+                return false;
+
+            if (!ToPlayer())
+                break;
+
+            if (!ToPlayer()->HasSpellCooldown(trigger_spell_id))
+            {
+                CastSpell(pVictim, trigger_spell_id, true);
+                ToPlayer()->AddSpellCooldown(trigger_spell_id, 0, time(NULL)+30000);
+            }
+            
+            return true;
             break;
         }
             // Brambles
@@ -10220,10 +10232,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
             if (HasAura(86627)) return false;
             break;
         }
-            // Demonic Circle: Summon
+        // Demonic Circle: Summon
         case 48018:
         {
-            if (HasAura(48018)) target->RemoveAura(48018);
+            sLog->outString("dentro");
+            if (HasAura(48018)) 
+                target->RemoveAura(48018);
             return false;
             break;
         }

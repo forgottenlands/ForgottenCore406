@@ -2285,7 +2285,8 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const {
                         aurApp->SendFakeAuraUpdate(62388, false);
                     else
                         aurApp->SendFakeAuraUpdate(62388, true);
-			    }
+			    } else
+                    target->RemoveAura(48018);
 			    break;
         }
         break;
