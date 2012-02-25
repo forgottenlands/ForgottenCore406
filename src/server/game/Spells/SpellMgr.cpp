@@ -4612,15 +4612,20 @@ void SpellMgr::LoadSpellCustomAttr() {
             break;
         case 77616: // Dark simulacrum
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS;
+            count++;
             break;
         case 687: // Demon and fel armor (Nether Ward)
         case 28176:
             spellInfo->EffectBasePoints[2] = 6229;
+            count++;
+            break;
         case 81801: // Thrashing Charge
             spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+            count++;
             break;
         case 88313: // Twister aura
             spellInfo->EffectAmplitude[0] = 2000;
+            count++;
             break;
 		default:
 			break;
