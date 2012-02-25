@@ -4475,8 +4475,7 @@ void SpellMgr::LoadSpellCustomAttr() {
 					// this is done because another spell also uses the same SpellFamilyFlags as Icy Touch
 					// SpellFamilyFlags[0] & 0x00000040 in SPELLFAMILY_DEATHKNIGHT is currently unused (3.3.5a)
 					// this needs research on modifier applying rules, does not seem to be in Attributes fields
-			spellInfo->EffectSpellClassMask[0] = flag96(0x00000040, 0x00000000,
-					0x00000000);
+			spellInfo->EffectSpellClassMask[0] = flag96(0x00000040, 0x00000000, 0x00000000);
 			count++;
 			break;
 		case 70460: // Coldflame Jets (Traps after Saurfang)
@@ -4591,16 +4590,18 @@ void SpellMgr::LoadSpellCustomAttr() {
 			spellInfo->Effect[1] = 0;
 			count++;
 			break;
-            case 68282: // Charge (ToC mount)
-                spellInfo->Attributes |= SPELL_EFFECT_SCHOOL_DAMAGE;
-                spellInfo->Attributes |= SPELL_EFFECT_CHARGE;
-                spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
-                spellInfo->EffectBasePoints[0] = 20 * 1000;
+        case 68282:
+            // Charge (ToC mount)
+            spellInfo->Attributes |= SPELL_EFFECT_SCHOOL_DAMAGE;
+            spellInfo->Attributes |= SPELL_EFFECT_CHARGE;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectBasePoints[0] = 20 * 1000;
+            count++;
             break;			
         case 51678: //WintergraspSiegeEngine Ram set damage radius to 5 yards 
             spellInfo->EffectRadiusIndex[0] = 52;
             spellInfo->EffectRadiusIndex[1] = 52;
-                break;						
+            break;						
 		case 87959: // Drink
 			spellInfo->Category = 59;
 			spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_POWER_REGEN;
@@ -4625,6 +4626,10 @@ void SpellMgr::LoadSpellCustomAttr() {
             break;
         case 88313: // Twister aura
             spellInfo->EffectAmplitude[0] = 2000;
+            count++;
+            break;
+        case 1079:
+            spellInfo->EffectBasePoints[0] = 0;
             count++;
             break;
 		default:

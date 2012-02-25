@@ -746,7 +746,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
                 if (caster->ToPlayer()->GetTalentBranchSpec(caster->ToPlayer()->GetActiveSpec()) == BS_DRUID_FERAL_COMBAT)
                     amount += int32(amount * (25.04f + (3.1f *  caster->ToPlayer()->GetMasteryPoints())) / 100);
             }
-        } 
+        }
         // Rake
         else if (GetSpellProto()->Id == 1822)
         {
@@ -1568,6 +1568,10 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 // Serpent Sting
                 if (GetSpellProto()->Id == 1978)
                     damage = int32((GetBase()->GetCaster()->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4f + (damage * 15 / 3)) / GetBase()->GetEffect(0)->GetTotalTicks());
+
+                // Rip
+                if (GetSpellProto()->Id == 1079)
+                    damage = int32(damage / 2);
 
                 // Fiery Apocalypse (Warlock Destrucion Mastery) DOTs
                 if (GetBase()->GetCaster()->HasAuraType(SPELL_AURA_MASTERY) && GetBase()->GetSpellProto()->SchoolMask == SPELL_SCHOOL_MASK_FIRE && GetBase()->GetCaster()->getClass() == CLASS_WARLOCK)
