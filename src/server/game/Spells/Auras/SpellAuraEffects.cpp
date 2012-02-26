@@ -1878,6 +1878,10 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 case 42771: // Second Wind r2
                     damage = int32(caster->GetMaxHealth() * 0.005f);
                     break;
+                case 8936: // Glifo de Recrecimiento
+                    if (caster->HasAura(54743) && target->HealthBelowPct(50))
+                        this->GetBase()->RefreshDuration();
+                    break;
                 default:
                     break;
             }
