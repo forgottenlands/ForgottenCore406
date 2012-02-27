@@ -1877,6 +1877,10 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 case 29842: // Second Wind r2
                 case 42771: // Second Wind r2
                     damage = int32(caster->GetMaxHealth() * 0.005f);
+          break;
+         case 8936: // Glifo de Recrecimiento
+                    if (caster->HasAura(54743) && target->HealthBelowPct(50))
+                        this->GetBase()->RefreshDuration();
                     break;
                 case 8936: // Glifo de Recrecimiento
                     if (caster->HasAura(54743) && target->HealthBelowPct(50))
@@ -1885,6 +1889,8 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 default:
                     break;
             }
+
+      damage = caster->SpellHealingBonus(target, GetSpellProto(), GetEffIndex(), damage, DOT,GetBase()->GetStackAmount());
 
             bool crit = IsPeriodicTickCrit(target, caster);
             if (crit)
