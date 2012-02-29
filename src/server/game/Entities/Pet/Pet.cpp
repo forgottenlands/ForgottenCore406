@@ -544,7 +544,8 @@ void Pet::Update(uint32 diff)
     if (m_removed) // pet already removed, just wait in remove queue, no updates
     return;
 
-    if (m_loading) return;
+    if (m_loading) 
+        return;
 
     switch (m_deathState)
     {
@@ -591,11 +592,17 @@ void Pet::Update(uint32 diff)
                     return;
                 }
             }
+            
+            if (IsPetGhoul())
+            {
+                setPowerType(POWER_ENERGY);
+            }
 
             //regenerate focus for hunter pets or energy for deathknight's ghoul
             if (m_regenTimer)
             {
-                if (m_regenTimer > diff) m_regenTimer -= diff;
+                if (m_regenTimer > diff) 
+                    m_regenTimer -= diff;
                 else
                 {
                     switch (getPowerType())
@@ -603,21 +610,22 @@ void Pet::Update(uint32 diff)
                         case POWER_FOCUS:
                             Regenerate(POWER_FOCUS);
                             m_regenTimer += PET_FOCUS_REGEN_INTERVAL - diff;
-                            if (!m_regenTimer) ++m_regenTimer;
+                            if (!m_regenTimer) 
+                                ++m_regenTimer;
+                            break;						
+                        case POWER_ENERGY:
+                            Regenerate(POWER_ENERGY);
+                            m_regenTimer += CREATURE_REGEN_INTERVAL - diff;
+                            if (!m_regenTimer) 
+                                ++m_regenTimer;
                             break;
-                            //  Fix for focus regen getting stuck
-                            if (m_regenTimer > PET_FOCUS_REGEN_INTERVAL)
-                                m_regenTimer = PET_FOCUS_REGEN_INTERVAL;							
-                            // in creature::update
-                            //case POWER_ENERGY:
-                            //    Regenerate(POWER_ENERGY);
-                            //    m_regenTimer += CREATURE_REGEN_INTERVAL - diff;
-                            //    if (!m_regenTimer) ++m_regenTimer;
-                            //    break;
                         default:
                             m_regenTimer = 0;
                             break;
                     }
+                    //  Fix for focus regen getting stuck
+                    if (m_regenTimer > PET_FOCUS_REGEN_INTERVAL)
+                        m_regenTimer = PET_FOCUS_REGEN_INTERVAL;
                 }
             }
 

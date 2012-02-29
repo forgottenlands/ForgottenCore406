@@ -11234,15 +11234,13 @@ Unit* Unit::GetCharm() const
 
 void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
 {
-    sLog->outDebug(LOG_FILTER_UNITS, "SetMinion %u for %u, apply %u",
-            minion->GetEntry(), GetEntry(), apply);
+    sLog->outDebug(LOG_FILTER_UNITS, "SetMinion %u for %u, apply %u", minion->GetEntry(), GetEntry(), apply);
 
     if (apply)
     {
         if (!minion->AddUInt64Value(UNIT_FIELD_SUMMONEDBY, GetGUID()))
         {
-            sLog->outCrash("SetMinion: Minion %u is not the minion of owner %u",
-                    minion->GetEntry(), GetEntry());
+            sLog->outCrash("SetMinion: Minion %u is not the minion of owner %u", minion->GetEntry(), GetEntry());
             return;
         }
 
@@ -11259,14 +11257,13 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
         {
             if (Guardian* oldPet = GetGuardianPet())
             {
-                if (oldPet != minion
-                        && (oldPet->isPet() || minion->isPet()
-                                || oldPet->GetEntry() != minion->GetEntry()))
+                if (oldPet != minion && (oldPet->isPet() || minion->isPet() || oldPet->GetEntry() != minion->GetEntry()))
                 {
                     // remove existing minion pet
-                    if (oldPet->isPet()) ((Pet*) oldPet)->Remove(
-                            PET_SLOT_ACTUAL_PET_SLOT);
-                    else oldPet->UnSummon();
+                    if (oldPet->isPet()) 
+                        ((Pet*) oldPet)->Remove(PET_SLOT_ACTUAL_PET_SLOT);
+                    else 
+                        oldPet->UnSummon();
 
                     SetPetGUID(minion->GetGUID());
                     SetMinionGUID(0);
@@ -11280,9 +11277,8 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
 
             if (slot == PET_SLOT_UNK_SLOT)
             {
-                if (minion->isPet()
-                        && minion->ToPet()->getPetType() == HUNTER_PET) assert(
-                        false);
+                if (minion->isPet() && minion->ToPet()->getPetType() == HUNTER_PET) 
+                    assert(false);
 
                 slot = PET_SLOT_OTHER_PET;
             }
@@ -11312,23 +11308,25 @@ void Unit::SetMinion(Minion *minion, bool apply, PetSlot slot)
             }
         }
 
-        if (minion->m_Properties
-                && minion->m_Properties->Type == SUMMON_TYPE_MINIPET)
+        if (minion->m_Properties && minion->m_Properties->Type == SUMMON_TYPE_MINIPET)
         {
             SetCritterGUID(minion->GetGUID());
         }
 
         // PvP, FFAPvP
-        minion->SetByteValue(UNIT_FIELD_BYTES_2, 1,
-                GetByteValue(UNIT_FIELD_BYTES_2, 1));
+        minion->SetByteValue(UNIT_FIELD_BYTES_2, 1, GetByteValue(UNIT_FIELD_BYTES_2, 1));
 
         // FIXME: hack, speed must be set only at follow
-        if (GetTypeId() == TYPEID_PLAYER && minion->isPet()) for (uint8 i = 0;
-                i < MAX_MOVE_TYPE; ++i)
-            minion->SetSpeed(UnitMoveType(i), m_speed_rate [i], true);
+        if (GetTypeId() == TYPEID_PLAYER && minion->isPet()) 
+            for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i) 
+                minion->SetSpeed(UnitMoveType(i), m_speed_rate [i], true);
 
         // Ghoul pets have energy instead of mana (is anywhere better place for this code?)
-        if (minion->IsPetGhoul()) minion->setPowerType(POWER_ENERGY);
+        if (minion->IsPetGhoul())
+        {
+            minion->setPowerType(POWER_ENERGY);
+            minion->SetPower(POWER_ENERGY, 100);
+        }
 
         if (GetTypeId() == TYPEID_PLAYER)
         {

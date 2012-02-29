@@ -20512,9 +20512,10 @@ void Player::RemoveSpellMods(Spell * spell) {
     if (spell->m_appliedMods.empty())
         return;
 
-    for (uint8 i = 0; i < MAX_SPELLMOD; ++i) {
-        for (SpellModList::iterator itr = m_spellMods[i].begin();
-                itr != m_spellMods[i].end();) {
+    for (uint8 i = 0; i < MAX_SPELLMOD; ++i) 
+    {
+        for (SpellModList::iterator itr = m_spellMods[i].begin(); itr != m_spellMods[i].end();) 
+        {
             SpellModifier *mod = *itr;
             ++itr;
 
@@ -20523,8 +20524,7 @@ void Player::RemoveSpellMods(Spell * spell) {
                 continue;
 
             // check if mod affected this spell
-            Spell::UsedSpellMods::iterator iterMod = spell->m_appliedMods.find(
-                    mod->ownerAura);
+            Spell::UsedSpellMods::iterator iterMod = spell->m_appliedMods.find(mod->ownerAura);
             if (iterMod == spell->m_appliedMods.end())
                 continue;
 

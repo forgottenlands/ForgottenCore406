@@ -1142,19 +1142,16 @@ bool Guardian::UpdateStats(Stats stat)
         // Ravenous Dead
         AuraEffect const *aurEff = NULL;
         // Check just if owner has Ravenous Dead since it's effect is not an aura
-        aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE,
-                SPELLFAMILY_DEATHKNIGHT, 3010, 0);
+        aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DEATHKNIGHT, 3010, 0);
         if (aurEff)
         {
             SpellEntry const* sProto = aurEff->GetSpellProto(); // Then get the SpellProto and add the dummy effect value
-            mod +=
-                    mod
-                            * (SpellMgr::CalculateSpellEffectAmount(sProto, 1)
-                                    / 100.0f); // Ravenous Dead edits the original scale
+            mod += mod * (SpellMgr::CalculateSpellEffectAmount(sProto, 1) / 100.0f); // Ravenous Dead edits the original scale
         }
         // Glyph of the Ghoul
         aurEff = owner->GetAuraEffect(58686, 0);
-        if (aurEff) mod += (aurEff->GetAmount() / 100.0f); // Glyph of the Ghoul adds a flat value to the scale mod
+        if (aurEff) 
+            mod += (aurEff->GetAmount() / 100.0f); // Glyph of the Ghoul adds a flat value to the scale mod
         ownersBonus = float(owner->GetStat(stat)) * mod;
         value += ownersBonus;
     }
