@@ -8667,6 +8667,29 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     simulacrumDk->ApplyCastTimePercentMod(10000.0f, true);
                 }                
             }
+
+            // Runic Empowerment
+            if (dummySpell->Id == 81229)
+            {
+                if (procSpell->Id == 49143 || procSpell->Id == 47632 || procSpell->Id == 56815)
+                {
+                    uint32 cooldownrunes[MAX_RUNES];
+                    uint8 runescount = 0;
+                    for (uint32 j = 0; j < MAX_RUNES; ++j) 
+                    {
+                        if (ToPlayer()->GetRuneCooldown(j)) 
+                        {
+                            cooldownrunes[runescount] = j;
+                            runescount++;   
+                        }
+                    }
+                    if (runescount > 0)
+                    {
+                        uint8 rndrune = urand(0, runescount - 1);
+                        ToPlayer()->SetRuneCooldown(cooldownrunes[rndrune], 0);
+                    }
+                }
+            }
             break;
         }
         case SPELLFAMILY_POTION:
