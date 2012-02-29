@@ -13753,10 +13753,11 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
         if (pet)
         {
             Battleground *bg = ToPlayer()->GetBattleground();
-            // don't unsummon pet in arena but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
-            if (bg && bg->isArena()) pet->SetFlag(UNIT_FIELD_FLAGS,
-                    UNIT_FLAG_STUNNED);
-            else plr->UnsummonPetTemporaryIfAny();
+            // don't unsummon pet in bg or arena but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
+            if (bg)
+                pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+            else 
+                plr->UnsummonPetTemporaryIfAny();
         }
 
         if (plr->GetEmoteState()) plr->SetEmoteState(0);
