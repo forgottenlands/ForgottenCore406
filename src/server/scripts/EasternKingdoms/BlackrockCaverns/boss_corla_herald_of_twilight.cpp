@@ -149,9 +149,13 @@ public:
 
 			// Informs the trigger on what Twilight Zealot he should channel the nether essence
 			for(uint8 i = 0; i <= RAID_MODE(1,2); i++)
-				NetherEssenceTrigger[i]->GetAI()->DoAction(ACTION_TRIGGER_START_CHANNELING);
+            {
+                if (NetherEssenceTrigger[i])
+				    NetherEssenceTrigger[i]->GetAI()->DoAction(ACTION_TRIGGER_START_CHANNELING);
+            }
 
-			NetherEssenceTrigger[0]->CastSpell(NetherEssenceTrigger[0], SPELL_NETHERESSENCE_AURA, true);
+            if (NetherEssenceTrigger[0])
+			    NetherEssenceTrigger[0]->CastSpell(NetherEssenceTrigger[0], SPELL_NETHERESSENCE_AURA, true);
 
 			DoCastAOE(SPELL_AURA_OF_ACCELERATION);
 
