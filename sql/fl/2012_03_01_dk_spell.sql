@@ -1,0 +1,2 @@
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (63560, 'spell_dk_dark_transformation');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (91342, 'spell_dk_shadow_infusion');

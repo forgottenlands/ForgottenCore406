@@ -590,6 +590,68 @@ class spell_dk_chains_of_ice : public SpellScriptLoader
         }
 };
 
+// Shadow Infusion (PET BUFF)
+class spell_dk_shadow_infusion : public SpellScriptLoader
+{
+public:
+    spell_dk_shadow_infusion() : SpellScriptLoader("spell_dk_shadow_infusion") { }
+
+    class spell_dk_shadow_infusion_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_shadow_infusion_SpellScript)
+
+        void HandleEffect(SpellEffIndex /*eff*/)
+        {
+            Unit* target = GetHitUnit();
+            if (target->GetAura(91342)->GetStackAmount() >= 5)
+            {
+                GetCaster()->AddAura(93426, GetCaster());
+            }
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_dk_shadow_infusion_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_shadow_infusion_SpellScript();
+    }
+};
+
+// 63560 Dark Transformation
+class spell_dk_dark_transformation : public SpellScriptLoader
+{
+public:
+    spell_dk_dark_transformation() : SpellScriptLoader("spell_dk_dark_transformation") { }
+
+    class spell_dk_dark_transformation_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dk_dark_transformation_SpellScript)
+
+        void HandleEffect(SpellEffIndex /*eff*/)
+        {
+            Unit* target = GetHitUnit();
+            if (target->GetAura(91342)->GetStackAmount() == 5)
+                target->RemoveAura(91342);
+
+            GetCaster()->RemoveAura(93426);
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_dk_dark_transformation_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dk_dark_transformation_SpellScript();
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_necrotic_strike();    
@@ -604,4 +666,6 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_improved_unholy_presence();
     new spell_dk_festering_strike();
     new spell_dk_chains_of_ice();
+    new spell_dk_shadow_infusion();
+    new spell_dk_dark_transformation();
 }
