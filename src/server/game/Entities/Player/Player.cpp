@@ -16257,11 +16257,8 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid) {
             real_entry = killed->GetEntry();
     }
 
-    GetAchievementMgr().StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_CREATURE,
-            real_entry); // MUST BE CALLED FIRST
-    GetAchievementMgr().UpdateAchievementCriteria(
-            ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, real_entry, addkillcount,
-            guid ? GetMap()->GetCreature(guid) : NULL);
+    GetAchievementMgr().StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_CREATURE, real_entry); // MUST BE CALLED FIRST
+    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, real_entry, addkillcount, guid ? GetMap()->GetCreature(guid) : NULL);
 
     for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i) {
         uint32 questid = GetQuestSlotQuestId(i);
@@ -20158,13 +20155,11 @@ void Player::PetSpellInitialize() {
 
     CharmInfo *charmInfo = pet->GetCharmInfo();
 
-    WorldPacket data(SMSG_PET_SPELLS,
-            8 + 2 + 4 + 4 + 4 * MAX_UNIT_ACTION_BAR_INDEX + 1 + 1);
+    WorldPacket data(SMSG_PET_SPELLS, 8 + 2 + 4 + 4 + 4 * MAX_UNIT_ACTION_BAR_INDEX + 1 + 1);
     data << uint64(pet->GetGUID());
     data << uint16(pet->GetCreatureInfo()->family); // creature family (required for pet talents)
     data << uint32(0);
-    data << uint8(pet->GetReactState()) << uint8(charmInfo->GetCommandState())
-            << uint16(0);
+    data << uint8(pet->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
 
     // action bar loop
     charmInfo->BuildActionBar(&data);
@@ -20175,34 +20170,29 @@ void Player::PetSpellInitialize() {
     uint8 addlist = 0;
     data << uint8(addlist); // placeholder
 
-    if (pet->IsPermanentPetFor(this)) {
+    if (pet->IsPermanentPetFor(this))
+    {
         // spells loop
-        for (PetSpellMap::iterator itr = pet->m_spells.begin();
-                itr != pet->m_spells.end(); ++itr) {
+        for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr) 
+        {
             if (itr->second.state == PETSPELL_REMOVED)
                 continue;
 
-            data
-                    << uint32(
-                            MAKE_UNIT_ACTION_BUTTON(itr->first, itr->second.active));
+            data << uint32(MAKE_UNIT_ACTION_BUTTON(itr->first, itr->second.active));
             ++addlist;
         }
     }
 
     data.put<uint8>(spellsCountPos, addlist);
 
-    uint8 cooldownsCount = pet->m_CreatureSpellCooldowns.size()
-            + pet->m_CreatureCategoryCooldowns.size();
+    uint8 cooldownsCount = pet->m_CreatureSpellCooldowns.size() + pet->m_CreatureCategoryCooldowns.size();
     data << uint8(cooldownsCount);
 
     time_t curTime = time(NULL);
 
-    for (CreatureSpellCooldowns::const_iterator itr =
-            pet->m_CreatureSpellCooldowns.begin();
-            itr != pet->m_CreatureSpellCooldowns.end(); ++itr) {
-        time_t cooldown =
-                (itr->second > curTime) ?
-                        (itr->second - curTime) * IN_MILLISECONDS : 0;
+    for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureSpellCooldowns.begin(); itr != pet->m_CreatureSpellCooldowns.end(); ++itr)
+    {
+        time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
 
         data << uint32(itr->first); // spellid
         data << uint16(0); // spell category?
@@ -20210,12 +20200,8 @@ void Player::PetSpellInitialize() {
         data << uint32(0); // category cooldown
     }
 
-    for (CreatureSpellCooldowns::const_iterator itr =
-            pet->m_CreatureCategoryCooldowns.begin();
-            itr != pet->m_CreatureCategoryCooldowns.end(); ++itr) {
-        time_t cooldown =
-                (itr->second > curTime) ?
-                        (itr->second - curTime) * IN_MILLISECONDS : 0;
+    for (CreatureSpellCooldowns::const_iterator itr = pet->m_CreatureCategoryCooldowns.begin(); itr != pet->m_CreatureCategoryCooldowns.end(); ++itr) {
+        time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
 
         data << uint32(itr->first); // spellid
         data << uint16(0); // spell category?

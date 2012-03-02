@@ -810,7 +810,8 @@ public:
 	GameObject* pGO;
 	uint32 DoorTimer;
 
-	bool OnGossipHello(Player *player, GameObject *pGO) {
+	bool OnGossipHello(Player *player, GameObject *pGO)
+    {
 		if (player->GetQuestStatus(QUEST_EVAC_MERC_SQUA) == QUEST_STATUS_INCOMPLETE && pGO->GetGoState() == GO_STATE_READY)
 		{
 			aPlayer = player;
@@ -826,12 +827,15 @@ public:
 			wx = x - cos(angle) * 2;
 			wy = y - sin(angle) * 2;
 
-			if (spawnKind < 3) {
-				if (Creature *spawnedCreature = pGO->SummonCreature(NPC_FRIGHTENED_CITIZEN_1,x,y,z,angle,TEMPSUMMON_TIMED_DESPAWN,SUMMON1_TTL)) {
+			if (spawnKind < 3)
+            {
+				if (Creature *spawnedCreature = pGO->SummonCreature(NPC_FRIGHTENED_CITIZEN_1,x,y,z,angle,TEMPSUMMON_TIMED_DESPAWN,SUMMON1_TTL)) 
+                {
 					spawnedCreature->SetPhaseMask(6, 1);
 					spawnedCreature->Respawn(1);
 				}
-			} else {
+			} else
+            {
 				if (Creature *spawnedCreature = pGO->SummonCreature(NPC_FRIGHTENED_CITIZEN_2,x,y,z,angle,TEMPSUMMON_TIMED_DESPAWN,SUMMON1_TTL)) {
 					spawnedCreature->SetPhaseMask(6, 1);
 					spawnedCreature->Respawn(1);
@@ -842,17 +846,24 @@ public:
 		return false;
 	}
 
-	void OnUpdate(GameObject *pGO, uint32 diff) {
-		if (opened == 1) {
-			if (tQuestCredit <= ((float) diff / 8)) {
+	void OnUpdate(GameObject *pGO, uint32 diff)
+    {
+		if (opened == 1)
+        {
+			if (tQuestCredit <= ((float) diff / 8))
+            {
 				opened = 0;
-				aPlayer->KilledMonsterCredit(35830, 0);
-				if (spawnKind == 3) {
+                if (aPlayer)
+				    aPlayer->KilledMonsterCredit(35830, 0);
+
+				if (spawnKind == 3)
+                {
 					if (Creature *spawnedCreature = pGO->SummonCreature(NPC_RAMPAGING_WORGEN_2,wx,wy,z,angle,TEMPSUMMON_TIMED_DESPAWN,SUMMON1_TTL)) {
 						spawnedCreature->SetPhaseMask(6, 1);
 						spawnedCreature->Respawn(1);
 						spawnedCreature->getThreatManager().resetAllAggro();
-						aPlayer->AddThreat(spawnedCreature, 1.0f);
+                        if (aPlayer)
+						    aPlayer->AddThreat(spawnedCreature, 1.0f);
 						spawnedCreature->AddThreat(aPlayer, 1.0f);
 					}
 				}

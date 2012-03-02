@@ -19105,22 +19105,24 @@ void Unit::ChangeSeat(int8 seatId, bool next, bool byAura)
 
 void Unit::ExitVehicle()
 {
-    if (!m_vehicle) return;
+    if (!m_vehicle) 
+        return;
 
-    Unit *vehicleBase = m_vehicle->GetBase();
-    const AuraEffectList &modAuras = vehicleBase->GetAuraEffectsByType(
-            SPELL_AURA_CONTROL_VEHICLE);
-    for (AuraEffectList::const_iterator itr = modAuras.begin();
-            itr != modAuras.end(); ++itr)
+    if (Unit *vehicleBase = m_vehicle->GetBase())
     {
-        if ((*itr)->GetBase()->GetOwner() == this)
+        const AuraEffectList &modAuras = vehicleBase->GetAuraEffectsByType(SPELL_AURA_CONTROL_VEHICLE);
+        for (AuraEffectList::const_iterator itr = modAuras.begin(); itr != modAuras.end(); ++itr)
         {
-            vehicleBase->RemoveAura((*itr)->GetBase());
-            break; // there should be no case that a vehicle has two auras for one owner
+            if ((*itr)->GetBase()->GetOwner() == this)
+            {
+                vehicleBase->RemoveAura((*itr)->GetBase());
+                break; // there should be no case that a vehicle has two auras for one owner
+            }
         }
     }
 
-    if (!m_vehicle) return;
+    if (!m_vehicle) 
+        return;
 
     //sLog->outError("exit vehicle");
 
@@ -19150,8 +19152,9 @@ void Unit::ExitVehicle()
     BuildHeartBeatMsg(&data);
     SendMessageToSet(&data, false);
 
-    if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION)) if (((Minion*) vehicle->GetBase())->GetOwner()
-            == this) vehicle->Dismiss();
+    if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION)) 
+        if (((Minion*) vehicle->GetBase())->GetOwner() == this) 
+            vehicle->Dismiss();
 }
 
 void Unit::BuildMovementPacket(ByteBuffer *data) const
