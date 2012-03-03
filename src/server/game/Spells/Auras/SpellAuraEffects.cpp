@@ -665,7 +665,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
         {
             amount = 1770;
             // apply spell healing bonus
-            amount += caster->SpellBaseHealingBonus(GetSpellSchoolMask(m_spellProto)) * 0.286f;
+            amount += int32(caster->SpellBaseHealingBonus(GetSpellSchoolMask(m_spellProto)) * 0.152f);
             // Improved Shields
             if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_SHAMAN, 19, 1))
                 amount += int32(amount * aurEff->GetAmount() / 100);
