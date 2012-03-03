@@ -661,17 +661,14 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
         if (!caster)
             break;
         // Earth Shield
-        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN
-                && m_spellProto->SpellFamilyFlags[1] & 0x400) {
-            // return to unmodified by spellmods value
-            amount = m_spellProto->EffectBasePoints[m_effIndex];
+        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellProto->SpellFamilyFlags[1] & 0x400)
+        {
+            amount = 1770;
             // apply spell healing bonus
-            amount = caster->SpellHealingBonus(GetBase()->GetUnitOwner(),
-                    GetSpellProto(), GetEffIndex(), amount,
-                    SPELL_DIRECT_DAMAGE);
-            // apply spellmods
-            amount = caster->ApplyEffectModifiers(GetSpellProto(), m_effIndex,
-                    float(amount));
+            amount += caster->SpellBaseHealingBonus(GetSpellSchoolMask(m_spellProto)) * 0.286f;
+            // Improved Shields
+            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_SHAMAN, 19, 1))
+                amount += int32(amount * aurEff->GetAmount() / 100);
         }
         break;
     case SPELL_AURA_DAMAGE_SHIELD:
