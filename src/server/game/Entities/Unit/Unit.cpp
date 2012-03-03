@@ -8629,7 +8629,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                 if (procSpell->EffectBasePoints[0] > 50000 || procSpell->EffectBasePoints[1] > 50000 || procSpell->EffectBasePoints[1] > 50000)
                     return false;
                 
-                if (GetPower(POWER_MANA) <= 100 && !ToCreature()->IsDungeonBoss())
+                if (GetMaxPower(POWER_MANA) <= 100)
                     return false;
 
                 int32 bp0 = int32(procSpell->Id);
