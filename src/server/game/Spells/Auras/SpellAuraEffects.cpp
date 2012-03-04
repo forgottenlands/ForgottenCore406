@@ -1547,7 +1547,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     damage = damageReductedArmor;
                 }
 
-                // Curse of Agony damage-per-tick calculation
+                // Bane of Agony damage-per-tick calculation
                 if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags[0] & 0x400) && GetSpellProto()->SpellIconID == 544) 
                 {
                     uint32 totalTick = GetTotalTicks();
@@ -7269,31 +7269,28 @@ void AuraEffect::HandleAuraConvertRune(AuraApplication const *aurApp,
         plr->RemoveRunesByAuraEffect(this);
 }
 
-void AuraEffect::HandleAuraLinked(AuraApplication const *aurApp, uint8 mode,
-        bool apply) const {
+void AuraEffect::HandleAuraLinked(AuraApplication const *aurApp, uint8 mode, bool apply) const 
+{
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
     Unit *target = aurApp->GetTarget();
 
-    if (apply) {
-        Unit * caster = GetTriggeredSpellCaster(m_spellProto, GetCaster(),
-                target);
+    sLog->outString("dentro %d %d", m_spellProto->EffectTriggerSpell[m_effIndex], aurApp->GetBase()->GetId());
+    if (apply) 
+    {
+        Unit * caster = GetTriggeredSpellCaster(m_spellProto, GetCaster(), target);
 
         if (!caster)
             return;
+
         // If amount avalible cast with basepoints (Crypt Fever for example)
         if (GetAmount())
-            caster->CastCustomSpell(target,
-                    m_spellProto->EffectTriggerSpell[m_effIndex], &m_amount,
-                    NULL, NULL, true, NULL, this);
+            caster->CastCustomSpell(target, m_spellProto->EffectTriggerSpell[m_effIndex], &m_amount, NULL, NULL, true, NULL, this);
         else
-            caster->CastSpell(target,
-                    m_spellProto->EffectTriggerSpell[m_effIndex], true, NULL,
-                    this);
+            caster->CastSpell(target, m_spellProto->EffectTriggerSpell[m_effIndex], true, NULL, this);
     } else
-        target->RemoveAura(m_spellProto->EffectTriggerSpell[m_effIndex],
-                GetCasterGUID(), 0, AuraRemoveMode(aurApp->GetRemoveMode()));
+        target->RemoveAura(m_spellProto->EffectTriggerSpell[m_effIndex], GetCasterGUID(), 0, AuraRemoveMode(aurApp->GetRemoveMode()));
 }
 
 void AuraEffect::HandleAuraOpenStable(AuraApplication const *aurApp, uint8 mode,

@@ -986,7 +986,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     }
 
     // mods at aura apply
-    if (apply) {
+    if (apply) 
+    {
         // Apply linked auras (On first aura apply)
         if (sSpellMgr->GetSpellCustomAttr(GetId()) & SPELL_ATTR0_CU_LINK_AURA) {
             if (const std::vector<int32> *spell_triggered = sSpellMgr->GetSpellLinked(GetId() + SPELL_LINK_AURA))
@@ -1289,40 +1290,44 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
         }
     }
     // mods at aura remove
-    else {
+    else 
+    {
         // Remove Linked Auras
-        if (removeMode != AURA_REMOVE_BY_STACK
-                && removeMode != AURA_REMOVE_BY_DEATH) {
-            if (uint32 customAttr = sSpellMgr->GetSpellCustomAttr(GetId())) {
-                if (customAttr & SPELL_ATTR0_CU_LINK_REMOVE) {
+        if (removeMode != AURA_REMOVE_BY_STACK && removeMode != AURA_REMOVE_BY_DEATH)
+        {
+            if (uint32 customAttr = sSpellMgr->GetSpellCustomAttr(GetId()))
+            {
+                if (customAttr & SPELL_ATTR0_CU_LINK_REMOVE) 
+                {
                     if (const std::vector<int32> *spell_triggered = sSpellMgr->GetSpellLinked(-(int32)GetId()))
-                        for (std::vector<int32>::const_iterator itr =
-                                spell_triggered->begin();
-                                itr != spell_triggered->end(); ++itr) {
+                        for (std::vector<int32>::const_iterator itr = spell_triggered->begin(); itr != spell_triggered->end(); ++itr) 
+                        {
                             if (*itr < 0)
                                 target->RemoveAurasDueToSpell(-(*itr));
                             else if (removeMode != AURA_REMOVE_BY_DEFAULT)
-                                target->CastSpell(target, *itr, true, NULL,
-                                        NULL, GetCasterGUID());
+                                target->CastSpell(target, *itr, true, NULL, NULL, GetCasterGUID());
                         }
                 }
-                if (customAttr & SPELL_ATTR0_CU_LINK_AURA) {
+                if (customAttr & SPELL_ATTR0_CU_LINK_AURA)
+                {
                     if (const std::vector<int32> *spell_triggered = sSpellMgr->GetSpellLinked(GetId() + SPELL_LINK_AURA))
-                        for (std::vector<int32>::const_iterator itr =
-                                spell_triggered->begin();
-                                itr != spell_triggered->end(); ++itr) {
+                        for (std::vector<int32>::const_iterator itr = spell_triggered->begin(); itr != spell_triggered->end(); ++itr) 
+                        {
                             if (*itr < 0)
-                                target->ApplySpellImmune(GetId(), IMMUNITY_ID,
-                                        -(*itr), false);
+                                target->ApplySpellImmune(GetId(), IMMUNITY_ID, -(*itr), false);
                             else
+                            {
                                 target->RemoveAurasDueToSpell(*itr);
+                            }
                         }
                 }
             }
         }
-        switch (GetSpellProto()->SpellFamilyName) {
+        switch (GetSpellProto()->SpellFamilyName) 
+        {
         case SPELLFAMILY_GENERIC:
-            switch (GetId()) {
+            switch (GetId()) 
+            {
             case 61987: // Avenging Wrath
                 // Remove the immunity shield marker on Avenging Wrath removal if Forbearance is not present
                 if (target->HasAura(61988) && !target->HasAura(25771))
@@ -1330,7 +1335,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 break;
             case 72368: // Shared Suffering
             case 72369:
-                if (caster) {
+                if (caster) 
+                {
                     if (AuraEffect* aurEff = GetEffect(0)) {
                         int32 remainingDamage = aurEff->GetAmount()
                                 * (aurEff->GetTotalTicks()
@@ -1474,57 +1480,57 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
             }
             // Power word: shield
-            else if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL
-                    && GetSpellProto()->SpellFamilyFlags[0] & 0x00000001) {
+            else if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL && GetSpellProto()->SpellFamilyFlags[0] & 0x00000001)
+            {
                 // Rapture
-                if (Aura const * aura = caster->GetAuraOfRankedSpell(47535)) {
+                if (Aura const * aura = caster->GetAuraOfRankedSpell(47535))
+                {
                     // check cooldown
-                    if (caster->GetTypeId() == TYPEID_PLAYER) {
+                    if (caster->GetTypeId() == TYPEID_PLAYER) 
+                    {
                         if (caster->ToPlayer()->HasSpellCooldown(aura->GetId()))
                             break;
                         // and add if needed
-                        caster->ToPlayer()->AddSpellCooldown(aura->GetId(), 0,
-                                uint32(time(NULL) + 12));
+                        caster->ToPlayer()->AddSpellCooldown(aura->GetId(), 0, uint32(time(NULL) + 12));
                     }
                     // effect on caster
-                    if (AuraEffect const * aurEff = aura->GetEffect(0)) {
+                    if (AuraEffect const * aurEff = aura->GetEffect(0)) 
+                    {
                         float multiplier = (float) aurEff->GetAmount();
                         if (aurEff->GetId() == 47535)
                             multiplier -= 0.5f;
                         else if (aurEff->GetId() == 47537)
                             multiplier += 0.5f;
 
-                        int32 basepoints0 = int32(
-                                multiplier * caster->GetMaxPower(POWER_MANA)
-                                        / 100);
-                        caster->CastCustomSpell(caster, 47755, &basepoints0,
-                                NULL, NULL, true);
+                        int32 basepoints0 = int32(multiplier * caster->GetMaxPower(POWER_MANA) / 100);
+                        caster->CastCustomSpell(caster, 47755, &basepoints0, NULL, NULL, true);
                     }
                     // effect on aura target
-                    if (AuraEffect const * aurEff = aura->GetEffect(1)) {
+                    if (AuraEffect const * aurEff = aura->GetEffect(1))
+                    {
                         if (!roll_chance_i(aurEff->GetAmount()))
                             break;
 
                         int32 triggeredSpellId = 0;
-                        switch (target->getPowerType()) {
-                        case POWER_MANA: {
-                            int32 basepoints0 = 2
-                                    * (target->GetMaxPower(POWER_MANA) / 100);
-                            caster->CastCustomSpell(target, 63654, &basepoints0,
-                                    NULL, NULL, true);
-                            break;
-                        }
-                        case POWER_RAGE:
-                            triggeredSpellId = 63653;
-                            break;
-                        case POWER_ENERGY:
-                            triggeredSpellId = 63655;
-                            break;
-                        case POWER_RUNIC_POWER:
-                            triggeredSpellId = 63652;
-                            break;
-                        default:
-                            break;
+                        switch (target->getPowerType()) 
+                        {
+                            case POWER_MANA: 
+                            {
+                                int32 basepoints0 = 2 * (target->GetMaxPower(POWER_MANA) / 100);
+                                caster->CastCustomSpell(target, 63654, &basepoints0, NULL, NULL, true);
+                                break;
+                            }
+                            case POWER_RAGE:
+                                triggeredSpellId = 63653;
+                                break;
+                            case POWER_ENERGY:
+                                triggeredSpellId = 63655;
+                                break;
+                            case POWER_RUNIC_POWER:
+                                triggeredSpellId = 63652;
+                                break;
+                            default:
+                                break;
                         }
                         if (triggeredSpellId)
                             caster->CastSpell(target, triggeredSpellId, true);

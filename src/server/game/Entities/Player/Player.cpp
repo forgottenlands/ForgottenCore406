@@ -4025,27 +4025,24 @@ void Player::learnSpell(uint32 spell_id, bool dependent) {
     }
 }
 
-void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank) {
+void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
+{
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr == m_spells.end())
         return;
 
-    if (itr->second->state == PLAYERSPELL_REMOVED
-            || (disabled && itr->second->disabled)
-            || itr->second->state == PLAYERSPELL_TEMPORARY)
+    if (itr->second->state == PLAYERSPELL_REMOVED || (disabled && itr->second->disabled) || itr->second->state == PLAYERSPELL_TEMPORARY)
         return;
 
     // unlearn non talent higher ranks (recursive)
-    if (SpellChainNode const* node = sSpellMgr->GetSpellChainNode(spell_id)) {
+    if (SpellChainNode const* node = sSpellMgr->GetSpellChainNode(spell_id))
+    {
         if (HasSpell(node->next) && !GetTalentSpellPos(node->next))
             removeSpell(node->next, disabled, false);
     }
     //unlearn spells dependent from recently removed spells
-    SpellsRequiringSpellMapBounds spellsRequiringSpell =
-            sSpellMgr->GetSpellsRequiringSpellBounds(spell_id);
-    for (SpellsRequiringSpellMap::const_iterator itr2 =
-            spellsRequiringSpell.first; itr2 != spellsRequiringSpell.second;
-            ++itr2)
+    SpellsRequiringSpellMapBounds spellsRequiringSpell = sSpellMgr->GetSpellsRequiringSpellBounds(spell_id);
+    for (SpellsRequiringSpellMap::const_iterator itr2 = spellsRequiringSpell.first; itr2 != spellsRequiringSpell.second; ++itr2)
         removeSpell(itr2->second, disabled);
 
     // re-search, it can be corrupted in prev loop
@@ -4058,12 +4055,15 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank) {
     bool cur_active = itr->second->active;
     bool cur_dependent = itr->second->dependent;
 
-    if (disabled) {
+    if (disabled)
+    {
         itr->second->disabled = disabled;
         if (itr->second->state != PLAYERSPELL_NEW)
             itr->second->state = PLAYERSPELL_CHANGED;
-    } else {
-        if (itr->second->state == PLAYERSPELL_NEW) {
+    } else
+    {
+        if (itr->second->state == PLAYERSPELL_NEW)
+        {
             delete itr->second;
             m_spells.erase(itr);
         } else
@@ -4079,7 +4079,8 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank) {
 
     // free talent points
     uint32 talentCosts = GetTalentSpellCost(spell_id);
-    if (talentCosts > 0 && giveTalentPoints) {
+    if (talentCosts > 0 && giveTalentPoints) 
+    {
         if (talentCosts < m_usedTalentCount)
             m_usedTalentCount -= talentCosts;
         else
