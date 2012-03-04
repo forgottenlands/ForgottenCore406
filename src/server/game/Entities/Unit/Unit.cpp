@@ -7374,6 +7374,17 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                 CastSpell(this, 35079, true);
                 return true;
             }
+            // Wild Quiver Hunter Marksmanship Mastery 
+            if (dummySpell->Id == 76659)
+            {
+                if (Player* caster = ToPlayer())
+                {
+                    int32 chance = int32(14.4f + 1.8f * caster->GetMasteryPoints());
+                    if (roll_chance_i(chance))
+                        caster->CastSpell(pVictim, 53254, true);
+                }
+                return true;
+            }
             break;
         }
         case SPELLFAMILY_PALADIN:

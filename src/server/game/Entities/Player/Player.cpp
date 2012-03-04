@@ -25734,6 +25734,9 @@ void Player::RemoveOrAddMasterySpells()
 
         if (HasAura(76672))
             RemoveAurasDueToSpell(76672);
+
+        if (HasAura(76659))
+            RemoveAurasDueToSpell(76659);
 	} 
     else if (HasAuraType(SPELL_AURA_MASTERY)) 
     {
@@ -25776,5 +25779,9 @@ void Player::RemoveOrAddMasterySpells()
         if (GetTalentBranchSpec(GetActiveSpec()) == BS_PALADIN_RETRIBUTION)
             if (!HasAura(76672))
                 AddAura(76672, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_HUNTER_MARKMANSHIP)
+            if (!HasAura(76659))
+                AddAura(76659, this);
     }
 }
