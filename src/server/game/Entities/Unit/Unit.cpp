@@ -3938,15 +3938,13 @@ void Unit::RemoveAura(AuraApplicationMap::iterator &i, AuraRemoveMode mode)
     if (aura->GetOwner() == this) aura->Remove(mode);
 }
 
-void Unit::RemoveAura(uint32 spellId, uint64 caster, uint8 reqEffMask,
-        AuraRemoveMode removeMode)
+void Unit::RemoveAura(uint32 spellId, uint64 caster, uint8 reqEffMask, AuraRemoveMode removeMode)
 {
-    for (AuraApplicationMap::iterator iter = m_appliedAuras.lower_bound(
-            spellId); iter != m_appliedAuras.upper_bound(spellId);)
+    sLog->outString("dentro remova %d", spellId);
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.lower_bound(spellId); iter != m_appliedAuras.upper_bound(spellId);)
     {
         Aura const * aura = iter->second->GetBase();
-        if (((aura->GetEffectMask() & reqEffMask) == reqEffMask)
-                && (!caster || aura->GetCasterGUID() == caster))
+        if (((aura->GetEffectMask() & reqEffMask) == reqEffMask) && (!caster || aura->GetCasterGUID() == caster))
         {
             RemoveAura(iter, removeMode);
             return;
@@ -3982,15 +3980,12 @@ void Unit::RemoveAura(Aura * aura, AuraRemoveMode mode)
     ASSERT(false);
 }
 
-void Unit::RemoveAurasDueToSpell(uint32 spellId, uint64 caster,
-        uint8 reqEffMask, AuraRemoveMode removeMode)
+void Unit::RemoveAurasDueToSpell(uint32 spellId, uint64 caster, uint8 reqEffMask, AuraRemoveMode removeMode)
 {
-    for (AuraApplicationMap::iterator iter = m_appliedAuras.lower_bound(
-            spellId); iter != m_appliedAuras.upper_bound(spellId);)
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.lower_bound(spellId); iter != m_appliedAuras.upper_bound(spellId);)
     {
         Aura const * aura = iter->second->GetBase();
-        if (((aura->GetEffectMask() & reqEffMask) == reqEffMask)
-                && (!caster || aura->GetCasterGUID() == caster))
+        if (((aura->GetEffectMask() & reqEffMask) == reqEffMask) && (!caster || aura->GetCasterGUID() == caster))
         {
             RemoveAura(iter, removeMode);
             iter = m_appliedAuras.lower_bound(spellId);
@@ -9890,6 +9885,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
                 ToPlayer()->RemoveSpellCooldown(78674, true); // Remove cooldown of Starsurge
             break;
         }
+        // Siphon Life
+        case 63108:
+        case 86667:
+            if (procSpell->Id != 172)
+                return false;
+            break;
         default:
             break;
     }
