@@ -4336,9 +4336,13 @@ void Unit::RemoveAndSaveSoulSwapDots(Unit* caster)
 		    {
                 caster->SaveSoulSwapAura(removed, count);
                 caster->SaveSoulSwapDotSource(GetGUID());
-			    RemoveAura(iter);
+                // Glyph of Soul Swap
+                if (!caster->HasAura(56226))
+                {
+                    RemoveAura(iter);
+                    continue;
+                }
                 ++count;
-			    continue;
 		    }
 		    ++iter;
 	    }

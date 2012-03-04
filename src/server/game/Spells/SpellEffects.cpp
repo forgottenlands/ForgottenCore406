@@ -715,6 +715,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     unitTarget->RemoveAndSaveSoulSwapDots(m_caster);
                     m_caster->CastSpell(m_caster, 86211, true);
+
+                    // Glyph of Soul Swap cooldown
+                    if (m_caster->HasAura(56226))
+                        m_caster->CastSpell(m_caster, 94229, false);
                 }
                 // Soul Swap Exhale
                 else if (m_spellInfo->Id == 86213)
@@ -2130,17 +2134,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         m_caster->GetPartyMembers(PartyMembers);
                         bool Continue = false;
                         uint32 player = 0;
-                        for (std::list <Unit*>::iterator itr =
-                                PartyMembers.begin(); itr != PartyMembers.end();
-                                ++itr) // If caster is in party with a player
+                        for (std::list <Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr) // If caster is in party with a player
                         {
                             ++player;
-                            if (Continue == false && player > 1) Continue =
-                                    true;
+                            if (Continue == false && player > 1) 
+                                Continue = true;
                         }
-                        if (Continue == true) m_caster->CastSpell(unitTarget,
-                                79061, true); // Mark of the Wild (Raid)
-                        else m_caster->CastSpell(unitTarget, 79060, true); // Mark of the Wild (Caster)
+                        if (Continue == true) 
+                            m_caster->CastSpell(unitTarget, 79061, true); // Mark of the Wild (Raid)
+                        else
+                            m_caster->CastSpell(unitTarget, 79060, true); // Mark of the Wild (Caster)
                     }
                     break;
                 }
