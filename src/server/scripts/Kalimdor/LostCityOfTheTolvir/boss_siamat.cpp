@@ -111,7 +111,7 @@ public:
                 {
                     for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
                     {
-                        if (i->getSource()->isAlive())
+                        if (i->getSource())
                         {
                             i->getSource()->KilledMonsterCredit(51088, 0);
                         }
