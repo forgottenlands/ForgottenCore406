@@ -6660,6 +6660,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                 {
                     basepoints0 = int32(damage * triggerAmount / 100);
                     triggered_spell_id = 96379;
+                    CastCustomSpell(this, triggered_spell_id, &basepoints0, 0, 0, true);
+                    return true;
                     break;
                 }
             }
