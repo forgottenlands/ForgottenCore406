@@ -1034,29 +1034,26 @@ void AuraEffect::CalculatePeriodic(Unit *caster, bool create) {
             modOwner->ApplySpellMod(GetId(), SPELLMOD_ACTIVATION_TIME,
                     m_amplitude);
 
-        if (caster) {
+        if (caster) 
+        {
             // Haste modifies periodic time of channeled spells
-            if (IsChanneledSpell(m_spellProto)) {
-                if (m_spellProto->AttributesEx5
-                        & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+            if (IsChanneledSpell(m_spellProto))
+            {
+                if (m_spellProto->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
                     caster->ModSpellCastTime(m_spellProto, m_amplitude);
             }
             // and periodic time of auras affected by SPELL_AURA_PERIODIC_HASTE
-            else if (caster->HasAuraTypeWithAffectMask(
-                    SPELL_AURA_PERIODIC_HASTE, m_spellProto)
-                    || m_spellProto->AttributesEx5
-                            & SPELL_ATTR5_HASTE_AFFECT_DURATION)
-                m_amplitude = int32(
-                        m_amplitude
-                                * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+            else if (caster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, m_spellProto) || m_spellProto->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+            {
+                m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+            }
         }
     }
 
-    if (create) {
+    if (create) 
+    {
         // Start periodic on next tick or at aura apply
-        if (m_amplitude
-                && !(m_spellProto->AttributesEx5
-                        & SPELL_ATTR5_START_PERIODIC_AT_APPLY))
+        if (m_amplitude && !(m_spellProto->AttributesEx5 & SPELL_ATTR5_START_PERIODIC_AT_APPLY))
             m_periodicTimer += m_amplitude;
     } else if (m_amplitude) // load aura from character_aura
     {
