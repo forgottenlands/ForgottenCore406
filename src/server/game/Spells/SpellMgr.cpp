@@ -666,20 +666,33 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo) {
 
         break;
     }
-    case SPELLFAMILY_WARLOCK: {
-        // only warlock curses have this
-        if (spellInfo->Dispel == DISPEL_CURSE)
-            return SPELL_SPECIFIC_CURSE;
-
-        // Warlock (Demon Armor | Demon Skin | Fel Armor)
-        if (spellInfo->SpellFamilyFlags[1] & 0x20000020
-                || spellInfo->SpellFamilyFlags[2] & 0x00000010)
-            return SPELL_SPECIFIC_WARLOCK_ARMOR;
-
-        //seed of corruption and corruption
-        if (spellInfo->SpellFamilyFlags[1] & 0x10
-                || spellInfo->SpellFamilyFlags[0] & 0x2)
-            return SPELL_SPECIFIC_WARLOCK_CORRUPTION;
+    case SPELLFAMILY_WARLOCK:
+    {
+        switch (spellInfo->Id)
+        {
+            // Curse of Weakness
+            // Curse of the Elements
+            // Curse of Tongues
+            case 702:
+            case 1490:
+            case 1714:
+                return SPELL_SPECIFIC_CURSE;
+            // Demon Armor 
+            // Fel Armor 
+            case 687:
+            case 28176:
+                return SPELL_SPECIFIC_WARLOCK_ARMOR;
+            // Seed of Corruption
+            // Corruption
+            case 27243:
+            case 172:
+                return SPELL_SPECIFIC_WARLOCK_CORRUPTION;
+            // Bane of Agony 
+            // Bane of Doom
+            case 603:
+            case 980:
+                return SPELL_SPECIFIC_WARLOCK_BANE;
+        }
         break;
     }
     case SPELLFAMILY_PRIEST: {
@@ -756,20 +769,22 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo) {
 }
 
 // target not allow have more one spell specific from same caster
-bool IsSingleFromSpellSpecificPerCaster(SpellSpecific spellSpec1,
-        SpellSpecific spellSpec2) {
-    switch (spellSpec1) {
-    case SPELL_SPECIFIC_SEAL:
-    case SPELL_SPECIFIC_HAND:
-    case SPELL_SPECIFIC_AURA:
-    case SPELL_SPECIFIC_STING:
-    case SPELL_SPECIFIC_CURSE:
-    case SPELL_SPECIFIC_ASPECT:
-    case SPELL_SPECIFIC_JUDGEMENT:
-    case SPELL_SPECIFIC_WARLOCK_CORRUPTION:
-        return spellSpec1 == spellSpec2;
-    default:
-        return false;
+bool IsSingleFromSpellSpecificPerCaster(SpellSpecific spellSpec1, SpellSpecific spellSpec2) 
+{
+    switch (spellSpec1)
+    {
+        case SPELL_SPECIFIC_SEAL:
+        case SPELL_SPECIFIC_HAND:
+        case SPELL_SPECIFIC_AURA:
+        case SPELL_SPECIFIC_STING:
+        case SPELL_SPECIFIC_CURSE:
+        case SPELL_SPECIFIC_ASPECT:
+        case SPELL_SPECIFIC_JUDGEMENT:
+        case SPELL_SPECIFIC_WARLOCK_CORRUPTION:
+        case SPELL_SPECIFIC_WARLOCK_BANE:
+            return spellSpec1 == spellSpec2;
+        default:
+            return false;
     }
 }
 
@@ -3066,8 +3081,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(
         if (spellproto->SpellFamilyFlags[0] & 0x80000)
             return DIMINISHING_DEATHCOIL;
         // Curses/etc
-        else if ((spellproto->SpellFamilyFlags[0] & 0x80000000)
-                || (spellproto->SpellFamilyFlags[1] & 0x200))
+        else if ((spellproto->SpellFamilyFlags[0] & 0x80000000) || (spellproto->SpellFamilyFlags[1] & 0x200))
             return DIMINISHING_LIMITONLY;
         // Howl of Terror
         else if (spellproto->SpellFamilyFlags[1] & 0x8)
