@@ -3009,20 +3009,18 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const {
                     target->CastSpell(target, 66530, true);
             }
             // Heart of the Wild
-            if (HotWSpellId) { // hacky, but the only way as spell family is not SPELLFAMILY_DRUID
-                Unit::AuraEffectList const& mModTotalStatPct =
-                        target->GetAuraEffectsByType(
-                                SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
-                for (Unit::AuraEffectList::const_iterator i =
-                        mModTotalStatPct.begin(); i != mModTotalStatPct.end();
-                        ++i) {
+            if (HotWSpellId) 
+            { 
+                // hacky, but the only way as spell family is not SPELLFAMILY_DRUID
+                Unit::AuraEffectList const& mModTotalStatPct = target->GetAuraEffectsByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
+                for (Unit::AuraEffectList::const_iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
+                {
                     // Heart of the Wild
-                    if ((*i)->GetSpellProto()->SpellIconID == 240
-                            && (*i)->GetMiscValue() == 3) {
+                    if ((*i)->GetSpellProto()->SpellIconID == 240 && (*i)->GetMiscValue() == 3)
+                    {
                         int32 HotWMod = (*i)->GetAmount();
 
-                        target->CastCustomSpell(target, HotWSpellId, &HotWMod,
-                                NULL, NULL, true, NULL, this);
+                        target->CastCustomSpell(target, HotWSpellId, &HotWMod, NULL, NULL, true, NULL, this);
                         break;
                     }
                 }
@@ -5361,17 +5359,16 @@ void AuraEffect::HandleModHealingDone(AuraApplication const *aurApp, uint8 mode,
     target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
-void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp,
-        uint8 mode, bool apply) const {
-    if (!(mode
-            & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp, uint8 mode, bool apply) const 
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
 
     Unit *target = aurApp->GetTarget();
 
-    if (GetMiscValue() < -1 || GetMiscValue() > 4) {
-        sLog->outError(
-                "WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
+    if (GetMiscValue() < -1 || GetMiscValue() > 4) 
+    {
+        sLog->outError("WARNING: Misc Value for SPELL_AURA_MOD_PERCENT_STAT not valid");
         return;
     }
 
@@ -5379,22 +5376,20 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const *aurApp,
     uint32 curHPValue = target->GetHealth();
     uint32 maxHPValue = target->GetMaxHealth();
 
-    for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++) {
-        if (GetMiscValue() == i || GetMiscValue() == -1) {
-            target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i),
-                    TOTAL_PCT, float(GetAmount()), apply);
-            if (target->GetTypeId() == TYPEID_PLAYER
-                    || target->ToCreature()->isPet())
-                target->ApplyStatPercentBuffMod(Stats(i), (float) GetAmount(),
-                        apply);
+    for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++) 
+    {
+        if (GetMiscValue() == i || GetMiscValue() == -1)
+        {
+            target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(GetAmount()), apply);
+            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
+                target->ApplyStatPercentBuffMod(Stats(i), (float) GetAmount(), apply);
         }
     }
 
     //recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR0_UNK4 0x00000010 flag)
-    if ((GetMiscValue() == STAT_STAMINA) && (maxHPValue > 0)
-            && (m_spellProto->Attributes & SPELL_ATTR0_UNK4)) {
-        uint32 newHPValue = target->CountPctFromMaxHealth(
-                int32(100.0f * curHPValue / maxHPValue));
+    if ((GetMiscValue() == STAT_STAMINA) && (maxHPValue > 0) && (m_spellProto->Attributes & SPELL_ATTR0_UNK4)) 
+    {
+        uint32 newHPValue = target->CountPctFromMaxHealth(int32(100.0f * curHPValue / maxHPValue));
         if (!newHPValue)
             newHPValue = 1;
         target->SetHealth(newHPValue);

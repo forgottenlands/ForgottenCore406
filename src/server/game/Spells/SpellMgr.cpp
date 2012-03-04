@@ -4636,6 +4636,11 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectBasePoints[0] = 0;
             count++;
             break;
+        case 79060: // Mark of the wild
+        case 79061:
+            spellInfo->EffectMiscValue[0] = -1;
+            count++;
+            break;
         default:
             break;
         }
