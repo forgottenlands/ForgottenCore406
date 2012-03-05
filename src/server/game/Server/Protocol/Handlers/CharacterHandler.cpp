@@ -233,7 +233,8 @@ bool LoginQueryHolder::Initialize() {
     return res;
 }
 
-void WorldSession::HandleCharEnum(QueryResult result) {
+void WorldSession::HandleCharEnum(QueryResult result)
+{
     WorldPacket data(SMSG_CHAR_ENUM, 100); // we guess size
 
     uint8 num = 0;
@@ -241,14 +242,19 @@ void WorldSession::HandleCharEnum(QueryResult result) {
     data << num;
 
     _allowedCharsToLogin.clear();
-    if (result) {
-        do {
+    if (result)
+    {
+        do 
+        {
             uint32 guidlow = (*result)[0].GetUInt32();
-            sLog->outDetail("Loading char guid %u from account %u.", guidlow,
-                    GetAccountId());
-            if (Player::BuildEnumData(result, &data)) {
-                _allowedCharsToLogin.insert(guidlow);
-                ++num;
+            // Don't shows double pg
+            if (_allowedCharsToLogin.find(guidlow) == _allowedCharsToLogin.end())
+            {
+                if (Player::BuildEnumData(result, &data))
+                {
+                    _allowedCharsToLogin.insert(guidlow);
+                    ++num;
+                }
             }
         } while (result->NextRow());
     }

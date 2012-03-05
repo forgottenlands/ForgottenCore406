@@ -1992,13 +1992,12 @@ bool Player::BuildEnumData(QueryResult result, WorldPacket * p_data) {
         uint32 petFamily = 0;
 
         // show pet at selection character in character list only for non-ghost character
-        if (result && !(playerFlags & PLAYER_FLAGS_GHOST)
-                && (pClass == CLASS_WARLOCK || pClass == CLASS_HUNTER
-                        || pClass == CLASS_DEATH_KNIGHT)) {
+        if (result && !(playerFlags & PLAYER_FLAGS_GHOST) && (pClass == CLASS_WARLOCK || pClass == CLASS_HUNTER || pClass == CLASS_DEATH_KNIGHT))
+        {
             uint32 entry = fields[16].GetUInt32();
-            CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<
-                    CreatureInfo>(entry);
-            if (cInfo) {
+            CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
+            if (cInfo) 
+            {
                 petDisplayId = fields[17].GetUInt32();
                 petLevel = fields[18].GetUInt16();
                 petFamily = cInfo->family;
@@ -19976,11 +19975,13 @@ Pet* Player::GetPet() const {
     return NULL;
 }
 
-void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent) {
+void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent) 
+{
     if (!pet)
         pet = GetPet();
 
-    if (pet) {
+    if (pet)
+    {
         sLog->outDebug(LOG_FILTER_UNITS, "RemovePet %u, %u, %u",
                 pet->GetEntry(), mode, returnreagent);
 
@@ -20001,16 +20002,6 @@ void Player::RemovePet(Pet* pet, PetSlot mode, bool returnreagent) {
      assert(false); //debug code. */
 
     pet->CombatStop();
-
-    switch (pet->GetEntry()) {
-    //warlock pets except imp are removed(?) when logging out
-    case 1860:
-    case 1863:
-    case 417:
-    case 17252:
-        mode = PET_SLOT_DELETED;
-        break;
-    }
 
     // only if current pet in slot
     pet->SavePetToDB(mode);
@@ -24666,21 +24657,25 @@ void Player::UpdateFallInformationIfNeed(MovementInfo const& minfo,
         SetFallInformation(minfo.fallTime, minfo.pos.GetPositionZ());
 }
 
-void Player::UnsummonPetTemporaryIfAny() {
+void Player::UnsummonPetTemporaryIfAny() 
+{
     Pet* pet = GetPet();
     if (!pet)
         return;
 
-    if (!m_temporaryUnsummonedPetNumber && pet->isControlled()
-            && !pet->isTemporarySummoned()) {
+    sLog->outString("temp pet %d", m_temporaryUnsummonedPetNumber);
+    if (!m_temporaryUnsummonedPetNumber && pet->isControlled() && !pet->isTemporarySummoned()) 
+    {
         m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
         m_oldpetspell = pet->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+        sLog->outString("temp pet %d sp %d", m_temporaryUnsummonedPetNumber, m_oldpetspell);
     }
 
     RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
 }
 
-void Player::ResummonPetTemporaryUnSummonedIfAny() {
+void Player::ResummonPetTemporaryUnSummonedIfAny()
+{
     if (!m_temporaryUnsummonedPetNumber)
         return;
 
