@@ -2138,9 +2138,9 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 	}
 
 	// petentry == 0 for hunter "call pet" (current pet summoned if any)
-	sLog->outDebug(LOG_FILTER_PETS, "Player::SummonPet PetSlot [%i]",
-			int32(slotID));
-	if (!entry) {
+	sLog->outDebug(LOG_FILTER_PETS, "Player::SummonPet PetSlot [%i]", int32(slotID));
+	if (!entry) 
+    {
 		delete pet;
 		return NULL;
 	}
@@ -2192,24 +2192,26 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 
 	map->Add(pet->ToCreature());
 
-	switch (petType) {
-	case SUMMON_PET:
-		pet->InitPetCreateSpells();
-		pet->InitTalentForLevel();
-		pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
-		PetSpellInitialize();
-		break;
-	default:
-		break;
+	switch (petType) 
+    {
+	    case SUMMON_PET:
+		    pet->InitPetCreateSpells();
+		    pet->InitTalentForLevel();
+		    pet->SavePetToDB(PET_SLOT_ACTUAL_PET_SLOT);
+		    PetSpellInitialize();
+		    break;
+	    default:
+		    break;
 	}
 
-	if (petType == SUMMON_PET) {
+	if (petType == SUMMON_PET)
+    {
 		// Remove Demonic Sacrifice auras (known pet)
-		Unit::AuraEffectList const& auraClassScripts = GetAuraEffectsByType(
-				SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-		for (Unit::AuraEffectList::const_iterator itr =
-				auraClassScripts.begin(); itr != auraClassScripts.end();) {
-			if ((*itr)->GetMiscValue() == 2228) {
+		Unit::AuraEffectList const& auraClassScripts = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+		for (Unit::AuraEffectList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();) 
+        {
+			if ((*itr)->GetMiscValue() == 2228)
+            {
 				RemoveAurasDueToSpell((*itr)->GetId());
 				itr = auraClassScripts.begin();
 			} else

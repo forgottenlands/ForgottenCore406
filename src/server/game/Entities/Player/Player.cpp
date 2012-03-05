@@ -18246,10 +18246,12 @@ void Player::_LoadMail() {
     m_mailsLoaded = true;
 }
 
-void Player::LoadPet() {
+void Player::LoadPet() 
+{
     //fixme: the pet should still be loaded if the player is not in world
     // just not added to the map
-    if (IsInWorld()) {
+    if (IsInWorld())
+    {
         Pet *pet = new Pet(this);
         if (!pet->LoadPetFromDB(this, 0, 0, true, PET_SLOT_ACTUAL_PET_SLOT))
             delete pet;

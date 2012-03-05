@@ -116,6 +116,22 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     uint32 ownerid = owner->GetGUIDLow();
 
+    switch (petentry) 
+    {
+        case 1860:
+            slotID = PET_SLOT_VOIDWALKER;
+            break;
+        case 1863:
+            slotID = PET_SLOT_SUCCUBUS;
+            break;
+        case 417:
+            slotID = PET_SLOT_FELHUNTER;
+            break;
+        case 17252:
+            slotID = PET_SLOT_FELGUARD;
+            break;
+    }
+
     QueryResult result;
 
     if (petnumber)
@@ -190,12 +206,13 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             return false;
         }
     }
+    /* Why  ?
     else if (pet_type == SUMMON_PET && summon_spell_id && !owner->HasSpell(summon_spell_id))
     {
         // pet is summon but owner has no summon spell (e.g.: Water Elemental)
         m_loading = false;
         return false;
-    }
+    }*/
 
     uint32 pet_number = fields [0].GetUInt32();
 
@@ -321,9 +338,10 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     if (slotID == PET_SLOT_UNK_SLOT)
     {
-        if (getPetType() == HUNTER_PET) owner->SetMinion(this, true,
-                (PetSlot) fields [7].GetUInt8());
-        else owner->SetMinion(this, true, PET_SLOT_OTHER_PET);
+        if (getPetType() == HUNTER_PET)
+            owner->SetMinion(this, true, (PetSlot) fields [7].GetUInt8());
+        else 
+            owner->SetMinion(this, true, PET_SLOT_OTHER_PET);
     }
     else owner->SetMinion(this, true, slotID);
 
@@ -421,6 +439,25 @@ void Pet::SavePetToDB(PetSlot mode)
         // for warlock case
         mode = PET_SLOT_OTHER_PET;
     }
+  
+    if (mode == PET_SLOT_OTHER_PET)
+    {
+        switch (GetEntry()) 
+        {
+            case 1860:
+                mode = PET_SLOT_VOIDWALKER;
+                break;
+            case 1863:
+                mode = PET_SLOT_SUCCUBUS;
+                break;
+            case 417:
+                mode = PET_SLOT_FELHUNTER;
+                break;
+            case 17252:
+                mode = PET_SLOT_FELGUARD;
+                break;
+        }
+    }
 
     uint32 curhealth = GetHealth();
     uint32 curmana = GetPower(POWER_MANA);
@@ -482,7 +519,8 @@ void Pet::SavePetToDB(PetSlot mode)
     // delete
     else
     {
-        if (pOwner->m_currentPetSlot >= PET_SLOT_HUNTER_FIRST && pOwner->m_currentPetSlot <= PET_SLOT_HUNTER_LAST) pOwner->setPetSlotUsed( pOwner->m_currentPetSlot, false);
+        if (pOwner->m_currentPetSlot >= PET_SLOT_HUNTER_FIRST && pOwner->m_currentPetSlot <= PET_SLOT_HUNTER_LAST) 
+            pOwner->setPetSlotUsed(pOwner->m_currentPetSlot, false);
         RemoveAllAuras();
         DeleteFromDB(m_charmInfo->GetPetNumber());
     }
