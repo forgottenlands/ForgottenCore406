@@ -41,15 +41,6 @@ enum Archivement
     ARCH_ANSCHISS_FUER_UMBRISS    = 100,
 };
 
-enum Yells
-{
-    SAY_AGGRO               = -1800000,
-    SAY_DEATH               = -1800001,
-    SAY_SUMMON_1            = -1800002,
-    SAY_SUMMON_2            = -1800003,
-    SAY_SLAY_1              = -1800004,
-};
-
 enum CreatureIds
 {
     BOSS_GENERAL_UMBRISS    = 39625,
@@ -68,6 +59,7 @@ enum Spells
     SPELL_PLAIE             = 74846,      //blutende wunde
     SPELL_PLAIE_H           = 91939,
     SPELL_APPARITION        = 74859,
+    SPELL_WOUND             = 91937,
     //Trogs
     SPELL_MAL               = 90169,
     SPELL_MODGUD            = 74837,
@@ -82,10 +74,11 @@ enum Events
     EVENT_ECLAIR            = 2,
     EVENT_PLAIE             = 3,
     EVENT_SUMMON            = 4,
+    EVENT_WOUND             = 5,
     //Trogg
-    EVENT_GRIFFE            = 5,
-    EVENT_MAL               = 6,
-    EVENT_MOGUD             = 7,
+    EVENT_GRIFFE            = 6,
+    EVENT_MAL               = 7,
+    EVENT_MOGUD             = 8,
 };
 
 enum SummonIds
@@ -116,18 +109,30 @@ class boss_general_umbriss : public CreatureScript
             InstanceScript* pInstance;
             EventMap events;
             SummonList Summons;
+            uint8 despcount;
+
+            void Reset()
+            {
+                events.Reset();
+                despcount = 0;
+                Summons.DespawnAll();
+            }
 
             void EnterCombat(Unit * /*who*/)
             {
-                EnterPhaseGround();
-                DoScriptText(SAY_AGGRO, me);
+                events.ScheduleEvent(EVENT_SECOUSS, 30000);
+                events.ScheduleEvent(EVENT_ECLAIR, 25000);
+                events.ScheduleEvent(EVENT_PLAIE, 20000);
+                events.ScheduleEvent(EVENT_SUMMON, 60000);
+                events.ScheduleEvent(EVENT_BERSERK, 1000);
+                events.ScheduleEvent(EVENT_WOUND, urand(10000, 11000));
             }
 
-//            void JustDied(Unit* /*killer*/)
-//            {
-//                DoScriptText(SAY_DEATH, me);
-//            }
-
+            void JustDied(Unit* /*killer*/)
+            {
+                Summons.DespawnAll();
+            }
+            
             void JustSummoned(Creature *pSummoned)
             {
                 pSummoned->SetInCombatWithZone();
@@ -140,15 +145,14 @@ class boss_general_umbriss : public CreatureScript
             void SummonedCreatureDespawn(Creature *summon)
             {
                 Summons.Despawn(summon);
-            }
+                if (summon->GetEntry() == NPC_TROGG_MAL || summon->GetEntry() == NPC_TROGG_HAB)
+                    despcount++;
 
-            void EnterPhaseGround()
-            {
-                events.ScheduleEvent(EVENT_SECOUSS, 30000);
-                events.ScheduleEvent(EVENT_ECLAIR, 25000);
-                events.ScheduleEvent(EVENT_PLAIE, 20000);
-                events.ScheduleEvent(EVENT_SUMMON, 60000);
-                events.ScheduleEvent(EVENT_BERSERK, 180000);
+                if (despcount >= 2)
+                {
+                    despcount = 0;
+                    events.ScheduleEvent(EVENT_SUMMON, 60000);
+                }
             }
 
             void UpdateAI(const uint32 diff)
@@ -165,38 +169,37 @@ class boss_general_umbriss : public CreatureScript
                             case EVENT_SECOUSS:
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, IsHeroic() ? SPELL_SECOUSS_H : SPELL_SECOUSS);
-                                events.ScheduleEvent(EVENT_SECOUSS, 20000);
+                                events.ScheduleEvent(EVENT_SECOUSS, urand(20000, 30000));
                                 return;
                             case EVENT_ECLAIR:
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, IsHeroic() ? SPELL_ECLAIR_H : SPELL_ECLAIR);
-                                events.ScheduleEvent(EVENT_ECLAIR, 25000);
+                                events.ScheduleEvent(EVENT_ECLAIR, urand(25000, 31000));
                                 return;
                             case EVENT_PLAIE:
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, IsHeroic() ? SPELL_PLAIE_H : SPELL_PLAIE);
-                                events.ScheduleEvent(EVENT_PLAIE, 20000);
+                                events.ScheduleEvent(EVENT_PLAIE, urand(20000, 30000));
                                 return;
                             case EVENT_BERSERK:
-                                if(!HealthAbovePct(30))
-                                    {
-                                        DoCast(me, SPELL_BERSERK);
-                                    }
+                                if(!HealthAbovePct(30) && !me->HasAura(SPELL_BERSERK))
+                                {
+                                    DoCast(me, SPELL_BERSERK);
+                                    events.CancelEvent(EVENT_SUMMON);
+                                }
+                                events.ScheduleEvent(EVENT_BERSERK, 1000);
                                 return;
                             case EVENT_SUMMON:
                                 me->SummonCreature(NPC_TROGG_MAL, aSpawnLocations[0].GetPositionX(), aSpawnLocations[0].GetPositionY(), aSpawnLocations[0].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
                                 me->SummonCreature(NPC_TROGG_HAB, aSpawnLocations[1].GetPositionX(), aSpawnLocations[1].GetPositionY(), aSpawnLocations[1].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
-                                events.ScheduleEvent(EVENT_SUMMON, 60000);
-                                DoScriptText(RAND(SAY_SUMMON_1, SAY_SUMMON_2), me);
                                 return;
+                            case EVENT_WOUND:
+                                DoCastVictim(SPELL_WOUND, true);
+                                events.ScheduleEvent(EVENT_WOUND, urand(16000, 20000));
+                                break;
                         }
                     }
                 DoMeleeAttackIfReady();
-            }
-
-            void KilledUnit(Unit* /*victim*/)
-            {
-                DoScriptText(SAY_SLAY_1, me);
             }
         };
 
@@ -244,7 +247,8 @@ public:
 					switch(eventId)
 					{
 						case EVENT_GRIFFE:
-							DoCastVictim(SPELL_GRIFFE);
+                            if (!me->getVictim()->HasAura(SPELL_GRIFFE))
+							    DoCastVictim(SPELL_GRIFFE);
 							events.ScheduleEvent(EVENT_GRIFFE, 2000);
 							return;
 						case EVENT_MAL:
@@ -304,7 +308,8 @@ public:
 					switch(eventId)
 					{
 						case EVENT_GRIFFE:
-							DoCastVictim(SPELL_GRIFFE);
+                            if (!me->getVictim()->HasAura(SPELL_GRIFFE))
+							    DoCastVictim(SPELL_GRIFFE);
 							events.ScheduleEvent(EVENT_GRIFFE, 5000);
 							return;
 					}
