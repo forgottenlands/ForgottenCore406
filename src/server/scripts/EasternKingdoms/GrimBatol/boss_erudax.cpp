@@ -159,11 +159,14 @@ public:
 					me->MonsterYell(SAY_SUMMON, LANG_UNIVERSAL, NULL);
 
 				//Adds a visual portal effect to the Stalker
-				FacelessPortalStalker->GetAI()->DoCast(FacelessPortalStalker,SPELL_TWILIGHT_PORTAL_VISUAL,true);
+                if (FacelessPortalStalker)
+				    FacelessPortalStalker->GetAI()->DoCast(FacelessPortalStalker,SPELL_TWILIGHT_PORTAL_VISUAL,true);
+
 				events.ScheduleEvent(EVENT_REMOVE_TWILIGHT_PORTAL, 7000);
 
 				//Summons Faceless over the Spell
-				FacelessPortalStalker->GetAI()->DoCast(FacelessPortalStalker,SPELL_SPAWN_FACELESS,true);
+                if (FacelessPortalStalker)
+				    FacelessPortalStalker->GetAI()->DoCast(FacelessPortalStalker,SPELL_SPAWN_FACELESS,true);
 
 				ShouldSummonAdds = false;
 
@@ -183,10 +186,13 @@ public:
 					break;
 
 				case EVENT_SHADOW_GALE:
-					ShadowGaleTrigger = me->SummonCreature(NPC_SHADOW_GALE_STALKER,-739.665f/*+(urand(0,20)-10)*/,-827.024f/*+(urand(0,20)-10)*/,232.412f,3.1f,TEMPSUMMON_CORPSE_DESPAWN);
-					me->SetReactState(REACT_PASSIVE);
-					me->GetMotionMaster()->MovePoint(POINT_ERUDAX_IS_AT_STALKER,ShadowGaleTrigger->GetPositionX(),ShadowGaleTrigger->GetPositionY(),ShadowGaleTrigger->GetPositionZ());
-                    DoScriptText(SAY_GALE, me);
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true, 0))
+                    {
+                        ShadowGaleTrigger = me->SummonCreature(NPC_SHADOW_GALE_STALKER, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN);
+					    me->SetReactState(REACT_PASSIVE);
+					    me->GetMotionMaster()->MovePoint(POINT_ERUDAX_IS_AT_STALKER, -739.665f, -827.024f, 232.412f);
+                        DoScriptText(SAY_GALE, me);
+                    }
 					break;
 
 				case EVENT_REMOVE_TWILIGHT_PORTAL:
@@ -243,8 +249,10 @@ public:
 					// if Erudax is not at the Stalkers poision while he is casting
 					// the Casting Effect would not displayed right
 					DoCast(SPELL_SHADOW_GALE_VISUAL);
-					ShouldSummonAdds = true;
+                    if (ShadowGaleTrigger)
+                        ShadowGaleTrigger->AddAura(SPELL_SHADOW_GALE_VISUAL, ShadowGaleTrigger);
 
+					ShouldSummonAdds = true;
 					break;
 
 				default:
@@ -516,31 +524,20 @@ public:
 		{
 			if(VisualEffectCasted)
 			{
-				events.Update(diff);
-
-				while (uint32 eventId = events.ExecuteEvent())
+                Map::PlayerList const &PlayerList =  me->GetMap()->GetPlayers();
+                if (!PlayerList.isEmpty())
 				{
-					switch (eventId)
-					{
-					case EVENT_TRIGGER_GALE_CHECK_PLAYERS:
-
-						Map::PlayerList const &PlayerList =  me->GetMap()->GetPlayers();
-
-						if (!PlayerList.isEmpty())
+					for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+						if(me->GetDistance(i->getSource()) >= 3)
 						{
-							for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-								if(me->GetDistance(i->getSource()) >= 3)
-								{
-									// ToDo Add Debuff and Deal damage
-									if(!i->getSource()->HasAura(SPELL_SHADOW_GALE_DEBUFF))
-										me->CastSpell(i->getSource(), SPELL_SHADOW_GALE_DEBUFF, true);
-								}else
-									i->getSource()->RemoveAura(SPELL_SHADOW_GALE_DEBUFF);
-						}
-
-						events.ScheduleEvent(EVENT_TRIGGER_GALE_CHECK_PLAYERS, 1000);
-						break;
-					}
+							// ToDo Add Debuff and Deal damage
+							if(!i->getSource()->HasAura(SPELL_SHADOW_GALE_DEBUFF))
+                            {
+								me->AddAura(SPELL_SHADOW_GALE_DEBUFF, i->getSource());
+                                me->DealDamage(i->getSource(),  urand(2925, 3075), NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW, NULL, false);
+                            }
+						}else
+							i->getSource()->RemoveAura(SPELL_SHADOW_GALE_DEBUFF);
 				}
 			}
 
@@ -550,7 +547,6 @@ public:
 			if(!VisualEffectCasted)
 			{
 				VisualEffectCasted = true;
-				events.ScheduleEvent(EVENT_TRIGGER_GALE_CHECK_PLAYERS, 1000);
 			}
 		}
 	};
