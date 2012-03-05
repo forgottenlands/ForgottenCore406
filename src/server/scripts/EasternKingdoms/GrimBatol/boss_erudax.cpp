@@ -423,6 +423,17 @@ public:
 		{	// Removes the Dot of the Egg if the Faceless dies
 			if(isAtAnEgg && pTarget->isAlive())
 				pTarget->RemoveAllAuras();
+
+            if (me->GetMap()->IsHeroic())
+            {
+                if (!me->GetMap()->GetPlayers().isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
+                    {
+                        i->getSource()->KilledMonsterCredit(48822, 0);
+                    }
+                }
+            }
 		}
 
 	private:
