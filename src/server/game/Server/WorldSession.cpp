@@ -197,11 +197,11 @@ void WorldSession::QueuePacket(WorldPacket* new_packet) {
 /// Logging helper for unexpected opcodes
 void WorldSession::LogUnexpectedOpcode(WorldPacket *packet, const char* status,
 		const char *reason) {
-	sLog->outError(
+	/*sLog->outError(
 			"SESSION (account: %u, guidlow: %u, char: %s): received unexpected opcode %s (0x%.4X, status: %s) %s",
 			GetAccountId(), m_GUIDLow, _player ? _player->GetName() : "<none>",
 			LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode(), status,
-			reason);
+			reason);*/
 }
 
 /// Logging helper for unexpected opcodes
@@ -322,21 +322,21 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater) {
 								"received not found opcode 0x%.4X",
 								packet->GetOpcode());
 					else
-						sLog->outError(
+					/*	sLog->outError(
 								"SESSION (account: %u, guidlow: %u, char: %s): received not allowed opcode %s (0x%.4X)",
 								GetAccountId(), m_GUIDLow,
 								_player ? _player->GetName() : "<none>",
 								LookupOpcodeName(packet->GetOpcode()),
-								packet->GetOpcode());
+								packet->GetOpcode());*/
 					break;
 				case STATUS_UNHANDLED:
-					sLog->outDebug(
+					/*sLog->outDebug(
 							LOG_FILTER_NETWORKIO,
 							"SESSION (account: %u, guidlow: %u, char: %s): received not handled opcode %s (0x%.4X)",
 							GetAccountId(), m_GUIDLow,
 							_player ? _player->GetName() : "<none>",
 							LookupOpcodeName(packet->GetOpcode()),
-							packet->GetOpcode());
+							packet->GetOpcode());*/
 					break;
 				}
 			} catch (ByteBufferException &) {

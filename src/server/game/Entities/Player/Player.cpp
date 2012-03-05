@@ -24665,12 +24665,10 @@ void Player::UnsummonPetTemporaryIfAny()
     if (!pet)
         return;
 
-    sLog->outString("temp pet %d", m_temporaryUnsummonedPetNumber);
     if (!m_temporaryUnsummonedPetNumber && pet->isControlled() && !pet->isTemporarySummoned()) 
     {
         m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
         m_oldpetspell = pet->GetUInt32Value(UNIT_CREATED_BY_SPELL);
-        sLog->outString("temp pet %d sp %d", m_temporaryUnsummonedPetNumber, m_oldpetspell);
     }
 
     RemovePet(pet, PET_SLOT_ACTUAL_PET_SLOT);
