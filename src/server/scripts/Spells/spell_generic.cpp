@@ -787,12 +787,15 @@ public:
         void HandleEffectPeriodic(AuraEffect const * /*aurEff*/) 
         {
             Unit* target = GetTarget();
+            if (AuraApplication* aurApp = target->GetAuraApplication(GetId(), target->GetGUID(), 0, 0, 0))
+                aurApp->ClientUpdate(false);
             if (!target->isInCombat())
             {
                 int32 curAmount = GetEffect(0)->GetAmount();
                 if (curAmount >= 1000)
                 {
                     GetEffect(0)->ChangeAmount(curAmount / 2, false);
+                    GetEffect(1)->ChangeAmount(curAmount / 2, false);
                     if (AuraApplication* aurApp = target->GetAuraApplication(GetId(), target->GetGUID(), 0, 0, 0))
                         aurApp->ClientUpdate(false);
                 } else
