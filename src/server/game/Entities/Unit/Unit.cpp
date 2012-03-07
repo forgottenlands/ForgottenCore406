@@ -8770,8 +8770,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                 bp += aurApp->GetBase()->GetEffect(0)->GetAmount();
                 if (bp <= (GetMaxHealth() / 10.0f))
                 {
-                    aurApp->GetBase()->GetEffect(0)->SetAmount(bp);
-                    aurApp->GetBase()->GetEffect(1)->SetAmount(bp);
+                    aurApp->GetBase()->GetEffect(0)->ChangeAmount(bp,  false);
+                    aurApp->GetBase()->GetEffect(1)->ChangeAmount(bp,  false);
                     aurApp->ClientUpdate(false);
                     return true;
                 }
