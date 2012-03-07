@@ -1,0 +1,4 @@
+-- Unusual Behavior... Even for Gnolls
+DELETE FROM `creature` WHERE (`guid`='49764');
+DELETE FROM `creature` WHERE (`guid`='45226');
+DELETE FROM `creature` WHERE (`guid`='52640');
