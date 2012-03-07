@@ -671,10 +671,22 @@ void Player::UpdateBlockPercentage()
         // Base value
         value = 5.0f;
         // Modify value from defense skill
-        value += (int32(GetDefenseSkillValue())
-                - int32(GetMaxSkillValueForLevel())) * 0.04f;
+        value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
         // Increase from SPELL_AURA_MOD_BLOCK_PERCENT aura
         value += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
+        // Increase from Mastery
+
+        // Warrior Protection Mastery: Critical Block
+        if (getClass() == CLASS_WARRIOR)
+        {
+            if (HasAuraType(SPELL_AURA_MASTERY))
+            {
+                if (GetTalentBranchSpec(GetActiveSpec()) == BS_WARRIOR_PROTECTION)
+                {
+                    value += float(1.5f * GetMasteryPoints());
+                }
+            }
+        }
         // Increase from rating
         value += GetRatingBonusValue(CR_BLOCK);
         value = value < 0.0f ? 0.0f : value;

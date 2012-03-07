@@ -2618,7 +2618,26 @@ bool Unit::isSpellBlocked(Unit *pVictim, SpellEntry const * spellProto,
 
 bool Unit::isBlockCritical()
 {
-    if (roll_chance_i(GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE))) return true;
+    int32 chance = GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE);
+
+    if (Player* caster = ToPlayer())
+    {
+        // Warrior Protection Mastery: Critical Block
+        if (caster->getClass() == CLASS_WARRIOR)
+        {
+            if (caster->HasAuraType(SPELL_AURA_MASTERY))
+            {
+                if (caster->GetTalentBranchSpec(caster->GetActiveSpec()) == BS_WARRIOR_PROTECTION)
+                {
+                    chance += int32(1.5f * caster->GetMasteryPoints());
+                }
+            }
+        }
+    }
+
+    if (roll_chance_i(GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE))) 
+        return true;
+
     return false;
 }
 
@@ -3050,6 +3069,7 @@ float Unit::GetUnitBlockChance() const
         else
         {
             float block = 5.0f;
+            
             block += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
             return block > 0.0f ? block : 0.0f;
         }
