@@ -6437,6 +6437,27 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     target = this;
                     break;
                 }
+                // Vengeance
+                case 93098:
+                    int32 bp = int32(damage * 0.05f);
+                    if (AuraApplication* aurApp = GetAuraApplication(76691, GetGUID(), 0, 0, 0))
+                    {
+                        bp += aurApp->GetBase()->GetEffect(0)->GetAmount();
+                        if (bp <= (GetMaxHealth() / 10.0f))
+                        {
+                            aurApp->GetBase()->GetEffect(0)->SetAmount(bp);
+                            aurApp->GetBase()->GetEffect(1)->SetAmount(bp);
+                            aurApp->ClientUpdate(false);
+                            return true;
+                        }
+
+                        return false;
+                    }
+
+                    if (bp <= (GetMaxHealth() / 10.0f))
+                        CastCustomSpell(this, 76691, &bp, &bp, 0, true);
+                    return true;
+                    break;
             }
 
             // Retaliation

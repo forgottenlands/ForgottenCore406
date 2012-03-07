@@ -774,6 +774,44 @@ public:
 	}
 };
 
+class spell_gen_vengeance : public SpellScriptLoader 
+{
+public:
+    spell_gen_vengeance() : SpellScriptLoader("spell_gen_vengeance") 
+    { }
+
+    class spell_gen_vengeance_AuraScript: public AuraScript 
+    {
+        PrepareAuraScript(spell_gen_vengeance_AuraScript)
+
+        void HandleEffectPeriodic(AuraEffect const * /*aurEff*/) 
+        {
+            Unit* target = GetTarget();
+            if (!target->isInCombat())
+            {
+                int32 curAmount = GetEffect(0)->GetAmount();
+                if (curAmount >= 1000)
+                {
+                    GetEffect(0)->ChangeAmount(curAmount / 2, false);
+                    if (AuraApplication* aurApp = target->GetAuraApplication(GetId(), target->GetGUID(), 0, 0, 0))
+                        aurApp->ClientUpdate(false);
+                } else
+                    target->RemoveAura(GetId());
+            }
+        }
+
+        void Register() 
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_vengeance_AuraScript::HandleEffectPeriodic, EFFECT_2, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript *GetAuraScript() const 
+    {
+        return new spell_gen_vengeance_AuraScript();
+    }
+};
+
 void AddSC_generic_spell_scripts() {
 	new spell_gen_absorb0_hitlimit1();
 	new spell_gen_aura_of_anger();
@@ -793,4 +831,5 @@ void AddSC_generic_spell_scripts() {
 	new spell_gen_shroud_of_death();
 	new spell_gen_dungeon_credit();
 	new spell_gen_profession_research();
+    new spell_gen_vengeance();
 }
