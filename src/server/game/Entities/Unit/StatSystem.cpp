@@ -677,16 +677,25 @@ void Player::UpdateBlockPercentage()
         // Increase from Mastery
 
         // Warrior Protection Mastery: Critical Block
-        if (getClass() == CLASS_WARRIOR)
+        if (HasAuraType(SPELL_AURA_MASTERY))
         {
-            if (HasAuraType(SPELL_AURA_MASTERY))
+            switch (getClass())
             {
-                if (GetTalentBranchSpec(GetActiveSpec()) == BS_WARRIOR_PROTECTION)
-                {
-                    value += float(1.5f * GetMasteryPoints());
-                }
+                case CLASS_WARRIOR:
+                    if (GetTalentBranchSpec(GetActiveSpec()) == BS_WARRIOR_PROTECTION)
+                    {
+                        value += float(1.5f * GetMasteryPoints());
+                    }
+                    break;
+                case CLASS_PALADIN:
+                    if (GetTalentBranchSpec(GetActiveSpec()) == BS_PALADIN_PROTECTION)
+                    {
+                        value += float(2.25f * GetMasteryPoints());
+                    }
+                    break;
             }
         }
+
         // Increase from rating
         value += GetRatingBonusValue(CR_BLOCK);
         value = value < 0.0f ? 0.0f : value;
