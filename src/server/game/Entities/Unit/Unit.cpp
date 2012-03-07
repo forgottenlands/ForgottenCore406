@@ -6437,27 +6437,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     target = this;
                     break;
                 }
-                // Vengeance
-                case 93098:
-                    int32 bp = int32(damage * 0.05f);
-                    if (AuraApplication* aurApp = GetAuraApplication(76691, GetGUID(), 0, 0, 0))
-                    {
-                        bp += aurApp->GetBase()->GetEffect(0)->GetAmount();
-                        if (bp <= (GetMaxHealth() / 10.0f))
-                        {
-                            aurApp->GetBase()->GetEffect(0)->SetAmount(bp);
-                            aurApp->GetBase()->GetEffect(1)->SetAmount(bp);
-                            aurApp->ClientUpdate(false);
-                            return true;
-                        }
-
-                        return false;
-                    }
-
-                    if (bp <= (GetMaxHealth() / 10.0f))
-                        CastCustomSpell(this, 76691, &bp, &bp, 0, true);
-                    return true;
-                    break;
             }
 
             // Retaliation
@@ -8773,15 +8752,48 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
             break;
     }
 
+    // Interclass Spells
+    switch (dummySpell->Id)
+    {
+        // Vengeance (Pally - Warrior - Druid - Death Knight)
+        case 84839:
+        case 84840:
+        case 93098:
+        case 93099:
+            // For druid don't proc if we aren't in bear form
+            if (dummySpell->Id == 84840 && GetShapeshiftForm() != FORM_BEAR)
+                return false;
+
+            int32 bp = int32(damage * 0.05f);
+            if (AuraApplication* aurApp = GetAuraApplication(76691, GetGUID(), 0, 0, 0))
+            {
+                bp += aurApp->GetBase()->GetEffect(0)->GetAmount();
+                if (bp <= (GetMaxHealth() / 10.0f))
+                {
+                    aurApp->GetBase()->GetEffect(0)->SetAmount(bp);
+                    aurApp->GetBase()->GetEffect(1)->SetAmount(bp);
+                    aurApp->ClientUpdate(false);
+                    return true;
+                }
+
+                return false;
+            }
+
+            if (bp <= (GetMaxHealth() / 10.0f))
+                CastCustomSpell(this, 76691, &bp, &bp, 0, true);
+            return true;
+            break;
+    }
+
     // if not handled by custom case, get triggered spell from dummySpell proto
-    if (!triggered_spell_id) triggered_spell_id =
-            dummySpell->EffectTriggerSpell [triggeredByAura->GetEffIndex()];
+    if (!triggered_spell_id) 
+        triggered_spell_id = dummySpell->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
 
     // processed charge only counting case
-    if (!triggered_spell_id) return true;
+    if (!triggered_spell_id)
+        return true;
 
-    SpellEntry const* triggerEntry = sSpellStore.LookupEntry(
-            triggered_spell_id);
+    SpellEntry const* triggerEntry = sSpellStore.LookupEntry(triggered_spell_id);
     if (!triggerEntry)
     {
         sLog->outError(
@@ -8791,21 +8803,22 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
     }
 
     // default case
-    if ((!target && !sSpellMgr->IsSrcTargetSpell(triggerEntry))
-            || (target && target != this && !target->isAlive())) return false;
+    if ((!target && !sSpellMgr->IsSrcTargetSpell(triggerEntry)) || (target && target != this && !target->isAlive())) 
+            return false;
 
-    if (cooldown_spell_id == 0) cooldown_spell_id = triggered_spell_id;
+    if (cooldown_spell_id == 0) 
+        cooldown_spell_id = triggered_spell_id;
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER
-            && ToPlayer()->HasSpellCooldown(cooldown_spell_id)) return false;
+    if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(cooldown_spell_id)) 
+        return false;
 
-    if (basepoints0) CastCustomSpell(target, triggered_spell_id, &basepoints0,
-            NULL, NULL, true, castItem, triggeredByAura, originalCaster);
-    else CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura,
-            originalCaster);
+    if (basepoints0) 
+        CastCustomSpell(target, triggered_spell_id, &basepoints0, NULL, NULL, true, castItem, triggeredByAura, originalCaster);
+    else 
+        CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura, originalCaster);
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER) ToPlayer()->AddSpellCooldown(
-            cooldown_spell_id, 0, time(NULL) + cooldown);
+    if (cooldown && GetTypeId() == TYPEID_PLAYER) 
+        ToPlayer()->AddSpellCooldown(cooldown_spell_id, 0, time(NULL) + cooldown);
 
     return true;
 }
@@ -9333,13 +9346,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
                     case 80128: // Impending Victory Rank 1
                     case 80129: // Impending Victory Rank 2
                         if (!pVictim->HealthBelowPct(20)) return false;
-                    case 93098:
-                        if (damage > 0)
-                        {
-                            int bp = damage * 0.05f; //5% from damage
-                            CastCustomSpell(this, 76691, &bp, &bp, &bp, true, 0,
-                                    0, GetGUID());
-                        }
                         break;
                 }
                 break;

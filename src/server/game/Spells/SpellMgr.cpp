@@ -579,7 +579,7 @@ AuraState GetSpellAuraState(SpellEntry const * spellInfo) {
         return AURA_STATE_DEADLY_POISON;
 
     // Enrage aura state
-    if (spellInfo->Dispel == DISPEL_ENRAGE)
+    if (spellInfo->Dispel == DISPEL_ENRAGE && spellInfo->Id != 76691)
         return AURA_STATE_ENRAGE;
 
     // Bleeding aura state

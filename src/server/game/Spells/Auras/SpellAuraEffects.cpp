@@ -3051,6 +3051,9 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const {
                     target->CastCustomSpell(target, 48420, &bp, NULL, NULL,
                             true);
                 }
+                // Remove Vengeance when go in cat form
+                if (target->HasAura(76691))
+                    target->RemoveAura(76691);
                 break;
             case FORM_DIREBEAR:
             case FORM_BEAR:
