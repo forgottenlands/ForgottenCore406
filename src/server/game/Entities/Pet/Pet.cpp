@@ -195,7 +195,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         m_loading = false;
         return false;
     }
-    sLog->outString("id %d", summon_spell_id);
     PetType pet_type = PetType(fields [18].GetUInt8());
     if (pet_type == HUNTER_PET)
     {

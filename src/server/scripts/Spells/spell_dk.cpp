@@ -366,7 +366,7 @@ class spell_dk_scourge_strike : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+                OnEffect += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
             }
         };
 

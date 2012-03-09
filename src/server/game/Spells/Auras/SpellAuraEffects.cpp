@@ -7409,7 +7409,7 @@ void AuraEffect::HandleAuraSetVehicle(AuraApplication const * aurApp,
     }
 }
 void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mode, bool apply) const
-{     
+{ 
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
@@ -7476,12 +7476,14 @@ void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mo
     {
         if (target->HasAura(91713)) //The nether ward talent
             affspell = 6229;
-        else
+    }
+    else
     {
         switch (GetAmount())
         {
             default:
             return;
+        }
     }
 
     if (overrideId == 88684 || overrideId == 88685) // Chakra
