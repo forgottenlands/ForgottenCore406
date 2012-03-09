@@ -4655,6 +4655,10 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectMiscValue[0] = -1;
             count++;
             break;
+        case 53592: // Touched by the light
+            spellInfo->EffectMiscValue[2] = STAT_STAMINA;
+            count++;
+            break;
         default:
             break;
         }

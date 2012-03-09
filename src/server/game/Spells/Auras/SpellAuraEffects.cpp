@@ -5873,10 +5873,9 @@ void AuraEffect::HandleRangedAmmoHaste(AuraApplication const *aurApp,
 /***       COMBAT RATING      ***/
 /********************************/
 
-void AuraEffect::HandleModRating(AuraApplication const *aurApp, uint8 mode,
-        bool apply) const {
-    if (!(mode
-            & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+void AuraEffect::HandleModRating(AuraApplication const *aurApp, uint8 mode, bool apply) const 
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
 
     Unit *target = aurApp->GetTarget();
@@ -5886,8 +5885,7 @@ void AuraEffect::HandleModRating(AuraApplication const *aurApp, uint8 mode,
 
     for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
         if (GetMiscValue() & (1 << rating))
-            target->ToPlayer()->ApplyRatingMod(CombatRating(rating),
-                    GetAmount(), apply);
+            target->ToPlayer()->ApplyRatingMod(CombatRating(rating), GetAmount(), apply);
 }
 
 void AuraEffect::HandleModRatingFromStat(AuraApplication const *aurApp,
@@ -5927,10 +5925,9 @@ void AuraEffect::HandleAuraModAttackPower(AuraApplication const *aurApp,
                 -float(GetAmount()), apply);
 }
 
-void AuraEffect::HandleAuraModRangedAttackPower(AuraApplication const *aurApp,
-        uint8 mode, bool apply) const {
-    if (!(mode
-            & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+void AuraEffect::HandleAuraModRangedAttackPower(AuraApplication const *aurApp, uint8 mode, bool apply) const 
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
 
     Unit *target = aurApp->GetTarget();
@@ -5938,12 +5935,11 @@ void AuraEffect::HandleAuraModRangedAttackPower(AuraApplication const *aurApp,
     if ((target->getClassMask() & CLASSMASK_WAND_USERS) != 0)
         return;
 
+    sLog->outString("aspc %d", GetAmount());
     if (float(GetAmount()) > 0.f)
-        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_POS,
-                TOTAL_VALUE, float(GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_POS, TOTAL_VALUE, float(GetAmount()), apply);
     else
-        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_NEG,
-                TOTAL_VALUE, -float(GetAmount()), apply);
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_VALUE, -float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModAttackPowerPercent(AuraApplication const *aurApp,

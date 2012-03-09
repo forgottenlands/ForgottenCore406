@@ -124,16 +124,14 @@ bool Player::UpdateStats(Stats stat)
 
     // Update ratings in exist SPELL_AURA_MOD_RATING_FROM_STAT and only depends from stat
     uint32 mask = 0;
-    AuraEffectList const& modRatingFromStat = GetAuraEffectsByType(
-            SPELL_AURA_MOD_RATING_FROM_STAT);
-    for (AuraEffectList::const_iterator i = modRatingFromStat.begin();
-            i != modRatingFromStat.end(); ++i)
+    AuraEffectList const& modRatingFromStat = GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_STAT);
+    for (AuraEffectList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
         if (Stats((*i)->GetMiscValueB()) == stat) mask |= (*i)->GetMiscValue();
     if (mask)
     {
         for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
-            if (mask & (1 << rating)) ApplyRatingMod(CombatRating(rating), 0,
-                    true);
+            if (mask & (1 << rating)) 
+                ApplyRatingMod(CombatRating(rating), 0, true);
     }
     return true;
 }
@@ -834,8 +832,7 @@ void Player::UpdateRangedHitChances()
 
 void Player::UpdateSpellHitChances()
 {
-    m_modSpellHitChance = (float) GetTotalAuraModifier(
-            SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+    m_modSpellHitChance = (float) GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
     m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
 }
 

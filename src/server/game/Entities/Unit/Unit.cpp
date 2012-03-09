@@ -12482,18 +12482,14 @@ int32 Unit::SpellBaseDamageBonus(SpellSchoolMask schoolMask)
         DoneAdvertisedBenefit += this->ToPlayer()->GetBaseSpellPowerBonus();
 
         // Damage bonus from stats
-        AuraEffectList const& mDamageDoneOfStatPercent = GetAuraEffectsByType(
-                SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
-        for (AuraEffectList::const_iterator i =
-                mDamageDoneOfStatPercent.begin();
-                i != mDamageDoneOfStatPercent.end(); ++i)
+        AuraEffectList const& mDamageDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
+        for (AuraEffectList::const_iterator i = mDamageDoneOfStatPercent.begin(); i != mDamageDoneOfStatPercent.end(); ++i)
         {
             if ((*i)->GetMiscValue() & schoolMask)
             {
                 // stat used stored in miscValueB for this aura
                 Stats usedStat = Stats((*i)->GetMiscValueB());
-                DoneAdvertisedBenefit += int32(
-                        GetStat(usedStat) * (*i)->GetAmount() / 100.0f);
+                DoneAdvertisedBenefit += int32(GetStat(usedStat) * (*i)->GetAmount() / 100.0f);
             }
         }
         // ... and attack power

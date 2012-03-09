@@ -6036,18 +6036,16 @@ void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply) {
     UpdateRating(cr);
 }
 
-void Player::UpdateRating(CombatRating cr) {
+void Player::UpdateRating(CombatRating cr)
+{
     int32 amount = m_baseRatingValue[cr];
     // Apply bonus from SPELL_AURA_MOD_RATING_FROM_STAT
     // stat used stored in miscValueB for this aura
-    AuraEffectList const& modRatingFromStat = GetAuraEffectsByType(
-            SPELL_AURA_MOD_RATING_FROM_STAT);
-    for (AuraEffectList::const_iterator i = modRatingFromStat.begin();
-            i != modRatingFromStat.end(); ++i)
+    AuraEffectList const& modRatingFromStat = GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_STAT);
+    for (AuraEffectList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
         if ((*i)->GetMiscValue() & (1 << cr))
-            amount += int32(
-                    GetStat(Stats((*i)->GetMiscValueB())) * (*i)->GetAmount()
-                            / 100.0f);
+            amount += int32(GetStat(Stats((*i)->GetMiscValueB())) * (*i)->GetAmount() / 100.0f);
+
     if (amount < 0)
         amount = 0;
     SetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + cr, uint32(amount));
