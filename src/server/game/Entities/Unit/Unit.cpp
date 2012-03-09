@@ -4841,21 +4841,20 @@ AuraEffect * Unit::IsScriptOverriden(SpellEntry const * spell,
 
 uint32 Unit::GetDiseasesByCaster(uint64 casterGUID, bool remove)
 {
-    static const AuraType diseaseAuraTypes [] =
-    { SPELL_AURA_PERIODIC_DAMAGE, // Frost Fever and Blood Plague
-            SPELL_AURA_LINKED, // Crypt Fever and Ebon Plague
-            SPELL_AURA_NONE };
+    static const AuraType diseaseAuraTypes[] =
+    { 
+        SPELL_AURA_PERIODIC_DAMAGE, // Frost Fever and Blood Plague
+        SPELL_AURA_MOD_DAMAGE_FROM_CASTER, // Ebon Plague
+        SPELL_AURA_NONE 
+    };
 
     uint32 diseases = 0;
-    for (AuraType const* itr = &diseaseAuraTypes [0];
-            itr && itr [0] != SPELL_AURA_NONE; ++itr)
+    for (AuraType const* itr = &diseaseAuraTypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
     {
-        for (AuraEffectList::iterator i = m_modAuras [*itr].begin();
-                i != m_modAuras [*itr].end();)
+        for (AuraEffectList::iterator i = m_modAuras[*itr].begin(); i != m_modAuras[*itr].end();)
         {
             // Get auras with disease dispel type by caster
-            if ((*i)->GetSpellProto()->Dispel == DISPEL_DISEASE
-                    && (*i)->GetCasterGUID() == casterGUID)
+            if ((*i)->GetSpellProto()->Dispel == DISPEL_DISEASE && (*i)->GetCasterGUID() == casterGUID)
             {
                 ++diseases;
 
