@@ -1888,8 +1888,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                     break;
             }
 
-      damage = caster->SpellHealingBonus(target, GetSpellProto(), GetEffIndex(), damage, DOT,GetBase()->GetStackAmount());
-
             bool crit = IsPeriodicTickCrit(target, caster);
             if (crit)
                 damage = caster->SpellCriticalHealingBonus(m_spellProto, damage, target);
@@ -7479,6 +7477,10 @@ void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mo
         if (target->HasAura(91713)) //The nether ward talent
             affspell = 6229;
         else
+    {
+        switch (GetAmount())
+        {
+            default:
             return;
     }
 
