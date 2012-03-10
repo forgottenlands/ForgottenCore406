@@ -6796,15 +6796,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     basepoints0 = damage * triggerAmount / tickcount / 100;
                     break;
                 }
-                    // Improved Shadowform
-                case 47570:
-                case 47569:
-                {
-                    if (!roll_chance_i(triggerAmount)) return false;
-
-                    RemoveMovementImpairingAuras();
-                    break;
-                }
                     // Glyph of Dispel Magic
                 case 55677:
                 {
