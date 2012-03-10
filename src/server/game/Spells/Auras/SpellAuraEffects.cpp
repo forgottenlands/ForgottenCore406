@@ -7470,16 +7470,10 @@ void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mo
 
     if (overrideId == 91711)
     {
-        if (target->HasAura(91713)) //The nether ward talent
+        if (target->HasAura(91713)) // The nether ward talent
             affspell = 6229;
-    }
-    else
-    {
-        switch (GetAmount())
-        {
-            default:
+        else 
             return;
-        }
     }
 
     if (overrideId == 88684 || overrideId == 88685) // Chakra
