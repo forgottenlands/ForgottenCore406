@@ -6318,7 +6318,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     target = this;
                     triggered_spell_id = 86262;
 
-                    if (pVictim) CastSpell(pVictim, 31589, false);
+                    if (pVictim && pVictim->GetGUID() != GetGUID()) 
+                    {
+                        AddAura(31589, pVictim);
+                        return true;
+                    }
+                    return false;
                     break;
                 }
                 // Glyph of Icy Veins
