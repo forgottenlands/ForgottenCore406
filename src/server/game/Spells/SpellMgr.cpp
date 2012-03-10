@@ -4659,6 +4659,17 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectMiscValue[2] = STAT_STAMINA;
             count++;
             break;
+        case 91058: // Summon Twilight Hatchling
+            spellInfo->Effect[1] = SPELL_EFFECT_NONE;
+            spellInfo->EffectBasePoints[1] = 0;
+            spellInfo->EffectMiscValue[1] = 0;
+            spellInfo->EffectMiscValueB[1] = 0;
+            spellInfo->Effect[2] = SPELL_EFFECT_NONE;
+            spellInfo->EffectBasePoints[2] = 0;
+            spellInfo->EffectMiscValue[2] = 0;
+            spellInfo->EffectMiscValueB[2] = 0;
+            count++;
+            break;
         default:
             break;
         }

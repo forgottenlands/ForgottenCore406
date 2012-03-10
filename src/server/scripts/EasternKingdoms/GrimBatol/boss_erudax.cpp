@@ -342,6 +342,8 @@ public:
 			pTarget = GetRandomEgg();
 			DoZoneInCombat();
             DoScriptText(SAY_SUMMON, summoner);
+            me->SetSpeed(MOVE_RUN, 0.8f, true);
+            me->SetSpeed(MOVE_WALK, 0.8f, true);
 
 			if(me->GetMap()->IsHeroic())
 				events.ScheduleEvent(EVENT_CAST_SHIELD_OF_NIGHTMARE_DELAY, 3000);
@@ -492,7 +494,8 @@ public:
 			// Despawn of the Hatchlings is handled by Erudax
 			// The behaviour of the hatchlings is handled through SmartAI
 
-			DoCastAOE(SPELL_SUMMON_TWILIGHT_HATCHLINGS, true);
+            if (urand(0, 1) == 1)
+			    DoCastAOE(SPELL_SUMMON_TWILIGHT_HATCHLINGS, true);
 		}
 
 		void JustSummoned(Creature* summon)
