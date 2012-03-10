@@ -5934,8 +5934,11 @@ void AuraEffect::HandleAuraModRangedAttackPower(AuraApplication const *aurApp, u
 
     if ((target->getClassMask() & CLASSMASK_WAND_USERS) != 0)
         return;
+    
+    // Aspect of the Hawk hackfix
+    if (aurApp->GetBase()->GetSpellProto()->Id == 13165 && target->getLevel() == 85)
+        aurApp->GetBase()->GetEffect(0)->SetAmount(2000);
 
-    sLog->outString("aspc %d", GetAmount());
     if (float(GetAmount()) > 0.f)
         target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_POS, TOTAL_VALUE, float(GetAmount()), apply);
     else
