@@ -2750,10 +2750,6 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const {
                     casterAsCreature->DisappearAndDie();
             }
             break;
-            // Mana Tide
-        case 16191:
-			target->CastCustomSpell(triggerTarget, triggerSpellId, &m_amount, NULL, NULL, true, NULL, this);
-            return;
             // Negative Energy Periodic
         case 46284:
             caster->CastCustomSpell(triggerSpellId, SPELLVALUE_MAX_TARGETS,
@@ -5211,15 +5207,15 @@ void AuraEffect::HandleModTargetResistance(AuraApplication const *aurApp,
 /***           STAT           ***/
 /********************************/
 
-void AuraEffect::HandleAuraModStat(AuraApplication const *aurApp, uint8 mode,
-        bool apply) const {
-    if (!(mode
-            & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+void AuraEffect::HandleAuraModStat(AuraApplication const *aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
 
     Unit *target = aurApp->GetTarget();
 
-    if (GetMiscValue() < -2 || GetMiscValue() > 4) {
+    if (GetMiscValue() < -2 || GetMiscValue() > 4)
+    {
         sLog->outError(
                 "WARNING: Spell %u effect %u has an unsupported misc value (%i) for SPELL_AURA_MOD_STAT ",
                 GetId(), GetEffIndex(), GetMiscValue());
@@ -5229,14 +5225,26 @@ void AuraEffect::HandleAuraModStat(AuraApplication const *aurApp, uint8 mode,
     if (apply && aurApp->GetRemoveMode())
         return;
 
-    for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++) {
+    // Mana Tide
+    if (aurApp->GetBase()->GetId() == 16191 && GetAmount() == 400)
+    {
+        if (Unit* manatide = aurApp->GetBase()->GetCaster())
+        {
+            if (Unit* owner = manatide->GetOwner())
+            {
+                aurApp->GetBase()->GetEffect(0)->SetAmount(owner->GetStat(STAT_SPIRIT) * 4);
+            }
+        }
+    }
+
+    for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
+    {
         // -1 or -2 is all stats (misc < -2 checked in function beginning)
-        if (GetMiscValue() < 0 || GetMiscValue() == i) {
-            target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i),
-                    TOTAL_VALUE, float(GetAmount()), apply);
-            if (target->GetTypeId() == TYPEID_PLAYER
-                    || target->ToCreature()->isPet())
-                target->ApplyStatBuffMod(Stats(i), (float) GetAmount(), apply);
+        if (GetMiscValue() < 0 || GetMiscValue() == i) 
+        {
+            target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, float(GetAmount()), apply);
+            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
+                target->ApplyStatBuffMod(Stats(i), (float)GetAmount(), apply);
         }
     }
 }

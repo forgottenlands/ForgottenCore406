@@ -2273,12 +2273,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 return;
             }
             // Mana Spring Totem
-            if (m_spellInfo->SpellFamilyFlags [0]
-                    & SPELLFAMILYFLAG_SHAMAN_MANA_SPRING)
+            if (m_spellInfo->SpellFamilyFlags [0] & SPELLFAMILYFLAG_SHAMAN_MANA_SPRING)
             {
-                if (!unitTarget || unitTarget->getPowerType() != POWER_MANA) return;
-                m_caster->CastCustomSpell(unitTarget, 52032, &damage, 0, 0,
-                        true, 0, 0, m_originalCasterGUID);
+                if (!unitTarget || unitTarget->getPowerType() != POWER_MANA) 
+                    return;
+
+                m_caster->CastCustomSpell(unitTarget, 52032, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
                 return;
             }
             // Lava Lash
@@ -4229,8 +4229,8 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     if (!summon || !summon->isTotem()) return;
 
                     // Mana Tide Totem
-                    if (m_spellInfo->Id == 16190) damage =
-                            m_caster->CountPctFromMaxHealth(10);
+                    if (m_spellInfo->Id == 16190) 
+                        damage = m_caster->CountPctFromMaxHealth(10);
 
                     if (damage) // if not spell info, DB values used
                     {
