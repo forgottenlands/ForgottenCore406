@@ -4723,7 +4723,11 @@ void SpellMgr::LoadSpellCustomAttr() {
             // Seals of the Pure should affect Seal of Righteousness
 			if (spellInfo->SpellIconID == 25 && spellInfo->Attributes & SPELL_ATTR0_PASSIVE)
                 spellInfo->EffectSpellClassMask[0][1] |= 0x20000000;
-            else
+            // Holy Radiance
+            else if (spellInfo->Id == 86452)
+            {
+                spellInfo->EffectRadiusIndex[0] = 9; // 20yd
+            } else
                 break;
             count++;
             break;
