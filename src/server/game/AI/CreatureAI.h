@@ -172,6 +172,12 @@ public:
     void DoAttackerAreaInCombat(Unit* attacker, float range, Unit* pUnit = NULL);
     void DoAttackerGroupInCombat(Player* attacker);
 
+    void SetMinionInCombat()
+    {
+        DoZoneInCombat(me);
+        me->SetInCombatWithZone();
+    }
+
     // Called at text emote receive from player
     virtual void ReceiveEmote(Player* /*pPlayer*/, uint32 /*text_emote*/) {
     }
