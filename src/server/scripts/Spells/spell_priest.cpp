@@ -520,6 +520,39 @@ class spell_pri_fade : public SpellScriptLoader
         }
 };
 
+// Mind Spike
+class spell_pri_mind_spike : public SpellScriptLoader
+{
+    public:
+        spell_pri_mind_spike() : SpellScriptLoader("spell_pri_mind_spike") { }
+
+        class spell_pri_mind_spike_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_mind_spike_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                sLog->outString("dentro");
+                if(Unit* caster = GetCaster())
+                {
+                    GetHitUnit()->RemoveAura(34914, GetCaster()->GetGUID());
+                    GetHitUnit()->RemoveAura(2944, GetCaster()->GetGUID());
+                    GetHitUnit()->RemoveAura(589, GetCaster()->GetGUID());
+                }
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_pri_mind_spike_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pri_mind_spike_SpellScript;
+        }
+};
+
 void AddSC_priest_spell_scripts() {
 	new spell_pri_guardian_spirit();
 	new spell_pri_mana_burn;
@@ -533,4 +566,5 @@ void AddSC_priest_spell_scripts() {
 	new spell_pri_power_word_fortitude();
     new spell_pri_power_word_shield();
     new spell_pri_fade();
+    new spell_pri_mind_spike();
 }
