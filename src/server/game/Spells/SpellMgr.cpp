@@ -4711,8 +4711,10 @@ void SpellMgr::LoadSpellCustomAttr() {
                 spellInfo->EffectRadiusIndex[0] = 14;
             // Thrash
             else if (spellInfo->Id == 77758)
+            {
                 spellInfo->EffectRadiusIndex[0] = 14;
                 spellInfo->EffectRadiusIndex[1] = 14;
+            }
             else
                 break;
             count++;
