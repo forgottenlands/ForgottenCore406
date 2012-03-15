@@ -314,7 +314,6 @@ public:
                 {
                 case DATA_MAGMAW:
                 case DATA_OMNOTRON_DEFENSE_SYSTEM:
-                    sLog->outString("dentro");
                     HandleGameObject(gobPreBossDoor, GetBossState(DATA_MAGMAW) == DONE && GetBossState(DATA_OMNOTRON_DEFENSE_SYSTEM)==DONE);
                     break;
 

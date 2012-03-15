@@ -28,51 +28,74 @@
 #include "ScriptPCH.h"
 #include "SpellAuraEffects.h"
 
-enum HunterSpells {
-	HUNTER_SPELL_READINESS = 23989,
-	HUNTER_SPELL_BESTIAL_WRATH = 19574,
-	HUNTER_PET_SPELL_LAST_STAND_TRIGGERED = 53479,
-	HUNTER_PET_HEART_OF_THE_PHOENIX = 55709,
-	HUNTER_PET_HEART_OF_THE_PHOENIX_TRIGGERED = 54114,
-	HUNTER_PET_HEART_OF_THE_PHOENIX_DEBUFF = 55711,
-	HUNTER_PET_SPELL_CARRION_FEEDER_TRIGGERED = 54045,
-	HUNTER_SPELL_INVIGORATION_TRIGGERED = 53398,
-	HUNTER_SPELL_MASTERS_CALL_TRIGGERED = 62305,
-	HUNTER_SPELL_STREADY_SHOT_ATTACK_SPEED = 53220
+enum HunterSpells 
+{
+	HUNTER_SPELL_READINESS                        = 23989,
+	HUNTER_SPELL_BESTIAL_WRATH                    = 19574,
+	HUNTER_PET_SPELL_LAST_STAND_TRIGGERED         = 53479,
+	HUNTER_PET_HEART_OF_THE_PHOENIX               = 55709,
+	HUNTER_PET_HEART_OF_THE_PHOENIX_TRIGGERED     = 54114,
+	HUNTER_PET_HEART_OF_THE_PHOENIX_DEBUFF        = 55711,
+	HUNTER_PET_SPELL_CARRION_FEEDER_TRIGGERED     = 54045,
+	HUNTER_SPELL_INVIGORATION_TRIGGERED           = 53398,
+	HUNTER_SPELL_MASTERS_CALL_TRIGGERED           = 62305,
+	HUNTER_SPELL_STREADY_SHOT_ATTACK_SPEED        = 53220,
+    HUNTER_SPELL_KILL_COMMAND                     = 34026,
+    HUNTER_SPELL_KILL_COMMAND_TRIGGER             = 83381,
 };
 
-class spell_hun_kill_command: public SpellScriptLoader {
+class spell_hun_kill_command : public SpellScriptLoader
+{
 public:
-    spell_hun_kill_command() : SpellScriptLoader("spell_hun_kill_command") {}
+    spell_hun_kill_command() : SpellScriptLoader("spell_hun_kill_command") { }
 
-    class spell_hun_kill_command_SpellScript: public SpellScript {
+    class spell_hun_kill_command_SpellScript : public SpellScript
+    {
         PrepareSpellScript(spell_hun_kill_command_SpellScript)
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            if (!sSpellStore.LookupEntry(HUNTER_SPELL_KILL_COMMAND))
+                return false;
+            return true;
+        }
 
-        SpellCastResult CheckCast(){
-            Pet* pet = GetCaster()->ToPlayer()->GetPet();
-
-            if (!pet || pet->isDead())
+        SpellCastResult CheckCastMeet()
+        {
+            Unit* pet = GetCaster()->GetGuardianPet();
+            Unit* petTarget = pet->getVictim();
+            if (!pet)
                 return SPELL_FAILED_NO_PET;
 
-            if (!pet->IsWithinMeleeRange(pet->getVictim()))
-                return SPELL_FAILED_OUT_OF_RANGE;
+            // Make sure pet has a target and target is within 5 yards
+            if (!petTarget || !pet->IsWithinDist(petTarget, 5.0f, true))
+            {
+                SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_TARGET_TOO_FAR);
+                return SPELL_FAILED_CUSTOM_ERROR;
+            }
 
             return SPELL_CAST_OK;
         }
 
-        void HandleScriptEffect(SpellEffIndex /*effIndex*/) {
-             Pet* pet = GetCaster()->ToPlayer()->GetPet();
-             pet->CastCustomSpell(pet->getVictim(), (uint32)GetEffectValue(), 0, NULL, NULL, true, NULL, NULL, pet->GetGUID());
-        }
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* pet = GetCaster()->GetGuardianPet();
 
+            if (!pet)
+                return;
+
+            pet->CastSpell(pet->getVictim(), HUNTER_SPELL_KILL_COMMAND_TRIGGER, true);
+        }
+        
+        
         void Register()
         {
-            OnCheckCast += SpellCheckCastFn(spell_hun_kill_command_SpellScript::CheckCast);
-            OnEffect += SpellEffectFn(spell_hun_kill_command_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnCheckCast += SpellCheckCastFn(spell_hun_kill_command_SpellScript::CheckCastMeet);
+            OnEffectHit += SpellEffectFn(spell_hun_kill_command_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 
-    SpellScript* GetSpellScript() const {
+    SpellScript* GetSpellScript() const
+    {
         return new spell_hun_kill_command_SpellScript();
     }
 };

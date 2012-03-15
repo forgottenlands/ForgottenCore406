@@ -7284,7 +7284,6 @@ void AuraEffect::HandleAuraLinked(AuraApplication const *aurApp, uint8 mode, boo
 
     Unit *target = aurApp->GetTarget();
 
-    sLog->outString("dentro %d %d", m_spellProto->EffectTriggerSpell[m_effIndex], aurApp->GetBase()->GetId());
     if (apply) 
     {
         Unit * caster = GetTriggeredSpellCaster(m_spellProto, GetCaster(), target);

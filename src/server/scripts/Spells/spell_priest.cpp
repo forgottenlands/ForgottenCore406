@@ -501,7 +501,6 @@ class spell_pri_fade : public SpellScriptLoader
                     {
                         if (roll_chance_i(aurEff->GetAmount()))
                         {
-                                            sLog->outString("Dentro");
                             caster->RemoveMovementImpairingAuras();
                         }
                     }
@@ -532,7 +531,6 @@ class spell_pri_mind_spike : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                sLog->outString("dentro");
                 if(Unit* caster = GetCaster())
                 {
                     GetHitUnit()->RemoveAura(34914, GetCaster()->GetGUID());
