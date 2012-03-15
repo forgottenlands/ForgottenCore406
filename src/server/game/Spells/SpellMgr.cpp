@@ -4706,6 +4706,9 @@ void SpellMgr::LoadSpellCustomAttr() {
             // Rake
             else if (spellInfo->SpellFamilyFlags[0] & 0x1000)
                 mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+            // Swipe
+            else if (spellInfo->Id == 779 || spellInfo->Id == 62078)
+                spellInfo->EffectRadiusIndex[0] = 14;
             else
                 break;
             count++;
