@@ -7518,13 +7518,23 @@ void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mo
     if (overrideId == 89420) // Drain Life
         affspell = 689;
     if (overrideId == 81170) // Ravage
-          affspell = 6785;
+        affspell = 6785;
     if (overrideId == 93402) // Eclipse (Solar)
-         affspell = 8921;
+        affspell = 8921;
     if (overrideId == 92283) // Frostfire Orb Override
-         affspell = 82731;
+        affspell = 82731;
     if (overrideId == 86213) // Soul Swap: Exhale
         affspell = 86121;
+    if (overrideId == 60192) // Freezing Trap
+        affspell = 1499;
+    if (overrideId == 82939) // Explosive Trap
+        affspell = 13813;
+    if (overrideId == 82941) // Ice Trap
+        affspell = 13809;
+    if (overrideId == 82945) // Immolation Trap
+        affspell = 13795;
+    if (overrideId == 82948) // Snake Trap
+        affspell = 34600;
 
     if (affspell != 0)
     {
