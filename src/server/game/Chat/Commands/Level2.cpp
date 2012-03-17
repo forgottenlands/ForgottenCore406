@@ -1592,6 +1592,29 @@ bool ChatHandler::HandlePetLearnCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HendlePetStunnedCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    Creature* target = getSelectedCreature();
+    Pet* pet = target->ToPet();
+
+    if (!pet)
+    {
+        PSendSysMessage("Target is not pet!");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (pet->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED))
+        pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+    else
+        pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+
+    return true;
+}
+
 bool ChatHandler::HandlePetUnlearnCommand(const char *args)
 {
     if (!*args)
