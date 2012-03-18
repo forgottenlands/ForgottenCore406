@@ -6191,36 +6191,33 @@ inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel,
     return sWorld->getIntConfig(CONFIG_SKILL_CHANCE_ORANGE) * 10;
 }
 
-bool Player::UpdateCraftSkill(uint32 spellid) {
-    sLog->outDebug(LOG_FILTER_PLAYER_SKILLS, "UpdateCraftSkill spellid %d",
-            spellid);
+bool Player::UpdateCraftSkill(uint32 spellid) 
+{
+    sLog->outDebug(LOG_FILTER_PLAYER_SKILLS, "UpdateCraftSkill spellid %d", spellid);
 
-    SkillLineAbilityMapBounds bounds = sSpellMgr->GetSkillLineAbilityMapBounds(
-            spellid);
+    SkillLineAbilityMapBounds bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellid);
 
-    for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first;
-            _spell_idx != bounds.second; ++_spell_idx) {
-        if (_spell_idx->second->skillId) {
+    for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
+    {
+        if (_spell_idx->second->skillId)
+        {
             uint32 SkillValue = GetPureSkillValue(_spell_idx->second->skillId);
 
-            // Alchemy Discoveries here
+            // Alchemy Discoveries here 
             SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellid);
-            if (spellEntry && spellEntry->Mechanic == MECHANIC_DISCOVERY) {
+            if (spellEntry && spellEntry->Mechanic == MECHANIC_DISCOVERY)
+            {
                 if (uint32 discoveredSpell = GetSkillDiscoverySpell(_spell_idx->second->skillId, spellid, this))
                     learnSpell(discoveredSpell, false);
             }
 
-            uint32 craft_skill_gain = sWorld->getIntConfig(
-                    CONFIG_SKILL_GAIN_CRAFTING);
+            uint32 craft_skill_gain = sWorld->getIntConfig(CONFIG_SKILL_GAIN_CRAFTING);
 
-            return UpdateSkillPro(
-                    _spell_idx->second->skillId,
-                    SkillGainChance(
-                            SkillValue,
-                            _spell_idx->second->max_value,
-                            (_spell_idx->second->max_value
-                                    + _spell_idx->second->min_value) / 2,
-                            _spell_idx->second->min_value), craft_skill_gain);
+            // 4.x Some craft have custom skillgain (only if pattern is orange)
+            if (_spell_idx->second->characterPoints[0] > 1 && SkillValue < _spell_idx->second->min_value)
+                craft_skill_gain = _spell_idx->second->characterPoints[0];
+
+            return UpdateSkillPro(_spell_idx->second->skillId, SkillGainChance(SkillValue, _spell_idx->second->max_value, (_spell_idx->second->max_value + _spell_idx->second->min_value) / 2, _spell_idx->second->min_value), craft_skill_gain);
         }
     }
     return false;
