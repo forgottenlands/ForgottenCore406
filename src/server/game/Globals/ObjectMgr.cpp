@@ -5927,17 +5927,19 @@ void ObjectMgr::LoadInstanceEncounters() {
             dungeonLastBosses[lastEncounterDungeon] = dungeonEncounter;
         }
 
-        switch (creditType) {
-        case ENCOUNTER_CREDIT_KILL_CREATURE: {
+        switch (creditType) 
+        {
+        case ENCOUNTER_CREDIT_KILL_CREATURE: 
+            {
             CreatureInfo const* creatureInfo = GetCreatureInfo(creditEntry);
-            if (!creatureInfo) {
+            if (!creatureInfo) 
+            {
                 sLog->outErrorDb(
                         "Table `instance_encounters` has an invalid creature (entry %u) linked to the encounter %u (%s), skipped!",
                         creditEntry, entry, dungeonEncounter->encounterName);
                 continue;
             }
-            const_cast<CreatureInfo*>(creatureInfo)->flags_extra |=
-                    CREATURE_FLAG_EXTRA_DUNGEON_BOSS;
+            const_cast<CreatureInfo*>(creatureInfo)->flags_extra |= CREATURE_FLAG_EXTRA_DUNGEON_BOSS;
             break;
         }
         case ENCOUNTER_CREDIT_CAST_SPELL:

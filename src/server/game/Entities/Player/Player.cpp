@@ -558,11 +558,8 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
     // Give reputation and kill credit only in PvE.
     if (!_isPvP || _isBattleGround)
     {
-        const float rate = _group ?
-            _groupRate * float(player->getLevel()) / _sumLevel : // Group rate depends on summary level.
-            1.0f;                                                // Personal rate is 100%.
+        const float rate = _group ? _groupRate * float(player->getLevel()) / _sumLevel : 1.0f; // Personal rate is 100%.
         if (_xp)
-            // 4.2. Give XP.
             _RewardXP(player, rate);
         if (!_isBattleGround)
         {
@@ -573,9 +570,8 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
             // Reward Guild reputation
             if (player->GetGuildId() != 0 && _victim->GetTypeId() == TYPEID_UNIT && _victim->ToCreature()->IsDungeonBoss() && player->GetGroup() && player->GetGroup()->IsGuildGroup(player->GetGuildId()))
             {
-                uint32 guildRep = uint32(_xp / 450);
-                if (guildRep < 1)
-                    guildRep = 1;
+                uint32 guildRep = player->GetMap()->IsHeroic() ? 800 : 500;
+
                 player->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(1168), guildRep);
             }
         }
