@@ -1614,11 +1614,12 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId) {
     SendBankTabsInfo(session);
 }
 
-void Guild::HandleInviteMember(WorldSession* session, const std::string& name) {
+void Guild::HandleInviteMember(WorldSession* session, const std::string& name) 
+{
     Player* pInvitee = sObjectAccessor->FindPlayerByName(name.c_str());
-    if (!pInvitee) {
-        SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_PLAYER_NOT_FOUND_S,
-                name);
+    if (!pInvitee) 
+    {
+        SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_PLAYER_NOT_FOUND_S, name);
         return;
     }
 
@@ -1626,46 +1627,45 @@ void Guild::HandleInviteMember(WorldSession* session, const std::string& name) {
     // Do not show invitations from ignored players
     if (pInvitee->GetSocial()->HasIgnore(player->GetGUIDLow()))
         return;
-    if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD)
-            && pInvitee->GetTeam() != player->GetTeam()) {
+    if (!sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && pInvitee->GetTeam() != player->GetTeam()) 
+    {
         SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_NOT_ALLIED, name);
         return;
     }
     // Invited player cannot be in another guild
-    if (pInvitee->GetGuildId()) {
-        SendCommandResult(session, GUILD_INVITE_S, ERR_ALREADY_IN_GUILD_S,
-                name);
+    if (pInvitee->GetGuildId()) 
+    {
+        SendCommandResult(session, GUILD_INVITE_S, ERR_ALREADY_IN_GUILD_S, name);
         return;
     }
     // Invited player cannot be invited
-    if (pInvitee->GetGuildIdInvited()) {
-        SendCommandResult(session, GUILD_INVITE_S,
-                ERR_ALREADY_INVITED_TO_GUILD_S, name);
+    if (pInvitee->GetGuildIdInvited())
+    {
+        SendCommandResult(session, GUILD_INVITE_S, ERR_ALREADY_INVITED_TO_GUILD_S, name);
         return;
     }
     // Inviting player must have rights to invite
-    if (!_HasRankRight(player, GR_RIGHT_INVITE)) {
+    if (!_HasRankRight(player, GR_RIGHT_INVITE)) 
+    {
         SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_PERMISSIONS);
         return;
     }
 
-    sLog->outDebug(LOG_FILTER_GUILD, "Player %s invited %s to join his Guild",
-            player->GetName(), name.c_str());
+    sLog->outDebug(LOG_FILTER_GUILD, "Player %s invited %s to join his Guild", player->GetName(), name.c_str());
 
     pInvitee->SetGuildIdInvited(m_id);
-    _LogEvent(GUILD_EVENT_LOG_INVITE_PLAYER, player->GetGUIDLow(),
-            pInvitee->GetGUIDLow());
+    _LogEvent(GUILD_EVENT_LOG_INVITE_PLAYER, player->GetGUIDLow(), pInvitee->GetGUIDLow());
 
     uint64 guid = MAKE_NEW_GUID(m_id, 0, HIGHGUID_GUILD);
     WorldPacket data(SMSG_GUILD_INVITE, 8 + 10); // Guess size
-    data << uint32(0); // unk
-    data << uint32(0); // unk
-    data << uint32(0); // unk
-    data << uint32(0); // unk
+    data << uint32(m_emblemInfo.GetBackgroundColor()); // unk
+    data << uint32(m_emblemInfo.GetBorderStyle()); // unk
+    data << uint32(m_emblemInfo.GetColor()); // unk
+    data << uint32(m_emblemInfo.GetStyle()); // unk
     data << uint64(player->GetGUID());
     data << pInvitee->GetName();
     data << player->GetName();
-    data << uint32(0);
+    data << uint32(GetLevel());
     data << uint32(0);
     data << uint64(guid);
     data << std::string(GetName());
