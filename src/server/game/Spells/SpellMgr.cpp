@@ -36,6 +36,7 @@
 #include "CreatureAI.h"
 #include "MapManager.h"
 #include "BattlegroundIC.h"
+#include "SpellAuraEffects.h"
 
 #include "OutdoorPvPMgr.h"
 #include "OutdoorPvPWG.h"
@@ -386,9 +387,9 @@ uint32 GetDispelChance(Unit* auraCaster, Unit* target, uint32 spellId,
     return 100 - resist_chance;
 }
 
-uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell * spell) {
-    SpellCastTimesEntry const *spellCastTimeEntry =
-            sSpellCastTimesStore.LookupEntry(spellInfo->CastingTimeIndex);
+uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell * spell)
+{
+    SpellCastTimesEntry const *spellCastTimeEntry = sSpellCastTimesStore.LookupEntry(spellInfo->CastingTimeIndex);
 
     // not all spells have cast time index and this is all is pasiive abilities
     if (!spellCastTimeEntry)
@@ -396,10 +397,11 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell * spell) {
 
     int32 castTime = spellCastTimeEntry->CastTime;
 
-    if (spell && spell->GetCaster()) {
-        SpellScaling values(spell->GetCaster()->getLevel(),
-                spell->GetSpellInfo());
-        if (values.canScale) {
+    if (spell && spell->GetCaster()) 
+    {
+        SpellScaling values(spell->GetCaster()->getLevel(), spell->GetSpellInfo());
+        if (values.canScale) 
+        {
             castTime = values.cast;
         }
     }
@@ -407,9 +409,26 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell * spell) {
     if (spell && spell->GetCaster())
         spell->GetCaster()->ModSpellCastTime(spellInfo, castTime, spell);
 
-    if (spellInfo->Attributes & SPELL_ATTR0_REQ_AMMO
-            && (!spell || !(spell->IsAutoRepeat())))
+    if (spellInfo->Attributes & SPELL_ATTR0_REQ_AMMO && (!spell || !(spell->IsAutoRepeat())))
         castTime += 500;
+
+    // Mod ranged attack speed
+    if (spell && spell->GetCaster())
+    {
+        if (Unit* caster = spell->GetCaster())
+        {
+            if (caster->HasAuraType(SPELL_AURA_MOD_RANGED_ATTACK_SPEED))
+            {
+                Unit::AuraEffectList const& modAuras = caster->GetAuraEffectsByType(SPELL_AURA_MOD_RANGED_ATTACK_SPEED);
+                for (Unit::AuraEffectList::const_iterator i = modAuras.begin(); i != modAuras.end(); ++i) 
+                    castTime -= castTime * (*i)->GetAmount() / 100;
+            }
+        }
+    } 
+
+    // Master Marksman Aimed Shot! hack
+    if (spell && spell->GetSpellInfo()->Id == 82928)
+        castTime = -1;
 
     return (castTime > 0) ? uint32(castTime) : 0;
 }
