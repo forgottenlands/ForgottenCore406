@@ -432,6 +432,7 @@ public:
     void EffectDurabilityDamagePCT(SpellEffIndex effIndex);
     void EffectModifyThreatPercent(SpellEffIndex effIndex);
     void EffectResurrectNew(SpellEffIndex effIndex);
+    void EffectMassResurrect(SpellEffIndex effIndex);
     void EffectAddExtraAttacks(SpellEffIndex effIndex);
     void EffectSpiritHeal(SpellEffIndex effIndex);
     void EffectSkinPlayerCorpse(SpellEffIndex effIndex);

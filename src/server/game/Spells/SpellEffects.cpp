@@ -243,7 +243,7 @@ pEffect SpellEffects [TOTAL_SPELL_EFFECTS] =
     &Spell::EffectNULL,                       // 169 SPELL_EFFECT_169                      something related to items
     &Spell::EffectNULL,                       // 170 SPELL_EFFECT_170                      teleport and change phase ? 
     &Spell::EffectNULL,                       // 171 SPELL_EFFECT_171                      summon gameobject ?
-    &Spell::EffectNULL,                       // 172 SPELL_EFFECT_MASS_RESURRECTION        mass resurrection guild lv25 perk
+    &Spell::EffectMassResurrect,              // 172 SPELL_EFFECT_MASS_RESURRECTION        mass resurrection guild lv25 perk
     &Spell::EffectNULL,                       // 173 SPELL_EFFECT_ADD_BANK_SLOT            allow guild 7th and 8th tabs
     &Spell::EffectNULL,                       // 174 SPELL_EFFECT_174                      target same faction members ? 
 };
@@ -256,6 +256,40 @@ void Spell::EffectNULL(SpellEffIndex /*effIndex*/)
 void Spell::EffectUnused(SpellEffIndex /*effIndex*/)
 {
     // NOT USED BY ANY SPELL OR USELESS OR IMPLEMENTED IN DIFFERENT WAY IN ARKCORE
+}
+
+void Spell::EffectMassResurrect(SpellEffIndex effIndex)
+{
+    if (!m_caster) 
+        return;
+
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    std::list<Unit *> PartyMembers;
+    m_caster->GetResurectableRaidMember(PartyMembers, 100.0f);
+    uint32 health, mana;
+
+    if (!PartyMembers.empty())
+    {
+        for (std::list <Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr) 
+        {
+            if (!(*itr)->isAlive() && (*itr)->IsInWorld() && (*itr)->GetTypeId() == TYPEID_PLAYER && !(*itr)->HasAura(95223))
+            {
+                Player* target = (*itr)->ToPlayer();
+                if (!target->isRessurectRequested())
+                {
+                    if (m_spellInfo->Id == 83968)
+                        m_caster->AddAura(95223, target);
+                    health = m_spellInfo->EffectBasePoints[effIndex] * target->GetMaxHealth() / 100;
+                    mana = m_spellInfo->EffectBasePoints[effIndex] * target->GetMaxPower(POWER_MANA) / 100;
+                    ExecuteLogEffectResurrect(effIndex, target);
+                    target->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+                    SendResurrectRequest(target);
+                }
+            }
+        }
+    }
 }
 
 void Spell::EffectResurrectNew(SpellEffIndex effIndex)

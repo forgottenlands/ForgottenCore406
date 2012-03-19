@@ -1407,13 +1407,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         // aura remove - remove auras from all party members
                         std::list<Unit*> PartyMembers;
                         target->GetPartyMembers(PartyMembers);
-                        for (std::list<Unit*>::iterator itr =
-                                PartyMembers.begin(); itr != PartyMembers.end();
-                                ++itr) {
+                        for (std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr) {
                             if ((*itr) != target)
-                                (*itr)->RemoveAurasWithFamily(
-                                        SPELLFAMILY_WARRIOR, 0, 0x2, 0,
-                                        GetCasterGUID());
+                                (*itr)->RemoveAurasWithFamily(SPELLFAMILY_WARRIOR, 0, 0x2, 0, GetCasterGUID());
                         }
                     }
                 }

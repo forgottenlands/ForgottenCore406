@@ -1456,6 +1456,7 @@ public:
     void GetPartyMemberInDist(std::list<Unit*> &units, float dist);
     void GetPartyMembers(std::list<Unit*> &units);
     void GetRaidMember(std::list<Unit*> &units, float dist);
+    void GetResurectableRaidMember(std::list <Unit*> &nearMembers, float radius);
     bool IsContestedGuard() const {
         if (FactionTemplateEntry const* entry = getFactionTemplateEntry())
             return entry->IsContestedGuardFaction();

@@ -2431,6 +2431,9 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                     if (Unit * driver = m_targets.getUnitTarget()) if (driver->IsOnVehicle(
                             m_caster)) AddUnitTarget(driver, i);
                     break;
+                case TARGET_RAID_MEMBERS:
+                    pushType = PUSH_CASTER_CENTER;
+                    break;
                 default:
                     sLog->outError(
                             "SPELL (caster[type: %u; guidlow: %u], spell: %u): unhandled spell target (%u)",
@@ -2746,6 +2749,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                         m_caster->GetPartyMemberInDist(unitList, radius);
                         break;
                     case TARGET_UNIT_RAID_CASTER:
+                    case TARGET_RAID_MEMBERS:
                         m_caster->GetRaidMember(unitList, radius);
                         break;
                     case TARGET_UNIT_CLASS_TARGET: {

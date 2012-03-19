@@ -1358,6 +1358,15 @@ enum Targets {
     TARGET_UNK_AREA_UNK_DST_107 = 107, // not enough info - only generic spells avalible
     TARGET_GAMEOBJECT_AREA_PATH = 108,
     TARGET_DEST_UNK_110 = 110, // some kind of traj?
+    TARGET_111 = 111, 
+    TARGET_112 = 112,
+    TARGET_113 = 113,
+    TARGET_114 = 114,
+    TARGET_115 = 115,
+    TARGET_116 = 116,
+    TARGET_117 = 117,
+    TARGET_118 = 118,
+    TARGET_RAID_MEMBERS = 119,
     TOTAL_SPELL_TARGETS
 };
 
