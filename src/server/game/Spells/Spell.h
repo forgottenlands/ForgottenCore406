@@ -375,6 +375,7 @@ public:
     void EffectTeleUnitsFaceCaster(SpellEffIndex effIndex);
     void EffectLearnSkill(SpellEffIndex effIndex);
     void EffectAddHonor(SpellEffIndex effIndex);
+    void EffectAddHonorCurrency(SpellEffIndex eddIndex);
     void EffectTradeSkill(SpellEffIndex effIndex);
     void EffectEnchantItemPerm(SpellEffIndex effIndex);
     void EffectEnchantItemTmp(SpellEffIndex effIndex);

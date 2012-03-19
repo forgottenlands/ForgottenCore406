@@ -625,7 +625,8 @@ enum Team {
 
 const Team TeamId2Team[3] = { ALLIANCE, HORDE, TEAM_OTHER };
 
-enum SpellEffects {
+enum SpellEffects 
+{
     SPELL_EFFECT_NONE = 0,
     SPELL_EFFECT_INSTAKILL = 1,
     SPELL_EFFECT_SCHOOL_DAMAGE = 2,
@@ -792,7 +793,7 @@ enum SpellEffects {
     SPELL_EFFECT_163 = 163,
     SPELL_EFFECT_REMOVE_AURA = 164,
     SPELL_EFFECT_165 = 165,
-    SPELL_EFFECT_166 = 166,
+    SPELL_EFFECT_ADD_HONOR_2 = 166,
     SPELL_EFFECT_167 = 167,
     SPELL_EFFECT_168 = 168,
     SPELL_EFFECT_169 = 169,

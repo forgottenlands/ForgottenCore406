@@ -21057,8 +21057,7 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item,
             case CURRENCY_TYPE_HONOR_POINTS:
             case CURRENCY_TYPE_JUSTICE_POINTS:
             case CURRENCY_TYPE_VALOR_POINTS:
-                ModifyCurrency(iece->RequiredCurrency[i],
-                        -int32(iece->RequiredCurrencyCount[i] * count));
+                ModifyCurrency(iece->RequiredCurrency[i], -int32(iece->RequiredCurrencyCount[i] * count));
                 break;
             default: // other ones need multiplier
                 ModifyCurrency(
