@@ -1688,7 +1688,7 @@ void Guild::HandleAcceptMember(WorldSession* session) {
         player->SetUInt32Value(PLAYER_GUILDLEVEL, uint32(GetLevel()));
         player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GLEVEL_ENABLED);
         /// Learn perks to him
-        for (int i = 0; i < GetLevel()-1; ++i)
+        for (int i = 1; i < GetLevel(); ++i)
             if (const GuildPerksEntry* perk = sGuildPerksStore.LookupEntry(i))
                 player->learnSpell(perk->SpellId, true);
 
@@ -1702,14 +1702,16 @@ void Guild::HandleAcceptMember(WorldSession* session) {
 void Guild::HandleLeaveMember(WorldSession* session) {
     Player* player = session->GetPlayer();
     // If leader is leaving
-    if (_IsLeader(player)) {
+    if (_IsLeader(player)) 
+    {
         if (m_members.size() > 1)
             // Leader cannot leave if he is not the last member
             SendCommandResult(session, GUILD_QUIT_S, ERR_GUILD_LEADER_LEAVE);
         else
             // Guild is disbanded if leader leaves.
             Disband();
-    } else {
+    } else
+    {
         DeleteMember(player->GetGUID(), false, false);
         _LogEvent(GUILD_EVENT_LOG_LEAVE_GUILD, player->GetGUIDLow());
         _BroadcastEvent(GE_LEFT, player->GetGUID(), player->GetName());
@@ -1720,13 +1722,15 @@ void Guild::HandleLeaveMember(WorldSession* session) {
     HandleRoster();
 }
 
-void Guild::HandleRemoveMember(WorldSession* session, uint64 guid) {
+void Guild::HandleRemoveMember(WorldSession* session, uint64 guid)
+{
     Player* player = session->GetPlayer();
     // Player must have rights to remove members
     if (!_HasRankRight(player, GR_RIGHT_REMOVE))
         SendCommandResult(session, GUILD_INVITE_S, ERR_GUILD_PERMISSIONS);
     // Removed player must be a member of guild
-    else if (Member* pMember = GetMember(guid)) {
+    else if (Member* pMember = GetMember(guid)) 
+    {
         std::string name = pMember->GetName();
 
         // Leader cannot be removed
@@ -1734,15 +1738,14 @@ void Guild::HandleRemoveMember(WorldSession* session, uint64 guid) {
             SendCommandResult(session, GUILD_QUIT_S, ERR_GUILD_LEADER_LEAVE);
         // Do not allow to remove player with the same rank or higher
         else if (pMember->IsRankNotLower(player->GetRank()))
-            SendCommandResult(session, GUILD_QUIT_S, ERR_GUILD_RANK_TOO_HIGH_S,
-                    name);
-        else {
+            SendCommandResult(session, GUILD_QUIT_S, ERR_GUILD_RANK_TOO_HIGH_S, name);
+        else 
+        {
             // After call to DeleteMember pointer to member becomes invalid
             DeleteMember(guid, false, true);
-            _LogEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, player->GetGUIDLow(),
-                    GUID_LOPART(guid));
+            _LogEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, player->GetGUIDLow(), GUID_LOPART(guid));
             _BroadcastEvent(GE_REMOVED, 0, name.c_str(), player->GetName());
-            player->SetReputation(1168, -1);
+            pMember->FindPlayer()->SetReputation(1168, -1);
         }
     }
     HandleRoster();
@@ -2440,18 +2443,19 @@ void Guild::DeleteMember(const uint64& guid, bool isDisbanding, bool isKicked) {
 
     // Guild master can be deleted when loading guild and guid doesn't exist in characters table
     // or when he is removed from guild by gm command
-    if (m_leaderGuid == guid && !isDisbanding) {
+    if (m_leaderGuid == guid && !isDisbanding) 
+    {
         Member* oldLeader = NULL;
         Member* newLeader = NULL;
-        for (Guild::Members::iterator i = m_members.begin();
-                i != m_members.end(); ++i) {
+        for (Guild::Members::iterator i = m_members.begin(); i != m_members.end(); ++i) 
+        {
             if (i->first == lowguid)
                 oldLeader = i->second;
-            else if (!newLeader
-                    || newLeader->GetRankId() > i->second->GetRankId())
+            else if (!newLeader || newLeader->GetRankId() > i->second->GetRankId())
                 newLeader = i->second;
         }
-        if (!newLeader) {
+        if (!newLeader)
+        {
             Disband();
             return;
         }
@@ -2463,9 +2467,9 @@ void Guild::DeleteMember(const uint64& guid, bool isDisbanding, bool isKicked) {
             newLeaderPlayer->SetRank(GR_GUILDMASTER);
 
         // If leader does not exist (at guild loading with deleted leader) do not send broadcasts
-        if (oldLeader) {
-            _BroadcastEvent(GE_LEADER_CHANGED, 0, oldLeader->GetName().c_str(),
-                    newLeader->GetName().c_str());
+        if (oldLeader) 
+        {
+            _BroadcastEvent(GE_LEADER_CHANGED, 0, oldLeader->GetName().c_str(), newLeader->GetName().c_str());
             _BroadcastEvent(GE_LEFT, guid, oldLeader->GetName().c_str());
         }
     }
@@ -2480,7 +2484,8 @@ void Guild::DeleteMember(const uint64& guid, bool isDisbanding, bool isKicked) {
         HandleRoster();
 
     // If player not online data in data field will be loaded from guild tabs no need to update it !!
-    if (player) {
+    if (player)
+    {
         player->SetInGuild(0);
         player->SetRank(0);
 
