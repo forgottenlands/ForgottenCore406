@@ -5406,6 +5406,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                     break;
                 }
                 case 19434: // Aimed Shot
+                case 82928: // Aimed Shot!
                 {
                     // "A powerful aimed shot that deals % ranged weapon damage plus (RAP * 0.724)+776."
                     shotMod = 0.724f;
