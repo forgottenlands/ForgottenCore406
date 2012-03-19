@@ -1110,6 +1110,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     caster->CastCustomSpell(target, 83077, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
                 }
             }
+            if (GetId() == 82925) // Master Marksman
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER && GetStackAmount() == 5)
+                {
+                    target->CastSpell(target, 82926, true);
+                    target->RemoveAura(82925);
+                }
+            }
             break;
         case SPELLFAMILY_WARLOCK:
                 switch (GetId())
