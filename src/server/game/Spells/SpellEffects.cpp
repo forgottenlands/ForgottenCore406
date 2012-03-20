@@ -2811,19 +2811,20 @@ void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
     }
 
     if (m_CastItem)
-    sLog->outStaticDebug("WORLD: cast Item spellId - %i", spellInfo->Id);
+        sLog->outStaticDebug("WORLD: cast Item spellId - %i", spellInfo->Id);
 
     // Remove spell cooldown (not category) if spell triggering spell with cooldown and same category
     // Needed by freezing arrow and few other spells
-            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->CategoryRecoveryTime && spellInfo->CategoryRecoveryTime
-                    && m_spellInfo->Category == spellInfo->Category)
-            m_caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
-
-            float x, y
-, 	z;
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->CategoryRecoveryTime && spellInfo->CategoryRecoveryTime && m_spellInfo->Category == spellInfo->Category)
+        m_caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
+    
+    float x, y, z;
     m_targets.m_dstPos.GetPosition(x, y, z);
-    m_caster->CastSpell(x, y, z, spellInfo->Id, true, m_CastItem, 0,
-            m_originalCasterGUID);
+    m_caster->CastSpell(x, y, z, spellInfo->Id, true, m_CastItem, 0, m_originalCasterGUID);
+
+    // Remove trap launcher
+    if (m_caster->HasAura(77769) && (m_spellInfo->Id == 82948 || m_spellInfo->Id == 82945 || m_spellInfo->Id == 82941 || m_spellInfo->Id == 82939 || m_spellInfo->Id == 60192))
+        m_caster->RemoveAura(77769);
 }
 
 void Spell::EffectJump(SpellEffIndex effIndex)
