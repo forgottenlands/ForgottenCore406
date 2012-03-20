@@ -2112,17 +2112,14 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask,
 
         // We're going to call functions which can modify content of the list during iteration over it's elements
         // Let's copy the list so we can prevent iterator invalidation
-        AuraEffectList vSplitDamagePctCopy(
-                pVictim->GetAuraEffectsByType(SPELL_AURA_SPLIT_DAMAGE_PCT));
-        for (AuraEffectList::iterator itr = vSplitDamagePctCopy.begin(), next;
-                (itr != vSplitDamagePctCopy.end()) && (dmgInfo.GetDamage() > 0);
-                ++itr)
+        AuraEffectList vSplitDamagePctCopy(pVictim->GetAuraEffectsByType(SPELL_AURA_SPLIT_DAMAGE_PCT));
+        for (AuraEffectList::iterator itr = vSplitDamagePctCopy.begin(), next; (itr != vSplitDamagePctCopy.end()) && (dmgInfo.GetDamage() > 0); ++itr)
         {
             // Check if aura was removed during iteration - we don't need to work on such auras
-            if (!((*itr)->GetBase()->IsAppliedOnTarget(pVictim->GetGUID()))) continue;
+            if (!((*itr)->GetBase()->IsAppliedOnTarget(pVictim->GetGUID()))) 
                 continue;
             // check damage school mask
-            if (!((*itr)->GetMiscValue() & schoolMask)) continue;
+            if (!((*itr)->GetMiscValue() & schoolMask))
                 continue;
 
             // Damage can be splitted only if aura has an alive caster
