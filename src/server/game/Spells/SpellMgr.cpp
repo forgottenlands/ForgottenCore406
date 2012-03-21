@@ -4689,6 +4689,11 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectMiscValueB[2] = 0;
             count++;
             break;
+        case 86914: // Firestarter
+            spellInfo->EffectBasePoints[0] = 1;
+            spellInfo->EffectMiscValue[0] = 0;
+            count++;
+            break;
         default:
             break;
         }

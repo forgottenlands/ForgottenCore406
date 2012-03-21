@@ -3466,12 +3466,10 @@ void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id,
 bool Unit::CanCastWhileWalking(const SpellEntry * const sp)
 {
     AuraEffectList alist = GetAuraEffectsByType(SPELL_AURA_CAST_WHILE_WALKING);
-    for (AuraEffectList::const_iterator i = alist.begin(); i != alist.end();
-            ++i)
+    for (AuraEffectList::const_iterator i = alist.begin(); i != alist.end(); ++i)
     {
         // check that spell mask matches
-        if (!((*i)->GetSpellProto()->EffectSpellClassMask [(*i)->GetEffIndex()]
-                & sp->SpellFamilyFlags)) continue;
+        if (!((*i)->GetSpellProto()->EffectSpellClassMask[(*i)->GetEffIndex()] & sp->SpellFamilyFlags)) continue;
         return true;
     }
     return false;

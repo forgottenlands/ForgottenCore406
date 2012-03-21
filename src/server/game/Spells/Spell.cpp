@@ -5020,6 +5020,11 @@ SpellCastResult Spell::CheckCast(bool strict) {
                 && IsNonCombatSpell(m_spellInfo)) return SPELL_FAILED_AFFECTING_COMBAT;
     }
 
+    // Firestarter update
+    if (m_caster->ToPlayer() && m_spellInfo->Id == 2948)
+        if (AuraApplication* aurApp = m_caster->GetAuraApplication(86914, m_caster->GetGUID()))
+            aurApp->SendFakeAuraUpdate(86914, false);
+
     // cancel autorepeat spells if cast start when moving
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
     if (m_caster->GetTypeId() == TYPEID_PLAYER

@@ -252,6 +252,7 @@ public:
 			bool apply) const;
 	void HandleAuraAllowFlight(AuraApplication const * aurApp, uint8 mode,
 			bool apply) const;
+    void HandleModCanCastWhileWalking(AuraApplication const* aurApp, uint8 mode, bool apply) const;
 	void HandleAuraWaterWalk(AuraApplication const * aurApp, uint8 mode,
 			bool apply) const;
 	void HandleAuraFeatherFall(AuraApplication const * aurApp, uint8 mode,

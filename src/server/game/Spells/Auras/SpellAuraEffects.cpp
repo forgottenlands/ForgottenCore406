@@ -386,7 +386,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] = { &AuraEffect::HandleNULL, /
         &AuraEffect::HandleNULL, //327
         &AuraEffect::HandleNULL, //328
         &AuraEffect::HandleNULL, //329
-        &AuraEffect::HandleNULL, //330
+        &AuraEffect::HandleModCanCastWhileWalking, //330 SPELL_AURA_CAST_WHILE_WALKING
         &AuraEffect::HandleNULL, //331
         &AuraEffect::HandleAuraReplaceSpell,//332 SPELL_AURA_332_REPLACE_SPELL
 		&AuraEffect::HandleAuraReplaceSpell,//333 SPELL_AURA_333_REPLACE_SPELL
@@ -4322,6 +4322,29 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const *aurApp,
         data.append(target->GetPackGUID());
         data << uint32(0); // unk
         plr->SendDirectMessage(&data);
+    }
+}
+
+void AuraEffect::HandleModCanCastWhileWalking(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    sLog->outString("dentro %d", apply ? 1 : 0);
+    uint32 spellId = 0;
+    Unit* target = aurApp->GetTarget();
+
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    switch (aurApp->GetBase()->GetId())
+    {
+        // Firestarter client update
+        case 86914:
+            if (target->ToPlayer())
+            {
+                sLog->outString("dentro");
+                if (AuraApplication* effAurApp = target->GetAuraApplication(86914, target->GetGUID()))
+                    effAurApp->SendFakeAuraUpdate(86914, !apply);
+            }
+            break;
     }
 }
 
