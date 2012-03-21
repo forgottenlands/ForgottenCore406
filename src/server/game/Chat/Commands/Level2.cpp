@@ -50,6 +50,7 @@
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "CreatureGroups.h"
 #include "ScriptMgr.h"
+#include "SpellAuraEffects.h"
 
 #include "OutdoorPvPWG.h"
 
@@ -1594,9 +1595,6 @@ bool ChatHandler::HandlePetLearnCommand(const char* args)
 
 bool ChatHandler::HendlePetStunnedCommand(const char* args)
 {
-    if (!*args)
-        return false;
-
     Creature* target = getSelectedCreature();
     Pet* pet = target->ToPet();
 
