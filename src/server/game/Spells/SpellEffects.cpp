@@ -3081,7 +3081,7 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
         {
             if (m_spellInfo->SpellFamilyFlags [0] == 0x8) //Gouge
             {
-                m_caster->CastSpell(unitTarget, 1776, true);
+                Aura::TryCreate(m_spellInfo, unitTarget, unitTarget);
                 return;
             }
             break;
