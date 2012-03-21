@@ -1571,15 +1571,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
         case SPELLFAMILY_ROGUE:
             // Remove Vanish on stealth remove
             if (GetId() == 1784)
-                target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0,
-                        0, target->GetGUID());
+                target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
             else if (GetId() == 6770) // On-sap removal - blackjack talent
-                    {
+            {
                 if (caster->HasAura(79125)) // rank 2
                     caster->CastSpell(target, 79126, true);
                 else if (caster->HasAura(79123)) // rank 1
                     caster->CastSpell(target, 79124, true);
-            }
+            } 
             break;
         case SPELLFAMILY_PALADIN:
             // Remove the immunity shield marker on Forbearance removal if AW marker is not present

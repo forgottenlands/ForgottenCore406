@@ -401,6 +401,40 @@ public:
 	}
 };
 
+// Vanish bugg (Improved stealth)
+class spell_rog_vanish_buff: public SpellScriptLoader 
+{
+public:
+	spell_rog_vanish_buff() : SpellScriptLoader("spell_rog_vanish_buff") 
+	{ }
+
+	class spell_rog_vanish_buff_AuraScript: public AuraScript
+	{
+		PrepareAuraScript(spell_rog_vanish_buff_AuraScript);
+
+		void HandleRemove(AuraEffect const * aurEff, AuraEffectHandleModes mode) 
+		{
+			if (GetCaster()->ToPlayer())
+			{
+				if (GetCaster()->ToPlayer()->HasSpellCooldown(1784))
+					GetCaster()->ToPlayer()->RemoveSpellCooldown(1784, true);
+
+				GetCaster()->CastSpell(GetCaster(), 1784, true);
+			}
+		}
+		
+		void Register()
+		{
+			OnEffectRemove += AuraEffectRemoveFn(spell_rog_vanish_buff_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+		}
+	};
+
+	AuraScript *GetAuraScript() const
+	{
+		return new spell_rog_vanish_buff_AuraScript();
+	}
+};
+
 void AddSC_rogue_spell_scripts() {
 	new spell_rog_cheat_death();
 	new spell_rog_nerves_of_steel();
@@ -408,4 +442,5 @@ void AddSC_rogue_spell_scripts() {
 	new spell_rog_prey_on_the_weak();
 	new spell_rog_shiv();
 	new spell_rog_deadly_poison();
+	new spell_rog_vanish_buff();
 }
