@@ -1019,6 +1019,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         // Eviscerate and Envenom Bonus Damage (item set effect)
                         if (m_caster->HasAura(37169)) 
                             damage += combo * 40;
+
+                        // Coup de Grace
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_ROGUE, 514, 0))
+                            AddPctN(damage, aurEff->GetAmount());
+
+                        apply_direct_bonus = false;
                     }
                 }
                 
