@@ -16194,14 +16194,11 @@ uint32 createProcExtendMask(SpellNonMeleeDamage *damageInfo,
     return procEx;
 }
 
-void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
-        uint32 procExtra, WeaponAttackType attType,
-        SpellEntry const * procSpell, uint32 damage,
-        SpellEntry const * procAura)
+void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellEntry const * procSpell, uint32 damage, SpellEntry const * procAura)
 {
     // Player is loading now - do not allow passive spell casts to proc
-    if (GetTypeId() == TYPEID_PLAYER
-            && this->ToPlayer()->GetSession()->PlayerLoading()) return;
+    if (GetTypeId() == TYPEID_PLAYER && this->ToPlayer()->GetSession()->PlayerLoading()) 
+        return;
     // For melee/ranged based attack need update skills and set some Aura states if victim present
     if (procFlag & MELEE_BASED_TRIGGER_MASK && pTarget)
     {
@@ -16209,23 +16206,17 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
         if (GetTypeId() == TYPEID_PLAYER)
         {
             // On melee based hit/miss/resist need update skill (for victim and attacker)
-            if (procExtra
-                    & (PROC_EX_NORMAL_HIT | PROC_EX_MISS | PROC_EX_RESIST))
+            if (procExtra & (PROC_EX_NORMAL_HIT | PROC_EX_MISS | PROC_EX_RESIST))
             {
-                if (pTarget->GetTypeId() != TYPEID_PLAYER
-                        && pTarget->GetCreatureType() != CREATURE_TYPE_CRITTER) this->ToPlayer()->UpdateCombatSkills(
-                        pTarget, attType, isVictim);
+                if (pTarget->GetTypeId() != TYPEID_PLAYER && pTarget->GetCreatureType() != CREATURE_TYPE_CRITTER) 
+                    this->ToPlayer()->UpdateCombatSkills(pTarget, attType, isVictim);
             }
             // Update defence if player is victim and parry/dodge/block
-            else if (isVictim
-                    && procExtra
-                            & (PROC_EX_DODGE | PROC_EX_PARRY | PROC_EX_BLOCK)) this->ToPlayer()->UpdateCombatSkills(
-                    pTarget, attType, true);
+            else if (isVictim && procExtra & (PROC_EX_DODGE | PROC_EX_PARRY | PROC_EX_BLOCK)) 
+                this->ToPlayer()->UpdateCombatSkills(pTarget, attType, true);
         }
         // If exist crit/parry/dodge/block need update aura state (for victim and attacker)
-        if (procExtra
-                & (PROC_EX_CRITICAL_HIT | PROC_EX_PARRY | PROC_EX_DODGE
-                        | PROC_EX_BLOCK))
+        if (procExtra & (PROC_EX_CRITICAL_HIT | PROC_EX_PARRY | PROC_EX_DODGE | PROC_EX_BLOCK))
         {
             // for victim
             if (isVictim)
@@ -16265,8 +16256,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
             else //For attacker
             {
                 // Overpower on victim dodge
-                if (procExtra & PROC_EX_DODGE && GetTypeId() == TYPEID_PLAYER
-                        && getClass() == CLASS_WARRIOR)
+                if (procExtra & PROC_EX_DODGE && GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_WARRIOR)
                 {
                     this->ToPlayer()->AddComboPoints(pTarget, 1);
                     StartReactiveTimer(REACTIVE_OVERPOWER);
@@ -16277,28 +16267,23 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
 
     ProcTriggeredList procTriggered;
     // Fill procTriggered list
-    for (AuraApplicationMap::const_iterator itr = GetAppliedAuras().begin();
-            itr != GetAppliedAuras().end(); ++itr)
+    for (AuraApplicationMap::const_iterator itr = GetAppliedAuras().begin(); itr != GetAppliedAuras().end(); ++itr)
     {
         // Do not allow auras to proc from effect triggered by itself
-        if (procAura && procAura->Id == itr->first) continue;
+        if (procAura && procAura->Id == itr->first) 
+            continue;
         ProcTriggeredData triggerData(itr->second->GetBase());
         // Defensive procs are active on absorbs (so absorption effects are not a hindrance)
-        bool active = (damage > 0)
-                || (procExtra & (PROC_EX_ABSORB | PROC_EX_BLOCK) && isVictim);
-        if (isVictim) procExtra &= ~PROC_EX_INTERNAL_REQ_FAMILY;
+        bool active = (damage > 0) || (procExtra & (PROC_EX_ABSORB | PROC_EX_BLOCK) && isVictim);
+        if (isVictim) 
+            procExtra &= ~PROC_EX_INTERNAL_REQ_FAMILY;
         SpellEntry const* spellProto = itr->second->GetBase()->GetSpellProto();
-        if (!IsTriggeredAtSpellProcEvent(pTarget, triggerData.aura, procSpell,
-                procFlag, procExtra, attType, isVictim, active,
-                triggerData.spellProcEvent)) continue;
+
+        if (!IsTriggeredAtSpellProcEvent(pTarget, triggerData.aura, procSpell, procFlag, procExtra, attType, isVictim, active, triggerData.spellProcEvent)) 
+            continue;
 
         // Triggered spells not triggering additional spells
-        bool triggered =
-                !(spellProto->AttributesEx3
-                        & SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED) ?
-                        (procExtra & PROC_EX_INTERNAL_TRIGGERED
-                                && !(procFlag & PROC_FLAG_DONE_TRAP_ACTIVATION)) :
-                        false;
+        bool triggered = !(spellProto->AttributesEx3 & SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED) ? (procExtra & PROC_EX_INTERNAL_TRIGGERED && !(procFlag & PROC_FLAG_DONE_TRAP_ACTIVATION)) : false;
 
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
@@ -16306,30 +16291,33 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
             {
                 AuraEffect * aurEff = itr->second->GetBase()->GetEffect(i);
                 // Skip this auras
-                if (isNonTriggerAura [aurEff->GetAuraType()]) continue;
+                if (isNonTriggerAura [aurEff->GetAuraType()]) 
+                    continue;
                 // If not trigger by default and spellProcEvent == NULL - skip
-                if (!isTriggerAura [aurEff->GetAuraType()]
-                        && triggerData.spellProcEvent == NULL) continue;
+                if (!isTriggerAura [aurEff->GetAuraType()] && triggerData.spellProcEvent == NULL) 
+                    continue;
                 // Some spells must always trigger
-                if (!triggered || isAlwaysTriggeredAura [aurEff->GetAuraType()]) triggerData.effMask |=
-                        1 << i;
+                if (!triggered || isAlwaysTriggeredAura [aurEff->GetAuraType()]) 
+                    triggerData.effMask |= 1 << i;
             }
         }
-        if (triggerData.effMask) procTriggered.push_front(triggerData);
+        if (triggerData.effMask) 
+            procTriggered.push_front(triggerData);
     }
 
     // Nothing found
-    if (procTriggered.empty()) return;
+    if (procTriggered.empty()) 
+        return;
 
-    if (procExtra & (PROC_EX_INTERNAL_TRIGGERED | PROC_EX_INTERNAL_CANT_PROC)) SetCantProc(
-            true);
+    if (procExtra & (PROC_EX_INTERNAL_TRIGGERED | PROC_EX_INTERNAL_CANT_PROC)) 
+        SetCantProc(true);
 
     // Handle effects proceed this time
-    for (ProcTriggeredList::const_iterator i = procTriggered.begin();
-            i != procTriggered.end(); ++i)
+    for (ProcTriggeredList::const_iterator i = procTriggered.begin(); i != procTriggered.end(); ++i)
     {
         // look for aura in auras list, it may be removed while proc event processing
-        if (i->aura->IsRemoved()) continue;
+        if (i->aura->IsRemoved()) 
+            continue;
 
         bool useCharges = i->aura->GetCharges() > 0;
         bool takeCharges = false;
@@ -16338,17 +16326,15 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
 
         // For players set spell cooldown if need
         uint32 cooldown = 0;
-        if (GetTypeId() == TYPEID_PLAYER && i->spellProcEvent
-                && i->spellProcEvent->cooldown) cooldown =
-                i->spellProcEvent->cooldown;
+        if (GetTypeId() == TYPEID_PLAYER && i->spellProcEvent && i->spellProcEvent->cooldown)
+            cooldown = i->spellProcEvent->cooldown;
 
-        if (spellInfo->AttributesEx3 & SPELL_ATTR3_DISABLE_PROC) SetCantProc(
-                true);
+        if (spellInfo->AttributesEx3 & SPELL_ATTR3_DISABLE_PROC) 
+            SetCantProc(true);
 
         // This bool is needed till separate aura effect procs are still here
         bool handled = false;
-        if (HandleAuraProc(pTarget, damage, i->aura, procSpell, procFlag,
-                procExtra, cooldown, &handled))
+        if (HandleAuraProc(pTarget, damage, i->aura, procSpell, procFlag, procExtra, cooldown, &handled))
         {
             sLog->outDebug(
                     LOG_FILTER_SPELLS_AURAS,
@@ -16358,252 +16344,237 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
             takeCharges = true;
         }
 
-        if (!handled) for (uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS;
-                ++effIndex)
-        {
-            if (!(i->effMask & (1 << effIndex))) continue;
-
-            AuraEffect *triggeredByAura = i->aura->GetEffect(effIndex);
-            ASSERT(triggeredByAura);
-
-            switch (triggeredByAura->GetAuraType())
+        if (!handled) 
+            for (uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
             {
-                case SPELL_AURA_PROC_TRIGGER_SPELL:
-                {
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: casting spell %u (triggered by %s aura of spell %u)",
-                            spellInfo->Id,
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
-                    // Don`t drop charge or add cooldown for not started trigger
-                    if (HandleProcTriggerSpell(pTarget, damage, triggeredByAura,
-                            procSpell, procFlag, procExtra, cooldown)) takeCharges =
-                            true;
-                    break;
-                }
-                case SPELL_AURA_PROC_TRIGGER_DAMAGE:
-                {
-                    if (!pTarget) return;
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: doing %u damage from spell id %u (triggered by %s aura of spell %u)",
-                            triggeredByAura->GetAmount(), spellInfo->Id,
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
-                    SpellNonMeleeDamage damageInfo(this, pTarget, spellInfo->Id,
-                            spellInfo->SchoolMask);
-                    uint32 damage = SpellDamageBonus(pTarget, spellInfo,
-                            triggeredByAura->GetEffIndex(),
-                            triggeredByAura->GetAmount(), SPELL_DIRECT_DAMAGE);
-                    CalculateSpellDamageTaken(&damageInfo, damage, spellInfo);
-                    DealDamageMods(damageInfo.target, damageInfo.damage,
-                            &damageInfo.absorb);
-                    SendSpellNonMeleeDamageLog(&damageInfo);
-                    DealSpellDamage(&damageInfo, true);
-                    takeCharges = true;
-                    break;
-                }
-                case SPELL_AURA_MANA_SHIELD:
-                case SPELL_AURA_DUMMY:
-                {
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: casting spell id %u (triggered by %s dummy aura of spell %u)",
-                            spellInfo->Id,
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
-                    if (HandleDummyAuraProc(pTarget, damage, triggeredByAura,
-                            procSpell, procFlag, procExtra, cooldown)) takeCharges =
-                            true;
-                    break;
-                }
-                case SPELL_AURA_OBS_MOD_POWER:
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: casting spell id %u (triggered by %s aura of spell %u)",
-                            spellInfo->Id,
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
-                    if (HandleObsModEnergyAuraProc(pTarget, damage,
-                            triggeredByAura, procSpell, procFlag, procExtra,
-                            cooldown)) takeCharges = true;
-                    break;
-                case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: casting spell id %u (triggered by %s aura of spell %u)",
-                            spellInfo->Id,
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
-                    if (HandleModDamagePctTakenAuraProc(pTarget, damage,
-                            triggeredByAura, procSpell, procFlag, procExtra,
-                            cooldown)) takeCharges = true;
-                    break;
-                case SPELL_AURA_MOD_POWER_REGEN_PERCENT:
-                {
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: casting spell id %u (triggered by %s ModPowerRegenPCT of spell %u)",
-                            spellInfo->Id,
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
-                    if (HandleModPowerRegenAuraProc(pTarget, damage,
-                            triggeredByAura, procSpell, procFlag, procExtra,
-                            cooldown)) takeCharges = true;
-                    break;
-                }
-                case SPELL_AURA_OVERRIDE_CLASS_SCRIPTS:
-                {
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: casting spell id %u (triggered by %s aura of spell %u)",
-                            spellInfo->Id,
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
-                    if (HandleOverrideClassScriptAuraProc(pTarget, damage,
-                            triggeredByAura, procSpell, cooldown)) takeCharges =
-                            true;
-                    break;
-                }
-                case SPELL_AURA_RAID_PROC_FROM_CHARGE_WITH_VALUE:
-                {
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: casting mending (triggered by %s dummy aura of spell %u)",
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
+                if (!(i->effMask & (1 << effIndex))) 
+                    continue;
 
-                    HandleAuraRaidProcFromChargeWithValue(triggeredByAura);
-                    takeCharges = true;
-                    break;
-                }
-                case SPELL_AURA_RAID_PROC_FROM_CHARGE:
-                {
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: casting mending (triggered by %s dummy aura of spell %u)",
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
+                AuraEffect *triggeredByAura = i->aura->GetEffect(effIndex);
+                ASSERT(triggeredByAura);
 
-                    HandleAuraRaidProcFromCharge(triggeredByAura);
-                    takeCharges = true;
-                    break;
-                }
-                case SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE:
+                switch (triggeredByAura->GetAuraType())
                 {
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: casting spell %u (triggered with value by %s aura of spell %u)",
-                            spellInfo->Id,
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
-
-                    if (HandleProcTriggerSpell(pTarget, damage, triggeredByAura,
-                            procSpell, procFlag, procExtra, cooldown)) takeCharges =
-                            true;
-                    break;
-                }
-                case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK:
-                    // Skip melee hits or instant cast spells
-                    if (procSpell && GetSpellCastTime(procSpell) != 0) takeCharges =
-                            true;
-                    break;
-                case SPELL_AURA_REFLECT_SPELLS_SCHOOL:
-                    // Skip Melee hits and spells ws wrong school
-                    if (procSpell
-                            && (triggeredByAura->GetMiscValue()
-                                    & procSpell->SchoolMask)) // School check
-                    takeCharges = true;
-                    break;
-                case SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT:
-                case SPELL_AURA_MOD_POWER_COST_SCHOOL:
-                    // Skip melee hits and spells ws wrong school or zero cost
-                    if (procSpell
-                            && (procSpell->manaCost != 0
-                                    || procSpell->ManaCostPercentage != 0) && // Cost check
-                            (triggeredByAura->GetMiscValue()
-                                    & procSpell->SchoolMask)) // School check
-                    takeCharges = true;
-                    break;
-                case SPELL_AURA_MECHANIC_IMMUNITY:
-                    // Compare mechanic
-                    if (procSpell
-                            && procSpell->Mechanic
-                                    == uint32(triggeredByAura->GetMiscValue())) takeCharges =
-                            true;
-                    break;
-                case SPELL_AURA_MOD_MECHANIC_RESISTANCE:
-                    // Compare mechanic
-                    if (procSpell
-                            && procSpell->Mechanic
-                                    == uint32(triggeredByAura->GetMiscValue())) takeCharges =
-                            true;
-                    break;
-                case SPELL_AURA_MOD_DAMAGE_FROM_CASTER:
-                    // Compare casters
-                    if (triggeredByAura->GetCasterGUID() == pTarget->GetGUID()) takeCharges =
-                            true;
-                    break;
-                case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "ProcDamageAndSpell: casting spell id %u (triggered by %s spell crit chance aura of spell %u)",
-                            spellInfo->Id,
-                            (isVictim ? "a victim's" : "an attacker's"),
-                            triggeredByAura->GetId());
-                    if (procSpell
-                            && HandleSpellCritChanceAuraProc(pTarget, damage,
-                                    triggeredByAura, procSpell, procFlag,
-                                    procExtra, cooldown)) takeCharges = true;
-                    break;
-                    // CC Auras which use their amount amount to drop
-                    // Are there any more auras which need this?
-                case SPELL_AURA_MOD_CONFUSE:
-                case SPELL_AURA_MOD_FEAR:
-                case SPELL_AURA_MOD_STUN:
-                case SPELL_AURA_MOD_ROOT:
-                case SPELL_AURA_TRANSFORM:
-                {
-                    // chargeable mods are breaking on hit
-                    if (useCharges) takeCharges = true;
-                    else
+                    case SPELL_AURA_PROC_TRIGGER_SPELL:
                     {
-                        // Spell own direct damage at apply wont break the CC
-                        if (procSpell
-                                && (procSpell->Id == triggeredByAura->GetId()))
-                        {
-                            Aura * aura = triggeredByAura->GetBase();
-                            // called from spellcast, should not have ticked yet
-                            if (aura->GetDuration() == aura->GetMaxDuration()) break;
-                        }
-                        int32 damageLeft = triggeredByAura->GetAmount();
-                        // No damage left
-                        if (damageLeft < int32(damage)) i->aura->Remove();
-                        else triggeredByAura->SetAmount(damageLeft - damage);
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: casting spell %u (triggered by %s aura of spell %u)",
+                                spellInfo->Id,
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+                        // Don`t drop charge or add cooldown for not started trigger
+                        if (HandleProcTriggerSpell(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown)) 
+                            takeCharges = true;
+                        break;
                     }
-                    break;
+                    case SPELL_AURA_PROC_TRIGGER_DAMAGE:
+                    {
+                        if (!pTarget) 
+                            return;
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: doing %u damage from spell id %u (triggered by %s aura of spell %u)",
+                                triggeredByAura->GetAmount(), spellInfo->Id,
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+                        SpellNonMeleeDamage damageInfo(this, pTarget, spellInfo->Id, spellInfo->SchoolMask);
+                        uint32 damage = SpellDamageBonus(pTarget, spellInfo, triggeredByAura->GetEffIndex(), triggeredByAura->GetAmount(), SPELL_DIRECT_DAMAGE);
+                        CalculateSpellDamageTaken(&damageInfo, damage, spellInfo);
+                        DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
+                        SendSpellNonMeleeDamageLog(&damageInfo);
+                        DealSpellDamage(&damageInfo, true);
+                        takeCharges = true;
+                        break;
+                    }
+                    case SPELL_AURA_MANA_SHIELD:
+                    case SPELL_AURA_DUMMY:
+                    {
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: casting spell id %u (triggered by %s dummy aura of spell %u)",
+                                spellInfo->Id,
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+                        if (HandleDummyAuraProc(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown)) 
+                            takeCharges = true;
+                        break;
+                    }
+                    case SPELL_AURA_OBS_MOD_POWER:
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: casting spell id %u (triggered by %s aura of spell %u)",
+                                spellInfo->Id,
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+                        if (HandleObsModEnergyAuraProc(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown)) 
+                            takeCharges = true;
+                        break;
+                    case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: casting spell id %u (triggered by %s aura of spell %u)",
+                                spellInfo->Id,
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+                        if (HandleModDamagePctTakenAuraProc(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown))
+                            takeCharges = true;
+                        break;
+                    case SPELL_AURA_MOD_POWER_REGEN_PERCENT:
+                    {
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: casting spell id %u (triggered by %s ModPowerRegenPCT of spell %u)",
+                                spellInfo->Id,
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+                        if (HandleModPowerRegenAuraProc(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown)) 
+                            takeCharges = true;
+                        break;
+                    }
+                    case SPELL_AURA_OVERRIDE_CLASS_SCRIPTS:
+                    {
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: casting spell id %u (triggered by %s aura of spell %u)",
+                                spellInfo->Id,
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+                        if (HandleOverrideClassScriptAuraProc(pTarget, damage, triggeredByAura, procSpell, cooldown)) 
+                            takeCharges = true;
+                        break;
+                    }
+                    case SPELL_AURA_RAID_PROC_FROM_CHARGE_WITH_VALUE:
+                    {
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: casting mending (triggered by %s dummy aura of spell %u)",
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+
+                        HandleAuraRaidProcFromChargeWithValue(triggeredByAura);
+                        takeCharges = true;
+                        break;
+                    }
+                    case SPELL_AURA_RAID_PROC_FROM_CHARGE:
+                    {
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: casting mending (triggered by %s dummy aura of spell %u)",
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+
+                        HandleAuraRaidProcFromCharge(triggeredByAura);
+                        takeCharges = true;
+                        break;
+                    }
+                    case SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE:
+                    {
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: casting spell %u (triggered with value by %s aura of spell %u)",
+                                spellInfo->Id,
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+
+                        if (HandleProcTriggerSpell(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown)) 
+                            takeCharges = true;
+                        break;
+                    }
+                    case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK:
+                        // Skip melee hits or instant cast spells
+                        if (procSpell && GetSpellCastTime(procSpell) != 0)
+                            takeCharges = true;
+                        break;
+                    case SPELL_AURA_REFLECT_SPELLS_SCHOOL:
+                        // Skip Melee hits and spells ws wrong school
+                        if (procSpell && (triggeredByAura->GetMiscValue() & procSpell->SchoolMask)) // School check
+                            takeCharges = true;
+                        break;
+                    case SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT:
+                    case SPELL_AURA_MOD_POWER_COST_SCHOOL:
+                        // Skip melee hits and spells ws wrong school or zero cost
+                        if (procSpell && (procSpell->manaCost != 0 || procSpell->ManaCostPercentage != 0) // Cost check
+                            && (triggeredByAura->GetMiscValue() & procSpell->SchoolMask)) // School check
+                            takeCharges = true;
+                        break;
+                    case SPELL_AURA_MECHANIC_IMMUNITY:
+                        // Compare mechanic
+                        if (procSpell && procSpell->Mechanic == uint32(triggeredByAura->GetMiscValue())) 
+                            takeCharges = true;
+                        break;
+                    case SPELL_AURA_MOD_MECHANIC_RESISTANCE:
+                        // Compare mechanic
+                        if (procSpell && procSpell->Mechanic == uint32(triggeredByAura->GetMiscValue())) 
+                            takeCharges = true;
+                        break;
+                    case SPELL_AURA_MOD_DAMAGE_FROM_CASTER:
+                        // Compare casters
+                        if (triggeredByAura->GetCasterGUID() == pTarget->GetGUID())
+                            takeCharges = true;
+                        break;
+                    case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
+                        sLog->outDebug(
+                                LOG_FILTER_SPELLS_AURAS,
+                                "ProcDamageAndSpell: casting spell id %u (triggered by %s spell crit chance aura of spell %u)",
+                                spellInfo->Id,
+                                (isVictim ? "a victim's" : "an attacker's"),
+                                triggeredByAura->GetId());
+                        if (procSpell && HandleSpellCritChanceAuraProc(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown)) 
+                            takeCharges = true;
+                        break;
+                        // CC Auras which use their amount amount to drop
+                        // Are there any more auras which need this?
+                    case SPELL_AURA_MOD_CONFUSE:
+                    case SPELL_AURA_MOD_FEAR:
+                    case SPELL_AURA_MOD_STUN:
+                    case SPELL_AURA_MOD_ROOT:
+                    case SPELL_AURA_TRANSFORM:
+                    {
+                        // chargeable mods are breaking on hit
+                        if (useCharges) 
+                            takeCharges = true;
+                        else
+                        {
+                            // Spell own direct damage at apply wont break the CC
+                            if (procSpell && (procSpell->Id == triggeredByAura->GetId()))
+                            {
+                                Aura * aura = triggeredByAura->GetBase();
+                                // called from spellcast, should not have ticked yet
+                                if (aura->GetDuration() == aura->GetMaxDuration()) 
+                                    break;
+                            }
+                            int32 damageLeft = triggeredByAura->GetAmount();
+                            // No damage left
+                            if (damageLeft < int32(damage))
+                                i->aura->Remove();
+                            else 
+                                triggeredByAura->SetAmount(damageLeft - damage);
+                        }
+                        break;
+                    }
+                    case SPELL_AURA_MOD_STEALTH:
+                        // Skip absorbs
+                        if (!(procExtra & PROC_EX_ABSORB))
+                            takeCharges = true;
+                        break;
+                    default:
+                        // nothing do, just charges counter
+                        takeCharges = true;
+                        break;
                 }
-                    //case SPELL_AURA_ADD_FLAT_MODIFIER:
-                    //case SPELL_AURA_ADD_PCT_MODIFIER:
-                    // HandleSpellModAuraProc
-                    //break;
-                default:
-                    // nothing do, just charges counter
-                    takeCharges = true;
-                    break;
-            }
         }
         // Remove charge (aura can be removed by triggers)
-        if (useCharges && takeCharges) i->aura->DropCharge();
+        if (useCharges && takeCharges)
+            i->aura->DropCharge();
 
-        if (spellInfo->AttributesEx3 & SPELL_ATTR3_DISABLE_PROC) SetCantProc(
-                false);
+        if (spellInfo->AttributesEx3 & SPELL_ATTR3_DISABLE_PROC)
+            SetCantProc(false);
     }
 
     // Cleanup proc requirements
-    if (procExtra & (PROC_EX_INTERNAL_TRIGGERED | PROC_EX_INTERNAL_CANT_PROC)) SetCantProc(
-            false);
+    if (procExtra & (PROC_EX_INTERNAL_TRIGGERED | PROC_EX_INTERNAL_CANT_PROC))
+        SetCantProc(false);
 }
 
 SpellSchoolMask Unit::GetMeleeDamageSchoolMask() const

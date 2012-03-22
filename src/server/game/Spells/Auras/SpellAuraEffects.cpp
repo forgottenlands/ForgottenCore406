@@ -4327,7 +4327,6 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const *aurApp,
 
 void AuraEffect::HandleModCanCastWhileWalking(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
-    sLog->outString("dentro %d", apply ? 1 : 0);
     uint32 spellId = 0;
     Unit* target = aurApp->GetTarget();
 
@@ -4340,7 +4339,6 @@ void AuraEffect::HandleModCanCastWhileWalking(AuraApplication const* aurApp, uin
         case 86914:
             if (target->ToPlayer())
             {
-                sLog->outString("dentro");
                 if (AuraApplication* effAurApp = target->GetAuraApplication(86914, target->GetGUID()))
                     effAurApp->SendFakeAuraUpdate(86914, !apply);
             }
