@@ -1745,7 +1745,8 @@ void Guild::HandleRemoveMember(WorldSession* session, uint64 guid)
             DeleteMember(guid, false, true);
             _LogEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, player->GetGUIDLow(), GUID_LOPART(guid));
             _BroadcastEvent(GE_REMOVED, 0, name.c_str(), player->GetName());
-            pMember->FindPlayer()->SetReputation(1168, -1);
+            if (pMember && pMember->FindPlayer())
+                pMember->FindPlayer()->SetReputation(1168, -1);
         }
     }
     HandleRoster();
