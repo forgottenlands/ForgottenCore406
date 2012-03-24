@@ -1108,7 +1108,12 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                             break;
                     }
                 }
-
+                // Exorcism
+                if (m_spellInfo->Id == 879)
+                {
+                    bool useAp = m_caster->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_HOLY) < m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    damage += 0.344f * (useAp ? m_caster->GetTotalAttackPowerValue(BASE_ATTACK) : m_caster->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_HOLY));
+                }
                 break;
             }
             case SPELLFAMILY_DEATHKNIGHT:

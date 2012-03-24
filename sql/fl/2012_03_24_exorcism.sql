@@ -1,0 +1,1 @@
+UPDATE `spell_bonus_data` SET `direct_bonus`=-1, `dot_bonus`=-1, `ap_bonus`=-1, `ap_dot_bonus`=-1 WHERE  `entry`=879 LIMIT 1;
