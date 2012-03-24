@@ -25722,6 +25722,9 @@ void Player::RemoveOrAddMasterySpells()
 
         if (HasAura(76659))
             RemoveAurasDueToSpell(76659);
+
+        if (HasAura(77222))
+            RemoveAurasDueToSpell(77222);
 	} 
     else if (HasAuraType(SPELL_AURA_MASTERY)) 
     {
@@ -25768,5 +25771,9 @@ void Player::RemoveOrAddMasterySpells()
         if (GetTalentBranchSpec(GetActiveSpec()) == BS_HUNTER_MARKMANSHIP)
             if (!HasAura(76659))
                 AddAura(76659, this);
+
+        if (GetTalentBranchSpec(GetActiveSpec()) == BS_SHAMAN_ELEMENTAL)
+            if (!HasAura(77222))
+                AddAura(77222, this);
     }
 }
