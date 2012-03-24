@@ -2334,16 +2334,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 return;
             }
             // Healing Stream Totem
-            if (m_spellInfo->SpellFamilyFlags [0]
-                    & SPELLFAMILYFLAG_SHAMAN_HEALING_STREAM)
+            if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_SHAMAN_HEALING_STREAM)
             {
-                if (!unitTarget) return;
-                // Restorative Totems
-                if (Unit *owner = m_caster->GetOwner()) if (AuraEffect *dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 338, 1)) damage +=
-                        damage * dummy->GetAmount() / 100;
+                if (!unitTarget) 
+                    return;
 
-                m_caster->CastCustomSpell(unitTarget, 52042, &damage, 0, 0,
-                        true, 0, 0, m_originalCasterGUID);
+                m_caster->CastCustomSpell(unitTarget, 52042, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
                 return;
             }
             // Mana Spring Totem
@@ -3441,19 +3437,23 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                     + caster->SpellBaseHealingBonus(SPELL_SCHOOL_MASK_HOLY))
                     * damage / 100;
         }
-        else addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo,
-                effIndex, addhealth, HEAL);
+        else addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, effIndex, addhealth, HEAL);
 
         // Remove Grievious bite if fully healed
-        if (unitTarget->HasAura(48920)
-                && (unitTarget->GetHealth() + addhealth
-                        >= unitTarget->GetMaxHealth())) unitTarget->RemoveAura(
-                48920);
+        if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth())) 
+            unitTarget->RemoveAura(48920);
 
         // Nature's Blessing
         if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2012, 0))
         {
             if (unitTarget->HasAura(974))
+                AddPctN(addhealth, aurEff->GetAmount());
+        }
+
+        // Soothing Rains
+        if (m_caster->GetOwner() && m_spellInfo->Id == 52042)
+        {
+            if (AuraEffect* aurEff = m_caster->GetOwner()->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2011, 0))
                 AddPctN(addhealth, aurEff->GetAmount());
         }
 

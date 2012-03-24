@@ -7512,21 +7512,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     triggered_spell_id = 86700;
                     break;
                 }
-                    // Uncomment this once the guardian is receiving the aura via
-                    // creature template addon and redirect aura procs to the owner
-                    // Ancient Crusader - Guardian
-                    /*
-                     case 86703:
-                     {
-                     Unit* owner = this->GetOwner();
-
-                     if (!owner)
-                     return false;
-
-                     owner->CastSpell(owner, 86700, true);
-                     return true;
-                     }*/
-                    // Long Arm of The law
+                // Long Arm of The law
                 case 87168:
                 case 87172:
                 {
@@ -7549,31 +7535,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                         break;
                     }
                 }
-                    // Judgement of Light
-                case 20185:
-                {
-                    if (!pVictim) // Crash Fix in Unit::HandleDummyAuraProc.
-                    return false;
-                    // 2% of base mana
-                    basepoints0 = int32(pVictim->CountPctFromMaxHealth(2));
-                    pVictim->CastCustomSpell(pVictim, 20267, &basepoints0, 0, 0,
-                            true, 0, triggeredByAura);
-                    return true;
-                }
-                    // Judgement of Wisdom
-                case 20186:
-                {
-                    if (pVictim && pVictim->isAlive()
-                            && pVictim->getPowerType() == POWER_MANA)
-                    {
-                        // 2% of base mana
-                        basepoints0 = int32(pVictim->GetCreateMana() * 2 / 100);
-                        pVictim->CastCustomSpell(pVictim, 20268, &basepoints0,
-                                NULL, NULL, true, 0, triggeredByAura);
-                    }
-                    return true;
-                }
-                    // Holy Power (Redemption Armor set)
+                // Holy Power (Redemption Armor set)
                 case 28789:
                 {
                     if (!pVictim) return false;
