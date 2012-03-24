@@ -4640,6 +4640,7 @@ void SpellMgr::LoadSpellCustomAttr() {
             count++;
             break;
         case 87426: // Summon Shadowy Apparition
+        case 88747: // Summon Wild Mushroom
             spellInfo->EffectBasePoints[0] = 1;
             count++;
             break;

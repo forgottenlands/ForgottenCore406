@@ -906,21 +906,24 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        if (m_caster->ToPlayer()->GetTalentBranchSpec(
-                                m_caster->ToPlayer()->GetActiveSpec())
-                                == BS_DRUID_BALANCE)
+                        if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_DRUID_BALANCE)
                         {
                             if (m_caster->HasAura(48517))
                             {
                                 m_caster->RemoveAurasDueToSpell(48517);
                                 m_caster->SetEclipsePower(0);
                             }
-                            if (m_caster->GetEclipsePower() >= -20) if (m_caster->HasAura(
-                                    48518)) m_caster->RemoveAurasDueToSpell(
-                                    48518);
+                            if (m_caster->GetEclipsePower() >= -20) 
+                                if (m_caster->HasAura(48518)) 
+                                    m_caster->RemoveAurasDueToSpell(48518);
 
-                            m_caster->SetEclipsePower(
-                                    int32(m_caster->GetEclipsePower() + 20));
+                            // Euphoria
+                            int32 bonuspower =  20;
+                            if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, 0))
+                                if (roll_chance_i(aurEff->GetAmount()))
+                                    bonuspower *= 2;
+
+                            m_caster->SetEclipsePower(int32(m_caster->GetEclipsePower() + bonuspower));
                         }
                     }
                 }
@@ -929,21 +932,24 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        if (m_caster->ToPlayer()->GetTalentBranchSpec(
-                                m_caster->ToPlayer()->GetActiveSpec())
-                                == BS_DRUID_BALANCE)
+                        if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_DRUID_BALANCE)
                         {
                             if (m_caster->HasAura(48518))
                             {
                                 m_caster->RemoveAurasDueToSpell(48518);
                                 m_caster->SetEclipsePower(0);
                             }
-                            if (m_caster->GetEclipsePower() <= 13) if (m_caster->HasAura(
-                                    48517)) m_caster->RemoveAurasDueToSpell(
-                                    48517);
+                            if (m_caster->GetEclipsePower() <= 13) 
+                                if (m_caster->HasAura(48517))
+                                    m_caster->RemoveAurasDueToSpell(48517);
 
-                            m_caster->SetEclipsePower(
-                                    int32(m_caster->GetEclipsePower() - 13));
+                            // Euphoria
+                            int32 bonuspower = 13;
+                            if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, 0))
+                                if (roll_chance_i(aurEff->GetAmount()))
+                                    bonuspower *= 2;
+
+                            m_caster->SetEclipsePower(int32(m_caster->GetEclipsePower() - bonuspower));
                         }
                     }
                     // Improved Insect Swarm
@@ -2148,22 +2154,19 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
         case SPELLFAMILY_DRUID:
         {
             // Starfall
-            if (m_spellInfo->SpellFamilyFlags [2]
-                    & SPELLFAMILYFLAG2_DRUID_STARFALL)
+            if (m_spellInfo->SpellFamilyFlags [2] & SPELLFAMILYFLAG2_DRUID_STARFALL)
             {
                 //Shapeshifting into an animal form or mounting cancels the effect.
-                if (m_caster->GetCreatureType() == CREATURE_TYPE_BEAST
-                        || m_caster->IsMounted())
+                if (m_caster->GetCreatureType() == CREATURE_TYPE_BEAST || m_caster->IsMounted())
                 {
-                    if (m_triggeredByAuraSpell) m_caster->RemoveAurasDueToSpell(
-                            m_triggeredByAuraSpell->Id);
+                    if (m_triggeredByAuraSpell) 
+                        m_caster->RemoveAurasDueToSpell(m_triggeredByAuraSpell->Id);
                     return;
                 }
 
                 //Any effect which causes you to lose control of your character will supress the starfall effect.
-                if (m_caster->HasUnitState(
-                        UNIT_STAT_STUNNED | UNIT_STAT_FLEEING | UNIT_STAT_ROOT
-                                | UNIT_STAT_CONFUSED)) return;
+                if (m_caster->HasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_FLEEING | UNIT_STAT_ROOT | UNIT_STAT_CONFUSED)) 
+                    return;
 
                 m_caster->CastSpell(unitTarget, damage, true);
                 return;
@@ -2182,6 +2185,28 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                             m_caster->CastSpell(unitTarget, 79060, true); // Mark of the Wild (Caster)
                     }
                     break;
+                }
+                // Wild mushroom: detonate
+                case 88751:
+                {
+                    std::list<Creature*> unitList;
+                    m_caster->GetCreatureListWithEntryInGrid(unitList, 47649, 40.0f);
+                    for (std::list<Creature*>::const_iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                    {
+                        if ((*itr)->GetOwnerGUID() == m_caster->GetGUID())
+                        {
+                            // Find all the enemies
+                            std::list<Unit*> targets;
+                            Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check((*itr), (*itr), 6.0f);
+                            Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher((*itr), targets, u_check);
+                            (*itr)->VisitNearbyObject(6.0f, searcher);
+                            for (std::list<Unit*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
+                                (*itr)->CastCustomSpell((*iter), 78777, NULL, NULL, NULL, true, 0, 0, (*itr)->GetOwnerGUID());
+                                
+                            (*itr)->CastSpell((*itr), 92853, true);
+                            (*itr)->DisappearAndDie();
+                        }
+                    }
                 }
             }
             break;
@@ -4186,21 +4211,19 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
     uint32 entry = m_spellInfo->EffectMiscValue [effIndex];
     if (!entry) return;
 
-    SummonPropertiesEntry const *properties =
-            sSummonPropertiesStore.LookupEntry(
-                    m_spellInfo->EffectMiscValueB [effIndex]);
+    SummonPropertiesEntry const *properties = sSummonPropertiesStore.LookupEntry(m_spellInfo->EffectMiscValueB[effIndex]);
     if (!properties)
     {
-        sLog->outError("EffectSummonType: Unhandled summon type %u",
-                m_spellInfo->EffectMiscValueB [effIndex]);
+        sLog->outError("EffectSummonType: Unhandled summon type %u", m_spellInfo->EffectMiscValueB[effIndex]);
         return;
     }
 
-    if (!m_originalCaster) return;
+    if (!m_originalCaster) 
+        return;
 
     int32 duration = GetSpellDuration(m_spellInfo);
-    if (Player* modOwner = m_originalCaster->GetSpellModOwner()) modOwner->ApplySpellMod(
-            m_spellInfo->Id, SPELLMOD_DURATION, duration);
+    if (Player* modOwner = m_originalCaster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
 
     Position pos;
     GetSummonPosition(effIndex, pos);
@@ -4244,9 +4267,8 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     // Summons a vehicle, but doesn't force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
                 case SUMMON_TYPE_VEHICLE:
                 case SUMMON_TYPE_VEHICLE2:
-                    if (m_originalCaster) summon =
-                            m_caster->GetMap()->SummonCreature(entry, pos,
-                                    properties, duration, m_originalCaster);
+                    if (m_originalCaster)
+                        summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster);
                     break;
                 case SUMMON_TYPE_TOTEM:
                 {
@@ -4266,25 +4288,24 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     m_originalCaster->ToPlayer()->SendDirectMessage(&data);
                 }
 
-                    summon = m_caster->GetMap()->SummonCreature(entry, pos,
-                            properties, duration, m_originalCaster, 0, lowGUID);
-                    if (!summon || !summon->isTotem()) return;
+                summon = m_caster->GetMap()->SummonCreature(entry, pos,properties, duration, m_originalCaster, 0, lowGUID);
+                if (!summon || !summon->isTotem()) 
+                    return;
 
-                    // Mana Tide Totem
-                    if (m_spellInfo->Id == 16190) 
-                        damage = m_caster->CountPctFromMaxHealth(10);
+                // Mana Tide Totem
+                if (m_spellInfo->Id == 16190) 
+                    damage = m_caster->CountPctFromMaxHealth(10);
 
-                    if (damage) // if not spell info, DB values used
-                    {
-                        summon->SetMaxHealth(damage);
-                        summon->SetHealth(damage);
-                    }
+                if (damage) // if not spell info, DB values used
+                {
+                    summon->SetMaxHealth(damage);
+                    summon->SetHealth(damage);
+                }
 
-                    //summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+                //summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-                    if (m_originalCaster->GetTypeId()
-                            == TYPEID_PLAYER && properties->Slot >= SUMMON_SLOT_TOTEM
-                            && properties->Slot < MAX_TOTEM_SLOT){
+                if (m_originalCaster->GetTypeId() == TYPEID_PLAYER && properties->Slot >= SUMMON_SLOT_TOTEM && properties->Slot < MAX_TOTEM_SLOT)
+                {
                     // set display id depending on race
                     uint32 displayId = m_originalCaster->GetModelForTotem(PlayerTotemType(properties->Id));
                     summon->SetNativeDisplayId(displayId);
@@ -4316,34 +4337,53 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                 }
                 default:
                 {
-                    float radius = GetSpellRadiusForHostile(
-                            sSpellRadiusStore.LookupEntry(
-                                    m_spellInfo->EffectRadiusIndex [effIndex]));
+                    float radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex [effIndex]));
 
                     uint32 amount = damage > 0 ? damage : 1;
                     if (m_spellInfo->Id == 18662) // Curse of Doom
-                    amount = 1;
+                        amount = 1;
 
                     for (uint32 count = 0; count < amount; ++count)
                     {
                         GetSummonPosition(effIndex, pos, radius, count);
 
-                        TempSummonType summonType =
-                                (duration == 0) ?
-                                        TEMPSUMMON_DEAD_DESPAWN :
-                                        TEMPSUMMON_TIMED_DESPAWN;
+                        TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
 
-                        summon = m_originalCaster->SummonCreature(entry, pos,
-                                summonType, duration);
-                        if (!summon) continue;
+                        // Wild mushroom
+                        if (entry == 47649)
+                        {
+                            uint8 mush = 0;
+                            std::list<Creature*> unitList;
+                            m_caster->GetCreatureListWithEntryInGrid(unitList, 47649, 40.0f);
+                            for (std::list<Creature*>::const_iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                                if ((*itr)->GetOwnerGUID() == m_caster->GetGUID() && (*itr)->isAlive())
+                                    mush++;
+
+                            if (mush < 3)
+                                summon = m_originalCaster->SummonCreature(entry, pos, summonType, duration);
+                            else
+                                continue;
+                        } 
+                        else
+                            summon = m_originalCaster->SummonCreature(entry, pos, summonType, duration);
+
+                        if (!summon) 
+                            continue;
 
                         if (properties->Category == SUMMON_CATEGORY_ALLY)
                         {
-                            summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,
-                                    m_originalCaster->GetGUID());
-                            summon->setFaction(m_originalCaster->getFaction());
-                            summon->SetUInt32Value(UNIT_CREATED_BY_SPELL,
-                                    m_spellInfo->Id);
+                            summon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_originalCaster->GetGUID());
+                            summon->setFaction(m_originalCaster->getFaction()); 
+                            summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+
+                            // Wild mushrooms
+                            if (entry == 47649)
+                            {
+                                summon->setFaction(summon->GetOwner()->getFaction());
+                                summon->SetReactState(REACT_PASSIVE);
+                                summon->SetMaxHealth(5);
+                                summon->SetHealth(5);
+                            }
                         }
                         ExecuteLogEffectSummonObject(effIndex, summon);
                     }
@@ -8670,21 +8710,23 @@ void Spell::EffectWMOChange(SpellEffIndex effIndex)
     }
 }
 
-void Spell::SummonGuardian(uint32 i, uint32 entry,
-        SummonPropertiesEntry const *properties)
+void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *properties)
 {
     Unit *caster = m_originalCaster;
     if (!caster) return;
 
-    if (caster->isTotem()) caster = caster->ToTotem()->GetOwner();
+    if (caster->isTotem()) 
+        caster = caster->ToTotem()->GetOwner();
 
     // in another case summon new
     uint8 level = caster->getLevel();
 
     // level of pet summoned using engineering item based at engineering skill level
-    if (m_CastItem && caster->GetTypeId() == TYPEID_PLAYER) if (ItemPrototype const *proto = m_CastItem->GetProto()) if (proto->RequiredSkill
-            == SKILL_ENGINEERING) if (uint16 skill202 = caster->ToPlayer()->GetSkillValue(SKILL_ENGINEERING)) level =
-            skill202 / 5;
+    if (m_CastItem && caster->GetTypeId() == TYPEID_PLAYER) 
+        if (ItemPrototype const *proto = m_CastItem->GetProto()) 
+            if (proto->RequiredSkill == SKILL_ENGINEERING) 
+                if (uint16 skill202 = caster->ToPlayer()->GetSkillValue(SKILL_ENGINEERING)) 
+                    level = skill202 / 5;
 
     //float radius = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     float radius = 5.0f;
@@ -8700,8 +8742,8 @@ void Spell::SummonGuardian(uint32 i, uint32 entry,
             duration += aurEff->GetAmount();
             break;
     }
-    if (Player* modOwner = m_originalCaster->GetSpellModOwner()) modOwner->ApplySpellMod(
-            m_spellInfo->Id, SPELLMOD_DURATION, duration);
+    if (Player* modOwner = m_originalCaster->GetSpellModOwner()) 
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
 
     //TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
     Map *map = caster->GetMap();
@@ -8711,15 +8753,16 @@ void Spell::SummonGuardian(uint32 i, uint32 entry,
         Position pos;
         GetSummonPosition(i, pos, radius, count);
 
-        TempSummon *summon = map->SummonCreature(entry, pos, properties,
-                duration, caster);
-        if (!summon) return;
-        if (summon->HasUnitTypeMask(UNIT_MASK_GUARDIAN)) ((Guardian*) summon)->InitStatsForLevel(
-                level);
+        TempSummon *summon = map->SummonCreature(entry, pos, properties, duration, caster);
+        if (!summon) 
+            return;
+        if (summon->HasUnitTypeMask(UNIT_MASK_GUARDIAN)) 
+            ((Guardian*) 
+            summon)->InitStatsForLevel(level);
 
         summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-        if (summon->HasUnitTypeMask(UNIT_MASK_MINION) && m_targets.HasDst()) ((Minion*) summon)->SetFollowAngle(
-                m_caster->GetAngle(summon));
+        if (summon->HasUnitTypeMask(UNIT_MASK_MINION) && m_targets.HasDst()) 
+            ((Minion*) summon)->SetFollowAngle(m_caster->GetAngle(summon));
 
         if (summon->GetEntry() == 27893)
         {
@@ -8730,11 +8773,14 @@ void Spell::SummonGuardian(uint32 i, uint32 entry,
             }
             else summon->SetDisplayId(1126);
         }
-        else if (summon->GetEntry() == 1964) // Force of Nature
-        if (AuraEffect * aurEff = m_caster->GetAuraEffectOfRankedSpell(16836, 2))
+        else if (summon->GetEntry() == 1964)
         {
-            int32 value = aurEff->GetAmount();
-            summon->CastCustomSpell(summon, 50419, &value, &value, 0, true);
+            // Force of Nature
+            if (AuraEffect * aurEff = m_caster->GetAuraEffectOfRankedSpell(16836, 2))
+            {
+                int32 value = aurEff->GetAmount();
+                summon->CastCustomSpell(summon, 50419, &value, &value, 0, true);
+            }
         }
 
         summon->AI()->EnterEvadeMode();
