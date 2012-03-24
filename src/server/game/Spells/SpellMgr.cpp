@@ -4694,6 +4694,10 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectMiscValue[0] = 0;
             count++;
             break;
+        case 50029: // Veteran of the third war
+            spellInfo->EffectMiscValue[0] = 2;
+            count++;
+            break;
         default:
             break;
         }
