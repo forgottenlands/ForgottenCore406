@@ -2751,6 +2751,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                     case TARGET_UNIT_RAID_CASTER:
                     case TARGET_RAID_MEMBERS:
                         m_caster->GetRaidMember(unitList, radius);
+                        if (m_spellInfo->Id == 70940)
+                            unitList.remove(m_caster);
                         break;
                     case TARGET_UNIT_CLASS_TARGET: {
                         Player* targetPlayer =
