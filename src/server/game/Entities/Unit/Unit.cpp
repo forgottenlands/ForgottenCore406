@@ -19567,16 +19567,30 @@ void Unit::SetEclipsePower(int32 power)
 
     if (eclipse >= 100)
     {
-        if (HasAura(48518)) RemoveAurasDueToSpell(48518);
+        if (HasAura(48518)) 
+            RemoveAurasDueToSpell(48518);
         eclipse = 100;
         AddAura(48517, ToPlayer());
+        // Euphoria
+        if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, 2))
+        {
+            int32 bp0 = aurEff->GetAmount();
+            CastCustomSpell(this, 81070, &bp0, 0, 0, true, 0, 0, 0);
+        }
     }
 
     if (eclipse <= -100)
     {
-        if (HasAura(48517)) RemoveAurasDueToSpell(48517);
+        if (HasAura(48517))
+            RemoveAurasDueToSpell(48517);
         eclipse = -100;
         AddAura(48518, ToPlayer());
+        // Euphoria
+        if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DRUID, 4431, 2))
+        {
+            int32 bp0 = aurEff->GetAmount();
+            CastCustomSpell(this, 81070, &bp0, 0, 0, true, 0, 0, 0);
+        }
     }
 
     WorldPacket data(SMSG_POWER_UPDATE);
