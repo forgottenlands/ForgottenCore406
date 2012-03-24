@@ -9952,6 +9952,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
             if (procSpell->Id != 172)
                 return false;
             break;
+        case 31825:
+        case 85510:
+            if (procSpell->Id != 25912 && procSpell->Id != 25914)
+                return false;
         default:
             break;
     }
