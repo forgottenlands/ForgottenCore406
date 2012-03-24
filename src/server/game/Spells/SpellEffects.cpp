@@ -3509,8 +3509,11 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
         }
 
         // Reduce Healing in Bg or Arena
-       // if (m_caster->ToPlayer()->InBattleground() || m_caster->ToPlayer()->InArena())
-       //     addhealth *= 0.9f;
+        if (m_caster->ToPlayer())
+        {
+            if (m_caster->ToPlayer()->InBattleground() || m_caster->ToPlayer()->InArena())
+                addhealth *= 0.9f;
+        }
 
         m_damage -= addhealth;
     }
