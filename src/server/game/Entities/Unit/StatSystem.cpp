@@ -1512,14 +1512,9 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
         //force of nature
         if (GetEntry() == ENTRY_TREANT)
         {
-            int32 spellDmg = int32(
-                    m_owner->GetUInt32Value(
-                            PLAYER_FIELD_MOD_DAMAGE_DONE_POS
-                                    + SPELL_SCHOOL_NATURE))
-                    - m_owner->GetUInt32Value(
-                            PLAYER_FIELD_MOD_DAMAGE_DONE_NEG
-                                    + SPELL_SCHOOL_NATURE);
-            if (spellDmg > 0) bonusDamage = spellDmg * 0.09f;
+            int32 spellDmg = int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_NATURE));
+            if (spellDmg > 0) 
+                bonusDamage = spellDmg * 0.09f;
         }
         //greater fire elemental
         else if (GetEntry() == ENTRY_FIRE_ELEMENTAL)
