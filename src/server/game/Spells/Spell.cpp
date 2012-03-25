@@ -3267,6 +3267,21 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const * triggere
             }
         }
 
+        // Early Frost
+        if (m_spellInfo->Id == 116)
+        {
+            if (m_caster->HasAura(83049))
+            {
+                if (!m_caster->HasAura(83162))
+                    m_caster->AddAura(83162, m_caster);
+            }
+            else if (m_caster->HasAura(83050))
+            {
+                if (!m_caster->HasAura(83239))
+                    m_caster->AddAura(83239, m_caster);
+            }
+        }
+
         m_caster->SetCurrentCastedSpell(this);
         SendSpellStart();
 
