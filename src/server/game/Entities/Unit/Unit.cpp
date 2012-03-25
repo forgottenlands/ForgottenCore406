@@ -11955,6 +11955,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                     }
                 }
             }
+            // Shadow word: Death (deals three times damage to target below 25% health)
+            else if (spellProto->Id == 32379)
+            {
+                if (pVictim->GetHealthPct() < 25.0f)
+                    DoneTotalMod *= 3.0f;
+            }
             break;
         case SPELLFAMILY_PALADIN:
             // Judgement of Vengeance/Judgement of Corruption
