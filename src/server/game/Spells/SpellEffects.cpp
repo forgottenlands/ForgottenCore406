@@ -771,6 +771,11 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     m_caster->RemoveAura(74434);
                     m_caster->AddAura(79440, m_caster);
                 }
+
+                // Soul Fire Empowered Imp remove
+                if (m_spellInfo->Id == 6353 && m_caster->HasAura(47283))
+                    m_caster->RemoveAurasDueToSpell(47283);
+
                 break;
             }
             case SPELLFAMILY_PRIEST:
