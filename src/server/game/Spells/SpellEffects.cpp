@@ -1127,6 +1127,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         if (m_caster->HasAura(48108))
                             m_caster->RemoveAura(48108);
                         break;
+                    // Freez (Improved Freez)
+                    case 33395:
+                        if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_MAGE, 94, 0))
+                        {
+                            if (roll_chance_i(aurEff->GetAmount()))
+                            {
+                                m_caster->AddAura(44544, m_caster);
+                                m_caster->CastSpell(m_caster, 44544, true);
+                            }
+                        }
                 }
                 break;
             }
