@@ -6877,13 +6877,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     if (procSpell->Id != 73510) return false;
                     break;
                 }
-                    // Atonement
+                // Atonement
                 case 14523:
                 case 81749:
                 {
                     basepoints0 = int32(CalculatePctN(damage, triggerAmount));
                     triggered_spell_id = 81751;
-                    target = this;
                     break;
                 }
                 // Train of Thought
