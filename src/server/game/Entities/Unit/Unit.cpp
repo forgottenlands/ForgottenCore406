@@ -6744,6 +6744,20 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
             }
             switch (dummySpell->Id)
             {
+                // Shadow orbs
+                case 95740:
+                {
+                    if (procSpell->Id != 589 && procSpell->Id != 15407)
+                        return false;
+
+                    int32 chance = 10;
+                    if (AuraEffect* aurEff = this->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
+                        chance += aurEff->GetAmount();
+
+                    if (!roll_chance_i(chance))
+                        return false;
+                    break;
+                }
                 // Vampiric Embrace
                 case 15286:
                 {
@@ -9047,9 +9061,7 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
     return false;
 }
 
-bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
-        AuraEffect* triggeredByAura, SpellEntry const *procSpell,
-        uint32 procFlags, uint32 procEx, uint32 cooldown)
+bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* triggeredByAura, SpellEntry const *procSpell, uint32 procFlags, uint32 procEx, uint32 cooldown)
 {
     // Get triggered aura spell info
     SpellEntry const* auraSpellInfo = triggeredByAura->GetSpellProto();
@@ -9058,22 +9070,15 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
     int32 triggerAmount = triggeredByAura->GetAmount();
 
     // Set trigger spell id, target, custom basepoints
-    uint32 trigger_spell_id =
-            auraSpellInfo->EffectTriggerSpell [triggeredByAura->GetEffIndex()];
+    uint32 trigger_spell_id = auraSpellInfo->EffectTriggerSpell [triggeredByAura->GetEffIndex()];
 
     Unit* target = NULL;
     int32 basepoints0 = 0;
 
-    if (triggeredByAura->GetAuraType()
-            == SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE) basepoints0 =
-            triggerAmount;
+    if (triggeredByAura->GetAuraType() == SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE)
+        basepoints0 = triggerAmount;
 
-    Item* castItem =
-            triggeredByAura->GetBase()->GetCastItemGUID()
-                    && GetTypeId() == TYPEID_PLAYER ?
-                    this->ToPlayer()->GetItemByGuid(
-                            triggeredByAura->GetBase()->GetCastItemGUID()) :
-                    NULL;
+    Item* castItem = triggeredByAura->GetBase()->GetCastItemGUID() && GetTypeId() == TYPEID_PLAYER ? this->ToPlayer()->GetItemByGuid(triggeredByAura->GetBase()->GetCastItemGUID()) : NULL;
 
     // Try handle unknown trigger spells
     if (sSpellStore.LookupEntry(trigger_spell_id) == NULL)
@@ -9619,8 +9624,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
     }
 
     // not allow proc extra attack spell at extra attack
-    if (m_extraAttacks
-            && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS)) return false;
+    if (m_extraAttacks && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS)) 
+        return false;
 
     // Custom requirements (not listed in procEx) Warning! damage dealing after this
     // Custom triggered spells
@@ -9822,49 +9827,52 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
     }
 
     // Sword Specialization
-    if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_GENERIC
-            && auraSpellInfo->SpellIconID == 1462 && procSpell) if (Player * plr = ToPlayer())
-    {
-        if (cooldown && plr->HasSpellCooldown(16459)) return false;
+    if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_GENERIC && auraSpellInfo->SpellIconID == 1462 && procSpell) 
+        if (Player * plr = ToPlayer())
+        {
+            if (cooldown && plr->HasSpellCooldown(16459))
+                return false;
 
-        // this required for attacks like Mortal Strike
-        plr->RemoveSpellCooldown(procSpell->Id);
+            // this required for attacks like Mortal Strike
+            plr->RemoveSpellCooldown(procSpell->Id);
 
-        CastSpell(pVictim, procSpell->Id, true);
+            CastSpell(pVictim, procSpell->Id, true);
 
-        if (cooldown) plr->AddSpellCooldown(16459, 0, time(NULL) + cooldown);
-        return true;
-    }
+            if (cooldown) 
+                plr->AddSpellCooldown(16459, 0, time(NULL) + cooldown);
+            return true;
+        }
 
     // Blade Barrier
-    if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT
-            && auraSpellInfo->SpellIconID == 85)
+    if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && auraSpellInfo->SpellIconID == 85)
     {
         Player * plr = this->ToPlayer();
-        if (this->GetTypeId() != TYPEID_PLAYER || !plr
-                || plr->getClass() != CLASS_DEATH_KNIGHT) return false;
+        if (this->GetTypeId() != TYPEID_PLAYER || !plr || plr->getClass() != CLASS_DEATH_KNIGHT)
+                return false;
 
-        if (!plr->IsBaseRuneSlotsOnCooldown(RUNE_BLOOD)) return false;
+        if (!plr->IsBaseRuneSlotsOnCooldown(RUNE_BLOOD))
+            return false;
     }
 
     // Rime
-    else if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT
-            && auraSpellInfo->SpellIconID == 56)
+    else if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && auraSpellInfo->SpellIconID == 56)
     {
-        if (GetTypeId() != TYPEID_PLAYER) return false;
+        if (GetTypeId() != TYPEID_PLAYER) 
+            return false;
 
         // Howling Blast
         this->ToPlayer()->RemoveSpellCategoryCooldown(1248, true);
     }
 
     // Death's Advance
-    if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT
-            && auraSpellInfo->SpellIconID == 3315)
+    if (auraSpellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && auraSpellInfo->SpellIconID == 3315)
     {
         Player* player = ToPlayer();
-        if (!player || player->getClass() != CLASS_DEATH_KNIGHT) return false;
+        if (!player || player->getClass() != CLASS_DEATH_KNIGHT) 
+            return false;
 
-        if (!player->IsBaseRuneSlotsOnCooldown(RUNE_UNHOLY)) return false;
+        if (!player->IsBaseRuneSlotsOnCooldown(RUNE_UNHOLY)) 
+            return false;
     }
 
     // Custom basepoints/target for exist spell
@@ -10188,26 +10196,24 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage,
         }
     }
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER
-            && ToPlayer()->HasSpellCooldown(trigger_spell_id)) return false;
+    if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
+        return false;
 
     // try detect target manually if not set
-    if (target == NULL) target =
-            !(procFlags
-                    & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS
-                            | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS))
-                    && IsPositiveSpell(trigger_spell_id) ? this : pVictim;
+    if (target == NULL)
+        target = !(procFlags & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS)) && IsPositiveSpell(trigger_spell_id) ? this : pVictim;
 
     // default case
-    if ((!target && !sSpellMgr->IsSrcTargetSpell(triggerEntry))
-            || (target && target != this && !target->isAlive())) return false;
+    if ((!target && !sSpellMgr->IsSrcTargetSpell(triggerEntry)) || (target && target != this && !target->isAlive())) 
+        return false;
 
-    if (basepoints0) CastCustomSpell(target, trigger_spell_id, &basepoints0,
-            NULL, NULL, true, castItem, triggeredByAura);
-    else CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
+    if (basepoints0) 
+        CastCustomSpell(target, trigger_spell_id, &basepoints0, NULL, NULL, true, castItem, triggeredByAura);
+    else
+        CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER) ToPlayer()->AddSpellCooldown(
-            trigger_spell_id, 0, time(NULL) + cooldown);
+    if (cooldown && GetTypeId() == TYPEID_PLAYER) 
+        ToPlayer()->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + cooldown);
 
     return true;
 }
@@ -11924,6 +11930,26 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 if (AuraEffect * aurEff = GetAuraEffect(55692, 0))
                     if (pVictim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x100000, 0, 0, GetGUID()))
                         AddPctN(DoneTotalMod, aurEff->GetAmount());
+            }
+            // Mind blast and Mind Spike
+            else if (spellProto->Id == 8092 || spellProto->Id == 73510)
+            {
+                if (HasAura(77487) && HasAura(95740))
+                {
+                    if (Player* caster = ToPlayer())
+                    {
+                        uint8 stacks = caster->GetAura(77487)->GetStackAmount();
+                        float pct = 1.0f + (0.10f * stacks);
+                        
+                        if (caster->HasAuraType(SPELL_AURA_MASTERY))
+                            if (caster->GetTalentBranchSpec(caster->GetActiveSpec()) == BS_PRIEST_SHADOW)
+                                pct += 0.12f + 0.015f * caster->GetMasteryPoints();
+
+                        DoneTotalMod *= pct;
+                        caster->RemoveAurasDueToSpell(77487);
+                        caster->CastSpell(caster, 95799, true);
+                    }
+                }
             }
             break;
         case SPELLFAMILY_PALADIN:

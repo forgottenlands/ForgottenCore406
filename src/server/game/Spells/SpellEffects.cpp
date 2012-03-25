@@ -785,21 +785,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     case 588:
                         m_caster->RemoveAurasDueToSpell(73413);
                         break;
-                        //Shadow Word: Pain || mind flay
-                    case 589:
-                    case 15407:
-                    {
-                        if (m_caster->HasSpell(95740)) // Shadow Orbs
-                        {
-                            int chance = 10;
-                            if (m_caster->HasAura(33191)) chance += 4;
-                            else if (m_caster->HasAura(78228)) chance += 8;
-
-                            if (roll_chance_i(chance)) m_caster->CastSpell(
-                                    m_caster, 77487, true);
-                        }
-                        break;
-                    }
                     // Mind Blast
                     case 8092:
                         // Improved Mind Blast
@@ -816,22 +801,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                                 }
                             }
                         }
-
-                        // Shadow orbs
-                        if (m_caster->HasAura(77487))
-                        {
-                            uint8 stack = m_caster->GetAura(77487)->GetStackAmount();
-                            uint32 pct = stack * 10;
-
-                            // Mastery
-                            if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
-                                if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_PRIEST_SHADOW)
-                                    pct += 1.5f * m_caster->ToPlayer()->GetMasteryPoints();
-
-                            AddPctN(damage, pct);
-                            m_caster->RemoveAurasDueToSpell(77487);
-                        }
-
                         //Mind Melt Aura remove
                         m_caster->RemoveAurasDueToSpell(87160);
                         m_caster->RemoveAurasDueToSpell(81292);
