@@ -11994,8 +11994,9 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                         }
             }
             // Drain Soul - increased damage for targets under 25 % HP
-            if (spellProto->Id == 1120) 
-                if (HasAura(200000)) DoneTotalMod *= 2;
+            if (spellProto->Id == 1120)
+                if (pVictim->GetHealthPct() < 25.0f)
+                    DoneTotalMod *= 2;
 
             // Shadow Bite (15% increase from each dot)
             if (spellProto->SpellFamilyFlags [1] & 0x00400000 && isPet() && GetOwner()) 
