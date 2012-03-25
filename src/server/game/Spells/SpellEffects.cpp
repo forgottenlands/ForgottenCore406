@@ -5747,31 +5747,28 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
         if (Spell* spell = unitTarget->GetCurrentSpell(CurrentSpellTypes(i)))
         {
             SpellEntry const* curSpellInfo = spell->m_spellInfo;
-            uint32 interruptFlags =
-                    (i == CURRENT_CHANNELED_SPELL) ?
-                            curSpellInfo->ChannelInterruptFlags :
-                            curSpellInfo->InterruptFlags;
+            uint32 interruptFlags = (i == CURRENT_CHANNELED_SPELL) ? curSpellInfo->ChannelInterruptFlags : curSpellInfo->InterruptFlags;
             // check if we can interrupt spell
-            if ((spell->getState() == SPELL_STATE_CASTING
-                    || (spell->getState() == SPELL_STATE_PREPARING
-                            && spell->GetCastTime() > 0.0f))
-                    && (interruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT)
-                    && curSpellInfo->PreventionType
-                            == SPELL_PREVENTION_TYPE_SILENCE)
+            if ((spell->getState() == SPELL_STATE_CASTING || (spell->getState() == SPELL_STATE_PREPARING && spell->GetCastTime() > 0.0f)) 
+                && (interruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT) && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
             {
                 if (m_originalCaster)
                 {
-                    int32 duration = m_originalCaster->ModSpellDuration(
-                            m_spellInfo, unitTarget,
-                            m_originalCaster->CalcSpellDuration(m_spellInfo),
-                            false);
-                    unitTarget->ProhibitSpellScholl(
-                            GetSpellSchoolMask(curSpellInfo),
-                            duration/*GetSpellDuration(m_spellInfo)*/);
+                    int32 duration = m_originalCaster->ModSpellDuration(m_spellInfo, unitTarget, m_originalCaster->CalcSpellDuration(m_spellInfo), false);
+                    unitTarget->ProhibitSpellScholl(GetSpellSchoolMask(curSpellInfo), duration/*GetSpellDuration(m_spellInfo)*/);
                 }
-                ExecuteLogEffectInterruptCast(effIndex, unitTarget,
-                        curSpellInfo->Id);
+                ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
                 unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
+
+                // Glyph of silencing shot
+                if (m_spellInfo->Id == 34490)
+                {
+                    if (AuraEffect* aurEff = m_caster->GetAuraEffect(56836, 0, m_caster->GetGUID()))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        m_caster->CastCustomSpell(m_caster, 82716, &bp0, 0, 0, true);
+                    }
+                }
             }
         }
     }

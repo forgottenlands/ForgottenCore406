@@ -3365,26 +3365,26 @@ void Unit::SetCurrentCastedSpell(Spell * pSpell)
             &(m_currentSpells [pSpell->GetCurrentContainer()]);
 }
 
-void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed,
-        bool withInstant)
+void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool withInstant)
 {
     ASSERT(spellType < CURRENT_MAX_SPELL);
 
     //sLog->outDebug(LOG_FILTER_UNITS, "Interrupt spell for unit %u.", GetEntry());
     Spell *spell = m_currentSpells [spellType];
-    if (spell && (withDelayed || spell->getState() != SPELL_STATE_DELAYED)
-            && (withInstant || spell->GetCastTime() > 0))
+    if (spell && (withDelayed || spell->getState() != SPELL_STATE_DELAYED) && (withInstant || spell->GetCastTime() > 0))
     {
         // for example, do not let self-stun aura interrupt itself
-        if (!spell->IsInterruptable()) return;
+        if (!spell->IsInterruptable())
+            return;
 
         // send autorepeat cancel message for autorepeat spells
         if (spellType == CURRENT_AUTOREPEAT_SPELL)
 
-        if (GetTypeId() == TYPEID_PLAYER) ToPlayer()->SendAutoRepeatCancel(
-                this);
+        if (GetTypeId() == TYPEID_PLAYER)
+            ToPlayer()->SendAutoRepeatCancel(this);
 
-        if (spell->getState() != SPELL_STATE_FINISHED) spell->cancel();
+        if (spell->getState() != SPELL_STATE_FINISHED) 
+            spell->cancel();
 
         m_currentSpells [spellType] = NULL;
         spell->SetReferencedFromCurrent(false);
@@ -9822,10 +9822,16 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (procSpell->Id != 172)
                 return false;
             break;
+        // Denounce
         case 31825:
         case 85510:
             if (procSpell->Id != 25912 && procSpell->Id != 25914)
                 return false;
+            break;
+        // Glyph of silencing shot
+        case 56836:
+            return false;
+            break;
         default:
             break;
     }
