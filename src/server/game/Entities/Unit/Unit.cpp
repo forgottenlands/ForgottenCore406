@@ -9801,7 +9801,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         // Masochism
         case 88994:
         case 88995:
-            if (damage < uint32(GetMaxHealth()*0.1))
+            if (procSpell)
+            {
+                if (procSpell->Id != 32409 && damage < uint32(GetMaxHealth()*0.1))
+                    return false;
+            } 
+            else if (damage < uint32(GetMaxHealth()*0.1))
                 return false;
             break;
         // Shooting Stars
