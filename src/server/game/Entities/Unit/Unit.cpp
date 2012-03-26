@@ -6750,7 +6750,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     if (procSpell->Id != 589 && procSpell->Id != 15407)
                         return false;
 
-                    int32 chance = 10;
+                    int32 chance = 18;
                     if (AuraEffect* aurEff = this->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PRIEST, 554, 0))
                         chance += aurEff->GetAmount();
 
