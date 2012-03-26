@@ -430,6 +430,13 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell * spell)
     if (spell && spell->GetSpellInfo()->Id == 82928)
         castTime = -1;
 
+    // Dark Simulacrum
+    if (spell && spell->GetCaster())
+        if (spell->GetCaster()->HasAura(77616))
+            if (spell->GetSpellInfo()->Id == spell->GetCaster()->GetAura(77616)->GetEffect(0)->GetAmount())
+                if (castTime > 0)
+                    castTime = -1;
+
     return (castTime > 0) ? uint32(castTime) : 0;
 }
 
@@ -4646,6 +4653,10 @@ void SpellMgr::LoadSpellCustomAttr() {
             break;
         case 77616: // Dark simulacrum
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_332_REPLACE_SPELL;
+            count++;
+            break;
+        case 82926: // Fire!
+            spellInfo->EffectApplyAuraName[1] = SPELL_AURA_332_REPLACE_SPELL;
             count++;
             break;
         case 687: // Demon and fel armor (Nether Ward)

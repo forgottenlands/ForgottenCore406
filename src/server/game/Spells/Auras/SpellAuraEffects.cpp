@@ -7454,18 +7454,14 @@ void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mo
 
     uint32 affspell = 0;
 
-    // Dark Simulacrum
-    if (GetSpellProto()->Id == 77616)
-        affspell = 77606;
-
     // Fel armor and demon armor 
     if (GetSpellProto()->Id == 687 || GetSpellProto()->Id == 28176)
     {
+        affspell = 6229;
+
         if (target->HasAura(91713))
-        {
-            affspell = 6229;
             overrideId = 91711;
-        } else
+        else
             overrideId = 6229;
     }
 
@@ -7474,8 +7470,8 @@ void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mo
     {
         if (target->HasAura(88627))
         {
-            affspell = 88625;
-            overrideId = 88684;
+            aurApp->GetBase()->GetEffect(EFFECT_2)->SetAmount(88684);
+            return;
         } else
             overrideId = 88625;
     }
@@ -7485,50 +7481,17 @@ void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mo
     {
         if (target->HasAura(88627))
         {
+            aurApp->GetBase()->GetEffect(EFFECT_2)->SetAmount(88685);
             affspell = 88625;
-            overrideId = 88686;
+            overrideId = 88685;
         } else
             overrideId = 88625;
     }
-  
-    if (overrideId == 93402)            // Sunfire
-    {
-        if (target->HasAura(48517))     // Sunfire talent
-            affspell = 8921;            // Moonfire
-        else
-            return;
-    }
 
-    if (overrideId == 91711)
-    {
-        if (target->HasAura(91713)) // The nether ward talent
-            affspell = 6229;
-        else 
-            return;
-    }
-
-    if (overrideId == 88684 || overrideId == 88685) // Chakra
-    {
-        if (target->HasAura(88627))
-            affspell = 88625;
-        else 
-            return;
-    }
-
-    if (overrideId == 92315) // Pyroblast
-        affspell = 11366;
-    if (overrideId == 82928) // Fire!
-        affspell = 19434;
-    if (overrideId == 89420) // Drain Life
-        affspell = 689;
     if (overrideId == 81170) // Ravage
         affspell = 6785;
-    if (overrideId == 93402) // Eclipse (Solar)
-        affspell = 8921;
     if (overrideId == 92283) // Frostfire Orb Override
         affspell = 82731;
-    if (overrideId == 86213) // Soul Swap: Exhale
-        affspell = 86121;
     if (overrideId == 60192) // Freezing Trap
         affspell = 1499;
     if (overrideId == 82939) // Explosive Trap
@@ -7540,7 +7503,7 @@ void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mo
     if (overrideId == 82948) // Snake Trap
         affspell = 34600;
 
-    if (affspell != 0)
+    if (affspell != 0 && (affspell != overrideId))
     {
         if (apply)
         {

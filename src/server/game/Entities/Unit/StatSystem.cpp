@@ -400,10 +400,8 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                 float weapon_bonus = 0.0f;
                 if (IsInFeralForm())
                 {
-                    Unit::AuraEffectList const& mDummy = GetAuraEffectsByType(
-                            SPELL_AURA_DUMMY);
-                    for (Unit::AuraEffectList::const_iterator itr =
-                            mDummy.begin(); itr != mDummy.end(); ++itr)
+                    Unit::AuraEffectList const& mDummy = GetAuraEffectsByType(SPELL_AURA_DUMMY);
+                    for (Unit::AuraEffectList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
                     {
                         AuraEffect* aurEff = *itr;
                         if (aurEff->GetSpellProto()->SpellIconID == 1563)
@@ -411,20 +409,17 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                             switch (aurEff->GetEffIndex())
                             {
                                 case 0: // Predatory Strikes (effect 0)
-                                    mLevelMult = CalculatePctN(1.0f,
-                                            aurEff->GetAmount());
+                                    mLevelMult = CalculatePctN(1.0f, aurEff->GetAmount());
                                     break;
                                 case 1: // Predatory Strikes (effect 1)
                                     if (Item* mainHand = m_items[EQUIPMENT_SLOT_MAINHAND])
                                     {
                                         // also gains % attack power from equipped weapon
-                                        ItemPrototype const *proto =
-                                                mainHand->GetProto();
-                                        if (!proto) continue;
+                                        ItemPrototype const *proto = mainHand->GetProto();
+                                        if (!proto)
+                                            continue;
 
-                                        weapon_bonus = CalculatePctN(
-                                                float(proto->getFeralBonus()),
-                                                aurEff->GetAmount());
+                                        weapon_bonus = CalculatePctN(float(proto->getFeralBonus()), aurEff->GetAmount());
                                     }
                                     break;
                                 default:
@@ -454,7 +449,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                                 + m_baseFeralAP;
                         break;
                     default:
-                        val2 = GetStat(STAT_STRENGTH) * 2.0f - 20.0f;
+                        val2 = getLevel() * 2 + (GetStat(STAT_STRENGTH) * 2.0f - 20.0f);
                         break;
                 }
                 break;

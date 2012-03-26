@@ -1149,10 +1149,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
         // Dark Simulacrum remove
         if (m_spellInfo->SpellFamilyName != SPELLFAMILY_DEATHKNIGHT && m_caster->HasAura(77616))
-        {
-            m_caster->ApplyCastTimePercentMod(10000.0f, false);
             m_caster->RemoveAura(77616);
-        }
 
         if (m_originalCaster && damage > 0 && apply_direct_bonus) 
             damage = m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo, effIndex, (uint32) damage, SPELL_DIRECT_DAMAGE);
@@ -3482,10 +3479,7 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
 
         // Dark Simulacrum remove
         if (m_spellInfo->SpellFamilyName != SPELLFAMILY_DEATHKNIGHT && m_caster->HasAura(77616))
-        {
-            m_caster->ApplyCastTimePercentMod(10000.0f, false);
             m_caster->RemoveAura(77616);
-        }
 
         // Reduce Healing in Bg or Arena
         if (m_caster->ToPlayer())

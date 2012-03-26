@@ -6761,14 +6761,13 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                 // Vampiric Embrace
                 case 15286:
                 {
-                    if (!pVictim || !pVictim->isAlive()
-                            || procSpell->SpellFamilyFlags [1] & 0x80000) return false;
+                    if (!pVictim || !pVictim->isAlive() || procSpell->SpellFamilyFlags [1] & 0x80000)
+                        return false;
 
                     // heal amount
                     int32 team = triggerAmount * damage / 500;
                     int32 self = triggerAmount * damage / 100 - team;
-                    CastCustomSpell(this, 15290, &team, &self, NULL, true,
-                            castItem, triggeredByAura);
+                    CastCustomSpell(this, 15290, &team, &self, NULL, true, castItem, triggeredByAura);
                     return true; // no hidden cooldown
                 }
                     // Priest Tier 6 Trinket (Ashtongue Talisman of Acumen)
@@ -8531,7 +8530,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     if (this->ToPlayer()->GetRuneCooldown(i) == 0) return false;
             }
             // Dark Simulacrum
-            if (dummySpell->Id == 77606)
+            if (dummySpell->Id == 77606 && procSpell)
             {
                 if (procSpell->EffectBasePoints[0] > 50000 || procSpell->EffectBasePoints[1] > 50000 || procSpell->EffectBasePoints[1] > 50000)
                     return false;
@@ -8541,10 +8540,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
 
                 int32 bp0 = int32(procSpell->Id);
                 if (Player* simulacrumDk = triggeredByAura->GetCaster()->ToPlayer())
-                {
-                    simulacrumDk->CastCustomSpell(simulacrumDk, 77616, &bp0, 0, 0, true);
-                    simulacrumDk->ApplyCastTimePercentMod(10000.0f, true);
-                }                
+                    simulacrumDk->CastCustomSpell(simulacrumDk, 77616, &bp0, 0, 0, true);         
             }
 
             // Runic Empowerment
