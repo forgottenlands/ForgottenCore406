@@ -435,6 +435,43 @@ public:
 	}
 };
 
+class spell_rogue_blind : public SpellScriptLoader 
+{
+public:
+	spell_rogue_blind() : SpellScriptLoader("spell_rogue_blind") 
+    { }
+
+	class spell_rogue_blind_SpellScript: public SpellScript 
+    {
+		PrepareSpellScript(spell_rogue_blind_SpellScript)
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+			if (Unit *unitTarget = GetHitUnit())
+            {
+                // Glyph of Blind
+                if (GetCaster()->HasAura(91299))
+                {
+                    unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, unitTarget->GetAura(32409)); // SW:D shall not be removed.
+                    unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                    unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                }
+            }
+
+		}
+
+		void Register()
+        {
+			OnEffect += SpellEffectFn(spell_rogue_blind_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+		}
+	};
+
+	SpellScript* GetSpellScript() const 
+    {
+		return new spell_rogue_blind_SpellScript();
+	}
+};
+
 void AddSC_rogue_spell_scripts() {
 	new spell_rog_cheat_death();
 	new spell_rog_nerves_of_steel();
@@ -443,4 +480,5 @@ void AddSC_rogue_spell_scripts() {
 	new spell_rog_shiv();
 	new spell_rog_deadly_poison();
 	new spell_rog_vanish_buff();
+    new spell_rogue_blind();
 }
