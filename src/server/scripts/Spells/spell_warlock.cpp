@@ -601,6 +601,46 @@ public:
     }
 };
 
+class spell_warlock_seduction : public SpellScriptLoader 
+{
+public:
+	spell_warlock_seduction() : SpellScriptLoader("spell_warlock_seduction") 
+    { }
+
+	class spell_warlock_seduction_SpellScript: public SpellScript 
+    {
+		PrepareSpellScript(spell_warlock_seduction_SpellScript)
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+			if (Unit *unitTarget = GetHitUnit())
+            {
+                // Glyph of Blind
+                if (GetCaster()->GetOwner())
+                {
+                    if (GetCaster()->GetOwner()->HasAura(56250))
+                    {
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, unitTarget->GetAura(32409)); // SW:D shall not be removed.
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                        unitTarget->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                    }
+                }
+            }
+
+		}
+
+		void Register()
+        {
+			OnEffect += SpellEffectFn(spell_warlock_seduction_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+		}
+	};
+
+	SpellScript* GetSpellScript() const 
+    {
+		return new spell_warlock_seduction_SpellScript();
+	}
+};
+
 void AddSC_warlock_spell_scripts()
 {
 	new spell_warl_demonic_empowerment();
@@ -617,4 +657,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_fel_flame();
     new spell_warl_soul_link();
     new spell_warl_demonic_circle_teleport();
+    new spell_warlock_seduction();
 }
