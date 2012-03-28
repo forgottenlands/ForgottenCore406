@@ -208,7 +208,7 @@ Position const IgnitionPositions[2][21] =
 
                     events.ScheduleEvent(EVENT_MAGMA_SPIT, urand(11000,13000));
                     events.ScheduleEvent(EVENT_LAVA_SPEW, urand(7000,9000));
-                    events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 22000);
+                    events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 30000);
 
                     events.ScheduleEvent(EVENT_IN_RANGE_CHECK, 5000);
                     events.ScheduleEvent(EVENT_MANGLE, 45000);
@@ -258,15 +258,16 @@ Position const IgnitionPositions[2][21] =
                             events.ScheduleEvent(EVENT_LAVA_SPEW, urand(7000,9000));
                             break;
                         case EVENT_IN_RANGE_CHECK:
-                            DoCast(me, SPELL_MOLTEN_TANTRUM);
+                            if (me->GetDistance(me->getVictim()) > 10.0f)
+                                DoCast(me, SPELL_MOLTEN_TANTRUM);
 
                             events.ScheduleEvent(EVENT_IN_RANGE_CHECK, 5000);
                             break;
                         case EVENT_PILLAR_OF_FLAME:
-                            if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 500, true))
+                            if(Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 500.0f, true))
                                 me->SummonCreature(NPC_PILLAR_OF_FLAME_TRIGGER,target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(), 0,TEMPSUMMON_CORPSE_DESPAWN);		
 
-                            events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, urand(20000,25000));
+                            events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 30000);
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);
@@ -331,7 +332,7 @@ Position const IgnitionPositions[2][21] =
 
                             events.ScheduleEvent(EVENT_MAGMA_SPIT, urand(11000,13000));
                             events.ScheduleEvent(EVENT_LAVA_SPEW, urand(7000,9000));
-                            events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 22000);
+                            events.ScheduleEvent(EVENT_PILLAR_OF_FLAME, 30000);
 
                             events.ScheduleEvent(EVENT_IN_RANGE_CHECK, 5000);
                             break;
@@ -348,7 +349,7 @@ Position const IgnitionPositions[2][21] =
                     {
                         summon->SetReactState(REACT_PASSIVE);
                         summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    }else
+                    }else if (summon->GetEntry() != NPC_PILLAR_OF_FLAME_TRIGGER)
                     {
                         summon->setActive(true);
                         summon->AI()->DoZoneInCombat(summon);
@@ -465,17 +466,27 @@ Position const IgnitionPositions[2][21] =
                 mob_pillar_of_flame_triggerAI(Creature* creature) : ScriptedAI(creature),Intialized(false) { }
 
                 uint32 uiErruptTime;
+                uint32 uiSpawnTime;
                 bool Intialized;
+
+                void Reset()
+                {
+                    uiErruptTime = 8000;
+                    uiSpawnTime = 3000;
+                    Intialized = false;
+                }
 
                 void IsSummonedBy(Unit* summoner)
                 {
                     me->SetReactState(REACT_PASSIVE);
                     me->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
+                    me->SetSpeed(MOVE_WALK, 0.0f, true);
+                    me->SetSpeed(MOVE_RUN, 0.0f, true);
 
-                    //DoCastAOE(SPELL_PILLAR_OF_FLAME,true); // This is only for DBM warnings etc...
-                    DoCastAOE(SPELL_PARASITE_SPAWN, true);
+                    DoCastAOE(SPELL_PILLAR_OF_FLAME, true); // This is only for DBM warnings etc...
 
-                    uiErruptTime = 5000;
+                    uiErruptTime = 8000;
+                    uiSpawnTime = 3000;
                     Intialized = true;
                 }
 
@@ -489,6 +500,19 @@ Position const IgnitionPositions[2][21] =
                         me->DespawnOrUnsummon();
 
                     } else uiErruptTime -= diff;
+
+                    if (uiSpawnTime <= diff)
+                    {
+                        DoCastAOE(SPELL_PARASITE_SPAWN, true);
+                        uiSpawnTime = 5000000;
+                    } else
+                        uiSpawnTime -= diff;
+                }
+
+                void JustSummoned(Creature *summon)
+                {
+                    summon->setActive(true);
+                    summon->AI()->DoZoneInCombat(summon);
                 }
             };
         };
