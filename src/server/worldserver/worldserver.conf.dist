@@ -3083,3 +3083,11 @@ OutdoorPvP.Wintergrasp.Antifarm.Def = 15
 #
 ###################################################################################################
 
+#
+
+#     AllowWhoInArena
+#        Description: Allow players to see who is in arena from who list
+#        Default:     1 - (Show players)
+#                     0 - (Filter players)  
+
+AllowWhoInArena = 0

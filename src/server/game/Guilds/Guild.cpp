@@ -512,7 +512,8 @@ void Guild::BankTab::SendText(const Guild* pGuild,
 
 ///////////////////////////////////////////////////////////////////////////////
 // Member
-void Guild::Member::SetStats(Player* player) {
+void Guild::Member::SetStats(Player* player) 
+{
     m_name = player->GetName();
     m_level = player->getLevel();
     m_class = player->getClass();
@@ -521,8 +522,7 @@ void Guild::Member::SetStats(Player* player) {
     m_achievementPoints = player->GetAchievementMgr().GetAchievementPoints();
 }
 
-void Guild::Member::SetStats(const std::string& name, uint8 level, uint8 _class,
-        uint32 zoneId, uint32 accountId) {
+void Guild::Member::SetStats(const std::string& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId) {
     m_name = name;
     m_level = level;
     m_class = _class;
@@ -584,25 +584,13 @@ void Guild::SwitchRank(uint32 oldID, uint32 newID) {
     m_ranks[oldID] = m_ranks[newID];
     m_ranks[newID] = old;
 
-    CharacterDatabase.PExecute(
-            "UPDATE guild_rank SET rid = 11 WHERE rid = '%u' AND guildid='%u'",
-            oldID, m_id);
-    CharacterDatabase.PExecute(
-            "UPDATE guild_rank SET rid = '%u' WHERE rid = '%u' AND guildid='%u'",
-            oldID, newID, m_id);
-    CharacterDatabase.PExecute(
-            "UPDATE guild_rank SET rid = '%u' WHERE rid = 11 AND guildid='%u'",
-            newID, m_id);
+    CharacterDatabase.PExecute("UPDATE guild_rank SET rid = 11 WHERE rid = '%u' AND guildid='%u'", oldID, m_id);
+    CharacterDatabase.PExecute("UPDATE guild_rank SET rid = '%u' WHERE rid = '%u' AND guildid='%u'", oldID, newID, m_id);
+    CharacterDatabase.PExecute("UPDATE guild_rank SET rid = '%u' WHERE rid = 11 AND guildid='%u'", newID, m_id);
 
-    CharacterDatabase.PExecute(
-            "UPDATE guild_bank_right SET rid = 11 WHERE rid = '%u' AND guildid='%u'",
-            oldID, m_id);
-    CharacterDatabase.PExecute(
-            "UPDATE guild_bank_right SET rid = '%u' WHERE rid = '%u' AND guildid='%u'",
-            oldID, newID, m_id);
-    CharacterDatabase.PExecute(
-            "UPDATE guild_bank_right SET rid = '%u' WHERE rid = 11 AND guildid='%u'",
-            newID, m_id);
+    CharacterDatabase.PExecute("UPDATE guild_bank_right SET rid = 11 WHERE rid = '%u' AND guildid='%u'", oldID, m_id);
+    CharacterDatabase.PExecute("UPDATE guild_bank_right SET rid = '%u' WHERE rid = '%u' AND guildid='%u'", oldID, newID, m_id);
+    CharacterDatabase.PExecute("UPDATE guild_bank_right SET rid = '%u' WHERE rid = 11 AND guildid='%u'", newID, m_id);
 }
 
 void Guild::Member::SaveToDB(SQLTransaction& trans) const {
@@ -654,9 +642,9 @@ bool Guild::Member::LoadFromDB(Field* fields) {
     if (!CheckStats())
         return false;
 
-    if (!m_zoneId) {
-        sLog->outError("Player (GUID: %u) has broken zone-data",
-                GUID_LOPART(m_guid));
+    if (!m_zoneId) 
+    {
+        sLog->outError("Player (GUID: %u) has broken zone-data", GUID_LOPART(m_guid));
         m_zoneId = Player::GetZoneIdFromDB(m_guid);
     }
     return true;
@@ -1290,7 +1278,14 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
         data << uint8(itr->second->GetFlags()); // GUILD_MEMBER_FLAGS enum
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        data << uint32(itr->second->GetZoneId()); // Zone ID: Use cached value as zone id does get updated
+        if (itr->second->FindPlayer() && itr->second->FindPlayer()->InArena() && !sWorld->getBoolConfig(CONFIG_ALLOW_WHO_ARENA))
+        {
+            if (itr->second->FindPlayer()->getFaction() == HORDE)
+                data << uint32(1637); // Show player as at orgrimmar
+            else if (itr->second->FindPlayer()->GetTeam() == ALLIANCE)
+                data << uint32(1519); // Show player as at stormwind
+        } else
+            data << uint32(itr->second->GetZoneId()); // Zone ID: Use cached value as zone id does get updated
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         data << uint32(itr->second->GetAchievementPoints()); // Achievement Points

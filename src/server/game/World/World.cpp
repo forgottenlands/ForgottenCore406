@@ -1253,6 +1253,9 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_DUEL_RESET_ONE] = sConfig->GetIntDefault("Duel.Reset.Area.One", 1);
     m_int_configs[CONFIG_DUEL_RESET_TWO] = sConfig->GetIntDefault("Duel.Reset.Area.Two", 616);
 
+    // Allow Who list in arena
+    m_bool_configs[CONFIG_ALLOW_WHO_ARENA] = sConfig->GetBoolDefault("AllowWhoInArena", true);
+
     sScriptMgr->OnConfigLoad(reload);
 }
 

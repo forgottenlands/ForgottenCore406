@@ -247,6 +247,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data) {
     uint32 security = GetSecurity();
     bool allowTwoSideWhoList = sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
     uint32 gmLevelInWhoList = sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST);
+    bool allowWhoInArena     = sWorld->getBoolConfig(CONFIG_ALLOW_WHO_ARENA);
     uint32 displaycount = 0;
 
     WorldPacket data(SMSG_WHO, 50);// guess size
@@ -266,6 +267,9 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data) {
             // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
             if ((itr->second->GetSession()->GetSecurity() > AccountTypes(gmLevelInWhoList)))
             continue;
+
+            if (itr->second->InArena() && !allowWhoInArena)
+                continue;
         }
 
         //do not process players which are not in world

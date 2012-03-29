@@ -179,49 +179,54 @@ SocialMgr::SocialMgr() {
 SocialMgr::~SocialMgr() {
 }
 
-void SocialMgr::GetFriendInfo(Player *player, uint32 friendGUID,
-		FriendInfo &friendInfo) {
-	if (!player)
-		return;
+void SocialMgr::GetFriendInfo(Player *player, uint32 friendGUID, FriendInfo &friendInfo)
+{
+    if (!player)
+        return;
 
-	friendInfo.Status = FRIEND_STATUS_OFFLINE;
-	friendInfo.Area = 0;
-	friendInfo.Level = 0;
-	friendInfo.Class = 0;
+    friendInfo.Status = FRIEND_STATUS_OFFLINE;
+    friendInfo.Area = 0;
+    friendInfo.Level = 0;
+    friendInfo.Class = 0;
 
-	Player *pFriend = ObjectAccessor::FindPlayer(friendGUID);
-	if (!pFriend)
-		return;
+    Player *pFriend = ObjectAccessor::FindPlayer(friendGUID);
+    if (!pFriend)
+        return;
 
-	uint32 team = player->GetTeam();
-	AccountTypes security = player->GetSession()->GetSecurity();
-	bool allowTwoSideWhoList = sWorld->getBoolConfig(
-			CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
-	AccountTypes gmLevelInWhoList = AccountTypes(
-			sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
+    uint32 team = player->GetTeam();
+    AccountTypes security = player->GetSession()->GetSecurity();
+    bool allowTwoSideWhoList = sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
+    AccountTypes gmLevelInWhoList = AccountTypes(sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
 
-	PlayerSocialMap::iterator itr = player->GetSocial()->m_playerSocialMap.find(
-			friendGUID);
-	if (itr != player->GetSocial()->m_playerSocialMap.end())
-		friendInfo.Note = itr->second.Note;
+    PlayerSocialMap::iterator itr = player->GetSocial()->m_playerSocialMap.find(friendGUID);
+    if (itr != player->GetSocial()->m_playerSocialMap.end())
+        friendInfo.Note = itr->second.Note;
 
-	// PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
-	// MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-	if (pFriend && pFriend->GetName()
-			&& (security > SEC_PLAYER
-					|| ((pFriend->GetTeam() == team || allowTwoSideWhoList)
-							&& (pFriend->GetSession()->GetSecurity()
-									<= gmLevelInWhoList)))
-			&& pFriend->IsVisibleGloballyFor(player)) {
-		friendInfo.Status = FRIEND_STATUS_ONLINE;
-		if (pFriend->isAFK())
-			friendInfo.Status = FRIEND_STATUS_AFK;
-		if (pFriend->isDND())
-			friendInfo.Status = FRIEND_STATUS_DND;
-		friendInfo.Area = pFriend->GetZoneId();
-		friendInfo.Level = pFriend->getLevel();
-		friendInfo.Class = pFriend->getClass();
-	}
+    // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
+    // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
+    if (pFriend && pFriend->GetName() 
+        && (security > SEC_PLAYER || ((pFriend->GetTeam() == team || allowTwoSideWhoList) && (pFriend->GetSession()->GetSecurity() <= gmLevelInWhoList))) && pFriend->IsVisibleGloballyFor(player)) 
+    {
+        friendInfo.Status = FRIEND_STATUS_ONLINE;
+        if (pFriend->isAFK())
+            friendInfo.Status = FRIEND_STATUS_AFK;
+        if (pFriend->isDND())
+            friendInfo.Status = FRIEND_STATUS_DND;
+
+        // Hide players in arena
+        if (pFriend->InArena() && !sWorld->getBoolConfig(CONFIG_ALLOW_WHO_ARENA))
+        {
+            if (pFriend->GetTeam() == HORDE)
+                friendInfo.Area = uint32(1637);
+            else if (pFriend->GetTeam() == ALLIANCE)
+                friendInfo.Area = uint32(1519);
+        }
+        else
+            friendInfo.Area = pFriend->GetZoneId();
+
+        friendInfo.Level = pFriend->getLevel();
+        friendInfo.Class = pFriend->getClass();
+    }
 }
 
 void SocialMgr::MakeFriendStatusPacket(FriendsResult result, uint32 guid,
