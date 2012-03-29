@@ -382,17 +382,33 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data) {
 
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
-        if (movementInfo.pos.GetPositionZ() < -5000.0f) {
-            if (!(plMover->InBattleground() && plMover->GetBattleground()
-                    && plMover->GetBattleground()->HandlePlayerUnderMap(_player))) {
+        float height;
+        switch (plMover->GetMapId())
+        {
+           case 617: height = 3.0f; break; // Dalaran Sewers
+           case 618: height = 28.0f; break; // Ring of Valor
+           case 559: // Nagrand Arena
+           case 572: // Ruins of Lordaeron
+           case 562: // Blade's Edge Arena
+               height = -5.0f;
+               break;
+           default: height = -500.0f;
+               break;
+        }
+
+        if (movementInfo.pos.GetPositionZ() < height)
+        {
+            if (!(plMover->InBattleground() && plMover->GetBattleground() && plMover->GetBattleground()->HandlePlayerUnderMap(_player))) 
+            {
                 // NOTE: this is actually called many times while falling
                 // even after the player has been teleported away
                 // TODO: discard movement packets after the player is rooted
-                if (plMover->isAlive()) {
-                    plMover->EnvironmentalDamage(DAMAGE_FALL_TO_VOID,
-                            GetPlayer()->GetMaxHealth());
+                if (plMover->isAlive()) 
+                {
+                    plMover->EnvironmentalDamage(DAMAGE_FALL_TO_VOID, GetPlayer()->GetMaxHealth());
                     // pl can be alive if GM/etc
-                    if (!plMover->isAlive()) {
+                    if (!plMover->isAlive()) 
+                    {
                         // change the death state to CORPSE to prevent the death timer from
                         // starting in the next player update
                         plMover->KillPlayer();
@@ -403,13 +419,6 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data) {
                 // cancel the death timer here if started
                 plMover->RepopAtGraveyard();
             }
-        }
-        else if (movementInfo.pos.GetPositionZ() < -50.0f)
-        {
-            if (plMover->InBattleground())
-                if (Battleground* bg = plMover->GetBattleground())
-                    if (bg->isArena())
-                        bg->HandlePlayerUnderMap(_player);
         }
     }
 }
