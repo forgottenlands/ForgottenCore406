@@ -30,6 +30,7 @@
 #include "Config.h"
 #include "SocialMgr.h"
 #include "Log.h"
+#include "SpellMgr.h"
 
 #define MAX_GUILD_BANK_TAB_TEXT_LEN 500
 #define EMBLEM_PRICE 10 * GOLD
@@ -520,9 +521,55 @@ void Guild::Member::SetStats(Player* player)
     m_zoneId = player->GetZoneId();
     m_accountId = player->GetSession()->GetAccountId();
     m_achievementPoints = player->GetAchievementMgr().GetAchievementPoints();
+
+    uint8 count_prof = 0;
+    for (PlayerSpellMap::const_iterator spellIter = player->GetSpellMap().begin(); spellIter != player->GetSpellMap().end(); ++spellIter)
+    {
+       if(count_prof >= 2)
+           break;
+
+       SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellIter->first);
+           if (!spellInfo)
+               continue;
+
+       if(sSpellMgr->IsPrimaryProfessionSpell(spellIter->first))
+       {
+           uint32 skill = 0;
+
+           for (uint8 i = 0 ; i < MAX_SPELL_EFFECTS ; ++i)
+           {
+               if (spellInfo->Effect[i] == SPELL_EFFECT_SKILL)
+               {
+                   skill = spellInfo->EffectMiscValue[i];
+                   break; 
+               }
+           }
+
+           uint32 value = (uint32)player->GetSkillValue(skill);
+           uint32 rank = sSpellMgr->GetSpellRank(spellIter->first);
+
+           SetProfession((uint32)count_prof, value, skill, rank);
+           count_prof++;
+       }
+    }
+
+    if (count_prof < 2)
+       for (uint8 i = 0; i < (2 - count_prof); i++)
+           SetProfession((uint32)(count_prof + i), 0, 0, 0);
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SET_GUILD_MEMBER_PROFESSION);
+    stmt->setUInt32(0, professions[0].level);
+    stmt->setUInt32(1, professions[0].skillID);
+    stmt->setUInt32(2, professions[0].rank);
+    stmt->setUInt32(3, professions[1].level);
+    stmt->setUInt32(4, professions[1].skillID);
+    stmt->setUInt32(5, professions[1].rank);
+    stmt->setUInt32(6, GUID_LOPART(m_guid));
+    CharacterDatabase.Execute(stmt);
 }
 
-void Guild::Member::SetStats(const std::string& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId) {
+void Guild::Member::SetStats(const std::string& name, uint8 level, uint8 _class, uint32 zoneId, uint32 accountId) 
+{
     m_name = name;
     m_level = level;
     m_class = _class;
@@ -549,8 +596,7 @@ void Guild::Member::SetOfficerNote(const std::string& officerNote) {
 
     m_officerNote = officerNote;
 
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(
-            CHAR_SET_GUILD_MEMBER_OFFNOTE);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SET_GUILD_MEMBER_OFFNOTE);
     stmt->setString(0, officerNote);
     stmt->setUInt32(1, GUID_LOPART(m_guid));
     CharacterDatabase.Execute(stmt);
@@ -563,8 +609,7 @@ void Guild::Member::ChangeRank(uint8 newRank) {
     if (Player *player = FindPlayer())
         player->SetRank(newRank);
 
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(
-            CHAR_SET_GUILD_MEMBER_RANK);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SET_GUILD_MEMBER_RANK);
     stmt->setUInt8(0, newRank);
     stmt->setUInt32(1, GUID_LOPART(m_guid));
     CharacterDatabase.Execute(stmt);
@@ -593,51 +638,61 @@ void Guild::SwitchRank(uint32 oldID, uint32 newID) {
     CharacterDatabase.PExecute("UPDATE guild_bank_right SET rid = '%u' WHERE rid = 11 AND guildid='%u'", newID, m_id);
 }
 
-void Guild::Member::SaveToDB(SQLTransaction& trans) const {
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(
-            CHAR_ADD_GUILD_MEMBER);
+void Guild::Member::SaveToDB(SQLTransaction& trans) const 
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_ADD_GUILD_MEMBER);
     stmt->setUInt32(0, m_guildId);
     stmt->setUInt32(1, GUID_LOPART(m_guid));
     stmt->setUInt8(2, m_rankId);
     stmt->setString(3, m_publicNote);
     stmt->setString(4, m_officerNote);
+    stmt->setUInt32(5, professions[0].level);
+    stmt->setUInt32(6, professions[0].skillID);
+    stmt->setUInt32(7, professions[0].rank);
+    stmt->setUInt32(8, professions[1].level);
+    stmt->setUInt32(9, professions[1].skillID);
+    stmt->setUInt32(10,professions[1].rank);
     CharacterDatabase.ExecuteOrAppend(trans, stmt);
 }
 
 // Loads member's data from database.
 // If member has broken fields (level, class) returns false.
 // In this case member has to be removed from guild.
-bool Guild::Member::LoadFromDB(Field* fields) {
-    /*
-     //          0        1        2     3      4        5                   6
-     "SELECT guildid, gm.guid, rank, pnote, offnote, BankResetTimeMoney, BankRemMoney, "
-     //   7                  8                 9                  10                11                 12
-     "BankResetTimeTab0, BankRemSlotsTab0, BankResetTimeTab1, BankRemSlotsTab1, BankResetTimeTab2, BankRemSlotsTab2, "
-     //   13                 14                15                 16                17                 18
-     "BankResetTimeTab3, BankRemSlotsTab3, BankResetTimeTab4, BankRemSlotsTab4, BankResetTimeTab5, BankRemSlotsTab5, "
-     //   19                 20                21                 22
-     "BankResetTimeTab6, BankRemSlotsTab6, BankResetTimeTab7, BankRemSlotsTab7, "
-     //   23      24       25       26      27         28
-     "c.name, c.level, c.class, c.zone, c.account, c.logout_time "
-     "FROM guild_member gm LEFT JOIN characters c ON c.guid = gm.guid ORDER BY guildid ASC", CONNECTION_SYNCH);
-     */
-
+bool Guild::Member::LoadFromDB(Field* fields) 
+{
+    /*      0        1        2     3      4        5                   6
+    "SELECT guildid, gm.guid, rank, pnote, offnote, BankResetTimeMoney, BankRemMoney, "
+     7                  8                 9                  10                11                 12
+    "BankResetTimeTab0, BankRemSlotsTab0, BankResetTimeTab1, BankRemSlotsTab1, BankResetTimeTab2, BankRemSlotsTab2, "
+     13                 14                15                 16                17                 18
+    "BankResetTimeTab3, BankRemSlotsTab3, BankResetTimeTab4, BankRemSlotsTab4, BankResetTimeTab5, BankRemSlotsTab5, "
+     19                 20                21                 22                23               24               25              26                27                28
+    "BankResetTimeTab6, BankRemSlotsTab6, BankResetTimeTab7, BankRemSlotsTab7, FirstProffLevel, FirstProffSkill, FirstProffRank, SecondProffLevel, SecondProffSkill, SecondProffRank, "
+     29      30       31       32      33         34
+    "c.name, c.level, c.class, c.zone, c.account, c.logout_time "
+    "FROM guild_member gm LEFT JOIN characters c ON c.guid = gm.guid ORDER BY guildid ASC"", CONNECTION_SYNCH);*/
+    
+    // Notes
     m_publicNote = fields[3].GetString();
     m_officerNote = fields[4].GetString();
+
+    // Bank
     m_bankRemaining[GUILD_BANK_MAX_TABS].resetTime = fields[5].GetUInt32();
     m_bankRemaining[GUILD_BANK_MAX_TABS].value = fields[6].GetUInt32();
-    for (uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i) {
+
+    for (uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i) 
+    {
         m_bankRemaining[i].resetTime = fields[7 + i * 2].GetUInt32();
         m_bankRemaining[i].value = fields[8 + i * 2].GetUInt32();
     }
 
-    SetStats(fields[23].GetString(),
-             fields[24].GetUInt8(),
-             fields[25].GetUInt8(),
-             fields[26].GetUInt16(),
-             fields[27].GetUInt32());
-    m_logoutTime = fields[28].GetUInt32();
-    m_logoutTime = fields[28].GetUInt32();
+    // Stats
+    SetStats(fields[29].GetString(), fields[30].GetUInt8(), fields[31].GetUInt8(), fields[32].GetUInt16(), fields[33].GetUInt32());
+    
+    SetProfession(0, fields[23].GetUInt32(), fields[24].GetUInt32(), fields[25].GetUInt32()); 
+    SetProfession(1, fields[26].GetUInt32(), fields[27].GetUInt32(), fields[28].GetUInt32());
+
+    m_logoutTime = fields[34].GetUInt32();
 
     if (!CheckStats())
         return false;
@@ -1210,23 +1265,24 @@ void Guild::Disband() {
     sObjectMgr->RemoveGuild(m_id);
 }
 
-void Guild::UpdateMemberData(Player* plr, uint8 dataid, uint32 value) {
-    if (Member* pMember = GetMember(plr->GetGUID())) {
-        switch (dataid) {
-        case GUILD_MEMBER_DATA_ZONEID:
-            pMember->SetZoneID(value);
-            break;
-        case GUILD_MEMBER_DATA_ACHIEVEMENT_POINTS:
-            pMember->SetAchievementPoints(value);
-            break;
-        case GUILD_MEMBER_DATA_LEVEL:
-            pMember->SetLevel(value);
-            break;
-        default:
-            sLog->outError(
-                    "Guild::UpdateMemberData: Called with incorrect DATAID %u (value %u)",
-                    dataid, value);
-            break;
+void Guild::UpdateMemberData(Player* plr, uint8 dataid, uint32 value)
+{
+    if (Member* pMember = GetMember(plr->GetGUID())) 
+    {
+        switch (dataid) 
+        {
+            case GUILD_MEMBER_DATA_ZONEID:
+                pMember->SetZoneID(value);
+                break;
+            case GUILD_MEMBER_DATA_ACHIEVEMENT_POINTS:
+                pMember->SetAchievementPoints(value);
+                break;
+            case GUILD_MEMBER_DATA_LEVEL:
+                pMember->SetLevel(value);
+                break;
+            default:
+                sLog->outError("Guild::UpdateMemberData: Called with incorrect DATAID %u (value %u)", dataid, value);
+                break;
         }
     }
 }
@@ -1331,9 +1387,9 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
         // two primary professions (todo)
         for(int i = 0; i < 2; ++i)
         {
-            data << uint32(0); // profession title
-            data << uint32(0); // profession level?
-            data << uint32(0); // skillid
+            data << uint32(itr->second->professions[i].level); // profession title
+            data << uint32(itr->second->professions[i].skillID); // profession level?
+            data << uint32(itr->second->professions[i].rank); // skillid
         }
     }
 

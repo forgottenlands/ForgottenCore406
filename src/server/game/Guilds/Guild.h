@@ -74,10 +74,12 @@ enum GuildMemberFlags {
 // Not used; On retail it's set if the plr is logged on with Mobile Armory
 };
 
-enum GuildMemberData {
+enum GuildMemberData
+{
 	GUILD_MEMBER_DATA_ZONEID = 0,
 	GUILD_MEMBER_DATA_ACHIEVEMENT_POINTS,
 	GUILD_MEMBER_DATA_LEVEL,
+    GUILD_MEMBER_DATA_PROFESSIONS,
 };
 
 enum GuildDefaultRanks {
@@ -305,9 +307,10 @@ private:
 			uint32 resetTime;
 		};
 
-		struct Profession {
+		struct Profession 
+        {
 			uint32 skillID;
-			uint32 title;
+			uint32 rank;
 			uint32 level;
 		};
 
@@ -334,6 +337,13 @@ private:
 		void SetLevel(uint8 var) {
 			m_level = var;
 		}
+
+        void SetProfession(uint32 num, uint32 level, uint32 skill, uint32 rank)
+        {
+            professions[num].level = level;
+            professions[num].skillID = skill;
+            professions[num].rank = rank;
+        }
 
 		void AddFlag(uint8 var) {
 			m_flags |= var;
@@ -384,6 +394,7 @@ private:
 		uint32 GetAchievementPoints() {
 			return m_achievementPoints;
 		}
+        Profession professions[2];
 
 		bool IsOnline() {
 			return (m_flags & GUILD_MEMBER_FLAG_ONLINE);
@@ -433,7 +444,6 @@ private:
 
 		RemainingValue m_bankRemaining[GUILD_BANK_MAX_TABS + 1];
 		uint32 m_achievementPoints;
-		Profession professions[2];
 	};
 
     typedef UNORDERED_MAP<uint32, GuildNews*> sGuildNews;

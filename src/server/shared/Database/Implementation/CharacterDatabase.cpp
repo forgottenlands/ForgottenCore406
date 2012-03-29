@@ -343,7 +343,7 @@ void CharacterDatabaseConnection::DoPrepareStatements() {
 	// 0: uint32, 1: uint32, 2: uint8, 4: string, 5: string
 	PREPARE_STATEMENT(
 			CHAR_ADD_GUILD_MEMBER,
-			"INSERT INTO guild_member (guildid, guid, rank, pnote, offnote) VALUES (?, ?, ?, ?, ?)",
+			"INSERT INTO guild_member (guildid, guid, rank, pnote, offnote, FirstProffLevel, FirstProffSkill, FirstProffRank, SecondProffLevel, SecondProffSkill, SecondProffRank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			CONNECTION_ASYNC);
 	PREPARE_STATEMENT(CHAR_DEL_GUILD_MEMBER,
 			"DELETE FROM guild_member WHERE guid = ?", CONNECTION_ASYNC);
@@ -446,6 +446,10 @@ void CharacterDatabaseConnection::DoPrepareStatements() {
 	PREPARE_STATEMENT(CHAR_SET_GUILD_MEMBER_RANK,
 			"UPDATE guild_member SET rank = ? WHERE guid = ?",
 			CONNECTION_ASYNC);
+    // 0-5: uint32
+    PREPARE_STATEMENT(CHAR_SET_GUILD_MEMBER_PROFESSION, 
+        "UPDATE guild_member SET FirstProffLevel = ?, FirstProffSkill = ?, FirstProffRank = ?, SecondProffLevel = ?, SecondProffSkill = ?, SecondProffRank = ? WHERE guid = ?", 
+        CONNECTION_ASYNC);
 	// 0: uint8, 1: uint32
 	PREPARE_STATEMENT(CHAR_SET_GUILD_MOTD,
 			"UPDATE guild SET motd = ? WHERE guildid = ?", CONNECTION_ASYNC);
@@ -612,9 +616,9 @@ void CharacterDatabaseConnection::DoPrepareStatements() {
 			"BankResetTimeTab0, BankRemSlotsTab0, BankResetTimeTab1, BankRemSlotsTab1, BankResetTimeTab2, BankRemSlotsTab2, "
 			//   13                 14                15                 16                17                 18
 			"BankResetTimeTab3, BankRemSlotsTab3, BankResetTimeTab4, BankRemSlotsTab4, BankResetTimeTab5, BankRemSlotsTab5, "
-                        //   19                 20                21                 22
-                        "BankResetTimeTab6, BankRemSlotsTab6, BankResetTimeTab7, BankRemSlotsTab7, "
-			//   23      24       25       26      27         28
+            //   19                 20                21                 22             23              24                  25              26              27                  28
+            "BankResetTimeTab6, BankRemSlotsTab6, BankResetTimeTab7, BankRemSlotsTab7, FirstProffLevel, FirstProffSkill, FirstProffRank, SecondProffLevel, SecondProffSkill, SecondProffRank, "
+			//   29      30       31       32      33         34
 			"c.name, c.level, c.class, c.zone, c.account, c.logout_time "
 			"FROM guild_member gm LEFT JOIN characters c ON c.guid = gm.guid ORDER BY guildid ASC",
 			CONNECTION_SYNCH);
