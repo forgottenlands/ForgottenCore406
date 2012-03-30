@@ -1295,6 +1295,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
             }
             break;
+        case SPELLFAMILY_DRUID:
+            switch (GetId())
+            {
+                // Tiger's Fury
+                case 5217:
+                    if (!caster)
+                        return;
+                    if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2850, 1))
+                    {
+                        int32 bp0 = aurEff->GetAmount();
+                        caster->CastCustomSpell(caster, 51178, &bp0, 0, 0, true);
+                    }
+                    break;
+            }
+            break;
         }
     }
     // mods at aura remove
