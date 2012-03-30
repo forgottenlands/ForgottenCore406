@@ -2371,45 +2371,31 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
             }
             // Death strike
-            if (m_spellInfo->SpellFamilyFlags [0]
-                    & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
+            if (m_spellInfo->SpellFamilyFlags [0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
             {
                 int32 bp;
-                if ((m_caster->CountPctFromMaxHealth(7))
-                        > (20 * m_caster->GetDamageTakenInPastSecs(5) / 100)) bp =
-                        m_caster->CountPctFromMaxHealth(7);
-                else bp = (20 * m_caster->GetDamageTakenInPastSecs(5) / 100);
+                uint32 healthPct = m_caster->CountPctFromMaxHealth(7);
+                uint32 damageTaken = m_caster->GetDamageTakenInPastSecs(5) * 0.15f;
 
                 // Improved Death Strike
-                if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0)) bp =
-                        int32(
-                                bp
-                                        * (m_caster->CalculateSpellDamage(
-                                                m_caster,
-                                                aurEff->GetSpellProto(), 2)
-                                                + 100.0f) / 100.0f);
+                if (AuraEffect const * aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0)) 
+                    damageTaken = uint32(damageTaken * (m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellProto(), 2) + 100.0f) / 100.0f);
+
+                if (healthPct > damageTaken)
+                    bp = int32(healthPct);
+                else 
+                    bp = int32(damageTaken);                
 
                 if (m_caster->ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
                 {
-                    if (m_caster->ToPlayer()->HasSpell(50029)) //Temp check for spec
+                    if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_DEATH_KNIGHT_BLOOD)
                     {
-                        if (m_caster->HasAura(48263))
-                        {
-                            int32 shield =
-                                    int32(
-                                            bp
-                                                    * (50.0f
-                                                            + (6.25f
-                                                                    * m_caster->ToPlayer()->GetMasteryPoints()))
-                                                    / 100.0f);
-                            m_caster->CastCustomSpell(m_caster, 77535, &shield,
-                                    NULL, NULL, false);
-                        }
+                        int32 shield = int32(bp * (50.0f + (6.25f * m_caster->ToPlayer()->GetMasteryPoints())) / 100.0f);
+                        m_caster->CastCustomSpell(m_caster, 77535, &shield, NULL, NULL, false);
                     }
                 }
 
-                m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL,
-                        false);
+                m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
                 return;
             }
             // Death Coil
