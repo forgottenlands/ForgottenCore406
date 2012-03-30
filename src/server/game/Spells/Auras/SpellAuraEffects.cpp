@@ -2885,121 +2885,121 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const {
     //uint32 spellId3 = 0;
     uint32 HotWSpellId = 0;
 
-    switch (GetMiscValue()) {
-    case FORM_CAT:
-        spellId = 3025;
-        HotWSpellId = 24900;
-        break;
-    case FORM_TREE:
-        spellId = 5420;
-        break;
-    case FORM_TRAVEL:
-        spellId = 5419;
-        break;
-    case FORM_AQUA:
-        spellId = 5421;
-        break;
-    case FORM_BEAR:
-        spellId = 1178;
-        spellId2 = 21178;
-        HotWSpellId = 24899;
-        break;
-    case FORM_DIREBEAR:
-        spellId = 9635;
-        spellId2 = 21178;
-        HotWSpellId = 24899;
-        break;
-    case FORM_BATTLESTANCE:
-        spellId = 21156;
-        break;
-    case FORM_DEFENSIVESTANCE:
-        spellId = 7376;
-        break;
-    case FORM_BERSERKERSTANCE:
-        spellId = 7381;
-        break;
-    case FORM_MOONKIN:
-        spellId = 24905;
-        spellId2 = 24907;
-        break;
-    case FORM_FLIGHT:
-        spellId = 33948;
-        spellId2 = 34764;
-        break;
-    case FORM_FLIGHT_EPIC:
-        spellId = 40122;
-        spellId2 = 40121;
-        break;
-    case FORM_METAMORPHOSIS:
-        spellId = 54817;
-        spellId2 = 54879;
-        break;
-    case FORM_SPIRITOFREDEMPTION:
-        spellId = 27792;
-        spellId2 = 27795; // must be second, this important at aura remove to prevent to early iterator invalidation.
-        break;
-    case FORM_SHADOW:
-        spellId = 49868;
-        spellId2 = 71167;
-        break;
-    case FORM_GHOSTWOLF:
-        spellId = 67116;
-        break;
-    case FORM_GHOUL:
-    case FORM_AMBIENT:
-    case FORM_STEALTH:
-    case FORM_CREATURECAT:
-    case FORM_CREATUREBEAR:
-        break;
-    default:
-        break;
+    switch (GetMiscValue())
+    {
+        case FORM_CAT:
+            spellId = 3025;
+            HotWSpellId = 24900;
+            break;
+        case FORM_TREE:
+            spellId = 5420;
+            break;
+        case FORM_TRAVEL:
+            spellId = 5419;
+            break;
+        case FORM_AQUA:
+            spellId = 5421;
+            break;
+        case FORM_BEAR:
+            spellId = 1178;
+            spellId2 = 21178;
+            HotWSpellId = 24899;
+            break;
+        case FORM_DIREBEAR:
+            spellId = 9635;
+            spellId2 = 21178;
+            HotWSpellId = 24899;
+            break;
+        case FORM_BATTLESTANCE:
+            spellId = 21156;
+            break;
+        case FORM_DEFENSIVESTANCE:
+            spellId = 7376;
+            break;
+        case FORM_BERSERKERSTANCE:
+            spellId = 7381;
+            break;
+        case FORM_MOONKIN:
+            spellId = 24905;
+            spellId2 = 24907;
+            break;
+        case FORM_FLIGHT:
+            spellId = 33948;
+            spellId2 = 34764;
+            break;
+        case FORM_FLIGHT_EPIC:
+            spellId = 40122;
+            spellId2 = 40121;
+            break;
+        case FORM_METAMORPHOSIS:
+            spellId = 54817;
+            spellId2 = 54879;
+            break;
+        case FORM_SPIRITOFREDEMPTION:
+            spellId = 27792;
+            spellId2 = 27795; // must be second, this important at aura remove to prevent to early iterator invalidation.
+            break;
+        case FORM_SHADOW:
+            spellId = 49868;
+            spellId2 = 71167;
+            break;
+        case FORM_GHOSTWOLF:
+            spellId = 67116;
+            break;
+        case FORM_GHOUL:
+        case FORM_AMBIENT:
+        case FORM_STEALTH:
+        case FORM_CREATURECAT:
+        case FORM_CREATUREBEAR:
+            break;
+        default:
+            break;
     }
 
-    if (apply) {
+    if (apply) 
+    {
         // Remove cooldown of spells triggered on stance change - they may share cooldown with stance spell
-        if (spellId) {
+        if (spellId) 
+        {
             if (target->GetTypeId() == TYPEID_PLAYER)
                 target->ToPlayer()->RemoveSpellCooldown(spellId);
             target->CastSpell(target, spellId, true, NULL, this);
         }
 
-        if (spellId2) {
+        if (spellId2)
+        {
             if (target->GetTypeId() == TYPEID_PLAYER)
                 target->ToPlayer()->RemoveSpellCooldown(spellId2);
             target->CastSpell(target, spellId2, true, NULL, this);
         }
 
-        if (target->GetTypeId() == TYPEID_PLAYER) {
+        if (target->GetTypeId() == TYPEID_PLAYER) 
+        {
             const PlayerSpellMap& sp_list = target->ToPlayer()->GetSpellMap();
-            for (PlayerSpellMap::const_iterator itr = sp_list.begin();
-                    itr != sp_list.end(); ++itr) {
-                if (itr->second->state == PLAYERSPELL_REMOVED
-                        || itr->second->disabled)
+            for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+            {
+                if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled)
                     continue;
                 if (itr->first == spellId || itr->first == spellId2)
                     continue;
-                SpellEntry const *spellInfo = sSpellStore.LookupEntry(
-                        itr->first);
-                if (!spellInfo
-                        || !(spellInfo->Attributes
-                                & (SPELL_ATTR0_PASSIVE | (1 << 7))))
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
+                if (!spellInfo || !(spellInfo->Attributes & (SPELL_ATTR0_PASSIVE | (1 << 7)))) 
                     continue;
                 if (spellInfo->Stances & (1 << (GetMiscValue() - 1)))
                     target->CastSpell(target, itr->first, true, NULL, this);
             }
             // Leader of the Pack
-            if (target->ToPlayer()->HasSpell(17007)) {
+            if (target->ToPlayer()->HasSpell(17007)) 
+            {
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(24932);
-                if (spellInfo
-                        && spellInfo->Stances & (1 << (GetMiscValue() - 1)))
+                if (spellInfo && spellInfo->Stances & (1 << (GetMiscValue() - 1)))
                     target->CastSpell(target, 24932, true, NULL, this);
             }
             // Improved Barkskin - apply/remove armor bonus due to shapeshift
-            if (target->ToPlayer()->HasSpell(63410)
-                    || target->ToPlayer()->HasSpell(63411)) {
+            if (target->ToPlayer()->HasSpell(63410) || target->ToPlayer()->HasSpell(63411))
+            {
                 target->RemoveAurasDueToSpell(66530);
-                if (GetMiscValue() == FORM_TRAVEL
-                        || GetMiscValue() == FORM_NONE) // "while in Travel Form or while not shapeshifted"
+                if (GetMiscValue() == FORM_TRAVEL || GetMiscValue() == FORM_NONE) // "while in Travel Form or while not shapeshifted"
                     target->CastSpell(target, 66530, true);
             }
             // Heart of the Wild
@@ -3019,87 +3019,94 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const {
                     }
                 }
             }
-            switch (GetMiscValue()) {
-            case FORM_CAT:
-                // Savage Roar
-                if (target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID,
-                        0, 0x10000000, 0))
-                    target->CastSpell(target, 62071, true);
-                // Nurturing Instinct
-                if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT, SPELLFAMILY_DRUID, 2254, 0)) {
-                    uint32 spellId = 0;
-                    switch (aurEff->GetId()) {
-                    case 33872:
-                        spellId = 47179;
-                        break;
-                    case 33873:
-                        spellId = 47180;
-                        break;
+            switch (GetMiscValue())
+            {
+                case FORM_CAT:
+                    // Savage Roar
+                    if (target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 0, 0x10000000, 0))
+                        target->CastSpell(target, 62071, true);
+                    // Nurturing Instinct
+                    if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT, SPELLFAMILY_DRUID, 2254, 0)) {
+                        uint32 spellId = 0;
+                        switch (aurEff->GetId()) 
+                        {
+                            case 33872:
+                                spellId = 47179;
+                                break;
+                            case 33873:
+                                spellId = 47180;
+                                break;
+                        }
+                        target->CastSpell(target, spellId, true, NULL, this);
                     }
-                    target->CastSpell(target, spellId, true, NULL, this);
-                }
-                // Master Shapeshifter - Cat
-                if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))  {
-                    if (target->HasAura(48418)) target->RemoveAurasDueToSpell(48418);
-                    int32 bp = aurEff->GetAmount();
-                    target->CastCustomSpell(target, 48420, &bp, NULL, NULL,
-                            true);
-                }
-                // Remove Vengeance when go in cat form
-                if (target->HasAura(76691))
-                    target->RemoveAura(76691);
-                break;
-            case FORM_DIREBEAR:
-            case FORM_BEAR:
-                // Master Shapeshifter - Bear
-                if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))  {
-                    int32 bp = aurEff->GetAmount();
-                    target->CastCustomSpell(target, 48418, &bp, NULL, NULL,
-                            true);
-                }
-                // Survival of the Fittest
-                if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DRUID, 961, 0)) {
-                    int32 bp = 100
-                            + SpellMgr::CalculateSpellEffectAmount(
-                                    aurEff->GetSpellProto(), 2);
-                    target->CastCustomSpell(target, 62069, &bp, NULL, NULL,
-                            true, 0, this);
-                }
-                break;
-            case FORM_MOONKIN:
-                // Master Shapeshifter - Moonkin
-                if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))  {
-                    if (target->HasAura(48418)) target->RemoveAurasDueToSpell(48418);
-                    int32 bp = aurEff->GetAmount();
-                    target->CastCustomSpell(target, 48421, &bp, NULL, NULL,
-                            true);
-                }
-                break;
+                    // Master Shapeshifter - Cat
+                    if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))  {
+                        if (target->HasAura(48418))
+                            target->RemoveAurasDueToSpell(48418);
+                        int32 bp = aurEff->GetAmount();
+                        target->CastCustomSpell(target, 48420, &bp, NULL, NULL, true);
+                    }
+                    // Remove Vengeance when go in cat form
+                    if (target->HasAura(76691))
+                        target->RemoveAura(76691);
+                    break;
+                case FORM_DIREBEAR:
+                case FORM_BEAR:
+                    // Master Shapeshifter - Bear
+                    if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0)) 
+                    {
+                        int32 bp = aurEff->GetAmount();
+                        target->CastCustomSpell(target, 48418, &bp, NULL, NULL, true);
+                    }
+                    // Survival of the Fittest
+                    if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DRUID, 961, 0))
+                    {
+                        int32 bp = 100 + SpellMgr::CalculateSpellEffectAmount(aurEff->GetSpellProto(), 2);
+                        target->CastCustomSpell(target, 62069, &bp, NULL, NULL, true, 0, this);
+                    }
+                    break;
+                case FORM_MOONKIN:
+                    // Master Shapeshifter - Moonkin
+                    if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))  {
+                        if (target->HasAura(48418))
+                            target->RemoveAurasDueToSpell(48418);
+                        int32 bp = aurEff->GetAmount();
+                        target->CastCustomSpell(target, 48421, &bp, NULL, NULL, true);
+                    }
+                    break;
             }
         }
-    } else {
+    }
+    else
+    {
         if (spellId)
             target->RemoveAurasDueToSpell(spellId);
         if (spellId2)
             target->RemoveAurasDueToSpell(spellId2);
 
         // Improved Barkskin - apply/remove armor bonus due to shapeshift
-        if (Player *pl=target->ToPlayer()) {
-            if (pl->HasSpell(63410) || pl->HasSpell(63411)) {
+        if (Player *pl=target->ToPlayer())
+        {
+            if (pl->HasSpell(63410) || pl->HasSpell(63411))
+            {
                 target->RemoveAurasDueToSpell(66530);
                 target->CastSpell(target, 66530, true);
             }
         }
 
         Unit::AuraApplicationMap& tAuras = target->GetAppliedAuras();
-        for (Unit::AuraApplicationMap::iterator itr = tAuras.begin();
-                itr != tAuras.end();) {
+        for (Unit::AuraApplicationMap::iterator itr = tAuras.begin(); itr != tAuras.end();) 
+        {
             if (itr->second->GetBase()->IsRemovedOnShapeLost(target))
                 target->RemoveAura(itr);
             else
                 ++itr;
         }
     }
+
+    if (GetMiscValue() == FORM_CAT)
+        if (target && (target->HasAura(17002) || target->HasAura(24866)))
+            target->UpdateSpeed(MOVE_RUN, true);
 }
 
 /*********************************************************/
@@ -4697,8 +4704,8 @@ void AuraEffect::HandleAuraControlVehicle(AuraApplication const *aurApp,
 /*********************************************************/
 /***                  MODIFY SPEED                     ***/
 /*********************************************************/
-void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const *aurApp,
-        uint8 mode, bool apply) const {
+void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const *aurApp, uint8 mode, bool apply) const
+{
     if (!(mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK))
         return;
 
@@ -4710,15 +4717,16 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const *aurApp,
 
     target->UpdateSpeed(MOVE_RUN, true);
 
-    if (apply) {
-        switch (GetId()) {
-        case 68992: // Darkflight, worgen's sprint spell.
+    if (apply)
+    {
+        switch (GetId())
         {
-            if (target->GetTypeId() == TYPEID_PLAYER)
-                target->ToPlayer()->setInWorgenForm(
-                        UNIT_FLAG2_WORGEN_TRANSFORM2);
-            break;
-        }
+            case 68992: // Darkflight, worgen's sprint spell.
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER) 
+                    target->ToPlayer()->setInWorgenForm(UNIT_FLAG2_WORGEN_TRANSFORM2);
+                break;
+            }
         default:
             break;
         }
