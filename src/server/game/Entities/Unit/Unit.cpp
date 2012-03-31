@@ -5608,20 +5608,13 @@ bool Unit::HandleSpellCritChanceAuraProc(Unit *pVictim, uint32 /*damage*/,
     return true;
 }
 
-bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
-        AuraEffect* triggeredByAura, SpellEntry const * procSpell,
-        uint32 procFlag, uint32 procEx, uint32 cooldown)
+bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* triggeredByAura, SpellEntry const * procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown)
 {
     SpellEntry const *dummySpell = triggeredByAura->GetSpellProto();
     uint32 effIndex = triggeredByAura->GetEffIndex();
     int32 triggerAmount = triggeredByAura->GetAmount();
 
-    Item* castItem =
-            triggeredByAura->GetBase()->GetCastItemGUID()
-                    && GetTypeId() == TYPEID_PLAYER ?
-                    this->ToPlayer()->GetItemByGuid(
-                            triggeredByAura->GetBase()->GetCastItemGUID()) :
-                    NULL;
+    Item* castItem = triggeredByAura->GetBase()->GetCastItemGUID() && GetTypeId() == TYPEID_PLAYER ? this->ToPlayer()->GetItemByGuid(triggeredByAura->GetBase()->GetCastItemGUID()) : NULL;
 
     uint32 triggered_spell_id = 0;
     uint32 cooldown_spell_id = 0; // for random trigger, will be one of the triggered spell to avoid repeatable triggers
@@ -5648,19 +5641,19 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                     }
                     return false;
                 }
-                    // Eye for an Eye
+                // Eye for an Eye
                 case 9799:
                 case 25988:
                 {
+                    sLog->outString("piselo");
                     // return damage % to attacker but < 50% own total health
                     basepoints0 = int32((triggerAmount * damage) / 100);
 
                     int32 halfMaxHealth = int32(CountPctFromMaxHealth(50));
-                    if (basepoints0 > halfMaxHealth) basepoints0 =
-                            halfMaxHealth;
+                    if (basepoints0 > halfMaxHealth)
+                        basepoints0 = halfMaxHealth;
 
                     triggered_spell_id = 25997;
-
                     break;
                 }
                     // Sweeping Strikes
@@ -7385,10 +7378,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage,
                 switch (dummySpell->Id)
                 {
                     case 53228: // Rank 1
-                        triggered_spell_id = 56654;
+                        triggered_spell_id = 53230;
                         break;
                     case 53232: // Rank 2
-                        triggered_spell_id = 58882;
+                        triggered_spell_id = 54227;
                         break;
                 }
                 break;
@@ -9072,6 +9065,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 
     Item* castItem = triggeredByAura->GetBase()->GetCastItemGUID() && GetTypeId() == TYPEID_PLAYER ? this->ToPlayer()->GetItemByGuid(triggeredByAura->GetBase()->GetCastItemGUID()) : NULL;
 
+    sLog->outString("trig %d", auraSpellInfo->Id);
     // Try handle unknown trigger spells
     if (sSpellStore.LookupEntry(trigger_spell_id) == NULL)
     {
