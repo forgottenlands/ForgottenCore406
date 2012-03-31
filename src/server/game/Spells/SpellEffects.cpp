@@ -2391,6 +2391,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_DEATH_KNIGHT_BLOOD)
                     {
                         int32 shield = int32(bp * (50.0f + (6.25f * m_caster->ToPlayer()->GetMasteryPoints())) / 100.0f);
+
+                        // This effect stacks
+                        if (m_caster->HasAura(77535, m_caster->GetGUID()))
+                            shield += m_caster->GetAura(77535, m_caster->GetGUID())->GetEffect(0)->GetAmount();
+
                         m_caster->CastCustomSpell(m_caster, 77535, &shield, NULL, NULL, false);
                     }
                 }
