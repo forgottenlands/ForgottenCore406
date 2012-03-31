@@ -3463,6 +3463,10 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                 if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_PALADIN_HOLY)
                 {
                     int32 bp0 = int32(addhealth	* (10.0f + (1.25f * m_caster->ToPlayer()->GetMasteryPoints())) / 100);
+                    if (unitTarget->HasAura(86273))
+                        if (bp0 < unitTarget->GetAura(86273)->GetEffect(0)->GetAmount())
+                            bp0 = unitTarget->GetAura(86273)->GetEffect(0)->GetAmount();
+
                     m_caster->CastCustomSpell(unitTarget, 86273, &bp0, NULL, NULL, true);
                 }
             }
