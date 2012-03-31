@@ -2045,13 +2045,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask,
         int32 manaTaken = -pVictim->ModifyPower(POWER_MANA, -manaReduction);
 
         // take case when mana has ended up into account
-        currentAbsorb =
-                currentAbsorb ?
-                        int32(
-                                float(currentAbsorb)
-                                        * (float(manaTaken)
-                                                / float(manaReduction))) :
-                        0;
+        currentAbsorb = currentAbsorb ? int32(float(currentAbsorb) * (float(manaTaken) / float(manaReduction))) : 0;
 
         dmgInfo.AbsorbDamage(currentAbsorb);
 
@@ -4621,18 +4615,18 @@ AuraEffect * Unit::GetAuraEffectOfRankedSpell(uint32 spellId, uint8 effIndex,
     return NULL;
 }
 
-AuraEffect* Unit::GetAuraEffect(AuraType type, SpellFamilyNames name,
-        uint32 iconId, uint8 effIndex) const
+AuraEffect* Unit::GetAuraEffect(AuraType type, SpellFamilyNames name, uint32 iconId, uint8 effIndex) const
 {
+    if (!HasAuraType(type))
+        return false;
+
     AuraEffectList const& auras = GetAuraEffectsByType(type);
-    for (Unit::AuraEffectList::const_iterator itr = auras.begin();
-            itr != auras.end(); ++itr)
+    for (Unit::AuraEffectList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
         if (effIndex != (*itr)->GetEffIndex()) continue;
         SpellEntry const * spell = (*itr)->GetSpellProto();
-        if (spell->SpellIconID == iconId
-                && spell->SpellFamilyName == uint32(name)
-                && !spell->SpellFamilyFlags) return *itr;
+        if (spell->SpellIconID == iconId && spell->SpellFamilyName == uint32(name) && !spell->SpellFamilyFlags) 
+            return *itr;
     }
     return NULL;
 }
@@ -15513,7 +15507,8 @@ void Unit::CleanupsBeforeDelete(bool finalCleanup)
     // This needs to be before RemoveFromWorld to make GetCaster() return a valid pointer on aura removal
     InterruptNonMeleeSpells(true);
 
-    if (IsInWorld()) RemoveFromWorld();
+    if (IsInWorld()) 
+        RemoveFromWorld();
 
     ASSERT(GetGUID());
 
@@ -15522,7 +15517,8 @@ void Unit::CleanupsBeforeDelete(bool finalCleanup)
     RemoveAllAuras();
     RemoveAllGameObjects();
 
-    if (finalCleanup) m_cleanupDone = true;
+    if (finalCleanup) 
+        m_cleanupDone = true;
 
     m_Events.KillAllEvents(false); // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map::RemoveAllObjectsInRemoveList
     CombatStop();

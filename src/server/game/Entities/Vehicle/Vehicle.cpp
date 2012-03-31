@@ -151,13 +151,13 @@ void Vehicle::InstallAllAccessories(uint32 entry)
 
 void Vehicle::Uninstall()
 {
-    sLog->outDebug(LOG_FILTER_VEHICLES, "Vehicle::Uninstall %u",
-            me->GetEntry());
+    sLog->outDebug(LOG_FILTER_VEHICLES, "Vehicle::Uninstall %u", me->GetEntry());
     for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
-        if (Unit *passenger = itr->second.passenger) if (passenger->HasUnitTypeMask(
-                UNIT_MASK_ACCESSORY)) passenger->ToTempSummon()->UnSummon();
+        if (Unit *passenger = itr->second.passenger) 
+            if (passenger->HasUnitTypeMask(UNIT_MASK_ACCESSORY))
+                passenger->ToTempSummon()->UnSummon();
 
-    this->RemoveAllPassengers();
+    RemoveAllPassengers();
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
     sScriptMgr->OnUninstall(this);
