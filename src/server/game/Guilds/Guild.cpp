@@ -1334,14 +1334,7 @@ void Guild::HandleRoster(WorldSession* session /*= NULL*/)
         data << uint8(itr->second->GetFlags()); // GUILD_MEMBER_FLAGS enum
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        if (itr->second->FindPlayer() && itr->second->FindPlayer()->InArena() && !sWorld->getBoolConfig(CONFIG_ALLOW_WHO_ARENA))
-        {
-            if (itr->second->FindPlayer()->getFaction() == HORDE)
-                data << uint32(1637); // Show player as at orgrimmar
-            else if (itr->second->FindPlayer()->GetTeam() == ALLIANCE)
-                data << uint32(1519); // Show player as at stormwind
-        } else
-            data << uint32(itr->second->GetZoneId()); // Zone ID: Use cached value as zone id does get updated
+        data << uint32(itr->second->GetZoneId()); // Zone ID: Use cached value as zone id does get updated
 
     for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         data << uint32(itr->second->GetAchievementPoints()); // Achievement Points
