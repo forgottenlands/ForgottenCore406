@@ -392,7 +392,10 @@ void Vehicle::RemovePassenger(Unit *unit)
     if (unit->GetVehicle() != this)
         return;
 
-    SeatMap::iterator seat = GetSeatIteratorForPassenger(unit);
+    SeatMap::iterator seat;
+    for (seat = m_Seats.begin(); seat != m_Seats.end(); ++seat)
+        if (seat->second.passenger == unit) 
+            break;
     ASSERT(seat != m_Seats.end());
 
     sLog->outDebug(LOG_FILTER_VEHICLES,
