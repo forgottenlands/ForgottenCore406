@@ -389,12 +389,10 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
 
 void Vehicle::RemovePassenger(Unit *unit)
 {
-    if (unit->GetVehicle() != this) return;
+    if (unit->GetVehicle() != this)
+        return;
 
-    SeatMap::iterator seat;
-    for (seat = m_Seats.begin(); seat != m_Seats.end(); ++seat)
-        if (seat->second.passenger == unit) break;
-
+    SeatMap::iterator seat = GetSeatIteratorForPassenger(unit);
     ASSERT(seat != m_Seats.end());
 
     sLog->outDebug(LOG_FILTER_VEHICLES,
@@ -416,9 +414,7 @@ void Vehicle::RemovePassenger(Unit *unit)
 
     unit->ClearUnitState(UNIT_STAT_ONVEHICLE);
 
-    if (me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER
-            && seat->first == 0
-            && seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
+    if (me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && seat->first == 0 && seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
     {
         me->RemoveCharmedBy(unit);
 
@@ -430,8 +426,8 @@ void Vehicle::RemovePassenger(Unit *unit)
         }
     }
 
-    if (me->GetTypeId() == TYPEID_UNIT && me->ToCreature()->IsAIEnabled) me->ToCreature()->AI()->PassengerBoarded(
-            unit, seat->first, false);
+    if (me->GetTypeId() == TYPEID_UNIT && me->ToCreature()->IsAIEnabled)
+        me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, false);
 
     // only for flyable vehicles
     if (unit->HasUnitMovementFlag(MOVEMENTFLAG_FLYING)) me->CastSpell(unit,

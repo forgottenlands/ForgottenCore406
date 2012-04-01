@@ -4203,8 +4203,7 @@ void Unit::RemoveAurasDueToItemSpell(Item* castItem, uint32 spellId)
     }
 }
 
-void Unit::RemoveAurasByType(AuraType auraType, uint64 casterGUID,
-        Aura * except, bool negative, bool positive)
+void Unit::RemoveAurasByType(AuraType auraType, uint64 casterGUID, Aura * except, bool negative, bool positive)
 {
 	for (AuraEffectList::iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
     {
@@ -4216,8 +4215,8 @@ void Unit::RemoveAurasByType(AuraType auraType, uint64 casterGUID,
         {
             uint32 removedAuras = m_removedAurasCount;
             RemoveAura(aurApp);
-            if (m_removedAurasCount > removedAuras + 1) iter =
-                    m_modAuras [auraType].begin();
+            if (m_removedAurasCount > removedAuras + 1)
+                iter = m_modAuras [auraType].begin();
         }
     }
 }
@@ -18910,21 +18909,7 @@ void Unit::ExitVehicle()
     if (!m_vehicle) 
         return;
 
-    if (Unit *vehicleBase = m_vehicle->GetBase())
-    {
-        const AuraEffectList &modAuras = vehicleBase->GetAuraEffectsByType(SPELL_AURA_CONTROL_VEHICLE);
-        for (AuraEffectList::const_iterator itr = modAuras.begin(); itr != modAuras.end(); ++itr)
-        {
-            if ((*itr)->GetBase()->GetOwner() == this)
-            {
-                vehicleBase->RemoveAura((*itr)->GetBase());
-                break; // there should be no case that a vehicle has two auras for one owner
-            }
-        }
-    }
-
-    if (!m_vehicle) 
-        return;
+    GetVehicleBase()->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE, GetGUID());
 
     //sLog->outError("exit vehicle");
 

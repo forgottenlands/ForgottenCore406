@@ -6682,11 +6682,16 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode,
                 break;
             case SPELLFAMILY_WARLOCK: {
                 // Shadowburn
-                if (GetId() == 29341) {
-                    if (caster->GetTypeId() == TYPEID_PLAYER
-                            && caster->ToPlayer()->isHonorOrXPTarget(target)
-                            && !target->isAlive())
-                            caster->CastSpell(target, 95810, true);
+                if (GetId() == 29341)
+                {
+                    if (caster)
+                    {
+                        if (caster->ToPlayer())
+                        {
+                            if (caster->ToPlayer()->isHonorOrXPTarget(target) && !target->isAlive())
+                                caster->CastSpell(target, 95810, true);
+                        }
+                    }
                 }
                 // Haunt
                 if (m_spellProto->SpellFamilyFlags[1] & 0x40000) {
