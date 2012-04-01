@@ -14147,7 +14147,8 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
     {
         if (ToPlayer()->getClass() == CLASS_DRUID)
         {
-            if (GetShapeshiftForm() != FORM_CAT)
+            if (GetShapeshiftForm() != FORM_CAT && !IsMounted() && GetShapeshiftForm() != FORM_TRAVEL && GetShapeshiftForm() != FORM_AQUA && GetShapeshiftForm() != FORM_FLIGHT_EPIC
+                && GetShapeshiftForm() != FORM_FLIGHT)
             {
                 if (HasAura(17002))
                     speed -= 0.15f;
