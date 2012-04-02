@@ -342,7 +342,9 @@ public:
 				}
 
 				zealot->SetAuraStack(SPELL_EVOLUTION,channelTarget,channelTarget->GetAuraCount(SPELL_EVOLUTION)+1);
-				channelTarget->GetAura(SPELL_EVOLUTION)->RefreshDuration();
+				
+                if (channelTarget->HasAura(SPELL_EVOLUTION))
+                    channelTarget->GetAura(SPELL_EVOLUTION)->RefreshDuration();
 
 				if(channelTarget->GetAuraCount(SPELL_EVOLUTION) == 100)
 				{
