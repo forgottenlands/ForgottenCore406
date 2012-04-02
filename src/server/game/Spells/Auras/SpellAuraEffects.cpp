@@ -797,23 +797,26 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
         // Innervate
             else if (m_spellProto->Id == 29166)
             {
-                if(GetBase()->GetCaster() == GetBase()->GetUnitOwner())
+                if (GetBase()->GetCaster())
                 {
-                    if(GetBase()->GetCaster()->HasAura(33597))  // Dreamstate rank1
-                        amount += 15;
-                    if(GetBase()->GetCaster()->HasAura(33599))  // Dreamstate rank2
-                        amount += 30;
-                } 
-                amount = int32((GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * amount / 100) / GetTotalTicks());
+                    if(GetBase()->GetCaster() == GetBase()->GetUnitOwner())
+                    {
+                        if(GetBase()->GetCaster()->HasAura(33597))  // Dreamstate rank1
+                            amount += 15;
+                        if(GetBase()->GetCaster()->HasAura(33599))  // Dreamstate rank2
+                            amount += 30;
+                    } 
+                    amount = int32((GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * amount / 100) / GetTotalTicks());
 
-				if (GetBase()->GetCaster() != GetBase()->GetUnitOwner())
-				{
-					if (AuraEffect* aurEff = GetBase()->GetCaster()->GetDummyAuraEffect(SPELLFAMILY_DRUID, 62, 0))
-					{
-						int32 bp0 = amount*aurEff->GetAmount()/100;
-						GetBase()->GetCaster()->CastCustomSpell(GetBase()->GetCaster(), 54833, &bp0, 0, 0, true, 0, 0, 0);
-					}
-				}
+				    if (GetBase()->GetCaster() != GetBase()->GetUnitOwner())
+				    {
+					    if (AuraEffect* aurEff = GetBase()->GetCaster()->GetDummyAuraEffect(SPELLFAMILY_DRUID, 62, 0))
+					    {
+						    int32 bp0 = amount*aurEff->GetAmount()/100;
+						    GetBase()->GetCaster()->CastCustomSpell(GetBase()->GetCaster(), 54833, &bp0, 0, 0, true, 0, 0, 0);
+					    }
+				    }
+                }
             }
         // Owlkin Frenzy
         else if (m_spellProto->Id == 48391)
