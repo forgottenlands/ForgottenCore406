@@ -394,7 +394,7 @@ void Vehicle::RemovePassenger(Unit *unit)
 
     SeatMap::iterator seat;
     for (seat = m_Seats.begin(); seat != m_Seats.end(); ++seat)
-        if (seat->second.passenger == unit) 
+        if (seat->second.passenger == unit)
             break;
     ASSERT(seat != m_Seats.end());
 
