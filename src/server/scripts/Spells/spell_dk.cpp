@@ -634,8 +634,11 @@ public:
         void HandleEffect(SpellEffIndex /*eff*/)
         {
             Unit* target = GetHitUnit();
-            if (target->GetAura(91342)->GetStackAmount() == 5)
-                target->RemoveAura(91342);
+            if (target->HasAura(91342))
+            {
+                if (target->GetAura(91342)->GetStackAmount() == 5)
+                    target->RemoveAura(91342);
+            }
 
             GetCaster()->RemoveAura(93426);
         }
