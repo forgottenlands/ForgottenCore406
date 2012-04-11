@@ -506,24 +506,23 @@ void Unit::SendMonsterMove(MonsterMoveData const& moveData, Player* player)
 void Unit::SendMonsterMoveTransport(Unit *vehicleOwner)
 {
     // TODO: Turn into BuildMonsterMoveTransport packet and allow certain variables (for npc movement aboard vehicles)
-    WorldPacket data(SMSG_MONSTER_MOVE_TRANSPORT,
-            GetPackGUID().size() + vehicleOwner->GetPackGUID().size() + 47);
+    WorldPacket data(SMSG_MONSTER_MOVE_TRANSPORT, GetPackGUID().size() + vehicleOwner->GetPackGUID().size() + 47);
     data.append(GetPackGUID());
     data.append(vehicleOwner->GetPackGUID());
     data << int8(GetTransSeat());
-    data << uint8(0); // unk boolean
+    data << uint8(0);                                           // unk boolean
     data << GetPositionX() - vehicleOwner->GetPositionX();
     data << GetPositionY() - vehicleOwner->GetPositionY();
     data << GetPositionZ() - vehicleOwner->GetPositionZ();
-    data << uint32(getMSTime()); // should be an increasing constant that indicates movement packet count
+    data << uint32(getMSTime());                                // should be an increasing constant that indicates movement packet count
     data << uint8(SPLINETYPE_FACING_ANGLE);
-    data << GetOrientation(); // facing angle?
+    data << GetTransOffsetO();                                  // facing angle?
     data << uint32(SPLINEFLAG_TRANSPORT);
-    data << uint32(GetTransTime()); // move time
-    data << uint32(1); // amount of waypoints
-    data << GetTransOffsetX();
-    data << GetTransOffsetY();
-    data << GetTransOffsetZ();
+    data << uint32(GetTransTime());                             // move time
+    data << uint32(0);                                          // amount of waypoints
+    data << uint32(0);                                          // waypoint X
+    data << uint32(0);                                          // waypoint Y
+    data << uint32(0);                                          // waypoint Z
     SendMessageToSet(&data, true);
 }
 
@@ -17507,32 +17506,46 @@ void Unit::SetStunned(bool apply)
 {
     if (apply)
     {
-        SetUInt64Value(UNIT_FIELD_TARGET, 0);
+        SetTarget(0);
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-        CastStop();
-//        AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
+        
+
+        // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
+        // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
+        RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
+        AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
 
         // Creature specific
-        if (GetTypeId() != TYPEID_PLAYER) this->ToCreature()->StopMoving();
-        else SetStandState(UNIT_STAND_STATE_STAND);
+        if (GetTypeId() != TYPEID_PLAYER) 
+            ToCreature()->StopMoving();
+        else 
+            SetStandState(UNIT_STAND_STATE_STAND);
 
-        if (Player * plr = ToPlayer()) plr->SetMovement(MOVE_ROOT);
+        WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
+        data.append(GetPackGUID());
+        data << uint32(0);
+        SendMessageToSet(&data, true);
+
+        CastStop();
     }
     else
     {
-        if (isAlive() && getVictim()) SetUInt64Value(UNIT_FIELD_TARGET,
-                getVictim()->GetGUID());
+        if (isAlive() && getVictim())
+            SetTarget(getVictim()->GetGUID());
 
         // don't remove UNIT_FLAG_STUNNED for pet when owner is mounted (disabled pet's interface)
         Unit *pOwner = GetOwner();
-        if (!pOwner
-                || (pOwner->GetTypeId() == TYPEID_PLAYER
-                        && !pOwner->ToPlayer()->IsMounted())) RemoveFlag(
-                UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+        if (!pOwner || (pOwner->GetTypeId() == TYPEID_PLAYER && !pOwner->ToPlayer()->IsMounted())) 
+            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
-        if (!HasUnitState(UNIT_STAT_ROOT)) // prevent allow move if have also root effect
+        if (!HasUnitState(UNIT_STAT_ROOT))         // prevent moving if it also has root effect
         {
-            if (Player * plr = ToPlayer()) plr->SetMovement(MOVE_UNROOT);
+            WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8+4);
+            data.append(GetPackGUID());
+            data << uint32(0);
+            SendMessageToSet(&data, true);
+
+            RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
         }
     }
 }
@@ -17542,32 +17555,48 @@ void Unit::SetRooted(bool apply)
     if (apply)
     {
         if (m_rootTimes > 0) //blizzard internal check?
-        m_rootTimes++;
+            m_rootTimes++;
 
-//        AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
+        // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
+        // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
+        // setting MOVEMENTFLAG_ROOT
+        RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
+        AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
 
-        if (Player *plr = ToPlayer())
+        if (GetTypeId() == TYPEID_PLAYER)
         {
             WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
             data.append(GetPackGUID());
             data << m_rootTimes;
-            plr->GetSession()->SendPacket(&data);
+            SendMessageToSet(&data, true);
         }
-        else ToCreature()->StopMoving();
+        else 
+        {
+            WorldPacket data(SMSG_SPLINE_MOVE_ROOT, 8);
+            data.append(GetPackGUID());
+            SendMessageToSet(&data, true);
+            ToCreature()->StopMoving();
+        }
     }
     else
     {
         if (!HasUnitState(UNIT_STAT_STUNNED)) // prevent allow move if have also stun effect
         {
-            m_rootTimes++; //blizzard internal check?
-
-            if (Player* plr = ToPlayer())
+            if (GetTypeId() == TYPEID_PLAYER)
             {
                 WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 10);
                 data.append(GetPackGUID());
-                data << m_rootTimes;
-                plr->GetSession()->SendPacket(&data);
+                data << ++m_rootTimes;
+                SendMessageToSet(&data, true);
+            } 
+            else
+            {
+                WorldPacket data(SMSG_SPLINE_MOVE_UNROOT, 8);
+                data.append(GetPackGUID());
+                SendMessageToSet(&data, true);
             }
+
+            RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
         }
     }
 }

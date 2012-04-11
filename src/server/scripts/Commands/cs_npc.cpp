@@ -1117,6 +1117,7 @@ public:
 		if (!pet) {
 			handler->PSendSysMessage(LANG_CREATURE_NON_TAMEABLE, cInfo->Entry);
 			handler->SetSentErrorMessage(true);
+            delete pet;
 			return false;
 		}
 
