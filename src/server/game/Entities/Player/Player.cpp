@@ -2262,7 +2262,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z,
         if (!sMapMgr->CanPlayerEnter(mapid, this, false))
             return false;
 
-        Map *map = sMapMgr->FindMap(mapid);
+        Map* map = sMapMgr->CreateMap(mapid, this, 0);
         if (!map || map->CanEnter(this)) {
             //lets reset near teleport flag if it wasn't reset during chained teleports
             SetSemaphoreTeleportNear(false);
