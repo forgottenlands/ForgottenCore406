@@ -265,7 +265,8 @@ public:
 				me->GetMotionMaster()->Clear();
 				me->GetMotionMaster()->MoveChase(me->getVictim());
 
-				pValiona->GetAI()->DoAction(ACTION_VALIONA_SHOULD_FLY_AWAY);
+                if (pValiona)
+				    pValiona->GetAI()->DoAction(ACTION_VALIONA_SHOULD_FLY_AWAY);
 
 				pValiona = NULL;
 			}

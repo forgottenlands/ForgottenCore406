@@ -611,8 +611,13 @@ public:
                     trons[3] = ObjectAccessor::GetCreature(*me,instance->GetData64(NPC_TOXITRON));
 
                     for(uint8 i = 0; i<=3; i++)
-                        if(trons[i] != me)
-                            trons[i]->ForcedDespawn();
+                    {
+                        if (trons[i])
+                        {
+                            if(trons[i] != me)
+                                trons[i]->ForcedDespawn();
+                        }
+                    }
                 }
                 else
                     omnotron->SetHealth(omnotron->GetHealth()-damage);

@@ -341,7 +341,8 @@ public:
 
                     // Green Phase
                 case EVENT_CAULDRON_EXPLODE:
-                    me->FindNearestCreature(NPC_SLIME_TRIGGER, 100.f)->AI()->DoCastAOE(SPELL_DEBILITATING_SLIME);
+                    if (Creature* slime = me->FindNearestCreature(NPC_SLIME_TRIGGER, 100.f))
+                        slime->AI()->DoCastAOE(SPELL_DEBILITATING_SLIME);
                     DoCastCausticSlime();
                     events.ScheduleEvent(EVENT_CAULDRON_EXPLODE, 15000);
                     break;

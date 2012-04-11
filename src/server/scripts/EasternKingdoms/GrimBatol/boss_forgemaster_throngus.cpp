@@ -238,12 +238,15 @@ public:
 
 			if(me->GetMap()->IsHeroic() && damage > 0)
             {
-                if (me->getVictim()->HasAura(SPELL_BURNING_FLAMES))
+                if (me->getVictim())
                 {
-                    if (me->getVictim()->GetAura(SPELL_BURNING_FLAMES)->GetDuration() <= 6000)
-				        me->CastSpell(me->getVictim(), SPELL_BURNING_FLAMES, true);
-                } else
-                    me->CastSpell(me->getVictim(), SPELL_BURNING_FLAMES, true);                    
+                    if (me->getVictim()->HasAura(SPELL_BURNING_FLAMES))
+                    {
+                        if (me->getVictim()->GetAura(SPELL_BURNING_FLAMES)->GetDuration() <= 6000)
+				            me->CastSpell(me->getVictim(), SPELL_BURNING_FLAMES, true);
+                    } else
+                        me->CastSpell(me->getVictim(), SPELL_BURNING_FLAMES, true);       
+                }
             }
 		}
 
