@@ -283,18 +283,18 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion)
 
 bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
 {
-    if (unit->GetVehicle() != this) 
-        return false;
+    if (unit->GetVehicle() != this) return false;
 
-    if (unit->GetTypeId() == TYPEID_PLAYER && unit->GetMap()->IsBattleArena())
-        return false;
+    if (unit->GetTypeId() == TYPEID_PLAYER && unit->GetMap()->IsBattleArena()) return false;
 
     SeatMap::iterator seat;
     if (seatId < 0) // no specific seat requirement
     {
         for (seat = m_Seats.begin(); seat != m_Seats.end(); ++seat)
-            if (!seat->second.passenger && ((!byAura && seat->second.seatInfo->CanEnterOrExit()) || (byAura && seat->second.seatInfo->IsUsableByAura())))
-                break;
+            if (!seat->second.passenger
+                    && ((!byAura && seat->second.seatInfo->CanEnterOrExit())
+                            || (byAura
+                                    && seat->second.seatInfo->IsUsableByAura()))) break;
 
         if (seat == m_Seats.end()) // no available seat
         return false;
@@ -302,17 +302,15 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
     else
     {
         seat = m_Seats.find(seatId);
-        if (seat == m_Seats.end())
-            return false;
+        if (seat == m_Seats.end()) return false;
 
-        if (seat->second.passenger)
-            seat->second.passenger->ExitVehicle();
+        if (seat->second.passenger) seat->second.passenger->ExitVehicle();
         else seat->second.passenger = NULL;
 
         ASSERT(!seat->second.passenger);
     }
 
-    sLog->outDebug(LOG_FILTER_VEHICLES, 
+    sLog->outDebug(LOG_FILTER_VEHICLES,
             "Unit %s enter vehicle entry %u id %u dbguid %u seat %d",
             unit->GetName(), me->GetEntry(), m_vehicleInfo->m_ID,
             me->GetGUIDLow(), (int32) seat->first);
@@ -324,15 +322,15 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
         --m_usableSeatNum;
         if (!m_usableSeatNum)
         {
-            if (me->GetTypeId() == TYPEID_PLAYER) 
-                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
-            else 
-                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+            if (me->GetTypeId() == TYPEID_PLAYER) me->RemoveFlag(UNIT_NPC_FLAGS,
+                    UNIT_NPC_FLAG_PLAYER_VEHICLE);
+            else me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         }
     }
 
-    if (seat->second.seatInfo->m_flags && !(seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_UNK11)) 
-        unit->AddUnitState(UNIT_STAT_ONVEHICLE);
+    if (seat->second.seatInfo->m_flags
+            && !(seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_UNK11)) unit->AddUnitState(
+            UNIT_STAT_ONVEHICLE);
 
     unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_ROOT);
     VehicleSeatEntry const *veSeat = seat->second.seatInfo;
@@ -343,7 +341,9 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
     unit->m_movementInfo.t_time = 0; // 1 for player
     unit->m_movementInfo.t_seat = seat->first;
 
-    if (me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && seat->first == 0 && seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
+    if (me->GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER
+            && seat->first == 0
+            && seat->second.seatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
     {
         if (!me->SetCharmedBy(unit, CHARM_TYPE_VEHICLE))
         ASSERT(false);
@@ -352,11 +352,13 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
         {
             Player *plr = unit->ToPlayer();
             float averageItemLevel = plr->GetAverageItemLevel();
-            if (averageItemLevel < scalingInfo->baseItemLevel) 
-                averageItemLevel = scalingInfo->baseItemLevel;
+            if (averageItemLevel < scalingInfo->baseItemLevel) averageItemLevel =
+                    scalingInfo->baseItemLevel;
             averageItemLevel -= scalingInfo->baseItemLevel;
 
-            m_bonusHP = uint32(me->GetMaxHealth() * (averageItemLevel * scalingInfo->scalingFactor));
+            m_bonusHP = uint32(
+                    me->GetMaxHealth()
+                            * (averageItemLevel * scalingInfo->scalingFactor));
             me->SetMaxHealth(me->GetMaxHealth() + m_bonusHP);
             me->SetHealth(me->GetHealth() + m_bonusHP);
         }
@@ -368,15 +370,19 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId, bool byAura)
 
         if (me->GetTypeId() == TYPEID_UNIT)
         {
-            if (me->ToCreature()->IsAIEnabled) me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, true);
+            if (me->ToCreature()->IsAIEnabled) me->ToCreature()->AI()->PassengerBoarded(
+                    unit, seat->first, true);
 
             // update all passenger's positions
-            RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+            RelocatePassengers(me->GetPositionX(), me->GetPositionY(),
+                    me->GetPositionZ(), me->GetOrientation());
         }
     }
+    unit->DestroyForNearbyPlayers();
+    unit->UpdateObjectVisibility(false);
 
     if (GetBase()->GetTypeId() == TYPEID_UNIT)
-        sScriptMgr->OnAddPassenger(this, unit, seatId);
+    sScriptMgr->OnAddPassenger(this, unit, seatId);
 
     return true;
 }
