@@ -87,9 +87,7 @@ public:
 	void setModelNameFilterMethod(bool(*pFilterMethod)(char *pName)) {
 		iFilterMethod = pFilterMethod;
 	}
-	std::string getDirEntryNameFromModName(unsigned int pMapId,
-			const std::string& pModPosName);
-	unsigned int getUniqueNameId(const std::string pName);
+	std::string getDirEntryNameFromModName(unsigned int pMapId, const std::string& pModPosName);
 };
 } // VMAP
 #endif                                                      /*_TILEASSEMBLER_H_*/
