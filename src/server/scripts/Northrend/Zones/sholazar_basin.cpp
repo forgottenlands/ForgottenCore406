@@ -1429,12 +1429,12 @@ static uint32 const goEntry[5] =
 
 static char const* Instructions[6] =
 {
-    "Use la valvula de presion!",
-    "Calienta a las brasas!",
-    "Tirar una naranja todavia en eso, date prisa!",
-    "Mezcla de unos cuantos platanos!",
+    "Usa la valvola della pressione!",
+    "Accendi il bracere!",
+    "Lancia un Arancia, fai presto!",
+    "Aggiungi una banana!",
     "Rapido, una Papaya!",
-    "No, eso estuvo mal! Tenemos que comenzar de nevo."
+    "No, questo non va bene! dobbiamo ricominciare."
 };
 
 #define GOSSIP_ITEM_TIPSY  "Estoy listo, vamos a comenzar."
