@@ -602,10 +602,16 @@ public:
 
         void HandleEffect(SpellEffIndex /*eff*/)
         {
-            Unit* target = GetHitUnit();
-            if (target->GetAura(91342)->GetStackAmount() >= 5)
+            if (Unit* target = GetHitUnit())
             {
-                GetCaster()->AddAura(93426, GetCaster());
+                if (target->HasAura(91342))
+                {
+                    if (target->GetAura(91342)->GetStackAmount() >= 5)
+                    {
+                        if (GetCaster())
+                            GetCaster()->AddAura(93426, GetCaster());
+                    }
+                }
             }
         }
 
