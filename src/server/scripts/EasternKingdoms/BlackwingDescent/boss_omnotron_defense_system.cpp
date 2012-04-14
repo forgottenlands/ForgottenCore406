@@ -599,7 +599,8 @@ public:
 
         void DamageTaken(Unit* /*who*/, uint32& damage)
         {
-            if(omnotron)
+            if (Creature* omnotron = ObjectAccessor::GetCreature(*me,instance->GetData64(BOSS_OMNOTRON)))
+            {
                 if(damage >= omnotron->GetHealth())
                 {
                     omnotron->AI()->DoAction(ACTION_OMNNOTRON_EVENT_FINISHED);
@@ -621,6 +622,7 @@ public:
                 }
                 else
                     omnotron->SetHealth(omnotron->GetHealth()-damage);
+            }
 
         }
 
