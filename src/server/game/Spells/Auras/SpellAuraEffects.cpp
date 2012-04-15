@@ -6723,13 +6723,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode,
                 // Vampiric Touch
                 if (m_spellProto->SpellFamilyFlags[1] & 0x0400 && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL && GetEffIndex() == 0)
                 {
-                    // Dispel Damage
-                    if (AuraEffect const * aurEff = GetBase()->GetEffect(1))
-                    {
-                        int32 damage = aurEff->GetAmount() * 8;
-                        target->CastCustomSpell(target, 64085, &damage, NULL, NULL, true, NULL, NULL, GetCasterGUID());
-                    }
-
                     // Sin and Punishment
                     if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 1869, 1))
                     {
