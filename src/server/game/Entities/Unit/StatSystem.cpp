@@ -507,8 +507,7 @@ void Player::UpdateShieldBlockValue()
     SetUInt32Value(PLAYER_SHIELD_BLOCK, GetShieldBlockValue());
 }
 
-void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized,
-        bool addTotalPct, float& min_damage, float& max_damage)
+void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized,bool addTotalPct, float& min_damage, float& max_damage)
 {
     UnitMods unitMod;
     UnitMods attPower_pos;
@@ -535,23 +534,26 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized,
     }
 
     float att_speed = GetAPMultiplier(attType, normalized);
-
-    float base_value = GetModifierValue(unitMod, BASE_VALUE)
-            + GetTotalAttackPowerValue(attType) / 14.0f * att_speed;
+    
+    float base_value = GetModifierValue(unitMod, BASE_VALUE) + GetTotalAttackPowerValue(attType) / 14.0f * att_speed;
     float base_pct = GetModifierValue(unitMod, BASE_PCT);
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
     float total_pct = addTotalPct ? GetModifierValue(unitMod, TOTAL_PCT) : 1.0f;
 
     float weapon_mindamage = GetWeaponDamageRange(attType, MINDAMAGE);
     float weapon_maxdamage = GetWeaponDamageRange(attType, MAXDAMAGE);
-
-    if (IsInFeralForm()) //check if player is druid and in cat or bear forms
+    
+    if (GetShapeshiftForm() == FORM_CAT) //check if player is druid and in cat
     {
-        uint8 lvl = getLevel();
-        if (lvl > 60) lvl = 60;
-
-        weapon_mindamage = lvl * 0.85f * att_speed;
-        weapon_maxdamage = lvl * 1.25f * att_speed;
+        float weapon_speed = 1.0f;
+        if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND + attType))
+        {
+            if (item->GetProto()->Class == ITEM_CLASS_WEAPON)
+                if (!item->IsBroken())
+                    weapon_speed = float(item->GetProto()->Delay)/1000.0f;
+        }
+        weapon_mindamage = weapon_mindamage / weapon_speed;
+        weapon_maxdamage = weapon_maxdamage / weapon_speed;
     }
     else if (!CanUseAttackType(attType)) //check if player not in form but still can't use (disarm case)
     {
@@ -571,10 +573,8 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized,
         weapon_maxdamage += GetAmmoDPS() * att_speed;
     }
 
-    min_damage = ((base_value + weapon_mindamage) * base_pct + total_value)
-            * total_pct;
-    max_damage = ((base_value + weapon_maxdamage) * base_pct + total_value)
-            * total_pct;
+    min_damage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
+    max_damage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
 }
 
 void Player::UpdateDamagePhysical(WeaponAttackType attType)
