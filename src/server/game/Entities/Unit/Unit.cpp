@@ -2503,13 +2503,12 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit *pVictim,
     return MELEE_HIT_NORMAL;
 }
 
-uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized,
-        bool addTotalPct)
+uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized, bool addTotalPct)
 {
     float min_damage, max_damage;
 
-    if (GetTypeId() == TYPEID_PLAYER && (normalized || !addTotalPct)) this->ToPlayer()->CalculateMinMaxDamage(
-            attType, normalized, addTotalPct, min_damage, max_damage);
+    if (GetTypeId() == TYPEID_PLAYER && (normalized || !addTotalPct))
+        this->ToPlayer()->CalculateMinMaxDamage(attType, normalized, addTotalPct, min_damage, max_damage);
     else
     {
         switch (attType)
@@ -2534,9 +2533,11 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized,
         }
     }
 
-    if (min_damage > max_damage) std::swap(min_damage, max_damage);
+    if (min_damage > max_damage) 
+        std::swap(min_damage, max_damage);
 
-    if (max_damage == 0.0f) max_damage = 5.0f;
+    if (max_damage == 0.0f) 
+        max_damage = 5.0f;
 
     return urand((uint32) min_damage, (uint32) max_damage);
 }

@@ -8181,17 +8181,16 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto, uint8 slot,
     }
 }
 
-void Player::_ApplyWeaponDamage(uint8 slot, ItemPrototype const *proto,
-        ScalingStatValuesEntry const *ssv, bool apply) {
+void Player::_ApplyWeaponDamage(uint8 slot, ItemPrototype const *proto, ScalingStatValuesEntry const *ssv, bool apply)
+{
     WeaponAttackType attType = BASE_ATTACK;
     float damage = 0.0f;
 
-    if (slot == EQUIPMENT_SLOT_RANGED
-            && (proto->InventoryType == INVTYPE_RANGED
-                    || proto->InventoryType == INVTYPE_THROWN
-                    || proto->InventoryType == INVTYPE_RANGEDRIGHT)) {
+    if (slot == EQUIPMENT_SLOT_RANGED && (proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN || proto->InventoryType == INVTYPE_RANGEDRIGHT))
+    {
         attType = RANGED_ATTACK;
-    } else if (slot == EQUIPMENT_SLOT_OFFHAND) {
+    } else if (slot == EQUIPMENT_SLOT_OFFHAND)
+    {
         attType = OFF_ATTACK;
     }
 
@@ -8199,29 +8198,33 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemPrototype const *proto,
     float maxDamage = proto->GetMaxDamage();
 
     // If set dpsMod in ScalingStatValue use it for min (70% from average), max (130% from average) damage
-    if (ssv) {
+    if (ssv) 
+    {
         int32 extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
-        if (extraDPS) {
+        if (extraDPS)
+        {
             float average = extraDPS * proto->Delay / 1000.0f;
             minDamage = 0.7f * average;
             maxDamage = 1.3f * average;
         }
     }
 
-    if (minDamage > 0) {
+    if (minDamage > 0) 
+    {
         damage = apply ? minDamage : BASE_MINDAMAGE;
         SetBaseWeaponDamage(attType, MINDAMAGE, damage);
     }
 
-    if (maxDamage > 0) {
+    if (maxDamage > 0)
+    {
         damage = apply ? maxDamage : BASE_MAXDAMAGE;
         SetBaseWeaponDamage(attType, MAXDAMAGE, damage);
     }
 
-    if (proto->Delay && !IsInFeralForm()) {
+    if (proto->Delay && !IsInFeralForm())
+    {
         if (slot == EQUIPMENT_SLOT_RANGED)
-            SetAttackTime(RANGED_ATTACK,
-                    apply ? proto->Delay : BASE_ATTACK_TIME);
+            SetAttackTime(RANGED_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
         else if (slot == EQUIPMENT_SLOT_MAINHAND)
             SetAttackTime(BASE_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
         else if (slot == EQUIPMENT_SLOT_OFFHAND)
