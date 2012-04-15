@@ -2543,58 +2543,59 @@ void Player::Regenerate(Powers power) {
     //powers now benefit from haste.
     float haste = (2 - GetFloatValue(UNIT_MOD_CAST_SPEED));
 
-    switch (power) {
-    case POWER_MANA: {
-        float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
-
-        if (getLevel() < 15)
-            ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA)
-                    * (2.066f - (getLevel() * 0.066f));
-
-        if (isInCombat()) // Trinity updates Mana in intervals of 2s, which is correct
-            addvalue += GetFloatValue(
-                    UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER)
-                    * ManaIncreaseRate * 0.001f * m_regenTimer * haste;
-        else
-            addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER)
-                    * ManaIncreaseRate * 0.001f * m_regenTimer * haste;
-    }
-        break;
-    case POWER_RAGE: // Regenerate rage
+    switch (power) 
     {
-        if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN)) {
-            float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
-            addvalue += -20 * RageDecreaseRate / haste; // 2 rage by tick (= 2 seconds => 1 rage/sec)
+        case POWER_MANA: 
+        {
+            float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
+
+            if (getLevel() < 15)
+                ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA) * (2.066f - (getLevel() * 0.066f));
+
+            if (isInCombat()) // Trinity updates Mana in intervals of 2s, which is correct
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer * haste;
+            else
+                addvalue += GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * 0.001f * m_regenTimer * haste;
         }
-    }
         break;
-    case POWER_FOCUS:
-        addvalue = 12 * haste;
-        break;
-    case POWER_HOLY_POWER: {
-        if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN)) {
-            addvalue += -1;
+        case POWER_RAGE: // Regenerate rage
+        {
+            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN)) 
+            {
+                float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
+                addvalue += -20 * RageDecreaseRate / haste; // 2 rage by tick (= 2 seconds => 1 rage/sec)
+            }
         }
         break;
-    }
-    case POWER_ENERGY: // Regenerate energy (rogue)
-        addvalue += 0.01f * m_regenTimer * haste
-                * sWorld->getRate(RATE_POWER_ENERGY);
-        break;
-    case POWER_RUNIC_POWER: {
-        if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN)) {
-            float RunicPowerDecreaseRate = sWorld->getRate(
-                    RATE_POWER_RUNICPOWER_LOSS);
-            addvalue += -30 * RunicPowerDecreaseRate; // 3 RunicPower by tick
+        case POWER_FOCUS:
+            addvalue = 12 * haste;
+            break;
+        case POWER_HOLY_POWER:
+        {
+            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN)) 
+            {
+                addvalue += -1;
+            }
+            break;
         }
-    }
+        case POWER_ENERGY: // Regenerate energy (rogue)
+            addvalue += 0.01f * m_regenTimer * haste * sWorld->getRate(RATE_POWER_ENERGY);
+            break;
+        case POWER_RUNIC_POWER:
+        {
+            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN)) 
+            {
+                float RunicPowerDecreaseRate = sWorld->getRate(RATE_POWER_RUNICPOWER_LOSS);
+                addvalue += -30 * RunicPowerDecreaseRate; // 3 RunicPower by tick
+            }
+        }
         break;
-    case POWER_RUNE:
-    case POWER_HAPPINESS:
-    case POWER_HEALTH:
-        break;
-    default:
-        break;
+        case POWER_RUNE:
+        case POWER_HAPPINESS:
+        case POWER_HEALTH:
+            break;
+        default:
+            break;
     }
 
     // Mana regen calculated in Player::UpdateManaRegen()
@@ -2698,23 +2699,25 @@ void Player::RegenerateHealth() {
     ModifyHealth(int32(addvalue));
 }
 
-void Player::ResetAllPowers() {
+void Player::ResetAllPowers() 
+{
     SetHealth(GetMaxHealth());
-    switch (getPowerType()) {
-    case POWER_MANA:
-        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
-        break;
-    case POWER_RAGE:
-        SetPower(POWER_RAGE, 0);
-        break;
-    case POWER_ENERGY:
-        SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-        break;
-    case POWER_RUNIC_POWER:
-        SetPower(POWER_RUNIC_POWER, 0);
-        break;
-    default:
-        break;
+    switch (getPowerType()) 
+    {
+        case POWER_MANA:
+            SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+            break;
+        case POWER_RAGE:
+            SetPower(POWER_RAGE, 0);
+            break;
+        case POWER_ENERGY:
+            SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
+            break;
+        case POWER_RUNIC_POWER:
+            SetPower(POWER_RUNIC_POWER, 0);
+            break;
+        default:
+            break;
     }
 }
 

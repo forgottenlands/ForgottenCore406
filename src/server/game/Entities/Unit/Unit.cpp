@@ -703,36 +703,20 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage,
     }
 
     // Rage from Damage made (only from direct weapon damage)
-    if (cleanDamage && damagetype == DIRECT_DAMAGE && this != pVictim
-            && getPowerType() == POWER_RAGE)
+    if (cleanDamage && damagetype == DIRECT_DAMAGE && this != pVictim && getPowerType() == POWER_RAGE)
     {
-        uint32 weaponSpeedHitFactor;
         uint32 rage_damage = damage + cleanDamage->absorbed_damage;
 
         switch (cleanDamage->attackType)
         {
             case BASE_ATTACK:
             {
-                weaponSpeedHitFactor = uint32(
-                        GetAttackTime(cleanDamage->attackType) / 1000.0f
-                                * 3.5f);
-                if (cleanDamage->hitOutCome == MELEE_HIT_CRIT) weaponSpeedHitFactor *=
-                        2;
-
-                RewardRage(rage_damage, weaponSpeedHitFactor, true);
-
+                RewardRage(rage_damage, GetAttackTime(cleanDamage->attackType), false, true);
                 break;
             }
             case OFF_ATTACK:
             {
-                weaponSpeedHitFactor = uint32(
-                        GetAttackTime(cleanDamage->attackType) / 1000.0f
-                                * 1.75f);
-                if (cleanDamage->hitOutCome == MELEE_HIT_CRIT) weaponSpeedHitFactor *=
-                        2;
-
-                RewardRage(rage_damage, weaponSpeedHitFactor, true);
-
+                RewardRage(rage_damage, GetAttackTime(cleanDamage->attackType), true, true);
                 break;
             }
             case RANGED_ATTACK:
@@ -745,9 +729,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage,
     if (!damage)
     {
         // Rage from absorbed damage
-        if (cleanDamage && cleanDamage->absorbed_damage
-                && pVictim->getPowerType() == POWER_RAGE) pVictim->RewardRage(
-                cleanDamage->absorbed_damage, 0, false);
+        if (cleanDamage && cleanDamage->absorbed_damage && pVictim->getPowerType() == POWER_RAGE) 
+            pVictim->RewardRage(cleanDamage->absorbed_damage, 0, false, false);
 
         return 0;
     }
@@ -902,9 +885,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage,
         // Rage from damage received
         if (this != pVictim && pVictim->getPowerType() == POWER_RAGE)
         {
-            uint32 rage_damage = damage
-                    + (cleanDamage ? cleanDamage->absorbed_damage : 0);
-            pVictim->RewardRage(rage_damage, 0, false);
+            uint32 rage_damage = damage + (cleanDamage ? cleanDamage->absorbed_damage : 0);
+            pVictim->RewardRage(rage_damage, 0, false, false);
         }
 
         if (GetTypeId() == TYPEID_PLAYER)
@@ -19208,31 +19190,30 @@ void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
     SendMessageToSet(&data, false);
 }
 
-void Unit::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
+void Unit::RewardRage(uint32 damage, uint32 weaponSpeed, bool offhand, bool attacker)
 {
     float addRage;
 
-    float rageconversion = ((0.0091107836f * getLevel() * getLevel())
-            + 3.225598133f * getLevel()) + 4.2652911f;
-
-    // Unknown if correct, but lineary adjust rage conversion above level 70
-    if (getLevel() > 70) rageconversion += 13.27f * (getLevel() - 70);
+    // TODO: Find formula for rage generated while taking damage and drop this wotlk rageconversion. (Rage for outgouing damage it's ok)
+    float rageconversion = ((0.0091107836f * getLevel() * getLevel()) + 3.225598133f * getLevel()) + 4.2652911f;
 
     if (attacker)
     {
-        addRage = ((damage / rageconversion * 7.5f + weaponSpeedHitFactor) / 2);
+        addRage = (6.5f * weaponSpeed / 1000.0f);
+
+        if (offhand)
+            addRage *= 0.5f;
 
         // talent who gave more rage on attack
-        addRage *= 1.0f
-                + GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT)
-                        / 100.0f;
+        addRage *= 1.0f + GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT) / 100.0f;
     }
     else
     {
         addRage = damage / rageconversion * 2.5f;
 
         // Berserker Rage effect
-        if (HasAura(18499)) addRage *= 2.0f;
+        if (HasAura(18499))
+            addRage *= 2.0f;
     }
 
     addRage *= sWorld->getRate(RATE_POWER_RAGE_INCOME);
