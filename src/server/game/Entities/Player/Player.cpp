@@ -2490,16 +2490,17 @@ void Player::RegenerateAll() {
 
     // Runes act as cooldowns, and they don't need to send any data
     if (getClass() == CLASS_DEATH_KNIGHT)
-        for (uint32 i = 0; i < MAX_RUNES; i += 2) {
+        for (uint32 i = 0; i < MAX_RUNES; i += 2)
+        {
             uint32 cd1 = GetRuneCooldown(i);
             uint32 cd2 = GetRuneCooldown(i + 1);
 
             if (cd1 && (!cd2 || cd1 <= cd2))
-                SetRuneCooldown(i,
-                        (cd1 > m_regenTimer) ? cd1 - m_regenTimer : 0);
+                SetRuneCooldown(i, (cd1 > m_regenTimer) ? cd1 - m_regenTimer : 0);
             else if (cd2)
-                SetRuneCooldown(i + 1,
-                        (cd2 > m_regenTimer) ? cd2 - m_regenTimer : 0);
+                SetRuneCooldown(i + 1, (cd2 > m_regenTimer) ? cd2 - m_regenTimer : 0);
+
+            ResyncRunes(MAX_RUNES);
         }
 
     if (m_regenTimerCount >= 2000) {
@@ -23875,17 +23876,21 @@ void Player::RemoveGlobalCooldown(SpellEntry const *spellInfo) {
     m_globalCooldowns[spellInfo->StartRecoveryCategory] = 0;
 }
 
-uint32 Player::GetRuneBaseCooldown(uint8 index) {
+uint32 Player::GetRuneBaseCooldown(uint8 index)
+{
     uint8 rune = GetBaseRune(index);
     uint32 cooldown = RUNE_BASE_COOLDOWN;
 
-    AuraEffectList const& regenAura = GetAuraEffectsByType(
-            SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraEffectList::const_iterator i = regenAura.begin();
-            i != regenAura.end(); ++i) {
+    AuraEffectList const& regenAura = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for (AuraEffectList::const_iterator i = regenAura.begin(); i != regenAura.end(); ++i)
+    {
         if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetMiscValueB() == rune)
             cooldown = cooldown * (100 - (*i)->GetAmount()) / 100;
     }
+
+    // In cataclysm runes benefit from haste
+    float haste = (2 - GetFloatValue(UNIT_MOD_CAST_SPEED));
+    cooldown += uint32(cooldown - (cooldown * haste));
 
     return cooldown;
 }
