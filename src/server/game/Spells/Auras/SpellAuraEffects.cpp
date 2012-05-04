@@ -806,13 +806,14 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
                         if(GetBase()->GetCaster()->HasAura(33599))  // Dreamstate rank2
                             amount += 30;
                     } 
-                    amount = int32((GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * amount / 100) / GetTotalTicks());
+                    int32 energizePct = amount;
+                    amount = int32((GetBase()->GetCaster()->GetMaxPower(POWER_MANA) * amount / 100) / GetTotalTicks());
 
 				    if (GetBase()->GetCaster() != GetBase()->GetUnitOwner())
 				    {
 					    if (AuraEffect* aurEff = GetBase()->GetCaster()->GetDummyAuraEffect(SPELLFAMILY_DRUID, 62, 0))
 					    {
-						    int32 bp0 = amount*aurEff->GetAmount()/100;
+						    int32 bp0 = energizePct / 2 / 10;
 						    GetBase()->GetCaster()->CastCustomSpell(GetBase()->GetCaster(), 54833, &bp0, 0, 0, true, 0, 0, 0);
 					    }
 				    }
