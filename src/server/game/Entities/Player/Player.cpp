@@ -2570,12 +2570,10 @@ void Player::Regenerate(Powers power) {
         case POWER_FOCUS:
             addvalue = 12 * haste;
             break;
-        case POWER_HOLY_POWER:
+        case POWER_HOLY_POWER:                                           // Regenerate holy power
         {
-            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN)) 
-            {
-                addvalue += -1;
-            }
+            if (!isInCombat())
+                addvalue += -0.2f;                                       // remove 1 each 10 sec
             break;
         }
         case POWER_ENERGY: // Regenerate energy (rogue)
