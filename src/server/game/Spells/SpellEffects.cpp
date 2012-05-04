@@ -5408,24 +5408,23 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             //Templar's Verdict
             if (m_spellInfo->Id == 85256)
             {
+				if (m_caster->HasAura(90174)) // Divine Purpose Proc
+                {
+                    totalDamagePercentMod += 6.5f;
+                    break;
+                }
+
                 switch (m_caster->GetPower(POWER_HOLY_POWER))
                 {
-                    // 1 Holy Power
-                    case 0:
-                        (m_caster->HasAura(31866 || 31867 || 31868)) ? totalDamagePercentMod += 0.3f : 0; //Crusade Rank 1,2,3 - 133%
-                    break;
                     // 2 Holy Power
                     case 1:
                         totalDamagePercentMod += 2.0f; // 3*30 = 90%
-                        (m_caster->HasAura(31866 || 31867 || 31868)) ? totalDamagePercentMod += 0.3f : 0; //Crusade Rank 1,2,3 - 133%
-                    break;
-                    // 3 Holy Power
+					break;
+					// 3 Holy Power
                     case 2:
                         totalDamagePercentMod += 6.5f; // 7.5*30 = 225%
-                        (m_caster->HasAura(31866 || 31867 || 31868)) ? totalDamagePercentMod += 0.9f : 0; //Crusade Rank 1,2,3  - 199%
                     break;
                 }
-                (m_caster->HasAura(63220)) ? totalDamagePercentMod *= 1.15f : 0 ; // Glyphe of Templar's Verdict
             }
         }
         case SPELLFAMILY_SHAMAN:
