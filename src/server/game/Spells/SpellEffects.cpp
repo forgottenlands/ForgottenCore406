@@ -618,7 +618,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 // Victory Rush
                 if (m_spellInfo->SpellFamilyFlags[1] & 0x100)
                 {
-                    damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45); // wowwiki formula
+                    damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * m_spellInfo->GetEffectMiscValue(0)/100); //formula corretta
                     m_caster->RemoveAurasDueToSpell(32216); // Victorious
                 }
                 // Heroic Leap
@@ -2154,6 +2154,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
             }
             switch (m_spellInfo->Id)
             {
+                case 80964:  // Skull Bash (bear) 
+                {
+                  m_caster->CastSpell(unitTarget,93983,true); 
+                  break; 
+                }
+                case 80965:  // Skull Bash(cat) 
+                { 
+                  m_caster->CastSpell(unitTarget,93983,true); 
+                  break;
+                }
                 case 1126: // Mark of the Wild
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -2763,6 +2773,21 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             // Coldflame
         case 33801:
             return; // just make the core stfu
+
+        case 91565:          // Feral Agression
+        if (m_caster->HasAura(16859) || m_caster->HasAura(16858))
+        {
+            uint8 count = 0;
+            if (m_caster->HasAura(16859))
+                count = m_caster->GetAuraEffect(16859, 0)->GetAmount() - 1;
+            if (m_caster->HasAura(16858))
+                count = m_caster->GetAuraEffect(16858, 0)->GetAmount() - 1;
+            while (count)
+            {
+                m_caster->CastSpell(unitTarget, triggered_spell_id, true);
+                count--;
+            }
+        }
     }
 
     // normal case

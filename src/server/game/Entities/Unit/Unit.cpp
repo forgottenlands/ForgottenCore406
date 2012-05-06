@@ -6394,8 +6394,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     // Victorious
                 case 32216:
                 {
-                    RemoveAura(dummySpell->Id);
-                    return false;
+                    // RemoveAura(dummySpell->Id);
+                    // return false;
                 }
                     // Improved Spell Reflection
                 case 59088:
@@ -9617,7 +9617,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             // Sacred Shield
         case 85285:
         {
-            if (!HealthBelowPct(30)) return false;
+              if (!HealthBelowPctDamaged(30, damage))
+              return false;
+
+              int32 ap = int32(GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
+              basepoints0 = int32(CalculatePctN(ap, 280));
             break;
         }
         // Improved Hamstring
@@ -16927,8 +16931,8 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura * aura,
 
         if (pVictim) allow = ToPlayer()->isHonorOrXPTarget(pVictim);
 
-        // Shadow Word: Death - can trigger from every kill
-        if (aura->GetId() == 32409) allow = true;
+        // Shadow Word: Death & Victory Rush - can trigger from every kill
+        if (aura->GetId() == 32409 || aura->GetId() == 32215) allow = true;
         if (!allow) return false;
     }
     // Aura added by spell can`t trigger from self (prevent drop charges/do triggers)

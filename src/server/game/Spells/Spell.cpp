@@ -3987,6 +3987,35 @@ void Spell::finish(bool ok) {
     // TODO: Kill these hacks
     switch (m_spellInfo->Id)
     {
+    case 586:          // Fade
+        if (m_caster->HasAura(47570) || (m_caster->HasAura(47569) && roll_chance_i(50)))          // Phantasm
+            m_caster->RemoveMovementImpairingAuras();
+        break;
+    case 49143:          // Frost Strike
+    case 47541:          // Death Coil
+    case 56815:          // Rune Strike
+        if (m_caster->HasAura(81229))          // Runic Empowerment
+        {
+            if (roll_chance_i(45))
+            {
+                uint32 cooldownrunes[MAX_RUNES];
+                uint8 runescount = 0;
+                for (uint32 j = 0; j < MAX_RUNES; ++j)
+                {
+                    if (m_caster->ToPlayer()->GetRuneCooldown(j))
+                    {
+                        cooldownrunes[runescount] = j;
+                        runescount++;
+                    }
+                }
+                if (runescount > 0)
+                {
+                    uint8 rndrune = urand(0, runescount - 1);
+                    m_caster->ToPlayer()->SetRuneCooldown(cooldownrunes[rndrune], 0);
+                }
+            }
+        }
+        break;
       case 33395: // Improved Freeze
             {
                 if (Unit* owner = m_caster->GetOwner()) {
