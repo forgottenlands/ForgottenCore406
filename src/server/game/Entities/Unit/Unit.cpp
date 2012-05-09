@@ -9614,14 +9614,26 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (!HealthBelowPct(35)) return false;
             break;
         }
-            // Sacred Shield
+        // Sacred Shield
         case 85285:
         {
-              if (!HealthBelowPctDamaged(30, damage))
-              return false;
+            // Controllo se il caster è un player e lo salvo nel puntatore "pally"
+            if (Player* pally = ToPlayer())
+            {
+                // Se il pally non è sotto al 30% di vita o se il pally ha in cd la spell del sacred (triggered) esco dalla funzione
+                if (!pally->HealthBelowPctDamaged(30, damage) || pally->HasSpellCooldown(trigger_spell_id))
+                    return false;
 
-              int32 ap = int32(GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
-              basepoints0 = int32(CalculatePctN(ap, 280));
+                // Calcolo l'ammontare dell'abssorb dello scudo
+                int32 ap = int32(pally->GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
+                basepoints0 = int32(CalculatePctN(ap, 280));
+                // Casto la spell triggered su me stesso (pally) con l'ammontare calcolato prima (basepoints0)
+                pally->CastCustomSpell(pally, trigger_spell_id, &basepoints0, NULL, NULL, true, 0, 0);
+                
+                // Mando in cd la spell del sacred triggered
+                pally->AddSpellCooldown(trigger_spell_id, 0, time(NULL)+30000);
+                return;
+            }
             break;
         }
         // Improved Hamstring
