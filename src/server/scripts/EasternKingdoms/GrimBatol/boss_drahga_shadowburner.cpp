@@ -573,11 +573,14 @@ public:
 			if (!UpdateVictim())
 				return;
 
-			if(me->GetDistance(me->getVictim()) < 1.0f )
-			{
-				DoCastVictim(RAID_MODE(SPELL_SUPERNOVA,	SPELL_SUPERNOVA_H));
-				me -> DespawnOrUnsummon();
-			}
+            if (me->getVictim())
+            {
+		        if(me->GetDistance(me->getVictim()) < 1.0f )
+		        {
+			        DoCastVictim(RAID_MODE(SPELL_SUPERNOVA,	SPELL_SUPERNOVA_H));
+			        me -> DespawnOrUnsummon();
+		        }
+            }
 		}
 	};
 };
