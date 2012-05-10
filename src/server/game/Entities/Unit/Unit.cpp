@@ -2131,8 +2131,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask,
     *absorb = dmgInfo.GetAbsorb();
 }
 
-void Unit::CalcHealAbsorb(Unit *pVictim, const SpellEntry *healSpell,
-        uint32 &healAmount, uint32 &absorb)
+void Unit::CalcHealAbsorb(Unit *pVictim, const SpellEntry *healSpell, uint32 &healAmount, uint32 &absorb)
 {
     if (!healAmount) return;
 
@@ -2142,10 +2141,8 @@ void Unit::CalcHealAbsorb(Unit *pVictim, const SpellEntry *healSpell,
     bool existExpired = false;
 
     // absorb without mana cost
-    AuraEffectList const& vHealAbsorb = pVictim->GetAuraEffectsByType(
-            SPELL_AURA_SCHOOL_HEAL_ABSORB);
-    for (AuraEffectList::const_iterator i = vHealAbsorb.begin();
-            i != vHealAbsorb.end() && RemainingHeal > 0; ++i)
+    AuraEffectList const& vHealAbsorb = pVictim->GetAuraEffectsByType(SPELL_AURA_SCHOOL_HEAL_ABSORB);
+    for (AuraEffectList::const_iterator i = vHealAbsorb.begin(); i != vHealAbsorb.end() && RemainingHeal > 0; ++i)
     {
         if (!((*i)->GetMiscValue() & healSpell->SchoolMask)) continue;
 
@@ -7152,6 +7149,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                             spellTarget = pTarget->GetSelectedUnit();
                         if (spellTarget && pTarget->canAttack(spellTarget))
                             pTarget->CastSpell(spellTarget, 51699, true);
+
+                        pTarget->AddSpellCooldown(51699, 0, time(NULL) + 6);
                     }
                     break;
                 }
