@@ -3220,26 +3220,20 @@ void Unit::_UpdateSpells(uint32 time)
 
 void Unit::_UpdateAutoRepeatSpell()
 {
-    //check "realtime" interrupts
-    if ((GetTypeId() == TYPEID_PLAYER && ((Player*) this)->isMoving())
-            || IsNonMeleeSpellCasted(
-                    false,
-                    false,
-                    true,
-                    m_currentSpells [CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id
-                            == 75))
-    {
+   bool isAutoShot = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id == 75;
+        // check "realtime" interrupts
+   if (IsNonMeleeSpellCasted(false, false, true, isAutoShot))
+     {
         // cancel wand shoot
-        if (m_currentSpells [CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75) InterruptSpell(
-                CURRENT_AUTOREPEAT_SPELL);
+        if (!isAutoShot) InterruptSpell
+                    (CURRENT_AUTOREPEAT_SPELL);
         m_AutoRepeatFirstCast = true;
         return;
     }
 
     //apply delay (Auto Shot (spellID 75) not affected)
-    if (m_AutoRepeatFirstCast && getAttackTimer(RANGED_ATTACK) < 500
-            && m_currentSpells [CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75) setAttackTimer(
-            RANGED_ATTACK, 500);
+    if (m_AutoRepeatFirstCast && getAttackTimer(RANGED_ATTACK) < 500 && !isAutoShot) 
+        setAttackTimer(RANGED_ATTACK, 500);
     m_AutoRepeatFirstCast = false;
 
     //castroutine
@@ -9632,7 +9626,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 
                 // Mando in cd la spell del sacred triggered
                 pally->AddSpellCooldown(trigger_spell_id, 0, time(NULL)+30000);
-                return;
+                return true;
             }
             break;
         }
