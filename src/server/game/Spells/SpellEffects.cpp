@@ -1156,6 +1156,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
         // Effects that should be applied after spellpower calculation
 
+        // Howling Blast double damage
+        if (m_spellInfo->Id == 49184)
+        {
+            if (m_destTarget)
+            {
+                if (unitTarget == m_destTarget)
+                    damage *= 2;
+            }
+        }
+
         // Fiery Apocalypse (Warlock Destrucion Mastery)
         if (m_caster->HasAuraType(SPELL_AURA_MASTERY) && m_spellInfo->SchoolMask == SPELL_SCHOOL_MASK_FIRE && m_caster->getClass() == CLASS_WARLOCK)
         {

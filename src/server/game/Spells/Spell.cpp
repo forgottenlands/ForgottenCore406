@@ -2192,8 +2192,11 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                 break;
             }
 
-            if (cur == TARGET_DST_TARGET_ENEMY
-                    || cur == TARGET_DEST_TARGET_ANY) {
+            if (cur == TARGET_DST_TARGET_ENEMY || cur == TARGET_DEST_TARGET_ANY)
+            {
+                if (target->ToUnit())
+                    m_destTarget = target;
+
                 m_targets.setDst(*target);
                 break;
             }
