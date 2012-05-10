@@ -968,6 +968,27 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
             break;
         }
     }
+    case SPELL_AURA_SCHOOL_HEAL_ABSORB:
+    {
+        switch (m_spellProto->Id)
+        {
+            // Necrotic Strike
+            case 73975:
+                int32 bp0 = caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f;
+                if (Unit* target = GetBase()->GetUnitOwner())
+                {
+                    if (target->ToPlayer() && caster->ToPlayer())
+                        bp0 -= target->GetPlayerDamageReduction(bp0);
+
+                    if (target->HasAura(73975, caster->GetGUID()))
+                        bp0 += target->GetAura(73975, caster->GetGUID())->GetEffect(1)->GetAmount();
+                }
+
+                amount = bp0;
+                break;
+        }
+        break;
+    }
     default:
         break;
     }
