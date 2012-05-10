@@ -576,6 +576,7 @@ public:
     SpellCastTargets m_targets;
     int8 m_comboPointGain;
     SpellCustomErrors m_customError;
+    Unit* m_destTarget;
 
     UsedSpellMods m_appliedMods;
 
