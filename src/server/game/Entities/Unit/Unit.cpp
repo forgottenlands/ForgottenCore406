@@ -5599,7 +5599,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             {
                 // Bane of Havoc track spell
                 case 85466:
-                    if (!ToPlayer() || !pVictim())
+                    if (!ToPlayer() || !pVictim)
                         return false;
 
                     if (pVictim->HasAura(80240))
