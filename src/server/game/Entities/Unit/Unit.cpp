@@ -1265,8 +1265,9 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo,
                         uint32(damage);
                 damage -= damageInfo->blocked;
             }
-
-            ApplyResilience(pVictim, &damage);
+            
+            if (!(sSpellMgr->GetSpellCustomAttr(spellInfo->Id) & SPELL_ATTR0_CU_IGNORE_RESI))
+                ApplyResilience(pVictim, &damage);
         }
             break;
             // Magical Attacks
@@ -1279,8 +1280,8 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo,
                 damageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT;
                 damage = SpellCriticalDamageBonus(spellInfo, damage, pVictim);
             }
-
-            ApplyResilience(pVictim, &damage);
+            if (!(sSpellMgr->GetSpellCustomAttr(spellInfo->Id) & SPELL_ATTR0_CU_IGNORE_RESI))
+                ApplyResilience(pVictim, &damage);
         }
             break;
     }

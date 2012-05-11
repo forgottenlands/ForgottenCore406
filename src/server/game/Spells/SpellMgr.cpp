@@ -4456,6 +4456,10 @@ void SpellMgr::LoadSpellCustomAttr() {
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_ARMOR;
             count++;
             break;
+        case 87023: // Cauterize
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_RESI;
+            count++;
+            break;
             // Strength of the Pack
         case 64381:
             spellInfo->StackAmount = 4;
