@@ -1434,54 +1434,61 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             if (!caster)
                 break;
             // Curse of Doom
-            if (GetSpellProto()->SpellFamilyFlags[1] & 0x02) {
-                if (removeMode == AURA_REMOVE_BY_DEATH) {
-                    if (caster->GetTypeId() == TYPEID_PLAYER
-                            && caster->ToPlayer()->isHonorOrXPTarget(target))
-                        caster->CastSpell(target, 18662, true, NULL,
-                                GetEffect(0));
+            if (GetSpellProto()->SpellFamilyFlags[1] & 0x02)
+            {
+                if (removeMode == AURA_REMOVE_BY_DEATH) 
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER && caster->ToPlayer()->isHonorOrXPTarget(target))
+                        caster->CastSpell(target, 18662, true, NULL, GetEffect(0));
                 }
             }
             // Improved Fear
-            else if (GetSpellProto()->SpellFamilyFlags[1] & 0x00000400) {
-                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 98, 0)) {
+            else if (GetSpellProto()->SpellFamilyFlags[1] & 0x00000400)
+            {
+                if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 98, 0))
+                {
                     uint32 spellId = 0;
-                    switch (aurEff->GetId()) {
-                    case 53759:
-                        spellId = 60947;
-                        break;
-                    case 53754:
-                        spellId = 60946;
-                        break;
-                    default:
-                        sLog->outError(
-                                "Aura::HandleAuraSpecificMods: Unknown rank of Improved Fear (%d) found",
-                                aurEff->GetId());
+                    switch (aurEff->GetId())
+                    {
+                        case 53759:
+                            spellId = 60947;
+                            break;
+                        case 53754:
+                            spellId = 60946;
+                            break;
+                        default:
+                            sLog->outError("Aura::HandleAuraSpecificMods: Unknown rank of Improved Fear (%d) found", aurEff->GetId());
                     }
                     if (spellId)
                         caster->CastSpell(target, spellId, true);
                 }
             }
-                switch (GetId())
-                {
-                    case 6358: // Seduction
-                        // Interrupt cast if aura removed from target
-                        // maybe should be used SpellChannelInterruptFlags instead
-                        caster->InterruptNonMeleeSpells(false, 6358, false);
-                        break;
-                   case 48018: // Demonic Circle
-                        // Do not remove GO when aura is removed by stack
-                        // to prevent remove GO added by new spell
-                        // old one is already removed
-                        if (!onReapply)
-                        {
-                            target->RemoveGameObject(GetId(), true);
-                        } else
-                            target->RemoveAura(48018);
+            switch (GetId())
+            {   
+                // Seduction
+                case 6358: 
+                    // Interrupt cast if aura removed from target
+                    // maybe should be used SpellChannelInterruptFlags instead
+                    caster->InterruptNonMeleeSpells(false, 6358, false);
                     break;
-                    default:
-                        break;
-                }
+                // Demonic Circle
+                case 48018: 
+                    // Do not remove GO when aura is removed by stack
+                    // to prevent remove GO added by new spell
+                    // old one is already removed
+                    if (!onReapply)
+                    {
+                        target->RemoveGameObject(GetId(), true);
+                    } else
+                        target->RemoveAura(48018);
+                break;
+                // Bane of Havoc
+                case 80240: 
+                    caster->CastCustomSpell(caster, 85466, NULL, NULL, NULL, true, 0, 0, target->GetGUID()); 
+                    break;
+                default:
+                    break;
+            }
             break;
         case SPELLFAMILY_PRIEST:
             if (!caster)
