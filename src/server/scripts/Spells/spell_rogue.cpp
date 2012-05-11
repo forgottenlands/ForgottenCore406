@@ -414,6 +414,9 @@ public:
 
 		void HandleRemove(AuraEffect const * aurEff, AuraEffectHandleModes mode) 
 		{
+            if (!GetCaster())
+                return;
+
 			if (GetCaster()->ToPlayer())
 			{
 				if (GetCaster()->ToPlayer()->HasSpellCooldown(1784))
