@@ -551,6 +551,50 @@ class spell_pri_mind_spike : public SpellScriptLoader
         }
 };
 
+// Holy word: sanctuary
+class spell_pri_hw_sanctuary : public SpellScriptLoader
+{
+    public:
+        spell_pri_hw_sanctuary() : SpellScriptLoader("spell_pri_hw_sanctuary") { }
+
+        class spell_pri_hw_sanctuary_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pri_hw_sanctuary_AuraScript);
+
+            void OnTick(AuraEffect const* aurEff)
+            {
+                targetList.clear();
+                if (DynamicObject* dynObj = GetCaster()->GetDynObject(88685))
+                {
+                    Aura::ApplicationMap applications = dynObj->GetAura()->GetApplicationMap();
+                    for (Aura::ApplicationMap::iterator itr = applications.begin(); itr != applications.end(); ++itr)
+                    {
+                        uint8 effectsToApply = itr->second->GetEffectsToApply();
+                        if (effectsToApply & (1 << 0))
+                            targetList.push_back(itr->second->GetTarget());
+                    }
+                }
+
+                for (std::list<Unit*>::const_iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
+                    GetCaster()->CastSpell((*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ(), 88686, true);
+            }
+
+            void Register()
+            {
+                //DoCheckAreaTarget += AuraCheckAreaTargetFn(spell_sha_healing_rain_AuraScript::Target);
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_pri_hw_sanctuary_AuraScript::OnTick, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            }
+
+            public:
+                std::list<Unit*> targetList;
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pri_hw_sanctuary_AuraScript();
+        }
+};
+
 void AddSC_priest_spell_scripts() {
 	new spell_pri_guardian_spirit();
 	new spell_pri_mana_burn;
@@ -565,4 +609,5 @@ void AddSC_priest_spell_scripts() {
     new spell_pri_power_word_shield();
     new spell_pri_fade();
     new spell_pri_mind_spike();
+    new spell_pri_hw_sanctuary();
 }
