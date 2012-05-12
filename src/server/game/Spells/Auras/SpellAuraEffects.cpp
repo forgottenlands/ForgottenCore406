@@ -1639,9 +1639,12 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             if (crit)
                 damage = caster->SpellCriticalDamageBonus(m_spellProto, damage, target);
 
-            int32 dmg = damage;
-            caster->ApplyResilience(target, &dmg);
-            damage = dmg;
+            if (!(sSpellMgr->GetSpellCustomAttr(GetId()) & SPELL_ATTR0_CU_IGNORE_RESI))
+            {
+                int32 dmg = damage;
+                caster->ApplyResilience(target, &dmg);
+                damage = dmg;
+            }
 
             caster->CalcAbsorbResist(target, GetSpellSchoolMask(GetSpellProto()), DOT, damage, &absorb, &resist, m_spellProto);
 
@@ -1718,9 +1721,12 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                 damage = damageReductedArmor;
             }
 
-            int32 dmg = damage;
-            caster->ApplyResilience(target, &dmg);
-            damage = dmg;
+            if (!(sSpellMgr->GetSpellCustomAttr(GetId()) & SPELL_ATTR0_CU_IGNORE_RESI))
+            {
+                int32 dmg = damage;
+                caster->ApplyResilience(target, &dmg);
+                damage = dmg;
+            }
 
             caster->CalcAbsorbResist(target, GetSpellSchoolMask(GetSpellProto()), DOT, damage, &absorb, &resist, m_spellProto);
 

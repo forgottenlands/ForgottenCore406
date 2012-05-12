@@ -1265,8 +1265,9 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo,
                         uint32(damage);
                 damage -= damageInfo->blocked;
             }
-
-            ApplyResilience(pVictim, &damage);
+            
+            if (!(sSpellMgr->GetSpellCustomAttr(spellInfo->Id) & SPELL_ATTR0_CU_IGNORE_RESI))
+                ApplyResilience(pVictim, &damage);
         }
             break;
             // Magical Attacks
@@ -1279,8 +1280,8 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo,
                 damageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT;
                 damage = SpellCriticalDamageBonus(spellInfo, damage, pVictim);
             }
-
-            ApplyResilience(pVictim, &damage);
+            if (!(sSpellMgr->GetSpellCustomAttr(spellInfo->Id) & SPELL_ATTR0_CU_IGNORE_RESI))
+                ApplyResilience(pVictim, &damage);
         }
             break;
     }
@@ -5589,13 +5590,31 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
     Unit* target = pVictim;
     int32 basepoints0 = 0;
     uint64 originalCaster = 0;
-
+    
     switch (dummySpell->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
         {
             switch (dummySpell->Id)
             {
+                // Bane of Havoc track spell
+                case 85466:
+                    if (!ToPlayer() || !pVictim)
+                        return false;
+
+                    if (pVictim->HasAura(80240))
+                        return false;
+
+                    if (Unit* havoc_target = triggeredByAura->GetCaster())
+                    {
+                        if (!havoc_target->HasAura(80240))
+                            return false;
+
+                        int32 bp0 = damage * 15.0f / 100;
+                        CastCustomSpell(havoc_target, 85455, &bp0, NULL, NULL, true, 0, 0, 0);
+                        return true;
+                    }        
+                    break;
                 // Bloodworms Health Leech
                 case 50453:
                 {
@@ -10002,8 +10021,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 50227:
         {
             // Remove cooldown on Shield Slam
-            if (GetTypeId() == TYPEID_PLAYER) this->ToPlayer()->RemoveSpellCategoryCooldown(
-                    1209, true);
+            sLog->outString("CD!");
+            if (GetTypeId() == TYPEID_PLAYER) 
+                ToPlayer()->RemoveSpellCooldown(23922, true);
             break;
         }
             // Maelstrom Weapon
