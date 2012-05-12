@@ -18711,7 +18711,7 @@ void Player::BindToInstance() {
 void Player::SendRaidInfo() {
     uint32 counter = 0;
 
-    WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
+    WorldPacket data(SMSG_RAID_INSTANCE_INFO);
 
     size_t p_counter = data.wpos();
     data << uint32(counter); // placeholder
@@ -18724,11 +18724,13 @@ void Player::SendRaidInfo() {
             if (itr->second.perm) {
                 InstanceSave *save = itr->second.save;
                 data << uint32(save->GetMapId()); // map id
-                data << uint32(save->GetDifficulty()); // difficulty
                 data << uint64(save->GetInstanceId()); // instance id
+                data << uint32(save->GetResetTime() - now); // reset time
+                data << uint32(save->GetDifficulty()); // difficulty
                 data << uint8(1); // expired = 0
                 data << uint8(0); // extended = 1
-                data << uint32(save->GetResetTime() - now); // reset time
+                data << uint32(0); // unk
+                data << uint32(0); // unk
                 ++counter;
             }
         }
