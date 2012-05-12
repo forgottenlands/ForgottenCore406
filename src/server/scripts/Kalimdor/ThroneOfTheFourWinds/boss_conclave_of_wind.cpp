@@ -23,6 +23,9 @@
 
 #include "throne_of_the_four_winds.h"
 
+#define MAX_ENERGY 90
+#define RATE_ENERGY 1
+
 /*
 ############
 ### Boss Anshal
@@ -32,6 +35,7 @@
 enum anshalEvents
 {
     EVENT_WINTERING_WINDS = 1,
+    EVENT_ANSHAL_REGEN_ENERGY,
 };
 
 class boss_anshal: public CreatureScript
@@ -41,22 +45,36 @@ class boss_anshal: public CreatureScript
 
     struct boss_anshalAI: public BossAI
     {
-        boss_anshalAI(Creature* creature) : BossAI(creature, DATA_ANSHAL_EVENT), summons(me) { }
+        boss_anshalAI(Creature* creature) : BossAI(creature, DATA_ANSHAL_EVENT), summons(me) 
+        {
+            instance = me->GetInstanceScript();
+        }
 
         SummonList summons;
+        InstanceScript* instance;
+        bool pauseRegen;
 
         void Reset()
         {
+            me->setPowerType(POWER_ENERGY);
+            me->SetMaxPower(POWER_ENERGY, MAX_ENERGY);
+            me->SetPower(POWER_ENERGY, 0);
+            pauseRegen = false;
             events.Reset();
         }   
 
         void EnterCombat(Unit* who)
         {
+            events.ScheduleEvent(EVENT_ANSHAL_REGEN_ENERGY, 1000, 0, 0);
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
         }
 
         void JustDied(Unit* killer)
         {
             summons.DespawnAll();
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
         }
 
         void JustSummoned(Creature* summoned)
@@ -80,10 +98,22 @@ class boss_anshal: public CreatureScript
                 {
                     case EVENT_WINTERING_WINDS:
                         break;
+                    case EVENT_ANSHAL_REGEN_ENERGY:
+                        RegenerateEnergy();
+                        events.ScheduleEvent(EVENT_ANSHAL_REGEN_ENERGY, 1000, 0, 0);
+                        break;
                 }
             }
 
             DoMeleeAttackIfReady();
+        }
+
+        void RegenerateEnergy()
+        {
+            if (pauseRegen)
+                return;
+
+            me->SetPower(POWER_ENERGY, me->GetPower(POWER_ENERGY) + RATE_ENERGY );
         }
      };
 
@@ -102,6 +132,7 @@ class boss_anshal: public CreatureScript
 enum nezirEvents
 {
     EVENT_CHILLING_WINDS = 1,
+    EVENT_NEZIR_REGEN_ENERGY
 };
 
 class boss_nezir: public CreatureScript
@@ -111,22 +142,37 @@ class boss_nezir: public CreatureScript
 
     struct boss_nezirAI: public BossAI
     {
-        boss_nezirAI(Creature* creature) : BossAI(creature, DATA_NEZIR_EVENT), summons(me) { }
+        boss_nezirAI(Creature* creature) : BossAI(creature, DATA_NEZIR_EVENT), summons(me)
+        {
+            instance = me->GetInstanceScript();
+        }
         
         SummonList summons;
+        InstanceScript* instance;
+
+        bool pauseRegen;
 
         void Reset()
         {
+            me->setPowerType(POWER_RUNIC_POWER);
+            me->SetMaxPower(POWER_RUNIC_POWER, MAX_ENERGY*10); // runic power go ten by ten
+            me->SetPower(POWER_RUNIC_POWER, 0);
+            pauseRegen = false;
             events.Reset();
         }   
 
         void EnterCombat(Unit* who)
         {
+            events.ScheduleEvent(EVENT_NEZIR_REGEN_ENERGY, 1000, 0, 0);
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
         }
 
         void JustDied(Unit* killer)
         {
             summons.DespawnAll();
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
         }
 
         void JustSummoned(Creature* summoned)
@@ -150,10 +196,22 @@ class boss_nezir: public CreatureScript
                 {
                     case EVENT_CHILLING_WINDS:
                         break;
+                    case EVENT_NEZIR_REGEN_ENERGY:
+                        RegenerateEnergy();
+                        events.ScheduleEvent(EVENT_NEZIR_REGEN_ENERGY, 1000, 0, 0);
+                        break;
                 }
             }
 
             DoMeleeAttackIfReady();
+        }
+        
+        void RegenerateEnergy()
+        {
+            if (pauseRegen)
+                return;
+
+            me->SetPower(POWER_RUNIC_POWER, me->GetPower(POWER_RUNIC_POWER) + RATE_ENERGY*10 );
         }
      };
 
@@ -172,6 +230,7 @@ class boss_nezir: public CreatureScript
 enum rohashEvents
 {
     EVENT_DEAFENING_WINDS = 1,
+    EVENT_ROHASH_REGEN_ENERGY,
 };
 
 
@@ -182,22 +241,38 @@ class boss_rohash: public CreatureScript
 
     struct boss_rohashAI: public BossAI
     {
-        boss_rohashAI(Creature* creature) : BossAI(creature, DATA_ANSHAL_EVENT), summons(me) { }
+        boss_rohashAI(Creature* creature) : BossAI(creature, DATA_ANSHAL_EVENT), summons(me)
+        {
+            instance = me->GetInstanceScript();
+        }
         
         SummonList summons;
+        InstanceScript* instance;
+
+        bool pauseRegen;
 
         void Reset()
         {
+            me->setPowerType(POWER_ENERGY);
+            me->SetMaxPower(POWER_ENERGY, MAX_ENERGY);
+            me->SetPower(POWER_ENERGY, 0);
+            pauseRegen = false;
             events.Reset();
         }   
 
         void EnterCombat(Unit* who)
         {
+            events.ScheduleEvent(EVENT_ROHASH_REGEN_ENERGY, 1000, 0, 0);
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
         }
 
         void JustDied(Unit* killer)
         {
             summons.DespawnAll();
+
+            if (instance)
+                instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
         }
 
         void JustSummoned(Creature* summoned)
@@ -221,10 +296,22 @@ class boss_rohash: public CreatureScript
                 {
                     case EVENT_DEAFENING_WINDS:
                         break;
+                    case EVENT_ROHASH_REGEN_ENERGY:
+                        RegenerateEnergy();
+                        events.ScheduleEvent(EVENT_ROHASH_REGEN_ENERGY, 1000, 0, 0);
+                        break;
                 }
             }
 
             DoMeleeAttackIfReady();
+        }
+
+        void RegenerateEnergy()
+        {
+            if (pauseRegen)
+                return;
+
+            me->SetPower(POWER_ENERGY, me->GetPower(POWER_ENERGY) + RATE_ENERGY);
         }
      };
 

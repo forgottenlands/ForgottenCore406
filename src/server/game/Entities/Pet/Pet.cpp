@@ -675,6 +675,10 @@ void Pet::Update(uint32 diff)
 
 void Creature::Regenerate(Powers power)
 {
+    // Conclave of Winds shouldent regen energy
+    if (GetEntry() == 45870 || GetEntry() == 45871 || GetEntry() == 45872)
+        return;
+
     uint32 curValue = GetPower(power);
     uint32 maxValue = GetMaxPower(power);
 
@@ -701,18 +705,12 @@ void Creature::Regenerate(Powers power)
     }
 
     // Apply modifiers (if any).
-    AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(
-            SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin();
-            i != ModPowerRegenPCTAuras.end(); ++i)
-        if (Powers((*i)->GetMiscValue()) == power) AddPctN(addvalue,
-                (*i)->GetAmount());
+    AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+        if (Powers((*i)->GetMiscValue()) == power) 
+            AddPctN(addvalue, (*i)->GetAmount());
 
-    addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN,
-            power) * (isHunterPet() ?
-    PET_FOCUS_REGEN_INTERVAL :
-                                        CREATURE_REGEN_INTERVAL)
-            / (5 * IN_MILLISECONDS);
+    addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * (isHunterPet() ? PET_FOCUS_REGEN_INTERVAL : CREATURE_REGEN_INTERVAL) / (5 * IN_MILLISECONDS);
 
     ModifyPower(power, int32(addvalue));
 }

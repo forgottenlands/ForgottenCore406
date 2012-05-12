@@ -412,34 +412,39 @@ bool InstanceScript::CheckAchievementCriteriaMeet(uint32 criteria_id,
 	return false;
 }
 
-void InstanceScript::SendEncounterUnit(uint32 type, Unit* unit /*= NULL*/,
-		uint8 param1 /*= 0*/, uint8 param2 /*= 0*/) {
-	// size of this packet is at most 15 (usually less)
-	WorldPacket data(SMSG_UPDATE_INSTANCE_ENCOUNTER_UNIT, 15);
-	data << uint32(type);
-
-	switch (type) {
-	case ENCOUNTER_FRAME_ADD:
-	case ENCOUNTER_FRAME_REMOVE:
-	case 2:
-		data.append(unit->GetPackGUID());
-		data << uint8(param1);
-		break;
-	case 3:
-	case 4:
-	case 6:
-		data << uint8(param1);
-		data << uint8(param2);
-		break;
-	case 5:
-		data << uint8(param1);
-		break;
-	case 7:
-	default:
-		break;
+void InstanceScript::SendEncounterUnit(uint32 type, Unit* unit /*= NULL*/, uint8 param1 /*= 0*/, uint8 param2 /*= 0*/)
+{
+	switch (type) 
+    {
+	    case ENCOUNTER_FRAME_ADD:
+        {
+            WorldPacket data2(SMSG_UPDATE_INSTANCE_ENCOUNTER_UNIT, 13);
+            data2 << uint8(2); //don't know
+            data2 << uint8(0); //don't know
+            data2 << uint8(0); //don't know
+            data2 << uint8(0); //don't know
+            data2.append(unit->GetPackGUID());
+            data2 << uint8(1); //don't know
+            instance->SendToPlayers(&data2);
+            break;
+        }
+	    case ENCOUNTER_FRAME_REMOVE:
+	    case 2:
+            // Todo
+            break;
+	    case 3:
+	    case 4:
+	    case 6:
+		    // todo
+		    break;
+	    case 5:
+		    // todo
+		    break;
+	    case 7:
+            break;
+	    default:
+		    break;
 	}
-
-	instance->SendToPlayers(&data);
 }
 
 void InstanceScript::UpdateEncounterState(EncounterCreditType type,
