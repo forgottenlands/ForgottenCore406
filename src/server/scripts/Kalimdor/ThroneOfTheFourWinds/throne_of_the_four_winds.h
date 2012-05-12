@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
  *
+ * Copyright (C) 2012 Forgotten Lands <http://www.forgottenlands.eu/>
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation; either version 2 of the License, or (at your
@@ -20,13 +22,16 @@
 
 enum Data
 {
-	DATA_CONCLAVE_OF_WIND_EVENT,
+    DATA_CONCLAVE_OF_WIND_EVENT,
     DATA_ALAKIR_EVENT,
+    DATA_ANSHAL_EVENT,
+    DATA_NEZIR_EVENT,
+    DATA_ROHASH_EVENT,
 };
 
 enum Data64
 {
-	DATA_ANSHAL,
+    DATA_ANSHAL,
     DATA_NEZIR,
     DATA_ROHASH,
     DATA_ALAKIR,
@@ -34,14 +39,14 @@ enum Data64
 
 enum CreatureIds
 {
-   BOSS_ANSHAL = 45870,
-   BOSS_NEZIR = 45871,
-   BOSS_ROHASH = 45872,
+   BOSS_ANSHAL                                    = 45870,
+   BOSS_NEZIR                                     = 45871,
+   BOSS_ROHASH                                    = 45872,
 
-   BOSS_ALAKIR = 46753,
+   BOSS_ALAKIR                                    = 46753,
 
    // Conclave of Wind
-   NPC_ICE_PATCH = 46186,
+   NPC_ICE_PATCH                                  = 46186,
 };
 
 #endif
