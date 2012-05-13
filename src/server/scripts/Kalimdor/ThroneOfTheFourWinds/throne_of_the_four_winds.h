@@ -49,4 +49,11 @@ enum CreatureIds
    NPC_ICE_PATCH                                  = 46186,
 };
 
+enum ConclaveSharedActions
+{
+    ACTION_NEZIR_ENTER_IN_COMBAT = 1,
+    ACTION_ANSHAL_ENTER_IN_COMBAT,
+    ACTION_ROHASH_ENTER_IN_COMBAT,
+};
+
 #endif

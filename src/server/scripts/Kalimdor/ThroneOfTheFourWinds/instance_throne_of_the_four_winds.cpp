@@ -41,18 +41,18 @@ public:
 
         uint32 Encounter[ENCOUNTERS];
 
-        uint64 Anshal;
-        uint64 Nezir;
-        uint64 Rohash;
+        uint64 AnshalGUID;
+        uint64 NezirGUID;
+        uint64 RohashGUID;
 
-        uint64 Alakir;
+        uint64 AlakirGUID;
 
         void Initialize()
         {
-            Anshal = 0;
-            Nezir = 0;
-            Rohash = 0;
-            Alakir = 0;
+            AnshalGUID = 0;
+            NezirGUID = 0;
+            RohashGUID = 0;
+            AlakirGUID = 0;
 
             for (uint8 i = 0 ; i<ENCOUNTERS; ++i)
                 Encounter[i] = NOT_STARTED;
@@ -77,16 +77,16 @@ public:
             switch (creature->GetEntry())
             {
                 case BOSS_ANSHAL:
-                    Anshal = creature->GetGUID();
+                    AnshalGUID = creature->GetGUID();
                     break;
                 case BOSS_NEZIR:
-                    Nezir = creature->GetGUID();
+                    NezirGUID = creature->GetGUID();
                     break;
                 case BOSS_ROHASH:
-                    Rohash = creature->GetGUID();
+                    RohashGUID = creature->GetGUID();
                     break;
                 case BOSS_ALAKIR:
-                    Alakir = creature->GetGUID();
+                    AlakirGUID = creature->GetGUID();
                     break;
             }
         }
@@ -96,13 +96,13 @@ public:
             switch (identifier)
             {
                 case DATA_ANSHAL:
-                    return Anshal;
+                    return AnshalGUID;
                 case DATA_NEZIR:
-                    return Nezir;
+                    return NezirGUID;
                 case DATA_ROHASH:
-                    return Rohash;
+                    return RohashGUID;
                 case DATA_ALAKIR:
-                    return Alakir;
+                    return AlakirGUID;
             }
             return 0;
         }
@@ -116,6 +116,42 @@ public:
                     break;
                 case DATA_ALAKIR_EVENT:
                     Encounter[1] = data;
+                    break;
+                case DATA_ANSHAL_EVENT:
+                    if (data == IN_PROGRESS)
+                    {
+                        if (Creature* nezir = instance->GetCreature(NezirGUID))
+                            if (!nezir->isInCombat())
+                                nezir->AI()->DoAction(ACTION_NEZIR_ENTER_IN_COMBAT);
+
+                        if (Creature* rohash = instance->GetCreature(RohashGUID))
+                            if (!rohash->isInCombat())
+                                rohash->AI()->DoAction(ACTION_ROHASH_ENTER_IN_COMBAT);
+                    }
+                    break;
+                case DATA_NEZIR_EVENT:
+                    if (data == IN_PROGRESS)
+                    {
+                        if (Creature* anshal = instance->GetCreature(AnshalGUID))
+                            if (!anshal->isInCombat())
+                                anshal->AI()->DoAction(ACTION_ANSHAL_ENTER_IN_COMBAT);
+
+                        if (Creature* rohash = instance->GetCreature(RohashGUID))
+                            if (!rohash->isInCombat())
+                                rohash->AI()->DoAction(ACTION_ROHASH_ENTER_IN_COMBAT);
+                    }
+                    break;
+                case DATA_ROHASH_EVENT:
+                    if (data == IN_PROGRESS)
+                    {
+                        if (Creature* nezir = instance->GetCreature(NezirGUID))
+                            if (!nezir->isInCombat())
+                                nezir->AI()->DoAction(ACTION_NEZIR_ENTER_IN_COMBAT);
+
+                        if (Creature* anshal = instance->GetCreature(AnshalGUID))
+                            if (!anshal->isInCombat())
+                                anshal->AI()->DoAction(ACTION_ANSHAL_ENTER_IN_COMBAT);
+                    }
                     break;
             }
 

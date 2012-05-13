@@ -67,7 +67,10 @@ class boss_anshal: public CreatureScript
         {
             events.ScheduleEvent(EVENT_ANSHAL_REGEN_ENERGY, 1000, 0, 0);
             if (instance)
+            {
+                instance->SetData(DATA_ANSHAL_EVENT, IN_PROGRESS);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
+            }
         }
 
         void JustDied(Unit* killer)
@@ -108,6 +111,17 @@ class boss_anshal: public CreatureScript
             DoMeleeAttackIfReady();
         }
 
+        void DoAction(int32 const action)
+        {
+            switch (action)
+            {
+                case ACTION_ANSHAL_ENTER_IN_COMBAT:
+                    if (Player* target = me->FindNearestPlayer(70.0f, true))
+                        me->Attack(target, true);
+                    break;
+            }
+        }
+
         void RegenerateEnergy()
         {
             if (pauseRegen)
@@ -132,7 +146,14 @@ class boss_anshal: public CreatureScript
 enum nezirEvents
 {
     EVENT_CHILLING_WINDS = 1,
-    EVENT_NEZIR_REGEN_ENERGY
+    EVENT_NEZIR_REGEN_ENERGY,
+    EVENT_ICE_PATCH,
+};
+
+enum nezirSpells
+{
+    ICE_PATCH_VISUAL                              = 86107,
+    ICE_PATCH_SUMMON                              = 86122,
 };
 
 class boss_nezir: public CreatureScript
@@ -163,6 +184,7 @@ class boss_nezir: public CreatureScript
 
         void EnterCombat(Unit* who)
         {
+            events.ScheduleEvent(EVENT_ICE_PATCH, urand(20000, 25000), 0, 0);
             events.ScheduleEvent(EVENT_NEZIR_REGEN_ENERGY, 1000, 0, 0);
             if (instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
@@ -172,12 +194,23 @@ class boss_nezir: public CreatureScript
         {
             summons.DespawnAll();
             if (instance)
+            {
+                instance->SetData(DATA_NEZIR_EVENT, IN_PROGRESS);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+            }
         }
 
         void JustSummoned(Creature* summoned)
         {
             summons.Summon(summoned);
+            
+            switch (summoned->GetEntry())
+            {
+                case NPC_ICE_PATCH:
+                    summoned->CastSpell(summoned, ICE_PATCH_VISUAL, true);
+                    // summoned->SetReactState(REACT_PASSIVE);
+                    break;
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -200,10 +233,27 @@ class boss_nezir: public CreatureScript
                         RegenerateEnergy();
                         events.ScheduleEvent(EVENT_NEZIR_REGEN_ENERGY, 1000, 0, 0);
                         break;
+                    case EVENT_ICE_PATCH:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true, 0))
+                            me->CastSpell(target, ICE_PATCH_SUMMON, true);
+
+                        events.ScheduleEvent(EVENT_ICE_PATCH, urand(20000, 25000), 0, 0);
+                        break;
                 }
             }
 
             DoMeleeAttackIfReady();
+        }
+
+        void DoAction(int32 const action)
+        {
+            switch (action)
+            {
+                case ACTION_NEZIR_ENTER_IN_COMBAT:
+                    if (Player* target = me->FindNearestPlayer(70.0f, true))
+                        me->Attack(target, true);
+                    break;
+            }
         }
         
         void RegenerateEnergy()
@@ -241,8 +291,7 @@ class boss_rohash: public CreatureScript
 
     struct boss_rohashAI: public BossAI
     {
-        boss_rohashAI(Creature* creature) : BossAI(creature, DATA_ANSHAL_EVENT), summons(me)
-        {
+        boss_rohashAI(Creature* creature) : BossAI(creature, DATA_ROHASH_EVENT), summons(me)       {
             instance = me->GetInstanceScript();
         }
         
@@ -263,8 +312,12 @@ class boss_rohash: public CreatureScript
         void EnterCombat(Unit* who)
         {
             events.ScheduleEvent(EVENT_ROHASH_REGEN_ENERGY, 1000, 0, 0);
+
             if (instance)
+            {
+                instance->SetData(DATA_ROHASH_EVENT, IN_PROGRESS);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
+            }
         }
 
         void JustDied(Unit* killer)
@@ -304,6 +357,17 @@ class boss_rohash: public CreatureScript
             }
 
             DoMeleeAttackIfReady();
+        }
+
+        void DoAction(int32 const action)
+        {
+            switch (action)
+            {
+                case ACTION_ROHASH_ENTER_IN_COMBAT:
+                    if (Player* target = me->FindNearestPlayer(70.0f, true))
+                        me->Attack(target, true);
+                    break;
+            }
         }
 
         void RegenerateEnergy()
