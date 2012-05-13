@@ -636,6 +636,8 @@ void AddSC_vortex_pinnacle();
 void AddSC_instance_vortex_pinnacle();
 void AddSC_instance_throne_of_the_four_winds(); // Throne of the Four Winds
 void AddSC_throne_of_the_four_winds();
+void AddSC_boss_alakir();
+void AddSC_boss_conclave_of_wind();
 void AddSC_boss_general_umbriss();           //Grimbatol
 void AddSC_boss_forgemaster_throngus();
 void AddSC_boss_drahga_shadowburner();
@@ -1322,6 +1324,8 @@ void AddNorthrendScripts() {
     AddSC_instance_vortex_pinnacle();
     AddSC_instance_throne_of_the_four_winds(); // Throne of the Four Winds
     AddSC_throne_of_the_four_winds();
+    AddSC_boss_alakir();
+    AddSC_boss_conclave_of_wind();
     AddSC_boss_general_umbriss();           //Grimbatol
     AddSC_boss_forgemaster_throngus();
     AddSC_boss_drahga_shadowburner();

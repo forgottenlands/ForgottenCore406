@@ -2166,8 +2166,12 @@ InstanceMap::~InstanceMap() {
 
 void InstanceMap::InitVisibilityDistance() {
     //init visibility distance for instances
-    m_VisibleDistance = World::GetMaxVisibleDistanceInInstances();
-    m_VisibilityNotifyPeriod = World::GetVisibilityNotifyPeriodInInstances();
+    if (GetId() != 754)
+        m_VisibleDistance = World::GetMaxVisibleDistanceInInstances();
+    else
+        m_VisibleDistance = 500.0f;
+
+        m_VisibilityNotifyPeriod = World::GetVisibilityNotifyPeriodInInstances();
 }
 
 /*
