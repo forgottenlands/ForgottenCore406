@@ -671,6 +671,22 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                            m_caster->CastSpell(m_caster, trig_spell, true);
                 }
 
+                // Thunder clap                
+                if (m_spellInfo->Id == 6343)
+                {
+                    if (m_caster->HasAura(84615) || (m_caster->HasAura(84614) && roll_chance_i(50)))
+                    {
+                        bool found = false;                    
+                        for (std::list <TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit) 
+                            if (Unit* itr = ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID))
+                                if (!found)
+                                    if (itr->HasAura(94009 , m_caster->GetGUID()))
+                                        found = true;
+                        if (found)
+                            m_caster->AddAura(94009, unitTarget);
+                    }
+                }
+
                 // Unshackled Fury (Fury Mastery)
                 if (m_caster->getClass() == CLASS_WARRIOR && m_spellInfo->Id == 85288)
                 {
