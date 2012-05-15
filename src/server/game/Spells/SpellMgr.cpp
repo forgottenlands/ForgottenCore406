@@ -4090,6 +4090,10 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 89348:
         case 95178: // Demon Repellent Ray
         case 86704: // Ancient Fury
+        case 86367: // Sleet Storm
+        case 93135:
+        case 93136:
+        case 93137:
             // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
             count++;

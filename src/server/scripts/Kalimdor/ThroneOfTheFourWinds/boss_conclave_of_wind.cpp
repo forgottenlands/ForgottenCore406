@@ -146,14 +146,21 @@ class boss_anshal: public CreatureScript
 enum nezirEvents
 {
     EVENT_CHILLING_WINDS = 1,
-    EVENT_NEZIR_REGEN_ENERGY,
     EVENT_ICE_PATCH,
+    EVENT_PERMAFROST,
+    EVENT_WIND_CHILL,
+    EVENT_SLEET_STORM,
+    EVENT_CHECK_ENERGY,
+    EVENT_RESET_ENERGY,
 };
 
 enum nezirSpells
 {
-    ICE_PATCH_VISUAL                              = 86107,
-    ICE_PATCH_SUMMON                              = 86122,
+    SPELL_ICE_PATCH_VISUAL                        = 86107,
+    SPELL_ICE_PATCH_SUMMON                        = 86122,
+    SPELL_PERMAFROST                              = 86082, // Target self!
+    SPELL_WIND_CHILL                              = 84645,
+    SPELL_SLEET_STORM                             = 84644,
 };
 
 class boss_nezir: public CreatureScript
@@ -171,7 +178,10 @@ class boss_nezir: public CreatureScript
         SummonList summons;
         InstanceScript* instance;
 
+        bool castingSpecial;
         bool pauseRegen;
+
+        uint32 energyRegenTimer;
 
         void Reset()
         {
@@ -179,13 +189,19 @@ class boss_nezir: public CreatureScript
             me->SetMaxPower(POWER_RUNIC_POWER, MAX_ENERGY*10); // runic power go ten by ten
             me->SetPower(POWER_RUNIC_POWER, 0);
             pauseRegen = false;
+            castingSpecial = false;
             events.Reset();
+            energyRegenTimer = 1000;
+            summons.DespawnAll();
         }   
 
         void EnterCombat(Unit* who)
         {
-            events.ScheduleEvent(EVENT_ICE_PATCH, urand(20000, 25000), 0, 0);
-            events.ScheduleEvent(EVENT_NEZIR_REGEN_ENERGY, 1000, 0, 0);
+            events.ScheduleEvent(EVENT_CHECK_ENERGY, 500, 0, 0);
+            events.ScheduleEvent(EVENT_ICE_PATCH, urand(20000, 25000), 0, 0); // Not sure
+            events.ScheduleEvent(EVENT_PERMAFROST, urand(10000, 12000), 0, 0); // Offylike
+            events.ScheduleEvent(EVENT_WIND_CHILL, 10000, 0, 0); // Offylike
+
             if (instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
         }
@@ -207,7 +223,7 @@ class boss_nezir: public CreatureScript
             switch (summoned->GetEntry())
             {
                 case NPC_ICE_PATCH:
-                    summoned->CastSpell(summoned, ICE_PATCH_VISUAL, true);
+                    summoned->CastSpell(summoned, SPELL_ICE_PATCH_VISUAL, true);
                     // summoned->SetReactState(REACT_PASSIVE);
                     break;
             }
@@ -217,6 +233,14 @@ class boss_nezir: public CreatureScript
         {
             if (!UpdateVictim())
                 return;
+
+            if (energyRegenTimer <= diff)
+            {
+                RegenerateEnergy();
+                energyRegenTimer = 1000;
+            }
+            else
+                energyRegenTimer -= diff;            
 
             events.Update(diff);
 
@@ -229,16 +253,44 @@ class boss_nezir: public CreatureScript
                 {
                     case EVENT_CHILLING_WINDS:
                         break;
-                    case EVENT_NEZIR_REGEN_ENERGY:
-                        RegenerateEnergy();
-                        events.ScheduleEvent(EVENT_NEZIR_REGEN_ENERGY, 1000, 0, 0);
-                        break;
                     case EVENT_ICE_PATCH:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true, 0))
-                            me->CastSpell(target, ICE_PATCH_SUMMON, true);
+                            me->CastSpell(target, SPELL_ICE_PATCH_SUMMON, true);
 
                         events.ScheduleEvent(EVENT_ICE_PATCH, urand(20000, 25000), 0, 0);
                         break;
+                    case EVENT_PERMAFROST:
+                        me->CastSpell(me, SPELL_PERMAFROST, true);
+                        events.ScheduleEvent(EVENT_PERMAFROST, urand(10000, 12000), 0, 0);
+                        break;
+                    case EVENT_WIND_CHILL:
+                        me->CastSpell(me, SPELL_WIND_CHILL, true);
+                        events.ScheduleEvent(EVENT_WIND_CHILL, 10000, 0, 0);
+                        break;
+                    case EVENT_CHECK_ENERGY:
+                        if (me->GetPower(POWER_RUNIC_POWER) >= MAX_ENERGY * 10 && !castingSpecial)
+                        {
+                            castingSpecial = true;
+                            events.ScheduleEvent(EVENT_SLEET_STORM, 1000, 0, 0);
+                        }
+                        events.ScheduleEvent(EVENT_CHECK_ENERGY, 500, 0, 0);
+                        break;
+                    case EVENT_SLEET_STORM:
+                        castingSpecial = true;  
+                        pauseRegen = true;
+                        float homeX, homeY, homeZ, homeO;
+                        me->GetHomePosition(homeX, homeY, homeZ, homeO);
+                        me->SetPosition(homeX, homeY, homeZ, homeO, true);
+                        me->SetPower(POWER_RUNIC_POWER, 0);
+                        me->CastSpell(me->getVictim(), SPELL_SLEET_STORM, true);
+                        events.ScheduleEvent(EVENT_RESET_ENERGY, 1000, 0, 0);
+                        events.DelayEvents(5800);
+                        break;
+                    case EVENT_RESET_ENERGY:
+                        pauseRegen = false;
+                        castingSpecial = false;
+                        break;
+
                 }
             }
 

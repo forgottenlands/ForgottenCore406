@@ -1772,12 +1772,14 @@ return                ;
     }
 }
 
-void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius,
-        SpellNotifyPushType type, SpellTargets TargetType, uint32 entry) {
-    if (TargetType == SPELL_TARGETS_GO) return;
+void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius, SpellNotifyPushType type, SpellTargets TargetType, uint32 entry) 
+{
+    if (TargetType == SPELL_TARGETS_GO)
+        return;
 
     Position *pos;
-    switch (type) {
+    switch (type)
+    {
         case PUSH_DST_CENTER:
             CheckDst();
             pos = &m_targets.m_dstPos;
@@ -1786,15 +1788,17 @@ void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius,
             CheckSrc();
             pos = &m_targets.m_srcPos;
             break;
-        case PUSH_CHAIN: {
-            Unit *target = m_targets.getUnitTarget();
-            if (!target) {
-                sLog->outError(
-                        "SPELL: cannot find unit target for spell ID %u\n",
-                        m_spellInfo->Id);
-                return;
-            }
-            pos = target;
+        case PUSH_CHAIN:
+            {
+                Unit *target = m_targets.getUnitTarget();
+                if (!target) 
+                {
+                    sLog->outError(
+                            "SPELL: cannot find unit target for spell ID %u\n",
+                            m_spellInfo->Id);
+                    return;
+                }
+                pos = target;
             break;
         }
         default:
@@ -1802,18 +1806,15 @@ void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius,
             break;
     }
 
-    bool requireDeadTarget = bool(
-            m_spellInfo->AttributesEx3 & SPELL_ATTR3_REQUIRE_DEAD_TARGET);
-    Trinity::SpellNotifierCreatureAndPlayer notifier(m_caster, TagUnitMap,
-            radius, type, TargetType, pos, entry, requireDeadTarget);
-    if ((m_spellInfo->AttributesEx3 & SPELL_ATTR3_PLAYERS_ONLY)
-            || (TargetType == SPELL_TARGETS_ENTRY && !entry)) m_caster->GetMap()->VisitWorld(
-            pos->m_positionX, pos->m_positionY, radius, notifier);
+    bool requireDeadTarget = bool(m_spellInfo->AttributesEx3 & SPELL_ATTR3_REQUIRE_DEAD_TARGET);
+    Trinity::SpellNotifierCreatureAndPlayer notifier(m_caster, TagUnitMap, radius, type, TargetType, pos, entry, requireDeadTarget);
+    if ((m_spellInfo->AttributesEx3 & SPELL_ATTR3_PLAYERS_ONLY) || (TargetType == SPELL_TARGETS_ENTRY && !entry)) 
+        m_caster->GetMap()->VisitWorld(pos->m_positionX, pos->m_positionY, radius, notifier);
     else
-        m_caster->GetMap()->VisitAll(pos->m_positionX, pos->m_positionY, radius,
-                notifier);
+        m_caster->GetMap()->VisitAll(pos->m_positionX, pos->m_positionY, radius, notifier);
 
-    if (m_customAttr & SPELL_ATTR0_CU_EXCLUDE_SELF) TagUnitMap.remove(m_caster);
+    if (m_customAttr & SPELL_ATTR0_CU_EXCLUDE_SELF) 
+        TagUnitMap.remove(m_caster);
 }
 
 void Spell::SearchGOAreaTarget(std::list<GameObject*> &TagGOMap, float radius,
@@ -1948,48 +1949,53 @@ WorldObject* Spell::SearchNearbyTarget(float range, SpellTargets TargetType,
     }
 }
 
-void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
+void Spell::SelectEffectTargets(uint32 i, uint32 cur)
+{
     SpellNotifyPushType pushType = PUSH_NONE;
     Player *modOwner = NULL;
-    if (m_originalCaster) modOwner = m_originalCaster->GetSpellModOwner();
+    if (m_originalCaster) 
+        modOwner = m_originalCaster->GetSpellModOwner();
 
-    switch (SpellTargetType[cur]) {
-        case TARGET_TYPE_UNIT_CASTER: {
-            switch (cur) {
+    switch (SpellTargetType[cur])
+    {
+        case TARGET_TYPE_UNIT_CASTER: 
+        {
+            switch (cur) 
+            {
                 case TARGET_UNIT_CASTER:
                 case TARGET_UNIT_CASTER_UNKNOWN:
                     AddUnitTarget(m_caster, i);
                     break;
-                case TARGET_UNIT_CASTER_FISHING: {
+                case TARGET_UNIT_CASTER_FISHING:
+                {
                     float min_dis = GetSpellMinRange(m_spellInfo, true);
                     float max_dis = GetSpellMaxRange(m_spellInfo, true);
-                    float dis = (float) rand_norm() * (max_dis - min_dis)
-                            + min_dis;
+                    float dis = (float) rand_norm() * (max_dis - min_dis) + min_dis;
                     float x, y, z;
-                    m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE,
-                            dis);
+                    m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE, dis);
                     m_targets.setDst(x, y, z, m_caster->GetOrientation());
                     break;
                 }
                 case TARGET_UNIT_MASTER:
-                    if (Unit* owner = m_caster->GetCharmerOrOwner()) AddUnitTarget(
-                            owner, i);
+                    if (Unit* owner = m_caster->GetCharmerOrOwner()) 
+                        AddUnitTarget(owner, i);
                     break;
                 case TARGET_UNIT_PET:
-                    if (Guardian* pet = m_caster->GetGuardianPet()) AddUnitTarget(
-                            pet, i);
+                    if (Guardian* pet = m_caster->GetGuardianPet()) 
+                        AddUnitTarget(pet, i);
                     break;
                 case TARGET_UNIT_SUMMONER:
-                    if (m_caster->isSummon()) if (Unit* unit = m_caster->ToTempSummon()->GetSummoner()) AddUnitTarget(
-                            unit, i);
+                    if (m_caster->isSummon()) 
+                        if (Unit* unit = m_caster->ToTempSummon()->GetSummoner()) 
+                            AddUnitTarget(unit, i);
                     break;
                 case TARGET_UNIT_PARTY_CASTER:
                 case TARGET_UNIT_RAID_CASTER:
                     pushType = PUSH_CASTER_CENTER;
                     break;
                 case TARGET_UNIT_VEHICLE:
-                    if (Unit *vehicle = m_caster->GetVehicleBase()) AddUnitTarget(
-                            vehicle, i);
+                    if (Unit *vehicle = m_caster->GetVehicleBase())
+                        AddUnitTarget(vehicle, i);
                     break;
                 case TARGET_UNIT_PASSENGER_0:
                 case TARGET_UNIT_PASSENGER_1:
@@ -1999,31 +2005,36 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                 case TARGET_UNIT_PASSENGER_5:
                 case TARGET_UNIT_PASSENGER_6:
                 case TARGET_UNIT_PASSENGER_7:
-                    if (m_caster->GetTypeId() == TYPEID_UNIT
-                            && m_caster->ToCreature()->IsVehicle()) if (Unit *unit = m_caster->GetVehicleKit()->GetPassenger(cur - TARGET_UNIT_PASSENGER_0)) AddUnitTarget(
-                            unit, i);
+                    if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->IsVehicle()) 
+                        if (Unit *unit = m_caster->GetVehicleKit()->GetPassenger(cur - TARGET_UNIT_PASSENGER_0))
+                            AddUnitTarget(unit, i);
                     break;
             }
             break;
         }
 
-        case TARGET_TYPE_UNIT_TARGET: {
+        case TARGET_TYPE_UNIT_TARGET: 
+        {
             Unit *target = m_targets.getUnitTarget();
-            if (!target) {
-                sLog->outError("SPELL: no unit target for spell ID %u",
-                        m_spellInfo->Id);
+            if (!target)
+            {
+                sLog->outError("SPELL: no unit target for spell ID %u", m_spellInfo->Id);
                 break;
             }
 
-            switch (cur) {
+            switch (cur) 
+            {
                 case TARGET_UNIT_TARGET_ENEMY:
-                    if (Unit *magnet = m_caster->SelectMagnetTarget(target, m_spellInfo)) if (magnet
-                            != target) m_targets.setUnitTarget(magnet);
+                    if (Unit *magnet = m_caster->SelectMagnetTarget(target, m_spellInfo)) 
+                        if (magnet != target)
+                            m_targets.setUnitTarget(magnet);
                     pushType = PUSH_CHAIN;
                     break;
                 case TARGET_UNIT_TARGET_ANY:
-                    if (!IsPositiveSpell(m_spellInfo->Id)) if (Unit *magnet = m_caster->SelectMagnetTarget(target, m_spellInfo)) if (magnet
-                            != target) m_targets.setUnitTarget(magnet);
+                    if (!IsPositiveSpell(m_spellInfo->Id)) 
+                        if (Unit *magnet = m_caster->SelectMagnetTarget(target, m_spellInfo)) 
+                        if (magnet != target) 
+                            m_targets.setUnitTarget(magnet);
                     pushType = PUSH_CHAIN;
                     break;
                 case TARGET_UNIT_CHAINHEAL:
@@ -2035,8 +2046,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                 case TARGET_UNIT_TARGET_RAID:
                 case TARGET_UNIT_TARGET_PARTY:
                 case TARGET_UNIT_TARGET_PUPPET:
-                    if (IsValidSingleTargetSpell(target)) AddUnitTarget(target,
-                            i);
+                    if (IsValidSingleTargetSpell(target)) 
+                        AddUnitTarget(target, i);
                     break;
                 case TARGET_UNIT_PARTY_TARGET:
                 case TARGET_UNIT_CLASS_TARGET:
@@ -2046,46 +2057,47 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
             break;
         }
 
-        case TARGET_TYPE_UNIT_NEARBY: {
+        case TARGET_TYPE_UNIT_NEARBY:
+        {
             WorldObject *target = NULL;
             float range;
 
-            switch (cur) {
+            switch (cur)
+            {
                 case TARGET_UNIT_NEARBY_ENEMY:
                     range = GetSpellMaxRange(m_spellInfo, false);
-                    if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id,
-                            SPELLMOD_RANGE, range, this);
-                    target = SearchNearbyTarget(range, SPELL_TARGETS_ENEMY,
-                            SpellEffIndex(i));
+                    if (modOwner)
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
+                    target = SearchNearbyTarget(range, SPELL_TARGETS_ENEMY, SpellEffIndex(i));
                     break;
                 case TARGET_UNIT_NEARBY_ALLY:
                 case TARGET_UNIT_NEARBY_ALLY_UNK:
                 case TARGET_UNIT_NEARBY_RAID:
                     range = GetSpellMaxRange(m_spellInfo, true);
-                    if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id,
-                            SPELLMOD_RANGE, range, this);
+                    if (modOwner) 
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
                     target = SearchNearbyTarget(range, SPELL_TARGETS_ALLY,
                             SpellEffIndex(i));
                     break;
                 case TARGET_UNIT_NEARBY_ENTRY:
                 case TARGET_GAMEOBJECT_NEARBY_ENTRY:
-                    range = GetSpellMaxRange(m_spellInfo,
-                            IsPositiveSpell(m_spellInfo->Id));
-                    if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id,
-                            SPELLMOD_RANGE, range, this);
-                    target = SearchNearbyTarget(range, SPELL_TARGETS_ENTRY,
-                            SpellEffIndex(i));
+                    range = GetSpellMaxRange(m_spellInfo, IsPositiveSpell(m_spellInfo->Id));
+                    if (modOwner)
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
+                    target = SearchNearbyTarget(range, SPELL_TARGETS_ENTRY, SpellEffIndex(i));
                     break;
             }
 
-            if (!target) return;
-            else if (target->GetTypeId() == TYPEID_GAMEOBJECT) AddGOTarget(
-                    (GameObject*) target, i);
-            else {
+            if (!target) 
+                return;
+            else if (target->GetTypeId() == TYPEID_GAMEOBJECT) 
+                AddGOTarget((GameObject*) target, i);
+            else
+            {
                 pushType = PUSH_CHAIN;
 
-                if (m_targets.getUnitTarget() != target) m_targets.setUnitTarget(
-                        (Unit*) target);
+                if (m_targets.getUnitTarget() != target) 
+                    m_targets.setUnitTarget((Unit*) target);
             }
 
             break;
@@ -2100,20 +2112,22 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
             break;
 
         case TARGET_TYPE_AREA_CONE:
-            if (m_customAttr & SPELL_ATTR0_CU_CONE_BACK) pushType =
-                    PUSH_IN_BACK;
-            else if (m_customAttr & SPELL_ATTR0_CU_CONE_LINE) pushType =
-                    PUSH_IN_LINE;
+            if (m_customAttr & SPELL_ATTR0_CU_CONE_BACK)
+                pushType = PUSH_IN_BACK;
+            else if (m_customAttr & SPELL_ATTR0_CU_CONE_LINE)
+                pushType = PUSH_IN_LINE;
             else
                 pushType = PUSH_IN_FRONT;
             break;
 
         case TARGET_TYPE_DEST_CASTER: //4+8+2
         {
-            if (cur == TARGET_SRC_CASTER) {
+            if (cur == TARGET_SRC_CASTER) 
+            {
                 m_targets.setSrc(*m_caster);
                 break;
-            } else if (cur == TARGET_DST_CASTER) {
+            } else if (cur == TARGET_DST_CASTER)
+            {
                 m_targets.setDst(*m_caster);
                 break;
             }
@@ -2121,19 +2135,19 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
             float angle, dist;
 
             float objSize = m_caster->GetObjectSize();
-            if (m_spellInfo->AttributesEx
-                    & SPELL_ATTR1_USE_RADIUS_AS_MAX_DISTANCE) dist = 0.0f;
+            if (m_spellInfo->AttributesEx & SPELL_ATTR1_USE_RADIUS_AS_MAX_DISTANCE)
+                dist = 0.0f;
             else
-                dist = GetSpellRadiusForFriend(
-                        sSpellRadiusStore.LookupEntry(
-                                m_spellInfo->EffectRadiusIndex[i]));
-            if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id,
-                    SPELLMOD_RADIUS, dist, this);
-            if (dist < objSize) dist = objSize;
-            else if (cur == TARGET_DEST_CASTER_RANDOM) dist = objSize
-                    + (dist - objSize) * (float) rand_norm();
+                dist = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+            if (modOwner)
+                modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, dist, this);
+            if (dist < objSize)
+                dist = objSize;
+            else if (cur == TARGET_DEST_CASTER_RANDOM)
+                dist = objSize + (dist - objSize) * (float) rand_norm();
 
-            switch (cur) {
+            switch (cur) 
+            {
                 case TARGET_DEST_CASTER_FRONT_LEFT:
                     angle = static_cast<float>(-M_PI / 4);
                     break;
@@ -2166,7 +2180,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
             }
 
             Position pos;
-            switch (cur) {
+            switch (cur)
+            {
                 case TARGET_DEST_CASTER_FRONT_LEAP:
                 case TARGET_DEST_CASTER_FRONT_LEFT:
                 case TARGET_DEST_CASTER_BACK_LEFT:
@@ -2186,9 +2201,9 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
         case TARGET_TYPE_DEST_TARGET: //2+8+2
         {
             Unit *target = m_targets.getUnitTarget();
-            if (!target) {
-                sLog->outError("SPELL: no unit target for spell ID %u",
-                        m_spellInfo->Id);
+            if (!target) 
+            {
+                sLog->outError("SPELL: no unit target for spell ID %u", m_spellInfo->Id);
                 break;
             }
 
@@ -2204,15 +2219,14 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
             float angle, dist;
 
             float objSize = target->GetObjectSize();
-            dist = (float) target->GetSpellRadiusForTarget(
-                    target,
-                    sSpellRadiusStore.LookupEntry(
-                            m_spellInfo->EffectRadiusIndex[i]));
-            if (dist < objSize) dist = objSize;
-            else if (cur == TARGET_DEST_TARGET_RANDOM) dist = objSize
-                    + (dist - objSize) * (float) rand_norm();
+            dist = (float) target->GetSpellRadiusForTarget(target, sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+            if (dist < objSize) 
+                dist = objSize;
+            else if (cur == TARGET_DEST_TARGET_RANDOM) 
+                dist = objSize + (dist - objSize) * (float) rand_norm();
 
-            switch (cur) {
+            switch (cur) 
+            {
                 case TARGET_DEST_TARGET_FRONT:
                     angle = 0.0f;
                     break;
@@ -2245,7 +2259,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
             Position pos;
             bool checkCollision = false;
 
-            switch (m_spellInfo->Id) {
+            switch (m_spellInfo->Id) 
+            {
                 case 36563: // Shadowstep
                 case 57840: // Killing Spree
                     checkCollision = true;
@@ -2254,8 +2269,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                     break;
             }
 
-            if (checkCollision) target->GetFirstCollisionPosition(pos, dist,
-                    angle);
+            if (checkCollision) 
+                target->GetFirstCollisionPosition(pos, dist, angle);
             else
                 target->GetNearPosition(pos, dist, angle);
 
@@ -2266,14 +2281,15 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
 
         case TARGET_TYPE_DEST_DEST: //5+8+1
         {
-            if (!m_targets.HasDst()) {
-                sLog->outError("SPELL: no destination for spell ID %u",
-                        m_spellInfo->Id);
+            if (!m_targets.HasDst()) 
+            {
+                sLog->outError("SPELL: no destination for spell ID %u", m_spellInfo->Id);
                 break;
             }
 
             float angle;
-            switch (cur) {
+            switch (cur) 
+            {
                 case TARGET_DEST_DYNOBJ_ENEMY:
                 case TARGET_DEST_DYNOBJ_ALLY:
                 case TARGET_DEST_DYNOBJ_ALL_UNITS:
@@ -2312,12 +2328,9 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
             }
 
             float dist;
-            dist = GetSpellRadiusForFriend(
-                    sSpellRadiusStore.LookupEntry(
-                            m_spellInfo->EffectRadiusIndex[i]));
-            if (cur == TARGET_DEST_DEST_RANDOM
-                    || cur == TARGET_DEST_DEST_RANDOM_DIR_DIST) dist *=
-                    (float) rand_norm();
+            dist = GetSpellRadiusForFriend(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+            if (cur == TARGET_DEST_DEST_RANDOM || cur == TARGET_DEST_DEST_RANDOM_DIR_DIST)
+                dist *= (float) rand_norm();
 
             // must has dst, no need to set flag
             Position pos = m_targets.m_dstPos;
@@ -2326,100 +2339,85 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
             break;
         }
 
-        case TARGET_TYPE_DEST_SPECIAL: {
-            switch (cur) {
+        case TARGET_TYPE_DEST_SPECIAL:
+        {
+            switch (cur)
+            {
                 case TARGET_DST_DB:
-                    if (SpellTargetPosition const* st = sSpellMgr->GetSpellTargetPosition(m_spellInfo->Id)) {
+                    if (SpellTargetPosition const* st = sSpellMgr->GetSpellTargetPosition(m_spellInfo->Id))
+                    {
                         //TODO: fix this check
-                        if (m_spellInfo->Effect[0]
-                                == SPELL_EFFECT_TELEPORT_UNITS
-                                || m_spellInfo->Effect[1]
-                                        == SPELL_EFFECT_TELEPORT_UNITS
-                                || m_spellInfo->Effect[2]
-                                        == SPELL_EFFECT_TELEPORT_UNITS) m_targets.setDst(
-                                st->target_X, st->target_Y, st->target_Z,
-                                st->target_Orientation,
-                                (int32) st->target_mapId);
-                        else if (st->target_mapId == m_caster->GetMapId()) m_targets.setDst(
-                                st->target_X, st->target_Y, st->target_Z,
-                                st->target_Orientation);
-                    } else {
-                        sLog->outDebug(
-                                LOG_FILTER_SPELLS_AURAS,
-                                "SPELL: unknown target coordinates for spell ID %u",
-                                m_spellInfo->Id);
+                        if (m_spellInfo->Effect[0] == SPELL_EFFECT_TELEPORT_UNITS || m_spellInfo->Effect[1] == SPELL_EFFECT_TELEPORT_UNITS || m_spellInfo->Effect[2] == SPELL_EFFECT_TELEPORT_UNITS)
+                            m_targets.setDst(st->target_X, st->target_Y, st->target_Z, st->target_Orientation, (int32) st->target_mapId);
+                        else if (st->target_mapId == m_caster->GetMapId()) 
+                            m_targets.setDst(st->target_X, st->target_Y, st->target_Z, st->target_Orientation);
+                    } else 
+                    {
+                        sLog->outDebug( LOG_FILTER_SPELLS_AURAS, "SPELL: unknown target coordinates for spell ID %u", m_spellInfo->Id);
                         Unit *target = NULL;
-                        if (uint64 guid = m_caster->GetUInt64Value(UNIT_FIELD_TARGET)) target =
-                                ObjectAccessor::GetUnit(*m_caster, guid);
+                        if (uint64 guid = m_caster->GetUInt64Value(UNIT_FIELD_TARGET)) 
+                            target = ObjectAccessor::GetUnit(*m_caster, guid);
                         m_targets.setDst(target ? *target : *m_caster);
                     }
                     break;
                 case TARGET_DST_HOME:
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER) m_targets.setDst(
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER) 
+                            m_targets.setDst(
                             m_caster->ToPlayer()->m_homebindX,
                             m_caster->ToPlayer()->m_homebindY,
                             m_caster->ToPlayer()->m_homebindZ,
                             m_caster->ToPlayer()->GetOrientation(),
                             m_caster->ToPlayer()->m_homebindMapId);
                     break;
-                case TARGET_DST_NEARBY_ENTRY: {
-                    float range = GetSpellMaxRange(m_spellInfo,
-                            IsPositiveSpell(m_spellInfo->Id));
-                    if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id,
-                            SPELLMOD_RANGE, range, this);
+                case TARGET_DST_NEARBY_ENTRY: 
+                {
+                    float range = GetSpellMaxRange(m_spellInfo, IsPositiveSpell(m_spellInfo->Id));
+                    if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
 
-                    if (WorldObject *target = SearchNearbyTarget(range, SPELL_TARGETS_ENTRY, SpellEffIndex(i))) m_targets.setDst(
-                            *target);
+                    if (WorldObject *target = SearchNearbyTarget(range, SPELL_TARGETS_ENTRY, SpellEffIndex(i))) 
+                        m_targets.setDst(*target);
                     break;
                 }
             }
             break;
         }
 
-        case TARGET_TYPE_CHANNEL: {
-            if (!m_originalCaster
-                    || !m_originalCaster->GetCurrentSpell(
-                            CURRENT_CHANNELED_SPELL)) {
-                sLog->outDebug(
-                        LOG_FILTER_SPELLS_AURAS,
-                        "SPELL: no current channeled spell for spell ID %u - spell triggering this spell was interrupted.",
-                        m_spellInfo->Id);
+        case TARGET_TYPE_CHANNEL:
+        {
+            if (!m_originalCaster || !m_originalCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+            {
+                sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELL: no current channeled spell for spell ID %u - spell triggering this spell was interrupted.", m_spellInfo->Id);
                 break;
             }
 
-            switch (cur) {
+            switch (cur)
+            {
                 case TARGET_UNIT_CHANNEL_TARGET:
                     // unit target may be no longer avalible - teleported out of map for example
-                    if (Unit* target = Unit::GetUnit(*m_caster, m_originalCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->m_targets.getUnitTargetGUID())) AddUnitTarget(
-                            target, i);
+                    if (Unit* target = Unit::GetUnit(*m_caster, m_originalCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->m_targets.getUnitTargetGUID())) 
+                        AddUnitTarget(target, i);
                     else
-                        sLog->outError(
-                                "SPELL: cannot find channel spell target for spell ID %u",
-                                m_spellInfo->Id);
+                        sLog->outError("SPELL: cannot find channel spell target for spell ID %u", m_spellInfo->Id);
                     break;
                 case TARGET_DEST_CHANNEL_TARGET:
-                    if (m_originalCaster->GetCurrentSpell(
-                            CURRENT_CHANNELED_SPELL)->m_targets.HasDst()) m_targets.setDst(
-                            m_originalCaster->GetCurrentSpell(
-                                    CURRENT_CHANNELED_SPELL)->m_targets);
-                    else if (Unit* target = Unit::GetUnit(*m_caster, m_originalCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->m_targets.getUnitTargetGUID())) m_targets.setDst(
-                            *target);
+                    if (m_originalCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->m_targets.HasDst()) 
+                        m_targets.setDst(m_originalCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->m_targets);
+                    else if (Unit* target = Unit::GetUnit(*m_caster, m_originalCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->m_targets.getUnitTargetGUID()))
+                        m_targets.setDst(*target);
                     else
-                        sLog->outError(
-                                "SPELL: cannot find channel spell destination for spell ID %u",
-                                m_spellInfo->Id);
+                        sLog->outError("SPELL: cannot find channel spell destination for spell ID %u", m_spellInfo->Id);
                     break;
                 case TARGET_DEST_CHANNEL_CASTER:
-                    m_targets.setDst(
-                            *m_originalCaster->GetCurrentSpell(
-                                    CURRENT_CHANNELED_SPELL)->GetCaster());
+                    m_targets.setDst(*m_originalCaster->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->GetCaster());
                     break;
             }
             break;
         }
 
-        default: {
-            switch (cur) {
+        default: 
+        {
+            switch (cur)
+            {
                 case TARGET_GAMEOBJECT:
                     if (m_targets.getGOTarget()) AddGOTarget(
                             m_targets.getGOTarget(), i);
@@ -2449,20 +2447,21 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
     }
 
     if (pushType == PUSH_CHAIN) // Chain
-            {
+    {
         Unit *target = m_targets.getUnitTarget();
-        if (!target) {
-            sLog->outError("SPELL: no chain unit target for spell ID %u",
-                    m_spellInfo->Id);
+        if (!target) 
+        {
+            sLog->outError("SPELL: no chain unit target for spell ID %u", m_spellInfo->Id);
             return;
         }
 
         //Chain: 2, 6, 22, 25, 45, 77
         uint32 maxTargets = m_spellInfo->EffectChainTarget[i];
-        if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id,
-                SPELLMOD_JUMP_TARGETS, maxTargets, this);
+        if (modOwner) 
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, maxTargets, this);
 
-        if (maxTargets > 1) {
+        if (maxTargets > 1) 
+        {
             //otherwise, this multiplier is used for something else
             m_damageMultipliers[i] = 1.0f;
             m_applyMultiplierMask |= 1 << i;
@@ -2470,42 +2469,41 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
             float range;
             std::list<Unit*> unitList;
 
-            switch (cur) {
+            switch (cur)
+            {
                 case TARGET_UNIT_NEARBY_ENEMY:
                 case TARGET_UNIT_TARGET_ENEMY:
                 case TARGET_UNIT_NEARBY_ENTRY: // fix me
                     range = GetSpellMaxRange(m_spellInfo, false);
-                    if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id,
-                            SPELLMOD_RANGE, range, this);
-                    SearchChainTarget(unitList, range, maxTargets,
-                            SPELL_TARGETS_ENEMY);
+                    if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
+                    SearchChainTarget(unitList, range, maxTargets, SPELL_TARGETS_ENEMY);
                     break;
                 case TARGET_UNIT_CHAINHEAL:
                 case TARGET_UNIT_NEARBY_ALLY: // fix me
                 case TARGET_UNIT_NEARBY_ALLY_UNK:
                 case TARGET_UNIT_NEARBY_RAID:
                     range = GetSpellMaxRange(m_spellInfo, true);
-                    if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id,
-                            SPELLMOD_RANGE, range, this);
-                    SearchChainTarget(unitList, range, maxTargets,
-                            SPELL_TARGETS_CHAINHEAL);
+                    if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
+                    SearchChainTarget(unitList, range, maxTargets, SPELL_TARGETS_CHAINHEAL);
                     break;
             }
 
             CallScriptAfterUnitTargetSelectHandlers(unitList, SpellEffIndex(i));
 
-            for (std::list<Unit*>::iterator itr = unitList.begin();
-                    itr != unitList.end(); ++itr)
+            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                 AddUnitTarget(*itr, i);
         } else
             AddUnitTarget(target, i);
-    } else if (pushType) {
+    } else if (pushType)
+    {
         // Dummy, just for client
-        if (EffectTargetType[m_spellInfo->Effect[i]] != SPELL_REQUIRE_UNIT) return;
+        if (EffectTargetType[m_spellInfo->Effect[i]] != SPELL_REQUIRE_UNIT) 
+            return;
 
         float radius;
         SpellTargets targetType;
-        switch (cur) {
+        switch (cur) 
+        {
             case TARGET_UNIT_AREA_ENEMY_SRC:
             case TARGET_UNIT_AREA_ENEMY_DST:
             case TARGET_UNIT_CONE_ENEMY:
@@ -2553,9 +2551,15 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
-                if (m_spellInfo->Id == 86111) // Ice Patch
+                if (m_spellInfo->Id == 86111 || m_spellInfo->Id == 93129 || m_spellInfo->Id ==  93130 || m_spellInfo->Id ==  93131) // Ice Patch
                 {
                     radius = 10;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
+                if (m_spellInfo->Id == 86367 || m_spellInfo->Id == 93135 || m_spellInfo->Id ==  93136 || m_spellInfo->Id ==  93137) // Sleet Storm
+                {
+                    radius = 90;
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
@@ -2587,51 +2591,45 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                 break;
         }
 
-        if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS,
-                radius, this);
+        if (modOwner)
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius, this);
         radius *= m_spellValue->RadiusMod;
 
         std::list<Unit*> unitList;
         std::list<GameObject*> gobjectList;
-        switch (targetType) {
-            case SPELL_TARGETS_ENTRY: {
-                ConditionList conditions =
-                        sConditionMgr->GetConditionsForNotGroupedEntry(
-                                CONDITION_SOURCE_TYPE_SPELL_SCRIPT_TARGET,
-                                m_spellInfo->Id);
-                if (!conditions.empty()) {
-                    for (ConditionList::const_iterator i_spellST =
-                            conditions.begin(); i_spellST != conditions.end();
-                            ++i_spellST) {
-                        if ((*i_spellST)->mConditionType
-                                != CONDITION_SPELL_SCRIPT_TARGET) continue;
-                        if ((*i_spellST)->mConditionValue3
-                                && !((*i_spellST)->mConditionValue3 & (1 << i))) continue;
-                        if ((*i_spellST)->mConditionValue1
-                                == SPELL_TARGET_TYPE_CREATURE) SearchAreaTarget(
-                                unitList, radius, pushType, SPELL_TARGETS_ENTRY,
-                                (*i_spellST)->mConditionValue2);
-                        else if ((*i_spellST)->mConditionValue1
-                                == SPELL_TARGET_TYPE_CONTROLLED) {
-                            for (Unit::ControlList::iterator itr =
-                                    m_caster->m_Controlled.begin();
-                                    itr != m_caster->m_Controlled.end(); ++itr)
-                                if ((*itr)->GetEntry()
-                                        == (*i_spellST)->mConditionValue2
-                                        &&
-                                        /*(*itr)->IsWithinDistInMap(m_caster, radius)*/(*itr)->IsInMap(
-                                                m_caster)) // For 60243 and 52173 need skip radius check or use range (no radius entry for effect)
+        switch (targetType)
+        {
+            case SPELL_TARGETS_ENTRY:
+            {
+                ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_SPELL_SCRIPT_TARGET, m_spellInfo->Id);
+                if (!conditions.empty()) 
+                {
+                    for (ConditionList::const_iterator i_spellST = conditions.begin(); i_spellST != conditions.end(); ++i_spellST)
+                    {
+                        if ((*i_spellST)->mConditionType != CONDITION_SPELL_SCRIPT_TARGET)
+                            continue;
+                        if ((*i_spellST)->mConditionValue3 && !((*i_spellST)->mConditionValue3 & (1 << i)))
+                            continue;
+                        if ((*i_spellST)->mConditionValue1 == SPELL_TARGET_TYPE_CREATURE) 
+                            SearchAreaTarget(unitList, radius, pushType, SPELL_TARGETS_ENTRY, (*i_spellST)->mConditionValue2);
+                        else if ((*i_spellST)->mConditionValue1 == SPELL_TARGET_TYPE_CONTROLLED)
+                        {
+                            for (Unit::ControlList::iterator itr = m_caster->m_Controlled.begin(); itr != m_caster->m_Controlled.end(); ++itr)
+                                if ((*itr)->GetEntry() == (*i_spellST)->mConditionValue2 && /*(*itr)->IsWithinDistInMap(m_caster, radius)*/(*itr)->IsInMap(m_caster)) // For 60243 and 52173 need skip radius check or use range (no radius entry for effect)
                                 unitList.push_back(*itr);
                         }
                     }
                 } else {
                     // Custom entries
                     // TODO: move these to sql
-                    switch (m_spellInfo->Id) {
+                    switch (m_spellInfo->Id)
+                    {
                         case 46584: // Raise Dead
                         {
-                            if (WorldObject* result = FindCorpseUsing<Trinity::RaiseDeadObjectCheck> ()) {
-                                switch (result->GetTypeId()) {
+                            if (WorldObject* result = FindCorpseUsing<Trinity::RaiseDeadObjectCheck> ()) 
+                            {
+                                switch (result->GetTypeId()) 
+                                {
                                     case TYPEID_UNIT:
                                         m_targets.setDst(*result);
                                         break;
@@ -2641,49 +2639,39 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                             }
                             break;
                         }
-                            // Corpse Explosion
+                        // Corpse Explosion
                         case 49158:
                         case 51325:
                         case 51326:
                         case 51327:
                         case 51328:
                             // Search for ghoul if our ghoul or dead body not valid unit target
-                            if (!(m_targets.getUnitTarget()
-                                    && ((m_targets.getUnitTarget()->GetEntry()
-                                            == 26125
-                                            && m_targets.getUnitTarget()->GetOwnerGUID()
-                                                    == m_caster->GetGUID())
-                                            || (m_targets.getUnitTarget()->getDeathState()
-                                                    == CORPSE
-                                                    && m_targets.getUnitTarget()->GetDisplayId()
-                                                            == m_targets.getUnitTarget()->GetNativeDisplayId()
-                                                    && m_targets.getUnitTarget()->GetTypeId()
-                                                            == TYPEID_UNIT
-                                                    && !m_targets.getUnitTarget()->ToCreature()->isDeadByDefault()
-                                                    && !(m_targets.getUnitTarget()->GetCreatureTypeMask()
-                                                            & CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL)
-                                                    && m_targets.getUnitTarget()->GetDisplayId()
-                                                            == m_targets.getUnitTarget()->GetNativeDisplayId())))) {
+                            if (!(m_targets.getUnitTarget() && ((m_targets.getUnitTarget()->GetEntry() == 26125 && m_targets.getUnitTarget()->GetOwnerGUID() == m_caster->GetGUID()) 
+                                || (m_targets.getUnitTarget()->getDeathState() == CORPSE && m_targets.getUnitTarget()->GetDisplayId() == m_targets.getUnitTarget()->GetNativeDisplayId() 
+                                && m_targets.getUnitTarget()->GetTypeId() == TYPEID_UNIT && !m_targets.getUnitTarget()->ToCreature()->isDeadByDefault() && 
+                                !(m_targets.getUnitTarget()->GetCreatureTypeMask() & CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL)
+                                && m_targets.getUnitTarget()->GetDisplayId() == m_targets.getUnitTarget()->GetNativeDisplayId()))))
+                            {
                                 CleanupTargetList();
 
-                                WorldObject* result = FindCorpseUsing<
-                                        Trinity::ExplodeCorpseObjectCheck>();
+                                WorldObject* result = FindCorpseUsing<Trinity::ExplodeCorpseObjectCheck>();
 
-                                if (result) {
-                                    switch (result->GetTypeId()) {
+                                if (result) 
+                                {
+                                    switch (result->GetTypeId())
+                                    {
                                         case TYPEID_UNIT:
                                         case TYPEID_PLAYER:
-                                            m_targets.setUnitTarget(
-                                                    (Unit*) result);
+                                            m_targets.setUnitTarget((Unit*) result);
                                             break;
                                         default:
                                             break;
                                     }
-                                } else {
-                                    if (m_caster->GetTypeId() == TYPEID_PLAYER) m_caster->ToPlayer()->RemoveSpellCooldown(
-                                            m_spellInfo->Id, true);
-                                    SendCastResult(
-                                            SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW);
+                                } else 
+                                {
+                                    if (m_caster->GetTypeId() == TYPEID_PLAYER) 
+                                        m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
+                                    SendCastResult(SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW);
                                     finish(false);
                                 }
                             }
@@ -2695,46 +2683,38 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                                     "Spell (ID: %u) (caster Entry: %u) does not have type CONDITION_SOURCE_TYPE_SPELL_SCRIPT_TARGET record in `conditions` table.",
                                     m_spellInfo->Id, m_caster->GetEntry());
 
-                            if (m_spellInfo->Effect[i]
-                                    == SPELL_EFFECT_TELEPORT_UNITS) SearchAreaTarget(
-                                    unitList, radius, pushType,
-                                    SPELL_TARGETS_ENTRY, 0);
-                            else if (IsPositiveEffect(m_spellInfo->Id, i)) SearchAreaTarget(
-                                    unitList, radius, pushType,
-                                    SPELL_TARGETS_ALLY);
+                            if (m_spellInfo->Effect[i] == SPELL_EFFECT_TELEPORT_UNITS) 
+                                SearchAreaTarget(unitList, radius, pushType, SPELL_TARGETS_ENTRY, 0);
+                            else if (IsPositiveEffect(m_spellInfo->Id, i)) 
+                                SearchAreaTarget(unitList, radius, pushType, SPELL_TARGETS_ALLY);
                             else
-                                SearchAreaTarget(unitList, radius, pushType,
-                                        SPELL_TARGETS_ENEMY);
+                                SearchAreaTarget(unitList, radius, pushType, SPELL_TARGETS_ENEMY);
                     }
                 }
                 break;
             }
-            case SPELL_TARGETS_GO: {
-                ConditionList conditions =
-                        sConditionMgr->GetConditionsForNotGroupedEntry(
-                                CONDITION_SOURCE_TYPE_SPELL_SCRIPT_TARGET,
-                                m_spellInfo->Id);
-                if (!conditions.empty()) {
-                    for (ConditionList::const_iterator i_spellST =
-                            conditions.begin(); i_spellST != conditions.end();
-                            ++i_spellST) {
-                        if ((*i_spellST)->mConditionType
-                                != CONDITION_SPELL_SCRIPT_TARGET) continue;
-                        if ((*i_spellST)->mConditionValue3
-                                && !((*i_spellST)->mConditionValue3 & (1 << i))) continue;
-                        if ((*i_spellST)->mConditionValue1
-                                == SPELL_TARGET_TYPE_GAMEOBJECT) SearchGOAreaTarget(
-                                gobjectList, radius, pushType, SPELL_TARGETS_GO,
-                                (*i_spellST)->mConditionValue2);
+            case SPELL_TARGETS_GO: 
+            {
+                ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_SPELL_SCRIPT_TARGET, m_spellInfo->Id);
+                if (!conditions.empty())
+                {
+                    for (ConditionList::const_iterator i_spellST = conditions.begin(); i_spellST != conditions.end(); ++i_spellST)
+                    {
+                        if ((*i_spellST)->mConditionType != CONDITION_SPELL_SCRIPT_TARGET)
+                            continue;
+                        if ((*i_spellST)->mConditionValue3 && !((*i_spellST)->mConditionValue3 & (1 << i)))
+                            continue;
+                        if ((*i_spellST)->mConditionValue1 == SPELL_TARGET_TYPE_GAMEOBJECT)
+                            SearchGOAreaTarget(gobjectList, radius, pushType, SPELL_TARGETS_GO, (*i_spellST)->mConditionValue2);
                     }
-                } else {
-                    if (m_spellInfo->Effect[i] == SPELL_EFFECT_ACTIVATE_OBJECT)
-                    sLog->outDebug(
-                            LOG_FILTER_SPELLS_AURAS,
-                            "Spell (ID: %u) (caster Entry: %u) with SPELL_EFFECT_ACTIVATE_OBJECT does not have type CONDITION_SOURCE_TYPE_SPELL_SCRIPT_TARGET record in `conditions` table.",
-                            m_spellInfo->Id, m_caster->GetEntry());
-                    SearchGOAreaTarget(gobjectList, radius, pushType,
-                            SPELL_TARGETS_GO);
+                } else 
+                {
+                    if (m_spellInfo->Effect[i] == SPELL_EFFECT_ACTIVATE_OBJECT) 
+                        sLog->outDebug(LOG_FILTER_SPELLS_AURAS, 
+                        "Spell (ID: %u) (caster Entry: %u) with SPELL_EFFECT_ACTIVATE_OBJECT does not have type CONDITION_SOURCE_TYPE_SPELL_SCRIPT_TARGET record in `conditions` table.",
+                        m_spellInfo->Id, m_caster->GetEntry());
+
+                    SearchGOAreaTarget(gobjectList, radius, pushType, SPELL_TARGETS_GO);
                 }
                 break;
             }
@@ -2745,7 +2725,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                 SearchAreaTarget(unitList, radius, pushType, targetType);
                 break;
             default:
-                switch (cur) {
+                switch (cur)
+                {
                     case TARGET_UNIT_AREA_PARTY_SRC:
                     case TARGET_UNIT_AREA_PARTY_DST:
                         m_caster->GetPartyMemberInDist(unitList, radius); //fix me
@@ -2763,46 +2744,41 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                         if (m_spellInfo->Id == 70940)
                             unitList.remove(m_caster);
                         break;
-                    case TARGET_UNIT_CLASS_TARGET: {
-                        Player* targetPlayer =
-                                m_targets.getUnitTarget()
-                                        && m_targets.getUnitTarget()->GetTypeId()
-                                                == TYPEID_PLAYER ?
-                                        (Player*) m_targets.getUnitTarget() :
-                                        NULL;
+                    case TARGET_UNIT_CLASS_TARGET:
+                    {
+                        Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER ? (Player*) m_targets.getUnitTarget() : NULL;
 
-                        Group* pGroup =
-                                targetPlayer ? targetPlayer->GetGroup() : NULL;
-                        if (pGroup) {
-                            for (GroupReference *itr = pGroup->GetFirstMember();
-                                    itr != NULL; itr = itr->next()) {
+                        Group* pGroup = targetPlayer ? targetPlayer->GetGroup() : NULL;
+                        if (pGroup)
+                        {
+                            for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next()) 
+                            {
                                 Player* Target = itr->getSource();
 
                                 // IsHostileTo check duel and controlled by enemy
-                                if (Target
-                                        && targetPlayer->IsWithinDistInMap(
-                                                Target, radius)
-                                        && targetPlayer->getClass()
-                                                == Target->getClass()
-                                        && !m_caster->IsHostileTo(Target)) {
+                                if (Target && targetPlayer->IsWithinDistInMap(Target, radius) && targetPlayer->getClass() == Target->getClass() && !m_caster->IsHostileTo(Target)) 
+                                {
                                     AddUnitTarget(Target, i);
                                 }
                             }
-                        } else if (m_targets.getUnitTarget()) AddUnitTarget(
-                                m_targets.getUnitTarget(), i);
+                        } else if (m_targets.getUnitTarget())
+                            AddUnitTarget(m_targets.getUnitTarget(), i);
                         break;
                     }
                 }
                 break;
         }
 
-        if (!unitList.empty()) {
+        if (!unitList.empty())
+        {
             // Special target selection for smart heals and energizes
             uint32 maxSize = 0;
             int32 power = -1;
-            switch (m_spellInfo->SpellFamilyName) {
+            switch (m_spellInfo->SpellFamilyName) 
+            {
                 case SPELLFAMILY_GENERIC:
-                    switch (m_spellInfo->Id) {
+                    switch (m_spellInfo->Id) 
+                    {
                         case 52759: // Ancestral Awakening
                         case 71610: // Echoes of Light (Althor's Abacus normal version)
                         case 71641: // Echoes of Light (Althor's Abacus heroic version)
@@ -2815,8 +2791,8 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                             break;
                         case 57669: // Replenishment
                             // In arenas Replenishment may only affect the caster
-                            if (m_caster->GetTypeId() == TYPEID_PLAYER
-                                    && m_caster->ToPlayer()->InArena()) {
+                            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->InArena()) 
+                            {
                                 unitList.clear();
                                 unitList.push_back(m_caster);
                                 break;
@@ -2830,15 +2806,15 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                     break;
                 case SPELLFAMILY_PRIEST:
                     if (m_spellInfo->SpellFamilyFlags[0] == 0x10000000) // Circle of Healing
-                            {
+                    {
                         maxSize = m_caster->HasAura(55675) ? 6 : 5; // Glyph of Circle of Healing
                         power = POWER_HEALTH;
                     } else if (m_spellInfo->Id == 64844) // Divine Hymn
-                            {
+                    {
                         maxSize = 3;
                         power = POWER_HEALTH;
                     } else if (m_spellInfo->Id == 64904) // Hymn of Hope
-                            {
+                    {
                         maxSize = 3;
                         power = POWER_MANA;
                     }
@@ -2851,28 +2827,26 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                         break;
 
                     // Remove targets outside caster's raid
-                    for (std::list<Unit*>::iterator itr = unitList.begin();
-                            itr != unitList.end();) {
-                        if (!(*itr)->IsInRaidWith(m_caster)) itr =
-                                unitList.erase(itr);
+                    for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                    {
+                        if (!(*itr)->IsInRaidWith(m_caster))
+                            itr = unitList.erase(itr);
                         else
                             ++itr;
                     }
                     break;
                 case SPELLFAMILY_DRUID:
                     if (m_spellInfo->SpellFamilyFlags[1] == 0x04000000) // Wild Growth
-                            {
+                    {
                         maxSize = m_caster->HasAura(62970) ? 6 : 5; // Glyph of Wild Growth
                         power = POWER_HEALTH;
                     } else if (m_spellInfo->SpellFamilyFlags[2] == 0x0100) // Starfall
-                            {
+                    {
                         // Remove targets not in LoS or in stealth
-                        for (std::list<Unit*>::iterator itr = unitList.begin();
-                                itr != unitList.end();) {
-                            if ((*itr)->HasStealthAura()
-                                    || (*itr)->HasInvisibilityAura()
-                                    || !(*itr)->IsWithinLOSInMap(m_caster)) itr =
-                                    unitList.erase(itr);
+                        for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();) 
+                        {
+                            if ((*itr)->HasStealthAura() || (*itr)->HasInvisibilityAura() || !(*itr)->IsWithinLOSInMap(m_caster)) 
+                                itr = unitList.erase(itr);
                             else
                                 ++itr;
                         }
@@ -2881,96 +2855,85 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                         break;
 
                     // Remove targets outside caster's raid
-                    for (std::list<Unit*>::iterator itr = unitList.begin();
-                            itr != unitList.end();) {
-                        if (!(*itr)->IsInRaidWith(m_caster)) itr =
-                                unitList.erase(itr);
+                    for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();) 
+                    {
+                        if (!(*itr)->IsInRaidWith(m_caster))
+                            itr = unitList.erase(itr);
                         else
                             ++itr;
                     }
-                    break;
-                case SPELLFAMILY_PALADIN:
-                    // Holy Wrath
-//                    if (m_spellInfo->Id == 2812)
-//                    {
-//                        for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
-//                        {
-//                            if ((*itr)->GetTypeId() == TYPEID_PLAYER || (*itr)->GetCreatureType() == CREATURE_TYPE_DEMON || (*itr)->GetCreatureType() == CREATURE_TYPE_UNDEAD)
-//                               itr++;
-//                            else
-//                                itr = unitList.erase(itr);
-//                        }
-//                    }
                     break;
                 default:
                     break;
             }
 
-            if (maxSize && power != -1) {
-                if (Powers(power) == POWER_HEALTH) {
-                    if (unitList.size() > maxSize) {
+            if (maxSize && power != -1) 
+            {
+                if (Powers(power) == POWER_HEALTH)
+                {
+                    if (unitList.size() > maxSize) 
+                    {
                         unitList.sort(Trinity::HealthPctOrderPred());
                         unitList.resize(maxSize);
                     }
-                } else {
-                    for (std::list<Unit*>::iterator itr = unitList.begin();
-                            itr != unitList.end();) {
-                        if ((*itr)->getPowerType() != (Powers) power) itr =
-                                unitList.erase(itr);
+                } else
+                {
+                    for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                    {
+                        if ((*itr)->getPowerType() != (Powers) power)
+                            itr = unitList.erase(itr);
                         else
                             ++itr;
                     }
-                    if (unitList.size() > maxSize) {
-                        unitList.sort(
-                                Trinity::PowerPctOrderPred((Powers) power));
+                    if (unitList.size() > maxSize) 
+                    {
+                        unitList.sort(Trinity::PowerPctOrderPred((Powers) power));
                         unitList.resize(maxSize);
                     }
                 }
             }
 
             // Other special target selection goes here
-            if (uint32 maxTargets = m_spellValue->MaxAffectedTargets) {
-                Unit::AuraEffectList const& Auras =
-                        m_caster->GetAuraEffectsByType(
-                                SPELL_AURA_MOD_MAX_AFFECTED_TARGETS);
-                for (Unit::AuraEffectList::const_iterator j = Auras.begin();
-                        j != Auras.end(); ++j)
-                    if ((*j)->IsAffectedOnSpell(m_spellInfo)) maxTargets +=
-                            (*j)->GetAmount();
+            if (uint32 maxTargets = m_spellValue->MaxAffectedTargets) 
+            {
+                Unit::AuraEffectList const& Auras = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS);
+                for (Unit::AuraEffectList::const_iterator j = Auras.begin(); j != Auras.end(); ++j)
+                    if ((*j)->IsAffectedOnSpell(m_spellInfo)) 
+                        maxTargets += (*j)->GetAmount();
 
                 if (m_spellInfo->Id == 5246) //Intimidating Shout
-                unitList.remove(m_targets.getUnitTarget());
+                    unitList.remove(m_targets.getUnitTarget());
                 Trinity::RandomResizeList(unitList, maxTargets);
-            } else {
-                switch (m_spellInfo->Id) {
-            case 2812:  // Paladin Holy Wrath
-            if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA &&
-              m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STUN)
+            } else 
             {
-              bool isElemsAndDragonkings = m_caster->HasAura(56420);    // Glyph of Holy Wrath
-              for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
-              {
-                Unit* target = (*itr);
-                if (!target)
+                switch (m_spellInfo->Id)
                 {
-                  itr++;
-                  continue;
-                }
+                    case 2812:  // Paladin Holy Wrath
+                    if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STUN)
+                    {
+                        bool isElemsAndDragonkings = m_caster->HasAura(56420);    // Glyph of Holy Wrath
+                        for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                        {
+                            Unit* target = (*itr);
+                            if (!target)
+                            {
+                                itr++;
+                                continue;
+                            }
 
-                uint32 typeCreature = target->GetCreatureType();
-                if ( (CREATURE_TYPE_DEMON==typeCreature || CREATURE_TYPE_UNDEAD==typeCreature) ||
-                  (isElemsAndDragonkings && (CREATURE_TYPE_DRAGONKIN==typeCreature || CREATURE_TYPE_ELEMENTAL==typeCreature))
-                   )
-                {
-                  itr++;
-                }
-                else
-                {
-                  itr = unitList.erase(itr);
-                }
-              }
-            }
-            break;
+                            uint32 typeCreature = target->GetCreatureType();
+                            if ((CREATURE_TYPE_DEMON==typeCreature || CREATURE_TYPE_UNDEAD==typeCreature) || (isElemsAndDragonkings 
+                                && (CREATURE_TYPE_DRAGONKIN==typeCreature || CREATURE_TYPE_ELEMENTAL==typeCreature)))
+                            {
+                                itr++;
+                            }
+                            else
+                            {
+                              itr = unitList.erase(itr);
+                            }
+                        }
+                    }
+                    break;
                     case 27285: // Seed of Corruption proc spell
                         unitList.remove(m_targets.getUnitTarget());
                         break;
@@ -2982,10 +2945,10 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                     case 72444:
                     case 72445:
                     case 72446:
-                        for (std::list<Unit*>::iterator itr = unitList.begin();
-                                itr != unitList.end();) {
-                            if (!(*itr)->HasAura(72293)) itr = unitList.erase(
-                                    itr);
+                        for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                        {
+                            if (!(*itr)->HasAura(72293)) 
+                                itr = unitList.erase(itr);
                             else
                                 ++itr;
                         }
@@ -2995,103 +2958,98 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur) {
                     case 69798:
                     case 69801: // Ooze Flood
                         // get 2 targets except 2 nearest
-                        unitList.sort(
-                                Trinity::ObjectDistanceOrderPred(m_caster));
+                        unitList.sort(Trinity::ObjectDistanceOrderPred(m_caster));
                         unitList.resize(4);
-                        while (unitList.size() > 2)
+                        while (unitList.size() > 2) 
                             unitList.pop_front();
                         // crashfix
-                        if (unitList.empty()) return;
+                        if (unitList.empty()) 
+                            return;
                         break;
                     case 68921:
                     case 69049: // Soulstorm
-                        for (std::list<Unit*>::iterator itr = unitList.begin();
-                                itr != unitList.end();) {
+                        for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();) 
+                        {
                             Position pos;
                             (*itr)->GetPosition(&pos);
-                            if (m_caster->GetExactDist2d(&pos) <= 10.0f) itr =
-                                    unitList.erase(itr);
+                            if (m_caster->GetExactDist2d(&pos) <= 10.0f) 
+                                itr = unitList.erase(itr);
                             else
                                 ++itr;
                         }
                         break;
                     case 71390: // Pact of the Darkfallen
                     {
-                        for (std::list<Unit*>::iterator itr = unitList.begin();
-                                itr != unitList.end();) {
-                            if (!(*itr)->HasAura(71340)) itr = unitList.erase(
-                                    itr);
+                        for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
+                        {
+                            if (!(*itr)->HasAura(71340)) 
+                                itr = unitList.erase(itr);
                             else
                                 ++itr;
                         }
                         bool remove = true;
                         // we can do this, unitList is MAX 4 in size
-                        for (std::list<Unit*>::const_iterator itr =
-                                unitList.begin();
-                                itr != unitList.end() && remove; ++itr) {
-                            if (!m_caster->IsWithinDist(*itr, 5.0f, false)) remove =
-                                    false;
+                        for (std::list<Unit*>::const_iterator itr = unitList.begin(); itr != unitList.end() && remove; ++itr)
+                        {
+                            if (!m_caster->IsWithinDist(*itr, 5.0f, false))
+                                remove = false;
 
-                            for (std::list<Unit*>::const_iterator itr2 =
-                                    unitList.begin();
-                                    itr2 != unitList.end() && remove; ++itr2)
-                                if (itr != itr2
-                                        && !(*itr2)->IsWithinDist(*itr, 5.0f,
-                                                false)) remove = false;
+                            for (std::list<Unit*>::const_iterator itr2 = unitList.begin(); itr2 != unitList.end() && remove; ++itr2)
+                                if (itr != itr2 && !(*itr2)->IsWithinDist(*itr, 5.0f, false))
+                                    remove = false;
                         }
 
-                        if (remove) for (std::list<Unit*>::iterator itr =
-                                unitList.begin(); itr != unitList.end(); ++itr)
-                            (*itr)->RemoveAura(71340);
+                        if (remove) 
+                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                                (*itr)->RemoveAura(71340);
                         break;
                     }
                 }
+
                 // Death Pact
-                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT
-                        && m_spellInfo->SpellFamilyFlags[0] & 0x00080000) {
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[0] & 0x00080000)
+                {
                     Unit * unit_to_add = NULL;
-                    for (std::list<Unit*>::iterator itr = unitList.begin();
-                            itr != unitList.end(); ++itr) {
-                        if ((*itr)->GetTypeId() == TYPEID_UNIT
-                                && (*itr)->GetOwnerGUID() == m_caster->GetGUID()
-                                && (*itr)->ToCreature()->GetCreatureInfo()->type
-                                        == CREATURE_TYPE_UNDEAD) {
+                    for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr) 
+                    {
+                        if ((*itr)->GetTypeId() == TYPEID_UNIT && (*itr)->GetOwnerGUID() == m_caster->GetGUID() && (*itr)->ToCreature()->GetCreatureInfo()->type == CREATURE_TYPE_UNDEAD) 
+                        {
                             unit_to_add = (*itr);
                             break;
                         }
                     }
-                    if (unit_to_add) {
+                    if (unit_to_add)
+                    {
                         unitList.clear();
                         unitList.push_back(unit_to_add);
                     }
                     // Pet not found - remove cooldown
-                    else {
-                        if (modOwner->GetTypeId() == TYPEID_PLAYER) modOwner->RemoveSpellCooldown(
-                                m_spellInfo->Id, true);
+                    else 
+                    {
+                        if (modOwner->GetTypeId() == TYPEID_PLAYER) 
+                            modOwner->RemoveSpellCooldown(m_spellInfo->Id, true);
                         SendCastResult(SPELL_FAILED_NO_PET);
                         finish(false);
                     }
                 }
             }
-            for (std::list<Unit*>::iterator itr = unitList.begin();
-                    itr != unitList.end(); ++itr)
+
+            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                 AddUnitTarget(*itr, i);
         }
 
-        if (!gobjectList.empty()) {
-            if (uint32 maxTargets = m_spellValue->MaxAffectedTargets) {
-                Unit::AuraEffectList const& Auras =
-                        m_caster->GetAuraEffectsByType(
-                                SPELL_AURA_MOD_MAX_AFFECTED_TARGETS);
-                for (Unit::AuraEffectList::const_iterator j = Auras.begin();
-                        j != Auras.end(); ++j)
-                    if ((*j)->IsAffectedOnSpell(m_spellInfo)) maxTargets +=
-                            (*j)->GetAmount();
+        if (!gobjectList.empty())
+        {
+            if (uint32 maxTargets = m_spellValue->MaxAffectedTargets) 
+            {
+                Unit::AuraEffectList const& Auras = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS);
+                for (Unit::AuraEffectList::const_iterator j = Auras.begin(); j != Auras.end(); ++j)
+                    if ((*j)->IsAffectedOnSpell(m_spellInfo)) 
+                        maxTargets += (*j)->GetAmount();
 
                 Trinity::RandomResizeList(gobjectList, maxTargets);
             }
-            for (std::list<GameObject*>::iterator itr = gobjectList.begin();
-                    itr != gobjectList.end(); ++itr)
+            for (std::list<GameObject*>::iterator itr = gobjectList.begin(); itr != gobjectList.end(); ++itr)
                 AddGOTarget(*itr, i);
         }
     }
