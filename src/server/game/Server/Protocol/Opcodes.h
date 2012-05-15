@@ -493,7 +493,7 @@ enum Opcodes
     CMSG_RECLAIM_CORPSE                              = 0x07CC8, // 4.0.6a 13623
     CMSG_WRAP_ITEM                                   = 0x07CC4, // 4.0.6a 13623
     SMSG_LEVELUP_INFO                                = 0x0B9C4, // 4.0.6a 13623
-    MSG_MINIMAP_PING                                 = 0x0C475, // Unknown opcode ID
+    MSG_MINIMAP_PING                                 = 0x033A0, // 4.0.6a 13623
     SMSG_RESISTLOG                                   = 0x10084, // Unknown opcode ID
     SMSG_ENCHANTMENTLOG                              = 0x0F5AC, // 4.0.6a 13623
     CMSG_SET_SKILL_CHEAT                             = 0x10085, // Unknown opcode ID
@@ -742,7 +742,7 @@ enum Opcodes
     CMSG_BATTLEFIELD_PORT                            = 0x00E11, // 4.0.6a 13623
     CMSG_INSPECT_HONOR_STATS                         = 0x00E93, // 4.0.6a 13623
     SMSG_INSPECT_HONOR_STATS                         = 0x0005E, // 4.0.6a 13623
-    CMSG_BATTLEMASTER_HELLO                          = 0x06D57, // Unknown opcode ID
+    CMSG_BATTLEMASTER_HELLO                          = 0x06EC8, // 4.0.6a 13623
     CMSG_MOVE_START_SWIM_CHEAT                       = 0x026C0, // 4.0.6a 13623
     CMSG_MOVE_STOP_SWIM_CHEAT                        = 0x06988, // 4.0.6a 13623
     SMSG_FORCE_WALK_SPEED_CHANGE                     = 0x068E8, // 4.0.6a 13623
