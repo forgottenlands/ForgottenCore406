@@ -295,69 +295,6 @@ class spell_warr_shockwave : public SpellScriptLoader
         }
 };
 
-// Thunder Clap
-// Spell Id: 6343
-class spell_warr_thunderclap : public SpellScriptLoader
-{
-    public:
-        spell_warr_thunderclap() : SpellScriptLoader("spell_warr_thunderclap") { }
-
-        class spell_warr_thunderclap_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warr_thunderclap_SpellScript);
-
-            // Lock for avoid processing the same thing multiple times when we already know the result
-            bool CheckAgain;
-            std::list<Unit*> targetList;
-
-            bool Load()
-            {
-                CheckAgain = true;
-				return true;
-            }
-
-            void FilterTargets(std::list<Unit*>& unitList)
-            {
-                targetList = unitList;
-            }
-
-            void OnTargetHit(SpellEffIndex effect)
-            {
-                if(CheckAgain) // Dont re-cast the thing on each target if its already applied
-                {
-                    // Check for Blood and Thunder
-                    if(Unit* caster = GetCaster())
-                    {
-                        if(caster->HasAura(84615) || (caster->HasAura(84614) && roll_chance_i(50))) // Blood and Thunder rank 1 & 2
-                        {
-                            if(Unit* target = GetHitUnit())
-                            {
-                                if(target->HasAura(94009)) // If the target has Rend
-                                {
-                                    CheckAgain = false;
-                                    for(std::list<Unit*>::iterator itr = targetList.begin(); itr != targetList.end(); ++itr)
-                                        if(Unit* curTrg = (*itr))
-                                            caster->CastSpell(curTrg,94009,true);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_thunderclap::spell_warr_thunderclap_SpellScript::OnTargetHit,EFFECT_0,SPELL_EFFECT_SCHOOL_DAMAGE);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_warr_thunderclap::spell_warr_thunderclap_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warr_thunderclap_SpellScript();
-        }
-};
-
 void AddSC_warrior_spell_scripts() {
 	new spell_warr_last_stand;
 	new spell_warr_charge;
@@ -367,5 +304,4 @@ void AddSC_warrior_spell_scripts() {
     new spell_warr_execute();
     new spell_warr_heroic_strike();
     new spell_warr_shockwave();
-    new spell_warr_thunderclap();
 }
