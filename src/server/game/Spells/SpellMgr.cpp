@@ -4714,6 +4714,25 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectMiscValue[0] = 2;
             count++;
             break;
+        case 85425: // Nurture (Anshal) summon
+            spellInfo->DurationIndex = 21;
+            break;
+        case 86282: // Toxic Spores
+        case 93120:
+        case 93121:
+        case 93122:
+            spellInfo->EffectRadiusIndex[0] = 13;
+            count++;
+            break;
+        case 84651: // Zephyr
+        case 93117:
+        case 93118:
+        case 93119:
+            spellInfo->EffectRadiusIndex[0] = 49;
+            spellInfo->EffectRadiusIndex[1] = 49;
+            spellInfo->EffectRadiusIndex[2] = 49;
+            count++;
+            break;
         default:
             break;
         }

@@ -35,7 +35,31 @@
 enum anshalEvents
 {
     EVENT_WINTERING_WINDS = 1,
-    EVENT_ANSHAL_REGEN_ENERGY,
+    EVENT_SOOTHING_BREEZE,
+    EVENT_DESPAWN_BREEZE,
+    EVENT_ANSHAL_CHECK_ENERGY,
+    EVENT_NURTURE,
+    EVENT_ZEPHYR,
+    EVENT_ANSHAL_CHECK_POSITION,
+    EVENT_ANSHAL_RESET_ENERGY
+};
+
+enum anshalSpells
+{
+    SPELL_SOOTHING_BREEZE_SUMMON                  = 86205,
+    SPELL_SOOTHING_BREEZE_VISUAL                  = 86208,
+    SPELL_SOOTHING_BREEZE_HEAL_TRIG               = 86206,
+    SPELL_SOOTHING_BREEZE_SILENCE_TRIG            = 86207,
+    SPELL_NURTURE                                 = 85422,
+    SPELL_NURTURE_VISUAL                          = 85428,
+    SPELL_SUMMON_RAVENOUS_CREEPER                 = 85429,
+    SPELL_ZEPHYR                                  = 84638,
+    SPELL_WINTERING_WILLS                         = 85576,
+};
+
+enum actions
+{
+    ACTION_RAVENOUS_SUMMON = 1,
 };
 
 class boss_anshal: public CreatureScript
@@ -53,6 +77,8 @@ class boss_anshal: public CreatureScript
         SummonList summons;
         InstanceScript* instance;
         bool pauseRegen;
+        bool castingSpecial;
+        uint32 energyRegenTimer;
 
         void Reset()
         {
@@ -60,12 +86,21 @@ class boss_anshal: public CreatureScript
             me->SetMaxPower(POWER_ENERGY, MAX_ENERGY);
             me->SetPower(POWER_ENERGY, 0);
             pauseRegen = false;
+            castingSpecial = false;
             events.Reset();
+            summons.DespawnAll();
+            energyRegenTimer = 0;
         }   
 
         void EnterCombat(Unit* who)
         {
-            events.ScheduleEvent(EVENT_ANSHAL_REGEN_ENERGY, 1000, 0, 0);
+            events.ScheduleEvent(EVENT_SOOTHING_BREEZE, 32500, 0, 0); // Offylike
+            events.ScheduleEvent(EVENT_ANSHAL_CHECK_POSITION, 1000, 0, 0);
+            events.ScheduleEvent(EVENT_NURTURE, urand(20000, 22000), 0, 0); // Not sure
+            events.ScheduleEvent(EVENT_ANSHAL_CHECK_ENERGY, 500, 0, 0);
+
+            energyRegenTimer = 1000;
+
             if (instance)
             {
                 instance->SetData(DATA_ANSHAL_EVENT, IN_PROGRESS);
@@ -83,6 +118,23 @@ class boss_anshal: public CreatureScript
         void JustSummoned(Creature* summoned)
         {
             summons.Summon(summoned);
+
+            switch (summoned->GetEntry())
+            {
+                case NPC_SOOTHING_BREEZE:
+                    me->AddAura(SPELL_SOOTHING_BREEZE_VISUAL, summoned);
+                    me->AddAura(SPELL_SOOTHING_BREEZE_HEAL_TRIG, summoned);
+                    me->AddAura(SPELL_SOOTHING_BREEZE_SILENCE_TRIG, summoned);
+                    summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                    events.ScheduleEvent(EVENT_DESPAWN_BREEZE, 30000, 0, 0);
+                    break;
+                case NPC_RAVENOUS_TRIGGER:
+                    summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    summoned->AddAura(SPELL_NURTURE_VISUAL, summoned);
+                    if (summoned->AI())
+                        summoned->AI()->DoAction(ACTION_RAVENOUS_SUMMON);
+                    break;
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -90,21 +142,72 @@ class boss_anshal: public CreatureScript
             if (!UpdateVictim())
                 return;
 
-            events.Update(diff);
+            if (energyRegenTimer <= diff)
+            {
+                RegenerateEnergy();
+                energyRegenTimer = 1000;
+            }
+            else
+                energyRegenTimer -= diff;          
 
             if (me->HasUnitState(UNIT_STAT_CASTING))
                 return;
+
+            events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_WINTERING_WINDS:
+                        me->CastSpell(me, SPELL_WINTERING_WILLS, true);
                         break;
-                    case EVENT_ANSHAL_REGEN_ENERGY:
-                        RegenerateEnergy();
-                        events.ScheduleEvent(EVENT_ANSHAL_REGEN_ENERGY, 1000, 0, 0);
+                    case EVENT_SOOTHING_BREEZE:
+                        me->CastSpell(me, SPELL_SOOTHING_BREEZE_SUMMON, true);
+                        events.ScheduleEvent(EVENT_SOOTHING_BREEZE, urand(32500, 36000), 0, 0);
                         break;
+                    case EVENT_DESPAWN_BREEZE:
+                        summons.DespawnEntry(NPC_SOOTHING_BREEZE, 0);
+                        break;
+                    case EVENT_NURTURE:
+                        me->CastSpell(me->getVictim(), SPELL_NURTURE, true);
+                        events.ScheduleEvent(EVENT_NURTURE, urand(80000, 90000), 0, 0); // not sure
+                        break;
+                    case EVENT_ANSHAL_CHECK_ENERGY:
+                        if (me->GetPower(POWER_ENERGY) >= MAX_ENERGY && !castingSpecial)
+                        {
+                            castingSpecial = true;
+                            events.ScheduleEvent(EVENT_ZEPHYR, 1000, 0, 0);
+                        }
+                        events.ScheduleEvent(EVENT_ANSHAL_CHECK_ENERGY, 500, 0, 0);
+                        break;
+                    case EVENT_ZEPHYR:
+                        castingSpecial = true;  
+                        pauseRegen = true;
+                        float homeX, homeY, homeZ, homeO;
+                        me->GetHomePosition(homeX, homeY, homeZ, homeO);
+                        me->SetPosition(homeX, homeY, homeZ, homeO, true);
+                        me->SetPower(POWER_ENERGY, 0);
+                        me->CastSpell(me->getVictim(), SPELL_ZEPHYR, true);
+                        events.ScheduleEvent(EVENT_ANSHAL_RESET_ENERGY, 1000, 0, 0);
+                        events.DelayEvents(5800);
+                        break;
+                    case EVENT_ANSHAL_RESET_ENERGY:
+                        pauseRegen = false;
+                        castingSpecial = false;
+                        break;
+                    case EVENT_ANSHAL_CHECK_POSITION:
+                    {
+                        float homeX, homeY, homeZ, homeO;
+                        me->GetHomePosition(homeX, homeY, homeZ, homeO);
+                        if (me->GetDistance(homeX, homeY, homeZ) > 70.0f)
+                            events.ScheduleEvent(EVENT_WINTERING_WINDS, 2000, 0, 0);
+                        else
+                            events.CancelEvent(EVENT_WINTERING_WINDS);
+
+                        events.ScheduleEvent(EVENT_ANSHAL_CHECK_POSITION, 1000, 0, 0);
+                        break;
+                    }
                 }
             }
 
@@ -117,7 +220,10 @@ class boss_anshal: public CreatureScript
             {
                 case ACTION_ANSHAL_ENTER_IN_COMBAT:
                     if (Player* target = me->FindNearestPlayer(70.0f, true))
+                    {
+                        me->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
                         me->Attack(target, true);
+                    }
                     break;
             }
         }
@@ -137,6 +243,128 @@ class boss_anshal: public CreatureScript
     }
 };
 
+enum ravenousTriggerEvents
+{
+    EVENT_SUMMON_RAVENOUS = 1,
+};
+
+class npc_ravenous_creeper_trigger : public CreatureScript
+{
+public:
+    npc_ravenous_creeper_trigger() : CreatureScript("npc_ravenous_creeper_trigger") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ravenous_creeper_triggerAI(creature);
+    }
+
+    struct npc_ravenous_creeper_triggerAI: public ScriptedAI
+    {
+        npc_ravenous_creeper_triggerAI(Creature* c) : ScriptedAI(c)
+        { }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.Reset();
+        }
+
+        void DoAction(const int32 actionid)
+        {
+            switch (actionid)
+            {
+                case ACTION_RAVENOUS_SUMMON:
+                    events.ScheduleEvent(EVENT_SUMMON_RAVENOUS, 10000, 0, 0);
+                    break;
+            }
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            if (Player* target = summon->FindNearestPlayer(70.0f, true))
+            {
+                summon->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
+                summon->Attack(target, true);
+                DoZoneInCombat(summon);
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SUMMON_RAVENOUS:
+                        me->CastSpell(me, SPELL_SUMMON_RAVENOUS_CREEPER, true);
+                        me->RemoveAllAuras();
+                    break;
+                }
+            }
+        }
+    };
+};
+
+enum ravenousCreeperEvents
+{
+    EVENT_TOXIC_SPORES = 1,
+};
+
+#define SPELL_TOXIC_SPORES                        86281
+
+class npc_ravenous_creeper : public CreatureScript
+{
+public:
+    npc_ravenous_creeper() : CreatureScript("npc_ravenous_creeper") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ravenous_creeperAI(creature);
+    }
+
+    struct npc_ravenous_creeperAI: public ScriptedAI
+    {
+        npc_ravenous_creeperAI(Creature* c) : ScriptedAI(c)
+        { }
+
+        EventMap events;
+
+        void Reset()
+        {
+            events.Reset();
+        }
+
+        void EnterCombat(Unit* pVictim)
+        {
+            events.ScheduleEvent(EVENT_TOXIC_SPORES, 7000, 0, 0);
+            me->CastSpell(me, SPELL_TOXIC_SPORES, me);
+        }
+        void UpdateAI(const uint32 diff)
+        {
+            events.Update(diff);
+            
+            if (!UpdateVictim())
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_TOXIC_SPORES:
+                    me->CastSpell(me, SPELL_TOXIC_SPORES, me);
+                    events.ScheduleEvent(EVENT_TOXIC_SPORES, 7000, 0, 0);
+                    break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    };
+};
+
 /*
 ############
 ### Boss Nezir
@@ -151,7 +379,9 @@ enum nezirEvents
     EVENT_WIND_CHILL,
     EVENT_SLEET_STORM,
     EVENT_CHECK_ENERGY,
-    EVENT_RESET_ENERGY,
+    EVENT_NEZIR_RESET_ENERGY,
+    EVENT_NEZIR_CHECK_POSITION,
+    EVENT_CHILLING_WILLS
 };
 
 enum nezirSpells
@@ -161,6 +391,7 @@ enum nezirSpells
     SPELL_PERMAFROST                              = 86082, // Target self!
     SPELL_WIND_CHILL                              = 84645,
     SPELL_SLEET_STORM                             = 84644,
+    SPELL_CHILLING_WINDS                          = 85578, // need damage
 };
 
 class boss_nezir: public CreatureScript
@@ -201,6 +432,7 @@ class boss_nezir: public CreatureScript
             events.ScheduleEvent(EVENT_ICE_PATCH, urand(20000, 25000), 0, 0); // Not sure
             events.ScheduleEvent(EVENT_PERMAFROST, urand(10000, 12000), 0, 0); // Offylike
             events.ScheduleEvent(EVENT_WIND_CHILL, 10000, 0, 0); // Offylike
+            events.ScheduleEvent(EVENT_NEZIR_CHECK_POSITION, 1000, 0, 0);
 
             if (instance)
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
@@ -252,6 +484,8 @@ class boss_nezir: public CreatureScript
                 switch (eventId)
                 {
                     case EVENT_CHILLING_WINDS:
+                        if (!me->HasAura(SPELL_CHILLING_WINDS))
+                            me->CastSpell(me, SPELL_CHILLING_WINDS, true);
                         break;
                     case EVENT_ICE_PATCH:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true, 0))
@@ -283,14 +517,25 @@ class boss_nezir: public CreatureScript
                         me->SetPosition(homeX, homeY, homeZ, homeO, true);
                         me->SetPower(POWER_RUNIC_POWER, 0);
                         me->CastSpell(me->getVictim(), SPELL_SLEET_STORM, true);
-                        events.ScheduleEvent(EVENT_RESET_ENERGY, 1000, 0, 0);
+                        events.ScheduleEvent(EVENT_NEZIR_RESET_ENERGY, 1000, 0, 0);
                         events.DelayEvents(5800);
                         break;
-                    case EVENT_RESET_ENERGY:
+                    case EVENT_NEZIR_RESET_ENERGY:
                         pauseRegen = false;
                         castingSpecial = false;
                         break;
+                    case EVENT_NEZIR_CHECK_POSITION:
+                    {
+                        float homeX, homeY, homeZ, homeO;
+                        me->GetHomePosition(homeX, homeY, homeZ, homeO);
+                        if (me->GetDistance(homeX, homeY, homeZ) > 70.0f)
+                            events.ScheduleEvent(EVENT_CHILLING_WILLS, 2000, 0, 0);
+                        else
+                            events.CancelEvent(EVENT_CHILLING_WILLS);
 
+                        events.ScheduleEvent(EVENT_NEZIR_CHECK_POSITION, 1000, 0, 0);
+                        break;
+                    }
                 }
             }
 
@@ -303,7 +548,10 @@ class boss_nezir: public CreatureScript
             {
                 case ACTION_NEZIR_ENTER_IN_COMBAT:
                     if (Player* target = me->FindNearestPlayer(70.0f, true))
+                    {
+                        me->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
                         me->Attack(target, true);
+                    }
                     break;
             }
         }
@@ -417,7 +665,10 @@ class boss_rohash: public CreatureScript
             {
                 case ACTION_ROHASH_ENTER_IN_COMBAT:
                     if (Player* target = me->FindNearestPlayer(70.0f, true))
+                    {
+                        me->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
                         me->Attack(target, true);
+                    }
                     break;
             }
         }
@@ -440,6 +691,8 @@ class boss_rohash: public CreatureScript
 void AddSC_boss_conclave_of_wind()
 {
     new boss_anshal();
+    new npc_ravenous_creeper_trigger();
+    new npc_ravenous_creeper();
     new boss_nezir();
     new boss_rohash();
 }

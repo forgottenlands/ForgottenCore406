@@ -2749,76 +2749,82 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const {
         }
     } else {
         // Spell exist but require custom code
-        switch (auraId) {
-        case 66869:
-            switch (caster->GetMap()->GetDifficulty()) {
-            case RAID_DIFFICULTY_10MAN_NORMAL:
-                triggerSpellId = 66870;
+        switch (auraId)
+        {
+            case 66869:
+                switch (caster->GetMap()->GetDifficulty()) 
+                {
+                    case RAID_DIFFICULTY_10MAN_NORMAL:
+                        triggerSpellId = 66870;
+                        break;
+                    case RAID_DIFFICULTY_10MAN_HEROIC:
+                        triggerSpellId = 67621;
+                        break;
+                    case RAID_DIFFICULTY_25MAN_NORMAL:
+                        triggerSpellId = 67622;
+                        break;
+                    case RAID_DIFFICULTY_25MAN_HEROIC:
+                        triggerSpellId = 67623;
+                        break;
+                }
                 break;
-            case RAID_DIFFICULTY_10MAN_HEROIC:
-                triggerSpellId = 67621;
-                break;
-            case RAID_DIFFICULTY_25MAN_NORMAL:
-                triggerSpellId = 67622;
-                break;
-            case RAID_DIFFICULTY_25MAN_HEROIC:
-                triggerSpellId = 67623;
-                break;
-            }
-            break;
             // Pursuing Spikes (Anub'arak)
-        case 65920:
-        case 65922:
-        case 65923:
-            if (caster->HasAura(66193)) {
-                if (Unit *permafrostCaster = caster->GetAura(66193)->GetCaster())
-                    if (Creature *permafrostCasterAsCreature = permafrostCaster->ToCreature())
-                        permafrostCasterAsCreature->ForcedDespawn(3000);
+            case 65920:
+            case 65922:
+            case 65923:
+                if (caster->HasAura(66193))
+                {
+                    if (Unit *permafrostCaster = caster->GetAura(66193)->GetCaster())
+                        if (Creature *permafrostCasterAsCreature = permafrostCaster->ToCreature())
+                            permafrostCasterAsCreature->ForcedDespawn(3000);
 
-                caster->CastSpell(caster, 66181, false);
-                caster->RemoveAllAuras();
-                if (Creature *casterAsCreature = caster->ToCreature())
-                    casterAsCreature->DisappearAndDie();
-            }
-            break;
+                    caster->CastSpell(caster, 66181, false);
+                    caster->RemoveAllAuras();
+                    if (Creature *casterAsCreature = caster->ToCreature())
+                        casterAsCreature->DisappearAndDie();
+                }
+                break;
             // Negative Energy Periodic
-        case 46284:
-            caster->CastCustomSpell(triggerSpellId, SPELLVALUE_MAX_TARGETS,
-                    m_tickNumber / 10 + 1, NULL, true, NULL, this);
-            return;
-            // Poison (Grobbulus)
-        case 28158:
-        case 54362:
+            case 46284:
+                caster->CastCustomSpell(triggerSpellId, SPELLVALUE_MAX_TARGETS, m_tickNumber / 10 + 1, NULL, true, NULL, this);
+                return;
+                // Poison (Grobbulus)
+            case 28158:
+            case 54362:
             // Slime Pool (Dreadscale & Acidmaw)
-        case 66882:
-            target->CastCustomSpell(
-                    triggerSpellId,
-                    SPELLVALUE_RADIUS_MOD,
-                    (int32) ((((float) m_tickNumber / 60) * 0.9f + 0.1f) * 10000),
-                    NULL, true, NULL, this);
-            return;
+            case 66882:
+                target->CastCustomSpell(triggerSpellId, SPELLVALUE_RADIUS_MOD, (int32) ((((float) m_tickNumber / 60) * 0.9f + 0.1f) * 10000), NULL, true, NULL, this);
+                return;
             // Beacon of Light
-        case 53563: {
-            Unit *triggerCaster = (Unit *) (GetBase()->GetOwner());
-            triggerCaster->CastSpell(triggerTarget, triggeredSpellInfo, true, 0,
-                    this, triggerCaster->GetGUID());
-            return;
-        }
+            case 53563:
+            {
+                Unit *triggerCaster = (Unit *) (GetBase()->GetOwner());
+                triggerCaster->CastSpell(triggerTarget, triggeredSpellInfo, true, 0, this, triggerCaster->GetGUID());
+                return;
+            }
             // Rapid Recuperation (triggered energize have basepoints == 0)
-        case 56654:
-        case 58882: {
-            if (int32 mana = target->GetMaxPower(POWER_FOCUS) / 100 * GetAmount())
-                target->CastCustomSpell(target, triggerSpellId, &mana, NULL,
-                        NULL, true, NULL, this);
-            return;
-        }
+            case 56654:
+            case 58882:
+            {
+                if (int32 mana = target->GetMaxPower(POWER_FOCUS) / 100 * GetAmount())
+                    target->CastCustomSpell(target, triggerSpellId, &mana, NULL, NULL, true, NULL, this);
+                return;
+            }
             // Slime Spray - temporary here until preventing default effect works again
             // added on 9.10.2010
-        case 69508: {
-            caster->CastSpell(triggerTarget, triggerSpellId, true, NULL, NULL,
-                    caster->GetGUID());
-            return;
-        }
+            case 69508: 
+            {
+                caster->CastSpell(triggerTarget, triggerSpellId, true, NULL, NULL, caster->GetGUID());
+                return;
+            }
+            // Nurture summon 
+            case 85422:
+                triggerSpellId = 0;
+                Position pos;
+                caster->GetNearPosition(pos, 5.0f + 25.0f * (float) rand_norm(), (float) rand_norm() * static_cast <float>(2 * M_PI));
+                caster->SummonCreature(45813, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 13000);
+                return;
+                break;
         }
     }
 

@@ -47,6 +47,8 @@ enum CreatureIds
 
    // Conclave of Wind
    NPC_ICE_PATCH                                  = 46186,
+   NPC_SOOTHING_BREEZE                            = 46246,
+   NPC_RAVENOUS_TRIGGER                           = 45813,
 };
 
 enum ConclaveSharedActions
