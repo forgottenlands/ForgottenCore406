@@ -392,6 +392,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data) {
            case 562: // Blade's Edge Arena
                height = -5.0f;
                break;
+           case 754: // Throne of four winds
+               height = 150.0f;
+               break;
            default: height = -500.0f;
                break;
         }
@@ -400,6 +403,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data) {
         {
             if (!(plMover->InBattleground() && plMover->GetBattleground() && plMover->GetBattleground()->HandlePlayerUnderMap(_player))) 
             {
+                if (plMover->GetMapId() == 754)
+                {
+                    plMover->TeleportTo(754, -281.557f, 814.71f, 218.26f, 6.27f);
+                    plMover->AddAura(130, plMover);
+                    return;
+                }
                 // NOTE: this is actually called many times while falling
                 // even after the player has been teleported away
                 // TODO: discard movement packets after the player is rooted

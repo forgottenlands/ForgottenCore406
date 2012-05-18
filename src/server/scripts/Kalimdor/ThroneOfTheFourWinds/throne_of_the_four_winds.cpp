@@ -88,12 +88,17 @@ public:
 
         uint8 SlipstreamPosition;
 
+        void Reset()
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
+        }
+
         void MoveInLineOfSight(Unit* who)
         {
             if(SlipstreamPosition >= DIR_ERROR || who->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            if(who->GetExactDist(me) <= 8.f)
+            if(who->GetExactDist(me) <= 5.f)
             {
                 me->AddAura(SPELL_SLIPSTREAM_BUFF,who);
                 me->AddAura(SPELL_SLIPSTREAM_PLAYER_VISUAL,who);
