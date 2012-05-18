@@ -2825,6 +2825,19 @@ void AuraEffect::TriggerSpell(Unit *target, Unit *caster) const {
                 caster->SummonCreature(45813, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 13000);
                 return;
                 break;
+            // Hurricane (Rohash Final)
+            case 84643: 
+                if (m_tickNumber == 14)
+                {
+                    if (caster->GetMap() && !caster->GetMap()->GetPlayers().isEmpty())
+                    {
+                        for (Map::PlayerList::const_iterator i = caster->GetMap()->GetPlayers().begin(); i != caster->GetMap()->GetPlayers().end(); ++i)
+                            if (i->getSource())
+                                if (caster->GetDistance(i->getSource()) <= 90.0f)
+                                    i->getSource()->GetMotionMaster()->MoveJump( i->getSource()->GetPositionX(),  i->getSource()->GetPositionY(),  i->getSource()->GetPositionZ() + 35.0f, 0.5f, 0.5f);
+                    }
+                }
+                break;
         }
     }
 

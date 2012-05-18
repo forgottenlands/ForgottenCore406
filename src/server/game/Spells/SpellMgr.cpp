@@ -4733,6 +4733,22 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectRadiusIndex[2] = 49;
             count++;
             break;
+        case 85483: // Wind Blast
+        case 93138:
+        case 93139:
+        case 93140:
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CONE_ENEMY;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CONE_ENEMY;
+            count++;
+            break;
+        case 86487: // Hurricane (Rohash Final)
+        case 93144:
+        case 93145:
+        case 93146:
+            spellInfo->EffectRadiusIndex[0] = 49;
+            spellInfo->EffectRadiusIndex[1] = 49;
+            count++;
+            break;
         default:
             break;
         }

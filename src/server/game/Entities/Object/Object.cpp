@@ -1451,8 +1451,27 @@ bool WorldObject::IsInBetween(const WorldObject *obj1, const WorldObject *obj2,
 			* GetExactDist2d(obj1->GetPositionX(), obj1->GetPositionY()) < size;
 }
 
-bool WorldObject::isInFront(WorldObject const* target, float distance,
-		float arc) const {
+bool WorldObject::isInFront(WorldObject const* target, float distance, float arc) const 
+{
+    // Rohash wind blast hack
+    if (ToCreature() && (ToCreature()->GetEntry() == 45872 || ToCreature()->GetEntry() == 50095 || ToCreature()->GetEntry() == 50105 || ToCreature()->GetEntry() == 50115))
+    {
+	    if (target == this)
+		    return true;
+
+	    arc = MapManager::NormalizeOrientation(arc);
+	    float angle = GetAngle(target);
+	    angle -= 0.980439f;
+
+	    angle = MapManager::NormalizeOrientation(angle);
+	    if (angle > M_PI)
+		    angle -= 2.0f * M_PI;
+
+	    float lborder = -1 * (arc / 2.0f);
+	    float rborder = (arc / 2.0f); 
+	    return IsWithinDist(target, distance) && ((angle >= lborder) && (angle <= rborder));
+    }
+
 	return IsWithinDist(target, distance) && HasInArc(arc, target);
 }
 

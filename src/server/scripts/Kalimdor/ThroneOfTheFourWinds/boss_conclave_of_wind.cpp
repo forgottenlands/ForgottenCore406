@@ -160,7 +160,8 @@ class boss_anshal: public CreatureScript
                 switch (eventId)
                 {
                     case EVENT_WINTERING_WINDS:
-                        me->CastSpell(me, SPELL_WINTERING_WILLS, true);
+                        if (!me->HasAura(SPELL_WINTERING_WILLS))
+                            me->CastSpell(me, SPELL_WINTERING_WILLS, true);
                         break;
                     case EVENT_SOOTHING_BREEZE:
                         me->CastSpell(me, SPELL_SOOTHING_BREEZE_SUMMON, true);
@@ -201,9 +202,12 @@ class boss_anshal: public CreatureScript
                         float homeX, homeY, homeZ, homeO;
                         me->GetHomePosition(homeX, homeY, homeZ, homeO);
                         if (me->GetDistance(homeX, homeY, homeZ) > 70.0f)
-                            events.ScheduleEvent(EVENT_WINTERING_WINDS, 2000, 0, 0);
+                            events.ScheduleEvent(EVENT_WINTERING_WINDS, 4000, 0, 0);
                         else
+                        {
+                            me->RemoveAura(SPELL_WINTERING_WILLS);
                             events.CancelEvent(EVENT_WINTERING_WINDS);
+                        }
 
                         events.ScheduleEvent(EVENT_ANSHAL_CHECK_POSITION, 1000, 0, 0);
                         break;
@@ -529,9 +533,12 @@ class boss_nezir: public CreatureScript
                         float homeX, homeY, homeZ, homeO;
                         me->GetHomePosition(homeX, homeY, homeZ, homeO);
                         if (me->GetDistance(homeX, homeY, homeZ) > 70.0f)
-                            events.ScheduleEvent(EVENT_CHILLING_WILLS, 2000, 0, 0);
+                            events.ScheduleEvent(EVENT_CHILLING_WILLS, 4000, 0, 0);
                         else
+                        {
+                            me->RemoveAura(SPELL_CHILLING_WINDS);
                             events.CancelEvent(EVENT_CHILLING_WILLS);
+                        }
 
                         events.ScheduleEvent(EVENT_NEZIR_CHECK_POSITION, 1000, 0, 0);
                         break;
@@ -580,9 +587,21 @@ class boss_nezir: public CreatureScript
 enum rohashEvents
 {
     EVENT_DEAFENING_WINDS = 1,
-    EVENT_ROHASH_REGEN_ENERGY,
+    EVENT_WIND_BLAST,
+    EVENT_SLICING_GALE,
+    EVENT_ROHASH_CHECK_ENERGY,
+    EVENT_ROHASH_RESET_ENERGY,
+    EVENT_HURRICANE
 };
 
+enum rohashSpells
+{
+    SPELL_SLICING_GALE                            = 86182,
+    SPELL_WIND_BLAST_DBM                          = 86193,
+    SPELL_WIND_BLAST                              = 85480,
+    SPELL_DEFEATING_WINDS                         = 85573,
+    SPELL_HURRICANE                               = 84643,
+};  
 
 class boss_rohash: public CreatureScript
 {
@@ -597,8 +616,11 @@ class boss_rohash: public CreatureScript
         
         SummonList summons;
         InstanceScript* instance;
-
+        uint32 energyRegenTimer;
+        uint32 castWindBlastTimer;
         bool pauseRegen;
+        bool castWind;
+        bool castingSpecial;
 
         void Reset()
         {
@@ -606,12 +628,27 @@ class boss_rohash: public CreatureScript
             me->SetMaxPower(POWER_ENERGY, MAX_ENERGY);
             me->SetPower(POWER_ENERGY, 0);
             pauseRegen = false;
+            castWind = false;
+            castingSpecial = false;
             events.Reset();
-        }   
+            energyRegenTimer = 0;
+            castWindBlastTimer = 0;
+        }
+
+        void AttackStart(Unit* who)
+        {
+           if (!who)
+               return;
+
+           AttackStartNoMove(who);
+        }
 
         void EnterCombat(Unit* who)
         {
-            events.ScheduleEvent(EVENT_ROHASH_REGEN_ENERGY, 1000, 0, 0);
+            energyRegenTimer = 1000;
+            events.ScheduleEvent(EVENT_SLICING_GALE, 4000, 0, 0);
+            events.ScheduleEvent(EVENT_WIND_BLAST, urand(22000, 25000), 0, 0);
+            events.ScheduleEvent(EVENT_ROHASH_CHECK_ENERGY, 500, 0, 0);
 
             if (instance)
             {
@@ -638,20 +675,75 @@ class boss_rohash: public CreatureScript
             if (!UpdateVictim())
                 return;
 
-            events.Update(diff);
+            if (energyRegenTimer <= diff)
+            {
+                RegenerateEnergy();
+                energyRegenTimer = 1000;
+            }
+            else
+                energyRegenTimer -= diff;            
+
+            
+            if (castWindBlastTimer <= diff && castWind)
+            {
+                castWind = false;
+                me->CastSpell(me, SPELL_WIND_BLAST, true);
+                events.ScheduleEvent(EVENT_WIND_BLAST, 60000, 0, 0);
+            }
+            else
+                castWindBlastTimer -= diff;     
 
             if (me->HasUnitState(UNIT_STAT_CASTING))
                 return;
+
+            events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
                     case EVENT_DEAFENING_WINDS:
+                        if (!me->HasAura(SPELL_DEFEATING_WINDS))
+                            me->CastSpell(me, SPELL_DEFEATING_WINDS, true);
                         break;
-                    case EVENT_ROHASH_REGEN_ENERGY:
-                        RegenerateEnergy();
-                        events.ScheduleEvent(EVENT_ROHASH_REGEN_ENERGY, 1000, 0, 0);
+                    case EVENT_SLICING_GALE:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 70.0f, true, 0))
+                        {
+                            me->CastSpell(target, SPELL_SLICING_GALE, true);
+                            events.CancelEvent(EVENT_DEAFENING_WINDS);
+                            me->RemoveAura(SPELL_DEFEATING_WINDS);
+                        }
+                        else
+                            events.ScheduleEvent(EVENT_DEAFENING_WINDS, 6000, 0, 0);
+                        events.ScheduleEvent(EVENT_SLICING_GALE, 2100, 0, 0);
+                        break;
+                    case EVENT_WIND_BLAST:
+                        me->CastSpell(me, SPELL_WIND_BLAST_DBM, true);
+                        castWindBlastTimer = 5000;
+                        castWind = true;
+                        break;
+                    case EVENT_ROHASH_CHECK_ENERGY:
+                        if (me->GetPower(POWER_ENERGY) >= MAX_ENERGY && !castingSpecial)
+                        {
+                            castingSpecial = true;
+                            events.ScheduleEvent(EVENT_HURRICANE, 1000, 0, 0);
+                        }
+                        events.ScheduleEvent(EVENT_ROHASH_CHECK_ENERGY, 500, 0, 0);
+                        break;
+                    case EVENT_HURRICANE:
+                        castingSpecial = true;  
+                        pauseRegen = true;
+                        float homeX, homeY, homeZ, homeO;
+                        me->GetHomePosition(homeX, homeY, homeZ, homeO);
+                        me->SetPosition(homeX, homeY, homeZ, homeO, true);
+                        me->SetPower(POWER_ENERGY, 0);
+                        me->CastSpell(me->getVictim(), SPELL_HURRICANE, true);
+                        events.ScheduleEvent(EVENT_ROHASH_RESET_ENERGY, 1000, 0, 0);
+                        events.DelayEvents(5800);
+                        break;
+                    case EVENT_ROHASH_RESET_ENERGY:
+                        pauseRegen = false;
+                        castingSpecial = false;
                         break;
                 }
             }
@@ -665,10 +757,7 @@ class boss_rohash: public CreatureScript
             {
                 case ACTION_ROHASH_ENTER_IN_COMBAT:
                     if (Player* target = me->FindNearestPlayer(70.0f, true))
-                    {
-                        me->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
-                        me->Attack(target, true);
-                    }
+                        me->Attack(target, false);
                     break;
             }
         }
