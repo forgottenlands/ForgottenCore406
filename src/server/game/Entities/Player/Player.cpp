@@ -15440,7 +15440,7 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
 
     // Not give XP in case already completed once repeatable quest
     float rates = sWorld->getRate(RATE_XP_QUEST);
-    if (GetTeam()) == ALLIANCE)
+    if (GetTeam() == ALLIANCE)
         rates = sWorld->getRate(RATE_XP_QUEST_ALLY);
 
     uint32 XP = rewarded ? 0 : uint32(pQuest->XPValue(this)* rates);
