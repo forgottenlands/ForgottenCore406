@@ -98,6 +98,10 @@ public:
             if(SlipstreamPosition >= DIR_ERROR || who->GetTypeId() != TYPEID_PLAYER)
                 return;
 
+            if (InstanceScript* instance = me->GetInstanceScript())
+                if (instance->GetData(DATA_SPECIAL) == IN_PROGRESS)
+                    return;
+
             if(who->GetExactDist(me) <= 5.f)
             {
                 me->AddAura(SPELL_SLIPSTREAM_BUFF,who);

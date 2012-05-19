@@ -521,10 +521,14 @@ class boss_nezir: public CreatureScript
                         me->SetPosition(homeX, homeY, homeZ, homeO, true);
                         me->SetPower(POWER_RUNIC_POWER, 0);
                         me->CastSpell(me->getVictim(), SPELL_SLEET_STORM, true);
+                        if (instance)
+                            instance->SetData(DATA_SPECIAL, IN_PROGRESS);
                         events.ScheduleEvent(EVENT_NEZIR_RESET_ENERGY, 1000, 0, 0);
                         events.DelayEvents(5800);
                         break;
                     case EVENT_NEZIR_RESET_ENERGY:
+                        if (instance)
+                            instance->SetData(DATA_SPECIAL, NOT_STARTED);
                         pauseRegen = false;
                         castingSpecial = false;
                         break;

@@ -27,6 +27,7 @@ enum Data
     DATA_ANSHAL_EVENT,
     DATA_NEZIR_EVENT,
     DATA_ROHASH_EVENT,
+    DATA_SPECIAL,
 };
 
 enum Data64

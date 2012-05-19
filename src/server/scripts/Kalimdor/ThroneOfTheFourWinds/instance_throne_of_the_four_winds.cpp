@@ -40,6 +40,7 @@ public:
         instance_throne_of_the_four_winds_InstanceMapScript(InstanceMap* map) : InstanceScript(map) {}
 
         uint32 Encounter[ENCOUNTERS];
+        uint32 DataSpecial;
 
         uint64 AnshalGUID;
         uint64 NezirGUID;
@@ -153,6 +154,9 @@ public:
                                 anshal->AI()->DoAction(ACTION_ANSHAL_ENTER_IN_COMBAT);
                     }
                     break;
+                case DATA_SPECIAL:
+                    DataSpecial = data;
+                    break;
             }
 
             if (data == DONE)
@@ -167,6 +171,8 @@ public:
                     return Encounter[0];
                 case DATA_ALAKIR_EVENT:
                     return Encounter[1];
+                case DATA_SPECIAL:
+                    return DataSpecial;
             }
             return 0;
         }
