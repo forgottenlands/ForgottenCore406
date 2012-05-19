@@ -173,7 +173,11 @@ inline uint32 Gain(Player *pl, Unit *u) {
         }
 
         float premium_rate = pl->GetSession()->IsPremium() ? sWorld->getRate(RATE_XP_KILL_PREMIUM) : 1.0f;
-        uint32 expamount = uint32(gain*sWorld->getRate(RATE_XP_KILL)*premium_rate);
+        uint32 expamount = 0;
+        if (pl->GetTeam() == HORDE)
+            expamount = uint32(gain*sWorld->getRate(RATE_XP_KILL)*premium_rate);
+        else if (pl->GetTeam() == ALLIANCE)
+            expamount = uint32(gain*sWorld->getRate(RATE_XP_KILL_ALLY)*premium_rate);
 
             return expamount;
     }

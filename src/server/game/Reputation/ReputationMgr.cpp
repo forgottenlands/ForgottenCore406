@@ -351,11 +351,11 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry,
 
         if (incremental) {
             // int32 *= float cause one point loss?
-            standing = int32(
-                    floor(
-                            (float) standing
-                                    * sWorld->getRate(RATE_REPUTATION_GAIN)
-                                    + 0.5));
+            float rate = sWorld->getRate(RATE_REPUTATION_GAIN) ;
+            if (m_player->GetTeam() == ALLIANCE)
+                rate = sWorld->getRate(RATE_REPUTATION_GAIN_ALLY);
+
+            standing = int32(floor((float) standing * rate + 0.5));
             standing += itr->second.Standing + BaseRep;
         }
 

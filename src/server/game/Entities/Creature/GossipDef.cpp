@@ -457,6 +457,8 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const *pQuest, uint64 npcGUID,
 	}
 
     float rates = sWorld->getRate(RATE_XP_QUEST);
+    if (pSession->GetPlayer()->GetTeam() == ALLIANCE)
+        rates = sWorld->getRate(RATE_XP_QUEST_ALLY);
 
 	data << uint32(pQuest->GetRewOrReqMoney());
 	data << uint32(pQuest->XPValue(pSession->GetPlayer()) * rates);
@@ -739,10 +741,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, uint64 npcGUID,
 	}
 
 	data << uint32(pQuest->GetRewOrReqMoney());
-	data
-			<< uint32(
-					pQuest->XPValue(pSession->GetPlayer())
-							* sWorld->getRate(RATE_XP_QUEST)); // 4.0.6
+    data << uint32(pQuest->XPValue(pSession->GetPlayer()) * pSession->GetPlayer()->GetTeam() == HORDE ? sWorld->getRate(RATE_XP_QUEST) : sWorld->getRate(RATE_XP_QUEST_ALLY)); // 4.0.6
 	data << uint32(pQuest->GetCharTitleId());
 	data << uint32(0); // Unknown 4.0.6
 	data << uint32(0); // Unknown 4.0.6
