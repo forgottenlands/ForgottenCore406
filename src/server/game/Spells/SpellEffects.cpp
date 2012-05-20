@@ -5466,7 +5466,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
             {
 				if (m_caster->HasAura(90174)) // Divine Purpose Proc
                 {
-                    totalDamagePercentMod += 6.5f;
+                    totalDamagePercentMod += 7.5f;
                     break;
                 }
 
@@ -5474,11 +5474,11 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 {
                     // 2 Holy Power
                     case 1:
-                        totalDamagePercentMod += 2.0f; // 3*30 = 90%
+                        totalDamagePercentMod += 3.0f; // 3*30 = 90%
 					break;
 					// 3 Holy Power
                     case 2:
-                        totalDamagePercentMod += 6.5f; // 7.5*30 = 225%
+                        totalDamagePercentMod += 7.5f; // 7.5*30 = 225%
                     break;
                 }
             }
