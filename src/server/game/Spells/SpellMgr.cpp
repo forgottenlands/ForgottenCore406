@@ -717,6 +717,7 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo) {
             // Bane of Doom
             case 603:
             case 980:
+            case 80240:
                 return SPELL_SPECIFIC_WARLOCK_BANE;
         }
         break;
@@ -4094,6 +4095,7 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 93135:
         case 93136:
         case 93137:
+        case 88916:
             // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE
             mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
             count++;
