@@ -9845,6 +9845,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 56836:
             return false;
             break;
+        case 46867: // Wrecking Crew
+        case 56611:
+        case 56612:
+            if (procSpell->Id != 12294)
+                return false;
+        break;
         default:
             break;
     }

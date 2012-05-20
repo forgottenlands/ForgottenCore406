@@ -3108,7 +3108,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(
         if (spellproto->SpellFamilyFlags[0] & 0x80000)
             return DIMINISHING_DEATHCOIL;
         // Curses/etc
-        else if ((spellproto->SpellFamilyFlags[0] & 0x80000000)))
+        else if ((spellproto->SpellFamilyFlags[0] & 0x80000000))
             return DIMINISHING_LIMITONLY;
         // Howl of Terror
         else if (spellproto->SpellFamilyFlags[1] & 0x8)
