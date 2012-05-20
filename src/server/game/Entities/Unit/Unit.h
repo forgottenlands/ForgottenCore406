@@ -1989,10 +1989,8 @@ public:
                     AURA_REMOVE_BY_DEFAULT);
     void RemoveAuraFromStack(uint32 spellId, uint64 caster = NULL,
             AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT);
-    inline void RemoveAuraFromStack(AuraMap::iterator &iter,
-            AuraRemoveMode removeMode);
-    void RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID,
-            Unit *dispeller);
+    inline void RemoveAuraFromStack(AuraMap::iterator &iter, AuraRemoveMode removeMode, uint8 chargesRemoved = 1);
+    void RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit *dispeller, uint8 chargesRemoved = 1);
     void RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID,
             Unit *stealer);
     void RemoveAurasDueToItemSpell(Item* castItem, uint32 spellId);

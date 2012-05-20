@@ -6753,17 +6753,20 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode,
             }
             case SPELLFAMILY_DRUID:
                 // Lifebloom
-                if (GetSpellProto()->SpellFamilyFlags[1] & 0x10) {
+                if (GetSpellProto()->SpellFamilyFlags[1] & 0x10) 
+                {
                     // Final heal only on dispelled or duration end
-                    if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE
-                            && aurApp->GetRemoveMode()
-                                    != AURA_REMOVE_BY_ENEMY_SPELL)
+                    if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
                         return;
 
                     // final heal
                     int32 stack = GetBase()->GetStackAmount();
-                    target->CastCustomSpell(target, 33778, &m_amount, &stack,
-                            NULL, true, NULL, this, GetCasterGUID());
+                    int32 amount = m_amount;
+                    //  Gift of the Earthmother 
+                    if (AuraEffect const * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 3186, 0))
+                        amount += amount * aurEff->GetAmount() / 100;
+
+                    target->CastCustomSpell(target, 33778, &amount, &stack, NULL, true, NULL, this, GetCasterGUID()); 
                 }
                 break;
             case SPELLFAMILY_PRIEST:

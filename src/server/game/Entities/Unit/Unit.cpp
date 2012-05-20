@@ -3994,13 +3994,13 @@ void Unit::RemoveAuraFromStack(uint32 spellId, uint64 caster,
     }
 }
 
-inline void Unit::RemoveAuraFromStack(AuraMap::iterator &iter,
-        AuraRemoveMode removeMode)
+inline void Unit::RemoveAuraFromStack(AuraMap::iterator &iter, AuraRemoveMode removeMode, uint8 chargesRemoved/*= 1*/)
 {
-    if (iter->second->ModStackAmount(-1)) RemoveOwnedAura(iter, removeMode);
+    if (iter->second->ModStackAmount(-chargesRemoved))
+        RemoveOwnedAura(iter, removeMode);
 }
 
-void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID,	Unit *dispeller)
+void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID,	Unit *dispeller, uint8 chargesRemoved/*= 1*/)
 {
 	for (AuraMap::iterator iter = m_ownedAuras.lower_bound(spellId); iter != m_ownedAuras.upper_bound(spellId);)
     {
@@ -4008,9 +4008,32 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID,	Unit
         if (aura->GetCasterGUID() == casterGUID)
         {
 			if (aura->GetSpellProto()->AttributesEx7 & SPELL_ATTR7_DISPEL_CHARGES) 
-                aura->DropCharge();
+            {
+               for (uint8 i = 0; i < chargesRemoved; i++)
+                   aura->DropCharge();
+            }
 			else 
-                RemoveAuraFromStack(iter, AURA_REMOVE_BY_ENEMY_SPELL);
+                RemoveAuraFromStack(iter, AURA_REMOVE_BY_ENEMY_SPELL, chargesRemoved);
+
+            //Lifebloom
+            if (aura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && (aura->GetSpellProto()->SpellFamilyFlags[1] & 0x10))
+            {
+               if (Unit * caster = aura->GetCaster())
+               {
+		            if (AuraEffect const * aurEff = aura->GetEffect(EFFECT_1))
+                   {
+                        // final heal
+                        int32 healAmount = aurEff->GetAmount();
+                        int32 stack = chargesRemoved;
+                        int32 amount = healAmount;
+                        //  Gift of the Earthmother 
+                        if (AuraEffect const * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 3186, 0))
+                            amount += amount * aurEff->GetAmount() / 100;
+
+                       CastCustomSpell(this, 33778, &amount, &stack, NULL, true, NULL, NULL, aura->GetCasterGUID());
+                   }
+               }
+            }
 
             // Unstable Affliction (crash if before removeaura?)
 			if (aura->GetSpellProto()->Id == 30108)
