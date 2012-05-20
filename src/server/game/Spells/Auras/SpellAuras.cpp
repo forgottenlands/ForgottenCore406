@@ -1308,6 +1308,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         caster->CastCustomSpell(caster, 51178, &bp0, 0, 0, true);
                     }
                     break;
+                // Rejuvenation
+                case 774:
+                    if (AuraEffect const * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 3186, 0))
+                    {
+                        int32 basepoints0 = aurEff->GetAmount() * (GetEffect(0)->GetTotalTicks() * caster->SpellHealingBonus(caster, GetSpellProto(), 0, GetEffect(0)->GetAmount()*GetEffect(0)->GetTotalTicks(), HEAL)) / 100;
+                        caster->CastCustomSpell(target, 64801, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
+                    }
+                    break;
             }
             break;
         }
