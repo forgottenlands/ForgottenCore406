@@ -152,69 +152,69 @@ public:
 	}
 };
 
-class spell_rog_preparation: public SpellScriptLoader {
+class spell_rog_preparation: public SpellScriptLoader 
+{
 public:
-	spell_rog_preparation() :
-			SpellScriptLoader("spell_rog_preparation") {
-	}
+	spell_rog_preparation() : SpellScriptLoader("spell_rog_preparation") 
+    { }
 
-	class spell_rog_preparation_SpellScript: public SpellScript {
+	class spell_rog_preparation_SpellScript: public SpellScript 
+    {
 		PrepareSpellScript(spell_rog_preparation_SpellScript)
-		bool Validate(SpellEntry const * /*spellEntry*/) {
+		bool Validate(SpellEntry const * /*spellEntry*/) 
+        {
 			if (!sSpellStore.LookupEntry(ROGUE_SPELL_GLYPH_OF_PREPARATION))
 				return false;
 			return true;
 		}
 
-		void HandleDummy(SpellEffIndex /*effIndex*/) {
+		void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
 			Unit *caster = GetCaster();
 			if (caster->GetTypeId() != TYPEID_PLAYER)
 				return;
 
-			//immediately finishes the cooldown on certain Rogue abilities
-			const SpellCooldowns& cm =
-					caster->ToPlayer()->GetSpellCooldownMap();
-			for (SpellCooldowns::const_iterator itr = cm.begin();
-					itr != cm.end();) {
-				SpellEntry const *spellInfo = sSpellStore.LookupEntry(
-						itr->first);
+            if (Player* rogue = caster->ToPlayer())
+            {
+                // Sprint
+                if (rogue->HasSpellCooldown(2983))
+                    rogue->RemoveSpellCooldown(2983, true);
 
-				if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE) {
-					if (spellInfo->SpellFamilyFlags[1]
-							& SPELLFAMILYFLAG1_ROGUE_COLDB_SHADOWSTEP || // Cold Blood, Shadowstep
-							spellInfo->SpellFamilyFlags[0]
-									& SPELLFAMILYFLAG_ROGUE_VAN_EVAS_SPRINT) // Vanish, Evasion, Sprint
-						caster->ToPlayer()->RemoveSpellCooldown((itr++)->first,
-								true);
-					else if (caster->HasAura(
-							ROGUE_SPELL_GLYPH_OF_PREPARATION)) {
-						if (spellInfo->SpellFamilyFlags[1]
-								& SPELLFAMILYFLAG1_ROGUE_DISMANTLE || // Dismantle
-								spellInfo->SpellFamilyFlags[0]
-										& SPELLFAMILYFLAG_ROGUE_KICK || // Kick
-								(spellInfo->SpellFamilyFlags[0]
-										& SPELLFAMILYFLAG_ROGUE_BLADE_FLURRY && // Blade Flurry
-										spellInfo->SpellFamilyFlags[1]
-												& SPELLFAMILYFLAG1_ROGUE_BLADE_FLURRY))
-							caster->ToPlayer()->RemoveSpellCooldown(
-									(itr++)->first, true);
-						else
-							++itr;
-					} else
-						++itr;
-				} else
-					++itr;
-			}
+                // Vanish
+                if (rogue->HasSpellCooldown(1856))
+                    rogue->RemoveSpellCooldown(1856, true);
+
+                // Shadowstep
+                if (rogue->HasSpellCooldown(36554))
+                    rogue->RemoveSpellCooldown(36554, true);
+
+                // Glyph of preparation
+                if (rogue->HasAura(56819))
+                {
+                    // Kick
+                    if (rogue->HasSpellCooldown(1766))
+                        rogue->RemoveSpellCooldown(1766, true);
+
+                    // Dismantle
+                    if (rogue->HasSpellCooldown(51722))
+                        rogue->RemoveSpellCooldown(51722, true);
+
+                    // Smoke bomb
+                    if (rogue->HasSpellCooldown(76577))
+                        rogue->RemoveSpellCooldown(76577, true);
+                }
+            }
 		}
 
-		void Register() {
+		void Register() 
+        {
 			// add dummy effect spell handler to Preparation
-			OnEffect +=
-					SpellEffectFn(spell_rog_preparation_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+			OnEffect += SpellEffectFn(spell_rog_preparation_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
 		}
 	};
 
-	SpellScript *GetSpellScript() const {
+	SpellScript *GetSpellScript() const 
+    {
 		return new spell_rog_preparation_SpellScript();
 	}
 };
