@@ -6762,9 +6762,13 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode,
                     // final heal
                     int32 stack = GetBase()->GetStackAmount();
                     int32 amount = m_amount;
+
                     //  Gift of the Earthmother 
-                    if (AuraEffect const * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 3186, 0))
-                        amount += amount * aurEff->GetAmount() / 100;
+                    if (caster)
+                    {
+                        if (AuraEffect * aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 3186, 0))
+                            amount += amount * aurEff->GetAmount() / 100;
+                    }
 
                     target->CastCustomSpell(target, 33778, &amount, &stack, NULL, true, NULL, this, GetCasterGUID()); 
                 }
