@@ -4751,6 +4751,10 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectRadiusIndex[1] = 49;
             count++;
             break;
+        case 87327: // Shadow Power Hotfix
+            spellInfo->EffectBasePoints[0] = 15;
+            count++;
+            break;
         default:
             break;
         }
