@@ -20,7 +20,7 @@ INSERT INTO `item_enchantment_template` (`entry`, `ench`, `chance`) VALUES (434,
 INSERT INTO `item_enchantment_template` (`entry`, `ench`, `chance`) VALUES (434, 188, 25);
 
 -- Thunder wall Belt
-UPDATE `item_template` SET `RandomSuffix`=424 WHERE (`entry`=63497);
+UPDATE `item_template` SET `RandomSuffix`=424 WHERE (`entry`=63491);
 DELETE FROM `item_enchantment_template` WHERE (`entry`=424);
 INSERT INTO `item_enchantment_template` (`entry`, `ench`, `chance`) VALUES (424, 177, 33);
 INSERT INTO `item_enchantment_template` (`entry`, `ench`, `chance`) VALUES (424, 178, 33);
