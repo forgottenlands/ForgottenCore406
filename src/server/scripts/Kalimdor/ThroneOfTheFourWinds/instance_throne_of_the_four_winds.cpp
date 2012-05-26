@@ -40,6 +40,7 @@ public:
         instance_throne_of_the_four_winds_InstanceMapScript(InstanceMap* map) : InstanceScript(map) {}
 
         uint32 Encounter[ENCOUNTERS];
+        uint32 conclave[3];
         uint32 DataSpecial;
 
         uint64 AnshalGUID;
@@ -119,7 +120,7 @@ public:
                     Encounter[1] = data;
                     break;
                 case DATA_ANSHAL_EVENT:
-                    if (data == IN_PROGRESS)
+                    if (data == IN_PROGRESS && conclave[0] != SPECIAL)
                     {
                         if (Creature* nezir = instance->GetCreature(NezirGUID))
                             if (!nezir->isInCombat())
@@ -129,9 +130,10 @@ public:
                             if (!rohash->isInCombat())
                                 rohash->AI()->DoAction(ACTION_ROHASH_ENTER_IN_COMBAT);
                     }
+                    conclave[0] = data;
                     break;
                 case DATA_NEZIR_EVENT:
-                    if (data == IN_PROGRESS)
+                    if (data == IN_PROGRESS  && conclave[1] != SPECIAL)
                     {
                         if (Creature* anshal = instance->GetCreature(AnshalGUID))
                             if (!anshal->isInCombat())
@@ -141,9 +143,10 @@ public:
                             if (!rohash->isInCombat())
                                 rohash->AI()->DoAction(ACTION_ROHASH_ENTER_IN_COMBAT);
                     }
+                    conclave[1] = data;
                     break;
                 case DATA_ROHASH_EVENT:
-                    if (data == IN_PROGRESS)
+                    if (data == IN_PROGRESS && conclave[2] != SPECIAL)
                     {
                         if (Creature* nezir = instance->GetCreature(NezirGUID))
                             if (!nezir->isInCombat())
@@ -153,6 +156,7 @@ public:
                             if (!anshal->isInCombat())
                                 anshal->AI()->DoAction(ACTION_ANSHAL_ENTER_IN_COMBAT);
                     }
+                    conclave[2] = data;
                     break;
                 case DATA_SPECIAL:
                     DataSpecial = data;
@@ -173,6 +177,12 @@ public:
                     return Encounter[1];
                 case DATA_SPECIAL:
                     return DataSpecial;
+                case DATA_ANSHAL_EVENT:
+                    return conclave[0];
+                case DATA_NEZIR_EVENT:
+                    return conclave[1];
+                case DATA_ROHASH_EVENT:
+                    return conclave[2];
             }
             return 0;
         }

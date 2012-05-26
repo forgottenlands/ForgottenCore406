@@ -55,6 +55,7 @@ enum anshalSpells
     SPELL_SUMMON_RAVENOUS_CREEPER                 = 85429,
     SPELL_ZEPHYR                                  = 84638,
     SPELL_WINTERING_WILLS                         = 85576,
+    SPELL_GATHER_STRENGHT                         = 86307,
 };
 
 enum actions
@@ -78,7 +79,9 @@ class boss_anshal: public CreatureScript
         InstanceScript* instance;
         bool pauseRegen;
         bool castingSpecial;
+        bool respawn;
         uint32 energyRegenTimer;
+        uint32 respawnTimer;
 
         void Reset()
         {
@@ -87,9 +90,13 @@ class boss_anshal: public CreatureScript
             me->SetPower(POWER_ENERGY, 0);
             pauseRegen = false;
             castingSpecial = false;
+            respawn = false;
             events.Reset();
             summons.DespawnAll();
             energyRegenTimer = 0;
+            respawnTimer = 0;
+            if (instance)
+                instance->SetData(DATA_ANSHAL_EVENT, NOT_STARTED);
         }   
 
         void EnterCombat(Unit* who)
@@ -112,7 +119,51 @@ class boss_anshal: public CreatureScript
         {
             summons.DespawnAll();
             if (instance)
+            {
+                instance->SetData(DATA_ANSHAL_EVENT, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+            }
+        }
+
+        void DamageTaken(Unit* who, uint32 &damage)
+        {
+            if (damage >= me->GetHealth())
+            {
+                if (instance)
+                {
+                    if (instance->GetData(DATA_NEZIR_EVENT) == SPECIAL && instance->GetData(DATA_ROHASH_EVENT) == SPECIAL)
+                    {
+                        instance->SetData(DATA_CONCLAVE_OF_WIND_EVENT, DONE);
+
+                        if (Creature* nezir = me->FindNearestCreature(BOSS_NEZIR, 500.0f, true))
+                        {
+                            nezir->LowerPlayerDamageReq(nezir->GetMaxHealth());
+                            me->getVictim()->Kill(nezir, false);
+                        }
+
+                        if (Creature* rohash = me->FindNearestCreature(BOSS_ROHASH, 500.0f, true))
+                            me->getVictim()->Kill(rohash, false);
+
+                        me->getVictim()->Kill(me, false);
+                        return;
+                    }
+
+                    damage = 0;
+                    me->SetHealth(1);
+                    pauseRegen = true;
+                    respawn = true;
+                    
+                    if (!me->HasUnitState(UNIT_STAT_CASTING))
+                    {
+                        respawnTimer = 60000;
+                        me->CastSpell(me, SPELL_GATHER_STRENGHT, false);
+                    }
+                    
+                    instance->SetData(DATA_ANSHAL_EVENT, SPECIAL);
+
+                    events.DelayEvents(60000);
+                }
+            }
         }
 
         void JustSummoned(Creature* summoned)
@@ -148,7 +199,16 @@ class boss_anshal: public CreatureScript
                 energyRegenTimer = 1000;
             }
             else
-                energyRegenTimer -= diff;          
+                energyRegenTimer -= diff;    
+
+            if (respawnTimer <= diff && respawn)
+            {
+                pauseRegen = false;
+                if (instance)
+                    instance->SetData(DATA_ANSHAL_EVENT, IN_PROGRESS);
+            }
+            else
+                respawnTimer -= diff;
 
             if (me->HasUnitState(UNIT_STAT_CASTING))
                 return;
@@ -227,6 +287,14 @@ class boss_anshal: public CreatureScript
                     {
                         me->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
                         me->Attack(target, true);
+                    } else
+                    {
+                        if (Player* target = me->FindNearestPlayer(500.0f, true))
+                        {
+                            me->Attack(target, false);
+                            me->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
+                        }
+                        me->CastSpell(me, SPELL_WINTERING_WILLS, true);
                     }
                     break;
             }
@@ -415,8 +483,10 @@ class boss_nezir: public CreatureScript
 
         bool castingSpecial;
         bool pauseRegen;
+        bool respawn;
 
         uint32 energyRegenTimer;
+        uint32 respawnTimer;
 
         void Reset()
         {
@@ -425,9 +495,13 @@ class boss_nezir: public CreatureScript
             me->SetPower(POWER_RUNIC_POWER, 0);
             pauseRegen = false;
             castingSpecial = false;
+            respawn = false;
             events.Reset();
             energyRegenTimer = 1000;
+            respawnTimer = 0;
             summons.DespawnAll();
+            if (instance)
+                instance->SetData(DATA_NEZIR_EVENT, NOT_STARTED);
         }   
 
         void EnterCombat(Unit* who)
@@ -439,7 +513,10 @@ class boss_nezir: public CreatureScript
             events.ScheduleEvent(EVENT_NEZIR_CHECK_POSITION, 1000, 0, 0);
 
             if (instance)
+            {
+                instance->SetData(DATA_NEZIR_EVENT, IN_PROGRESS);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
+            }
         }
 
         void JustDied(Unit* killer)
@@ -447,7 +524,7 @@ class boss_nezir: public CreatureScript
             summons.DespawnAll();
             if (instance)
             {
-                instance->SetData(DATA_NEZIR_EVENT, IN_PROGRESS);
+                instance->SetData(DATA_NEZIR_EVENT, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
             }
         }
@@ -465,6 +542,45 @@ class boss_nezir: public CreatureScript
             }
         }
 
+        void DamageTaken(Unit* who, uint32 &damage)
+        {
+            if (damage >= me->GetHealth())
+            {
+                if (instance)
+                {
+                    if (instance->GetData(DATA_ANSHAL_EVENT) == SPECIAL && instance->GetData(DATA_ROHASH_EVENT) == SPECIAL)
+                    {
+                        instance->SetData(DATA_CONCLAVE_OF_WIND_EVENT, DONE);
+
+                        if (Creature* anshal = me->FindNearestCreature(BOSS_ANSHAL, 500.0f, true))
+                            me->getVictim()->Kill(anshal, false);
+
+                        if (Creature* rohash = me->FindNearestCreature(BOSS_ROHASH, 500.0f, true))
+                            me->getVictim()->Kill(rohash, false);
+
+                        me->LowerPlayerDamageReq(me->GetMaxHealth());
+                        me->getVictim()->Kill(me, false);
+                        return;
+                    }
+
+                    damage = 0;
+                    me->SetHealth(1);
+                    pauseRegen = true;
+                    respawn = true;
+                    
+                    if (!me->HasUnitState(UNIT_STAT_CASTING))
+                    {
+                        respawnTimer = 60000;
+                        me->CastSpell(me, SPELL_GATHER_STRENGHT, false);
+                    }
+                    
+                    instance->SetData(DATA_NEZIR_EVENT, SPECIAL);
+
+                    events.DelayEvents(60000);
+                }
+            }
+        }
+
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
@@ -476,12 +592,21 @@ class boss_nezir: public CreatureScript
                 energyRegenTimer = 1000;
             }
             else
-                energyRegenTimer -= diff;            
+                energyRegenTimer -= diff; 
 
-            events.Update(diff);
+            if (respawnTimer <= diff && respawn)
+            {
+                pauseRegen = false;
+                if (instance)
+                    instance->SetData(DATA_NEZIR_EVENT, IN_PROGRESS);
+            }
+            else
+                respawnTimer -= diff;
 
             if (me->HasUnitState(UNIT_STAT_CASTING))
                 return;
+
+            events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
             {
@@ -562,6 +687,14 @@ class boss_nezir: public CreatureScript
                     {
                         me->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
                         me->Attack(target, true);
+                    } else
+                    {
+                        if (Player* target = me->FindNearestPlayer(500.0f, true))
+                        {
+                            me->Attack(target, false);
+                            me->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
+                        }
+                        me->CastSpell(me, SPELL_CHILLING_WINDS, true);
                     }
                     break;
             }
@@ -622,9 +755,12 @@ class boss_rohash: public CreatureScript
         InstanceScript* instance;
         uint32 energyRegenTimer;
         uint32 castWindBlastTimer;
+        uint32 respawnTimer;
+
         bool pauseRegen;
         bool castWind;
         bool castingSpecial;
+        bool respawn;
 
         void Reset()
         {
@@ -634,9 +770,13 @@ class boss_rohash: public CreatureScript
             pauseRegen = false;
             castWind = false;
             castingSpecial = false;
+            respawn = false;
             events.Reset();
             energyRegenTimer = 0;
             castWindBlastTimer = 0;
+            respawnTimer = 0;
+            if (instance)
+                instance->SetData(DATA_ROHASH_EVENT, NOT_STARTED);
         }
 
         void AttackStart(Unit* who)
@@ -666,12 +806,56 @@ class boss_rohash: public CreatureScript
             summons.DespawnAll();
 
             if (instance)
+            {
+                instance->SetData(DATA_ROHASH_EVENT, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
+            }
         }
 
         void JustSummoned(Creature* summoned)
         {
             summons.Summon(summoned);
+        }
+
+        void DamageTaken(Unit* who, uint32 &damage)
+        {
+            if (damage >= me->GetHealth())
+            {
+                if (instance)
+                {
+                    if (instance->GetData(DATA_ANSHAL_EVENT) == SPECIAL && instance->GetData(DATA_NEZIR_EVENT) == SPECIAL)
+                    {
+                        instance->SetData(DATA_CONCLAVE_OF_WIND_EVENT, DONE);
+
+                        if (Creature* anshal = me->FindNearestCreature(BOSS_ANSHAL, 500.0f, true))
+                            me->getVictim()->Kill(anshal, false);
+
+                        if (Creature* nezir = me->FindNearestCreature(BOSS_NEZIR, 500.0f, true))
+                        {
+                            nezir->LowerPlayerDamageReq(nezir->GetMaxHealth());
+                            me->getVictim()->Kill(nezir, false);
+                        }
+
+                        me->getVictim()->Kill(me, false);
+                        return;
+                    }
+
+                    damage = 0;
+                    me->SetHealth(1);
+                    pauseRegen = true;
+                    respawn = true;
+                    
+                    if (!me->HasUnitState(UNIT_STAT_CASTING))
+                    {
+                        respawnTimer = 60000;
+                        me->CastSpell(me, SPELL_GATHER_STRENGHT, false);
+                    }
+                    
+                    instance->SetData(DATA_ROHASH_EVENT, SPECIAL);
+
+                    events.DelayEvents(60000);
+                }
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -695,7 +879,16 @@ class boss_rohash: public CreatureScript
                 events.ScheduleEvent(EVENT_WIND_BLAST, 60000, 0, 0);
             }
             else
-                castWindBlastTimer -= diff;     
+                castWindBlastTimer -= diff;    
+
+            if (respawnTimer <= diff && respawn)
+            {
+                pauseRegen = false;
+                if (instance)
+                    instance->SetData(DATA_ROHASH_EVENT, IN_PROGRESS);
+            }
+            else
+                respawnTimer -= diff;
 
             if (me->HasUnitState(UNIT_STAT_CASTING))
                 return;
@@ -713,12 +906,20 @@ class boss_rohash: public CreatureScript
                     case EVENT_SLICING_GALE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 70.0f, true, 0))
                         {
-                            me->CastSpell(target, SPELL_SLICING_GALE, true);
+                            me->CastSpell(target, SPELL_SLICING_GALE, false);
                             events.CancelEvent(EVENT_DEAFENING_WINDS);
                             me->RemoveAura(SPELL_DEFEATING_WINDS);
                         }
-                        else
-                            events.ScheduleEvent(EVENT_DEAFENING_WINDS, 6000, 0, 0);
+                        else 
+                        {
+                            if (instance)
+                            {
+                                if (instance->GetData(DATA_ROHASH_EVENT) != SPECIAL)
+                                    events.ScheduleEvent(EVENT_DEAFENING_WINDS, 6000, 0, 0);
+                            } else
+                                events.ScheduleEvent(EVENT_DEAFENING_WINDS, 6000, 0, 0);
+                        }
+                            
                         events.ScheduleEvent(EVENT_SLICING_GALE, 2100, 0, 0);
                         break;
                     case EVENT_WIND_BLAST:
@@ -762,6 +963,12 @@ class boss_rohash: public CreatureScript
                 case ACTION_ROHASH_ENTER_IN_COMBAT:
                     if (Player* target = me->FindNearestPlayer(70.0f, true))
                         me->Attack(target, false);
+                    else
+                    {
+                        me->CastSpell(me, SPELL_DEFEATING_WINDS, true);
+                        if (Player* target = me->FindNearestPlayer(500.0f, true))
+                            me->Attack(target, false);
+                    }
                     break;
             }
         }
