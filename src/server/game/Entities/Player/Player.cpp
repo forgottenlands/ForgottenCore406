@@ -6228,57 +6228,36 @@ bool Player::UpdateCraftSkill(uint32 spellid)
     return false;
 }
 
-bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue,
-        uint32 RedLevel, uint32 Multiplicator) {
-    sLog->outDebug(LOG_FILTER_PLAYER_SKILLS,
-            "UpdateGatherSkill(SkillId %d SkillLevel %d RedLevel %d)", SkillId,
-            SkillValue, RedLevel);
+bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator) 
+{
+    sLog->outDebug(LOG_FILTER_PLAYER_SKILLS, "UpdateGatherSkill(SkillId %d SkillLevel %d RedLevel %d)", SkillId, SkillValue, RedLevel);
 
-    uint32 gathering_skill_gain = sWorld->getIntConfig(
-            CONFIG_SKILL_GAIN_GATHERING);
+    uint32 gathering_skill_gain = sWorld->getIntConfig(CONFIG_SKILL_GAIN_GATHERING);
 
     // For skinning and Mining chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
-    switch (SkillId) {
+    switch (SkillId) 
+    {
     case SKILL_HERBALISM:
     case SKILL_LOCKPICKING:
     case SKILL_JEWELCRAFTING:
     case SKILL_INSCRIPTION:
-        return UpdateSkillPro(
-                SkillId,
-                SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50,
-                        RedLevel + 25) * Multiplicator, gathering_skill_gain);
+        return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
     case SKILL_SKINNING:
         if (sWorld->getIntConfig(CONFIG_SKILL_CHANCE_SKINNING_STEPS) == 0)
-            return UpdateSkillPro(
-                    SkillId,
-                    SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50,
-                            RedLevel + 25) * Multiplicator,
-                    gathering_skill_gain);
+            return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
         else
-            return UpdateSkillPro(
-                    SkillId,
-                    (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50,
-                            RedLevel + 25) * Multiplicator)
-                            >> (SkillValue
-                                    / sWorld->getIntConfig(
-                                            CONFIG_SKILL_CHANCE_SKINNING_STEPS)),
-                    gathering_skill_gain);
+            return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld->getIntConfig( CONFIG_SKILL_CHANCE_SKINNING_STEPS)), gathering_skill_gain);
     case SKILL_MINING:
         if (sWorld->getIntConfig(CONFIG_SKILL_CHANCE_MINING_STEPS) == 0)
-            return UpdateSkillPro(
-                    SkillId,
-                    SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50,
-                            RedLevel + 25) * Multiplicator,
-                    gathering_skill_gain);
+            return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
         else
-            return UpdateSkillPro(
-                    SkillId,
-                    (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50,
-                            RedLevel + 25) * Multiplicator)
-                            >> (SkillValue
-                                    / sWorld->getIntConfig(
-                                            CONFIG_SKILL_CHANCE_MINING_STEPS)),
-                    gathering_skill_gain);
+            return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld->getIntConfig(CONFIG_SKILL_CHANCE_MINING_STEPS)), gathering_skill_gain);
+    case SKILL_ARCHAEOLOGY:
+        if (sWorld->getIntConfig(CONFIG_SKILL_CHANCE_ARCHAEOLOGY_STEPS) == 0)
+            return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25) * Multiplicator,gathering_skill_gain);
+        else
+            return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25) * Multiplicator) >> (SkillValue / sWorld->getIntConfig(CONFIG_SKILL_CHANCE_ARCHAEOLOGY_STEPS)), gathering_skill_gain);
+        break;
     }
     return false;
 }

@@ -516,6 +516,8 @@ void World::LoadConfigSettings(bool reload)
     }
     rate_values[RATE_MINING_AMOUNT] = sConfig->GetFloatDefault("Rate.Mining.Amount", 1.0f);
     rate_values[RATE_MINING_NEXT]   = sConfig->GetFloatDefault("Rate.Mining.Next", 1.0f);
+    rate_values[RATE_ARCHAEOLOGY_AMOUNT]   = sConfig->GetFloatDefault("Rate.Archaeology.Amount", 1.0f);
+    rate_values[RATE_ARCHAEOLOGY_NEXT]   = sConfig->GetFloatDefault("Rate.Archaeology.Next", 1.0f);
     rate_values[RATE_INSTANCE_RESET_TIME] = sConfig->GetFloatDefault("Rate.InstanceResetTime", 1.0f);
     rate_values[RATE_TALENT] = sConfig->GetFloatDefault("Rate.Talent", 1.0f);
     if (rate_values[RATE_TALENT] < 0.0f)
@@ -965,6 +967,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_SKILL_CHANCE_GREY]   = sConfig->GetIntDefault("SkillChance.Grey", 0);
 
     m_int_configs[CONFIG_SKILL_CHANCE_MINING_STEPS]  = sConfig->GetIntDefault("SkillChance.MiningSteps", 75);
+    m_int_configs[CONFIG_SKILL_CHANCE_ARCHAEOLOGY_STEPS]  = sConfig->GetIntDefault("SkillChance.ArchaeologySteps", 75);
     m_int_configs[CONFIG_SKILL_CHANCE_SKINNING_STEPS]   = sConfig->GetIntDefault("SkillChance.SkinningSteps", 75);
 
     m_bool_configs[CONFIG_SKILL_PROSPECTING] = sConfig->GetBoolDefault("SkillChance.Prospecting", false);

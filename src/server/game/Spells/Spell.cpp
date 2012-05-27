@@ -5529,7 +5529,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // second check prevent fail at rechecks
                 if (skillId != SKILL_NONE && (!m_selfContainer || ((*m_selfContainer) != this)))
                 {
-                    bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
+                    bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING && skillId != SKILL_ARCHAEOLOGY;
 
                     // chance for failure in orange gather / lockpick (gathering skill can't fail at maxskill)
                     if ((canFailAtMax || skillValue < sWorld->GetConfigMaxSkillValue()) && reqSkillValue > irand(skillValue - 25, skillValue + 37)) 

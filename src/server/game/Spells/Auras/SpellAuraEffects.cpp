@@ -4181,8 +4181,7 @@ void AuraEffect::HandleAuraTrackResources(AuraApplication const *aurApp,
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    target->SetUInt32Value(PLAYER_TRACK_RESOURCES,
-            (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);
+    target->SetUInt32Value(PLAYER_TRACK_RESOURCES, (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);
 }
 
 void AuraEffect::HandleAuraTrackStealthed(AuraApplication const *aurApp,
