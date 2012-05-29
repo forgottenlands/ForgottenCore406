@@ -25776,3 +25776,176 @@ void Player::RemoveOrAddMasterySpells()
                 AddAura(77222, this);
     }
 }
+
+#define MAX_RESEARCH_SITES  6
+void Player::GenerateResearchDigSites()
+{
+    uint32 skill_now = GetSkillValue(SKILL_ARCHAEOLOGY);
+
+    if (skill_now == 0)
+        return;
+
+    uint32 added_site_count = 0;
+
+    for (uint32 row=0; row < sResearchSiteStore.GetNumRows(); row++)
+    {
+        ResearchSiteEntry *rs = sResearchSiteStore.LookupRow(row);
+        if (!rs)
+            continue;
+
+        if (rs->mapId != GetMapId())
+            continue;
+
+        // check if we have this site atm
+        bool have_site = false;
+        uint32 free_spot = 0;
+        uint32 sites_found = 0;
+
+        for (uint32 sites = 0; sites < MAX_RESEARCH_SITES / 2; sites++)
+        {
+            uint32 site_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + sites) & 0xFFFF;
+            uint32 site_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + sites) >> 16;
+
+            if (site_now_1 == rs->id || site_now_2 == rs->id)
+            {
+                have_site = true;
+                break;
+            }
+
+            if (site_now_1 == 0 && free_spot == 0)
+                free_spot = sites * 2;
+
+            else if (site_now_2 == 0 && free_spot == 0)
+                free_spot = sites * 2 +1;
+
+            if (site_now_1 != 0 )
+                sites_found++;
+
+            if( site_now_2 != 0 )
+                sites_found++;
+        }
+
+        // we do not double add it
+        if (have_site == true )
+            continue;
+
+        // if we are low on sites we have a high chance to add it
+        uint32 chance = (100 - sites_found * 100 / MAX_RESEARCH_SITES);
+        if (chance < 50)
+            chance = 50;
+
+        if (roll_chance_i(chance) == false)
+            continue;
+
+        // if this is not added because we do not have any, just because we want to refresh site then we random pick a slot
+        if (free_spot == 0)
+            free_spot = uint32(rand() % MAX_RESEARCH_SITES);
+
+        //assign the site to us
+        uint32 site_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + free_spot / 2) & 0xFFFF;
+        uint32 site_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + free_spot / 2) >> 16;
+
+        uint32 new_value;
+        if (free_spot % 2 == 1)
+            new_value = (rs->id << 16) | (site_now_1);
+        else
+            new_value = (site_now_1 << 16) | (rs->id);
+
+        SetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + free_spot / 2, new_value);
+        added_site_count++;
+
+        if (added_site_count >= MAX_RESEARCH_SITES)
+            break;	// pointless to continue
+    }
+}
+
+void Player::GenerateResearchProjects(uint32 max)
+{
+    uint32 added_project_count = 0;
+    uint32 skill_now = GetSkillValue(SKILL_ARCHAEOLOGY);
+
+    if(skill_now == 0)
+        return;
+
+    for(uint32 row=0; row < sResearchProjectStore.GetNumRows(); row++)
+    {
+        ResearchProjectEntry *rs = sResearchProjectStore.LookupRow(row);
+        if (!rs)
+            continue;
+
+        //skip misc projects, they seem to contain junks
+        if (rs->branchId == 29)
+            continue;
+
+        //let's not pick impossible projects
+        // if (rs->req_fragments > MAX(75, skill_now / 3 ) )	//[25,150]
+        // 	continue;
+
+        //stop generating crap
+        //		if( rs->Complexity < MAX( 0, skill_now / 75 - 2 ) )
+        //			continue;
+
+        //while continuesly logged in, let's not generate same crap ? Same crap gets it's chance reduced
+        /*uint32 skip_chance = 0; // m_temp_completed_projects[rs->RowId];
+        if( rand( skip_chance * rs->req_fragments / 2 ) )
+            continue;*/
+
+        //check if we have this site atm
+        bool have_site = false;
+        uint32 free_spot = 0xFFFF;
+        uint32 projects_found = 0;
+        for (uint32 sites=0; sites < MAX_RESEARCH_SITES / 2; sites++)
+        {
+            uint32 project_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + sites) & 0xFFFF;
+            uint32 project_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + sites) >> 16;
+            if (project_now_1 == rs->id || project_now_2 == rs->id)
+            {
+                have_site = true;
+                break;
+            }
+
+            if (project_now_1 == 0 && free_spot == 0xFFFF)
+                free_spot = sites * 2;
+            else if (project_now_2 == 0 && free_spot == 0xFFFF)
+                free_spot = sites * 2 +1;
+            if (project_now_1 != 0)
+                projects_found++;
+            if (project_now_2 != 0)
+                projects_found++;
+        }
+
+        //we do not double add it
+        if (have_site == true)
+            continue;
+
+        //we only add, do not replace existing ones
+        if (free_spot == 0xFFFF)
+            break;	///there is no chance to add more projects to us
+
+        //if we are low on sites we have a high chance to add it
+        uint32 chance = 100 - projects_found * 100 / MAX_RESEARCH_SITES;
+        if (chance < 50)
+            chance = 50;
+
+        if (chance < 525 * 100 / skill_now)
+            chance = 525 * 100 / skill_now;
+
+        if (roll_chance_i(chance) == false) 
+            continue;
+
+        //assign the site to us
+        uint32 project_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + free_spot / 2) & 0xFFFF;
+        uint32 project_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + free_spot / 2) >> 16;
+        uint32 new_value;
+
+        if (free_spot % 2 == 1)
+            new_value = (rs->id << 16) | (project_now_1);
+        else
+            new_value = (project_now_2 << 16) | (rs->id);
+
+        SetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + free_spot / 2, new_value);
+        added_project_count++;
+        if (added_project_count >= MAX_RESEARCH_SITES || added_project_count >= max)
+            break;	//pointless to continue
+    }
+}

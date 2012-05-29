@@ -1417,6 +1417,28 @@ struct RandomPropertiesPointsEntry
     uint32    UncommonPropertiesPoints[5];                  // 12-16
 };
 
+struct ResearchSiteEntry
+{
+    uint32 id;                                              // 0 Id of the site
+    uint32 mapId;                                           // 1 Unknow
+    uint32 unk_2;                                           // 2 Unknow 2
+                                                            // 3 Site name
+                                                            // 4 Unkow 3 
+};
+
+struct ResearchProjectEntry
+{
+    uint32 id;                                              // 0 Id of the project
+                                                            // 1 Name of the project
+                                                            // 2 Description of the project
+    uint32 unk_1;                                           // 3 Unknow 1
+    uint32 branchId;                                        // 4 BranchId
+    uint32 spellId;                                         // 5 SpellId
+    uint32 unk_2;                                           // 6 Unknow 2
+                                                            // 7 icon
+    uint32 req_fragments;                                   // 8 Required Fragments
+};
+
 struct ScalingStatDistributionEntry
 {
     uint32  Id;                                             // 0

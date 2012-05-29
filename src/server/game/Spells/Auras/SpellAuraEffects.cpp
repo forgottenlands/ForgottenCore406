@@ -4157,8 +4157,8 @@ void AuraEffect::HandleAuraAllowOnlyAbility(AuraApplication const *aurApp,
 /***      TRACKING        ***/
 /****************************/
 
-void AuraEffect::HandleAuraTrackCreatures(AuraApplication const *aurApp,
-        uint8 mode, bool apply) const {
+void AuraEffect::HandleAuraTrackCreatures(AuraApplication const *aurApp, uint8 mode, bool apply) const
+{
     if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
         return;
 
@@ -4167,12 +4167,11 @@ void AuraEffect::HandleAuraTrackCreatures(AuraApplication const *aurApp,
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    target->SetUInt32Value(PLAYER_TRACK_CREATURES,
-            (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);
+    target->SetUInt32Value(PLAYER_TRACK_CREATURES, (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);
 }
 
-void AuraEffect::HandleAuraTrackResources(AuraApplication const *aurApp,
-        uint8 mode, bool apply) const {
+void AuraEffect::HandleAuraTrackResources(AuraApplication const *aurApp, uint8 mode, bool apply) const
+{
     if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
         return;
 
@@ -4181,7 +4180,16 @@ void AuraEffect::HandleAuraTrackResources(AuraApplication const *aurApp,
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    target->SetUInt32Value(PLAYER_TRACK_RESOURCES, (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);
+    switch (aurApp->GetBase()->GetId())
+    {
+        case 74268: // Archaeology track
+            if (target->ToPlayer()->HasSkill(SKILL_ARCHAEOLOGY))
+                target->ToPlayer()->GenerateResearchDigSites();
+            break;
+        default:    // Default tracks
+            target->SetUInt32Value(PLAYER_TRACK_RESOURCES, (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);
+            break;
+    }
 }
 
 void AuraEffect::HandleAuraTrackStealthed(AuraApplication const *aurApp,

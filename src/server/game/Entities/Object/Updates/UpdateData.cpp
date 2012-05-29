@@ -109,24 +109,21 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src,
 	*dst_size = c_stream.total_out;
 }
 
-bool UpdateData::BuildPacket(WorldPacket *packet) {
+bool UpdateData::BuildPacket(WorldPacket *packet)
+{
 	ASSERT(packet->empty()); // shouldn't happen
 
-	ByteBuffer buf(
-			2 + 4
-					+ (m_outOfRangeGUIDs.empty() ?
-							0 : 1 + 4 + 9 * m_outOfRangeGUIDs.size())
-					+ m_data.wpos());
+	ByteBuffer buf(2 + 4 + (m_outOfRangeGUIDs.empty() ? 0 : 1 + 4 + 9 * m_outOfRangeGUIDs.size()) + m_data.wpos());
 
 	buf << uint16(m_map);
 	buf << uint32(!m_outOfRangeGUIDs.empty() ? m_blockCount + 1 : m_blockCount);
 
-	if (!m_outOfRangeGUIDs.empty()) {
+	if (!m_outOfRangeGUIDs.empty()) 
+    {
 		buf << uint8(UPDATETYPE_OUT_OF_RANGE_OBJECTS);
 		buf << uint32(m_outOfRangeGUIDs.size());
 
-		for (std::set<uint64>::const_iterator i = m_outOfRangeGUIDs.begin();
-				i != m_outOfRangeGUIDs.end(); ++i) {
+		for (std::set<uint64>::const_iterator i = m_outOfRangeGUIDs.begin(); i != m_outOfRangeGUIDs.end(); ++i) {
 			buf.appendPackGUID(*i);
 		}
 	}
@@ -136,13 +133,12 @@ bool UpdateData::BuildPacket(WorldPacket *packet) {
 	size_t pSize = buf.wpos(); // use real used data size
 
 	if (pSize > 100) // compress large packets
-			{
+    {
 		uint32 destsize = compressBound(pSize);
 		packet->resize(destsize + sizeof(uint32));
 
 		packet->put<uint32>(0, pSize);
-		Compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32),
-				&destsize, (void*) buf.contents(), pSize);
+		Compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32), &destsize, (void*) buf.contents(), pSize);
 		if (destsize == 0)
 			return false;
 

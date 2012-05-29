@@ -85,6 +85,9 @@ public:
 	T* LookupEntryNoConst(uint32 id) const {
 		return (id >= nCount) ? NULL : indexTable[id];
 	}
+    T* LookupRow(uint32 id) const {
+		return (id >= nCount) ? NULL : indexTable[id];
+	}
 	void SetEntry(uint32 id, T* entry) {
 		if (id >= nCount) {
 			printf("ERROR");

@@ -2854,6 +2854,12 @@ public:
     float GetAverageItemLevel();
     bool isDebugAreaTriggers;
 
+    /*********************************************************/
+    /***                ARCHAEOLOGY SYSTEM                 ***/
+    /*********************************************************/
+    void GenerateResearchDigSites();
+    void GenerateResearchProjects(uint32 max);
+
 protected:
     uint32 m_GuildMoneyModifier;
     uint32 m_AreaID;

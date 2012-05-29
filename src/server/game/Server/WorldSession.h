@@ -703,6 +703,7 @@ public:
 	void HandleLearnPreviewTalents(WorldPacket& recvPacket);
 	void HandleTalentWipeConfirmOpcode(WorldPacket& recvPacket);
 	void HandleUnlearnSkillOpcode(WorldPacket& recvPacket);
+    void HandleCompletedArtifactsOpcode(WorldPacket& recvPacket);
 
 	void HandleQuestgiverStatusQueryOpcode(WorldPacket& recvPacket);
 	void HandleQuestgiverStatusMultipleQuery(WorldPacket& recvPacket);

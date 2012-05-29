@@ -174,3 +174,16 @@ void WorldSession::HandleUnlearnSkillOpcode(WorldPacket & recv_data) {
 	recv_data >> skill_id;
 	GetPlayer()->SetSkill(skill_id, 0, 0, 0);
 }
+
+void WorldSession::HandleCompletedArtifactsOpcode(WorldPacket &recv_data)
+{
+    WorldPacket data(SMSG_COMPLETED_ARTIFACTS, 4 + 12 * 1);
+    data << uint32(1);  // Number of artifact completed
+    // FOR
+    data << uint32(349); // ID
+    data << uint32(uint32(time(NULL))); // Time
+    data << uint32(10); // Count
+    // END FOR
+    SendPacket(&data);
+	GetPlayer()->GenerateResearchProjects(6);
+}
