@@ -1576,6 +1576,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Skill Fishing base level requirements...");
     sObjectMgr->LoadFishingBaseSkillLevel();
 
+    sLog->outString("Loading Research Dig Sites info...");
+    sObjectMgr->LoadResearchSitesInfo();
+
     sLog->outString("Loading Achievements...");
     sAchievementMgr->LoadAchievementReferenceList();
     sLog->outString("Loading Achievement Criteria Lists...");

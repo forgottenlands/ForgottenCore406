@@ -429,6 +429,17 @@ struct MailLevelReward {
 typedef std::list<MailLevelReward> MailLevelRewardList;
 typedef UNORDERED_MAP<uint8, MailLevelRewardList> MailLevelRewardMap;
 
+struct ResearchSiteInfo 
+{
+    uint32 id;
+    uint32 entry;
+    uint32 map;
+    uint32 minSkill;
+    uint32 minLevel;
+};
+
+typedef UNORDERED_MAP<uint32, ResearchSiteInfo> ResearchSiteInfoMap;
+
 // We assume the rate is in general the same for all three types below, but chose to keep three for scalability and customization
 struct RepRewardRate {
     float quest_rate; // We allow rate = 0.0 in database. For this case, it means that
@@ -983,6 +994,7 @@ public:
     void LoadPetNumber();
     void LoadCorpses();
     void LoadFishingBaseSkillLevel();
+    void LoadResearchSitesInfo();
 
     void LoadReputationRewardRate();
     void LoadRewardOnKill();
@@ -1012,6 +1024,10 @@ public:
         FishingBaseSkillMap::const_iterator itr = mFishingBaseForArea.find(entry);
         return itr != mFishingBaseForArea.end() ? itr->second : 0;
     }
+
+    // Archaeology sites info
+    ResearchSiteInfo const* GetResearchSiteInfo(uint32 siteEntry) const;
+    std::list<uint32> ObjectMgr::GetResearchSiteList(uint32 mapId, uint32 skill, uint8 level) const;
 
     void ReturnOrDeleteOldMails(bool serverUp);
 
@@ -1406,6 +1422,9 @@ private:
 
     typedef std::map<uint32, int32> FishingBaseSkillMap;// [areaId][base skill level]
     FishingBaseSkillMap mFishingBaseForArea;
+
+    // Archaeology
+    ResearchSiteInfoMap m_ReasearchSiteInfoMap;
 
     typedef std::map<uint32, StringVector> HalfNameMap;
     HalfNameMap PetHalfName0;

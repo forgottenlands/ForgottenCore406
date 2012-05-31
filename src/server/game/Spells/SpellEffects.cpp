@@ -176,7 +176,7 @@ pEffect SpellEffects [TOTAL_SPELL_EFFECTS] =
     &Spell::EffectDismissPet,                 // 102 SPELL_EFFECT_DISMISS_PET
     &Spell::EffectReputation,                 // 103 SPELL_EFFECT_REPUTATION
     &Spell::EffectSummonObject,               // 104 SPELL_EFFECT_SUMMON_OBJECT_SLOT1
-    &Spell::EffectSummonObject,               // 105 SPELL_EFFECT_SUMMON_OBJECT_SLOT2
+    &Spell::EffectSummonArchaeologyTelescope, // 105 SPELL_EFFECT_SUMMON_OBJECT_SLOT2
     &Spell::EffectSummonObject,               // 106 SPELL_EFFECT_SUMMON_OBJECT_SLOT3
     &Spell::EffectSummonObject,               // 107 SPELL_EFFECT_SUMMON_OBJECT_SLOT4
     &Spell::EffectDispelMechanic,             // 108 SPELL_EFFECT_DISPEL_MECHANIC
@@ -7617,9 +7617,6 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
         case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
             slot = 0;
             break;
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
-            slot = 1;
-            break;
         case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
             slot = 2;
             break;
@@ -7672,6 +7669,19 @@ void Spell::EffectSummonObject(SpellEffIndex effIndex)
     map->Add(pGameObj);
 
     m_caster->m_ObjectSlot [slot] = pGameObj->GetGUID();
+}
+
+void Spell::EffectSummonArchaeologyTelescope(SpellEffIndex effIndex)
+{
+    uint32 go_id = m_spellInfo->EffectMiscValue[effIndex];
+
+    Player* caster = m_caster->ToPlayer();
+    
+    if (!caster)
+        return;
+
+    caster->SetActualDigSitePosition();
+    caster->SpawnArchaeologyScope();
 }
 
 void Spell::EffectResurrect(SpellEffIndex effIndex)

@@ -181,7 +181,7 @@ void WorldSession::HandleCompletedArtifactsOpcode(WorldPacket &recv_data)
     data << uint32(1);  // Number of artifact completed
     // FOR
     data << uint32(349); // ID
-    data << uint32(uint32(time(NULL))); // Time
+    data << uint32(0); // Time
     data << uint32(10); // Count
     // END FOR
     SendPacket(&data);

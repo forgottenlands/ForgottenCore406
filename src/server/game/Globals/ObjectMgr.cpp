@@ -8682,6 +8682,97 @@ void ObjectMgr::LoadFishingBaseSkillLevel() {
     sLog->outString(">> Loaded %u areas for fishing base skill level", count);
 }
 
+void ObjectMgr::LoadResearchSitesInfo()
+{
+    m_ReasearchSiteInfoMap.clear(); // for reload case
+
+    uint32 count = 0;
+    QueryResult result = WorldDatabase.Query("SELECT id, entry, minSkill, minLevel FROM research_sites");
+
+    if (!result) 
+    {
+        sLog->outString();
+        sLog->outErrorDb(">> Loaded `research_sites`, table is empty!");
+        return;
+    }
+
+    do 
+    {
+        Field *fields = result->Fetch();
+        uint32 id = fields[0].GetUInt32();
+        uint32 entry = fields[1].GetInt32();
+        uint32 minSkill = fields[2].GetInt32();
+        uint32 minLevel = fields[3].GetInt32();
+
+        ResearchSiteEntry const* rs = sResearchSiteStore.LookupEntry(entry);
+        if (!rs)
+        {
+            sLog->outErrorDb("ResearchSite %u defined in `research_sites` does not exist in DBC", entry);
+            continue;
+        }
+        
+        ResearchSiteInfo rSite;
+        rSite.id = id;
+        rSite.entry = entry;
+        rSite.map = rs->mapId;
+        rSite.minLevel = minLevel;
+        rSite.minSkill = minSkill;
+        m_ReasearchSiteInfoMap[entry] = rSite;
+        ++count;
+    } 
+    while (result->NextRow());
+
+    sLog->outString();
+    sLog->outString(">> Loaded %u Research Dig Sites info", count);
+}
+
+ResearchSiteInfo const* ObjectMgr::GetResearchSiteInfo(uint32 siteEntry) const
+{
+	ResearchSiteInfoMap::const_iterator itr = m_ReasearchSiteInfoMap.find(siteEntry);
+
+	if(itr == m_ReasearchSiteInfoMap.end())
+		return NULL;
+	else
+		return &itr->second;
+}
+
+std::list<uint32> ObjectMgr::GetResearchSiteList(uint32 mapId, uint32 skill, uint8 level) const
+{
+    std::list<uint32> siteList;
+    siteList.clear();
+
+    for (uint32 row=9; row < sResearchSiteStore.GetNumRows(); row++)
+    {
+        ResearchSiteEntry *rs = sResearchSiteStore.LookupRow(row);
+        if (!rs)
+            continue;
+
+        if (rs->mapId != mapId)
+            continue;
+
+        // Invalid dig sites (testing ids)
+        if (rs->id == 140 || rs->id == 142 || rs->id == 161)
+            continue;
+
+        // Skip sites that are too complicated
+        if (ResearchSiteInfo const* rsInf = GetResearchSiteInfo(rs->id))
+        {
+            // Check skill level
+            if (rsInf->minSkill != 0)
+                if (skill < rsInf->minSkill)
+                    continue;
+            
+            // Check PG Level 
+            if (rsInf->minLevel != 0)
+                if (level < rsInf->minSkill)
+                    continue;
+        }
+
+        siteList.push_back(rs->id);
+    }
+    return siteList;
+}
+
 bool ObjectMgr::CheckDeclinedNames(std::wstring mainpart,
         DeclinedName const& names) {
     for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i) {

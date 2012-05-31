@@ -2859,7 +2859,14 @@ public:
     /*********************************************************/
     void GenerateResearchDigSites();
     void GenerateResearchProjects(uint32 max);
-
+    void GenerateResearchDigSitesInMap(uint32 map, uint32 &slot);
+    void SetActualDigSitePosition();
+    void SpawnArchaeologyScope();
+    uint8 HasSavedDigSites();
+    uint32 m_digSites[16];
+    Position m_actualDigPos;
+    uint8 m_doneDigSites;
+    
 protected:
     uint32 m_GuildMoneyModifier;
     uint32 m_AreaID;

@@ -4183,8 +4183,11 @@ void AuraEffect::HandleAuraTrackResources(AuraApplication const *aurApp, uint8 m
     switch (aurApp->GetBase()->GetId())
     {
         case 74268: // Archaeology track
-            if (target->ToPlayer()->HasSkill(SKILL_ARCHAEOLOGY))
-                target->ToPlayer()->GenerateResearchDigSites();
+            if (apply)
+            {
+                if (target->ToPlayer()->HasSkill(SKILL_ARCHAEOLOGY))
+                    target->ToPlayer()->GenerateResearchDigSites();
+            }
             break;
         default:    // Default tracks
             target->SetUInt32Value(PLAYER_TRACK_RESOURCES, (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);

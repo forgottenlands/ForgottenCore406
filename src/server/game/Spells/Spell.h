@@ -401,6 +401,7 @@ public:
     void EffectApplyGlyph(SpellEffIndex effIndex);
     void EffectEnchantHeldItem(SpellEffIndex effIndex);
     void EffectSummonObject(SpellEffIndex effIndex);
+    void EffectSummonArchaeologyTelescope(SpellEffIndex effIndex);
     void EffectResurrect(SpellEffIndex effIndex);
     void EffectParry(SpellEffIndex effIndex);
     void EffectBlock(SpellEffIndex effIndex);

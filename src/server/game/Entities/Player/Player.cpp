@@ -11300,7 +11300,7 @@ void Player::ModifyCurrency(uint32 id, int32 count) {
 
     const CurrencyTypesEntry* currency = sCurrencyTypesStore.LookupEntry(id);
     ASSERT(currency);
-
+    
     int32 oldTotalCount = 0;
     int32 oldWeekCount = 0;
     PlayerCurrenciesMap::iterator itr = m_currencies.find(id);
@@ -11395,19 +11395,27 @@ uint32 Player::_GetCurrencyWeekCap(const CurrencyTypesEntry* currency) const {
 
 uint32 Player::_GetCurrencyTotalCap(const CurrencyTypesEntry* currency) const {
     uint32 cap = currency->TotalCap;
-    switch (currency->ID) {
-    case CURRENCY_TYPE_CONQUEST_POINTS:
-        cap = sWorld->getIntConfig(
-                CONFIG_MAX_CONQUEST_POINTS) * PLAYER_CURRENCY_PRECISION;
-        break;
-    case CURRENCY_TYPE_HONOR_POINTS:
-        cap = sWorld->getIntConfig(
-                CONFIG_MAX_HONOR_POINTS) * PLAYER_CURRENCY_PRECISION;
-        break;
-    case CURRENCY_TYPE_JUSTICE_POINTS:
-        cap = sWorld->getIntConfig(
-                CONFIG_MAX_JUSTICE_POINTS) * PLAYER_CURRENCY_PRECISION;
-        break;
+    switch (currency->ID) 
+    {
+        case CURRENCY_TYPE_CONQUEST_POINTS:
+            cap = sWorld->getIntConfig(CONFIG_MAX_CONQUEST_POINTS) * PLAYER_CURRENCY_PRECISION;
+            break;
+        case CURRENCY_TYPE_HONOR_POINTS:
+            cap = sWorld->getIntConfig(CONFIG_MAX_HONOR_POINTS) * PLAYER_CURRENCY_PRECISION;
+            break;
+        case CURRENCY_TYPE_JUSTICE_POINTS:
+            cap = sWorld->getIntConfig(CONFIG_MAX_JUSTICE_POINTS) * PLAYER_CURRENCY_PRECISION;
+            break;
+        case CURRENCY_TIPE_ARCHEAOLOGY_DWARF:
+        case CURRENCY_TIPE_ARCHEAOLOGY_DRAENEI:
+        case CURRENCY_TIPE_ARCHEAOLOGY_FOSSIL:
+        case CURRENCY_TIPE_ARCHEAOLOGY_NERUBIAN:
+        case CURRENCY_TIPE_ARCHEAOLOGY_NIGHT_ELF:
+        case CURRENCY_TIPE_ARCHEAOLOGY_ORC:
+        case CURRENCY_TIPE_ARCHEAOLOGY_TOLVIR:
+        case CURRENCY_TIPE_ARCHEAOLOGY_VRYKUL:
+            cap *= PLAYER_CURRENCY_PRECISION;
+            break;
     }
 
     return cap;
@@ -16923,8 +16931,8 @@ float Player::GetFloatValueFromArray(Tokens const& data, uint16 index) {
     return result;
 }
 
-Player* Player::LoadFromDB(uint32 guid, SQLQueryHolder * holder,
-        WorldSession * session) {
+Player* Player::LoadFromDB(uint32 guid, SQLQueryHolder * holder, WorldSession * session) 
+{
     ////                                                     0     1        2     3     4        5      6    7      8     9           10              11
     //QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags, "
     // 12          13          14          15   16           17        18        19         20         21          22           23                 24
@@ -16937,13 +16945,11 @@ Player* Player::LoadFromDB(uint32 guid, SQLQueryHolder * holder,
     //"health, power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, "
     // 67           68          69              70
     //"knownTitles, actionBars, currentPetSlot, petSlotUsed FROM characters WHERE guid = '%u'", guid);
-    PreparedQueryResult result = holder->GetPreparedResult(
-            PLAYER_LOGIN_QUERY_LOADFROM);
+    PreparedQueryResult result = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
-    if (!result) {
-        sLog->outError(
-                "Player (GUID: %u) not found in table `characters`, can't load. ",
-                guid);
+    if (!result)
+    {
+        sLog->outError("Player (GUID: %u) not found in table `characters`, can't load. ", guid);
         return false;
     }
 
@@ -17038,6 +17044,23 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder,
                 "UPDATE characters SET at_login = at_login | '%u' WHERE guid ='%u'",
                 uint32(AT_LOGIN_RENAME), guid);
         return false;
+    }
+
+    // Load archaeology dig sites
+    for (uint8 i = 0; i < 16; i++)
+        m_digSites[i] = 0;
+
+    if (QueryResult digResult = CharacterDatabase.PQuery("SELECT entry FROM character_digsites WHERE guid = %u", guid))
+    {
+        uint8 count = 0;
+        do
+        {
+            Field* digFields = digResult->Fetch();
+            uint32 digId = digFields[0].GetUInt32();
+            m_digSites[count] = digId;
+            count++;
+        } 
+        while (digResult->NextRow());
     }
 
     // overwrite possible wrong/corrupted guid
@@ -18957,12 +18980,14 @@ bool Player::_LoadHomeBind(PreparedQueryResult result) {
 /***                   SAVE SYSTEM                     ***/
 /*********************************************************/
 
-void Player::SaveToDB() {
+void Player::SaveToDB() 
+{
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);
 
     //lets allow only players in world to be saved
-    if (IsBeingTeleportedFar()) {
+    if (IsBeingTeleportedFar()) 
+    {
         ScheduleDelayedOperation(DELAYED_SAVE_PLAYER);
         return;
     }
@@ -18970,8 +18995,7 @@ void Player::SaveToDB() {
     // first save/honor gain after midnight will also update the player's honor fields
     UpdateHonorFields();
 
-    sLog->outDebug(LOG_FILTER_UNITS, "The value of player %s at save: ",
-            m_name.c_str());
+    sLog->outDebug(LOG_FILTER_UNITS, "The value of player %s at save: ", m_name.c_str());
     outDebugValues();
 
     std::string sql_name = m_name;
@@ -18998,24 +19022,23 @@ void Player::SaveToDB() {
             << GetUInt32Value(PLAYER_BYTES_2) << ", "
             << GetUInt32Value(PLAYER_FLAGS) << ", ";
 
-    if (!IsBeingTeleported()) {
+    if (!IsBeingTeleported())
+    {
         ss << GetMapId() << ", " << (uint32) GetInstanceId() << ", "
-                << uint32(
-                        uint8(GetDungeonDifficulty())
-                                | uint8(GetRaidDifficulty()) << 4) << ", "
-                << finiteAlways(GetPositionX()) << ", "
-                << finiteAlways(GetPositionY()) << ", "
-                << finiteAlways(GetPositionZ()) << ", "
-                << finiteAlways(GetOrientation()) << ", ";
-    } else {
+        << uint32(uint8(GetDungeonDifficulty()) | uint8(GetRaidDifficulty()) << 4) << ", "
+        << finiteAlways(GetPositionX()) << ", "
+        << finiteAlways(GetPositionY()) << ", "
+        << finiteAlways(GetPositionZ()) << ", "
+        << finiteAlways(GetOrientation()) << ", ";
+    } 
+    else 
+    {
         ss << GetTeleportDest().GetMapId() << ", " << (uint32) 0 << ", "
-                << uint32(
-                        uint8(GetDungeonDifficulty())
-                                | uint8(GetRaidDifficulty()) << 4) << ", "
-                << finiteAlways(GetTeleportDest().GetPositionX()) << ", "
-                << finiteAlways(GetTeleportDest().GetPositionY()) << ", "
-                << finiteAlways(GetTeleportDest().GetPositionZ()) << ", "
-                << finiteAlways(GetTeleportDest().GetOrientation()) << ", ";
+        << uint32(uint8(GetDungeonDifficulty())| uint8(GetRaidDifficulty()) << 4) << ", "
+        << finiteAlways(GetTeleportDest().GetPositionX()) << ", "
+        << finiteAlways(GetTeleportDest().GetPositionY()) << ", "
+        << finiteAlways(GetTeleportDest().GetPositionZ()) << ", "
+        << finiteAlways(GetTeleportDest().GetOrientation()) << ", ";
     }
 
     ss << m_taxi << ", "; // string with TaxiMaskSize numbers
@@ -19079,21 +19102,28 @@ void Player::SaveToDB() {
     ss << uint32(m_specsCount);
     ss << ", ";
     ss << uint32(m_activeSpec) << ", '";
-    for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i) {
+
+    for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i) 
+    {
         ss << GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + i) << " ";
     }
 
     ss << "', '";
-    for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i) {
+
+    for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i) 
+    {
         ss << GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + i) << " ";
     }
 
     ss << "', ";
 
     ss << uint32(0) /*GetUInt32Value(PLAYER_AMMO_ID)*/<< ", '";
-    for (uint32 i = 0; i < KNOWN_TITLES_SIZE * 2; ++i) {
+
+    for (uint32 i = 0; i < KNOWN_TITLES_SIZE * 2; ++i)
+    {
         ss << GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES + i) << " ";
     }
+
     ss << "', ";
     ss << uint32(GetByteValue(PLAYER_FIELD_BYTES, 2));
 
@@ -19136,6 +19166,14 @@ void Player::SaveToDB() {
         _SaveStats(trans);
 
     CharacterDatabase.CommitTransaction(trans);
+
+    // Save archaeology dig sites
+    CharacterDatabase.PQuery("DELETE FROM character_digsites WHERE guid = %u", GetGUIDLow());
+    for (uint8 i = 0; i < 16; ++i)
+    {
+        if (m_digSites[i] != 0)
+            CharacterDatabase.PQuery("INSERT INTO character_digsites VALUES (%u, %u)", GetGUIDLow(), m_digSites[i]);
+    }
 
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
@@ -25777,7 +25815,17 @@ void Player::RemoveOrAddMasterySpells()
     }
 }
 
-#define MAX_RESEARCH_SITES  6
+#define MAX_RESEARCH_SITES  4
+#define ARCHAEOLOGY_DIG_SITE_RADIUS					40
+#define ARCHAEOLOGY_DIG_SITE_FAR_DIST				25
+#define ARCHAEOLOGY_DIG_SITE_MED_DIST				10
+#define ARCHAEOLOGY_DIG_SITE_CLOSE_DIST				5
+#define ARCHAEOLOGY_DIG_SITE_FAR_SURVEYBOT			206590
+#define ARCHAEOLOGY_DIG_SITE_MEDIUM_SURVEYBOT		206589
+#define ARCHAEOLOGY_DIG_SITE_CLOSE_SURVEYBOT		204272
+#define ARCHAEOLOGY_DIG_SITE_REWARD_PLAYER   		0
+#define ARCHAEOLOGY_DIG_SITE_REWARD_AMMT_MAX		7
+
 void Player::GenerateResearchDigSites()
 {
     uint32 skill_now = GetSkillValue(SKILL_ARCHAEOLOGY);
@@ -25785,77 +25833,317 @@ void Player::GenerateResearchDigSites()
     if (skill_now == 0)
         return;
 
-    uint32 added_site_count = 0;
+    uint32 slot = 0;
 
-    for (uint32 row=0; row < sResearchSiteStore.GetNumRows(); row++)
+    // Keep saved dig sites
+    if (HasSavedDigSites() > 0)
     {
-        ResearchSiteEntry *rs = sResearchSiteStore.LookupRow(row);
-        if (!rs)
-            continue;
-
-        if (rs->mapId != GetMapId())
-            continue;
-
-        // check if we have this site atm
-        bool have_site = false;
-        uint32 free_spot = 0;
-        uint32 sites_found = 0;
-
-        for (uint32 sites = 0; sites < MAX_RESEARCH_SITES / 2; sites++)
+        for (uint8 i = 0; i < 16; i++)
         {
-            uint32 site_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + sites) & 0xFFFF;
-            uint32 site_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + sites) >> 16;
+            uint32 site_1 = m_digSites[i];
+            uint32 site_2 = m_digSites[i+1];
+            uint32 value = (site_2 << 16) | (site_1);
+            SetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + slot, value);
+            ++i;
+            ++slot;
+        }
+        return;
+    }
 
-            if (site_now_1 == rs->id || site_now_2 == rs->id)
+    // Generate first time sites
+    GenerateResearchDigSitesInMap(0, slot);         // Kalimidor
+    GenerateResearchDigSitesInMap(1, slot);         // Eastern Kindom
+
+    if (getLevel() >= 58)
+        GenerateResearchDigSitesInMap(530, slot);   // Outland
+
+    if (getLevel() >= 68)
+        GenerateResearchDigSitesInMap(571, slot);   // Northrend
+}
+
+void Player::GenerateResearchDigSitesInMap(uint32 map, uint32 &slot)
+{
+    uint32 beginSlot = slot;
+    uint32 skill_now = GetSkillValue(SKILL_ARCHAEOLOGY);
+    std::list<uint32> sitesList;
+    sitesList = sObjectMgr->GetResearchSiteList(map, skill_now, getLevel());
+
+    // Generate Random Sites
+    for (uint8 i = 0; i < MAX_RESEARCH_SITES; i++)
+    {
+        uint32 rsite = urand(0, sitesList.size());
+        uint32 count = 0;
+        for (std::list<uint32>::const_iterator itr = sitesList.begin(); itr != sitesList.end(); ++itr)
+        {
+            if (count == rsite)
             {
-                have_site = true;
+                ResearchSiteEntry *rs = sResearchSiteStore.LookupRow((*itr));
+                if (!rs)
+                    continue;
+
+                uint32 site_now = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + slot) & 0xFFFF;
+                uint32 new_value = 0;
+
+                if (site_now != 0)
+                {
+                    new_value = (rs->id << 16) | (site_now);
+                    SetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + slot, new_value);
+                    slot++;
+                } 
+                else
+                {
+                    new_value = (site_now << 16) | (rs->id);
+                    SetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + slot, new_value);
+                }
+                
+                m_digSites[i + MAX_RESEARCH_SITES * beginSlot / 2] = rs->id;
+                sitesList.remove((*itr));
                 break;
             }
+            count++;
+        }
+    }
+}
 
-            if (site_now_1 == 0 && free_spot == 0)
-                free_spot = sites * 2;
+uint8 Player::HasSavedDigSites()
+{
+    uint8 count = 0;
+    for (uint8 i = 0; i < 16; ++i)
+    {
+        if (m_digSites[i] != 0)
+            count++;
+    }
+    return count;
+}
 
-            else if (site_now_2 == 0 && free_spot == 0)
-                free_spot = sites * 2 +1;
+void Player::SetActualDigSitePosition()
+{
+    if (m_actualDigPos.m_positionX == 0.0f)
+    {
+        m_actualDigPos.m_positionX = GetPositionX() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
+        m_actualDigPos.m_positionY = GetPositionY() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
+        m_actualDigPos.m_positionZ = GetPositionZ();
+    }
+}
 
-            if (site_now_1 != 0 )
-                sites_found++;
+void Player::SpawnArchaeologyScope()
+{
+    uint32 skill_now = GetSkillValue(SKILL_ARCHAEOLOGY);
+    float distance = 0;
+    distance = GetDistance2d(m_actualDigPos.m_positionX, m_actualDigPos.m_positionY);
+    uint32 telescopeEntry;
 
-            if( site_now_2 != 0 )
-                sites_found++;
+    if (distance > ARCHAEOLOGY_DIG_SITE_FAR_DIST)
+        telescopeEntry = ARCHAEOLOGY_DIG_SITE_FAR_SURVEYBOT;
+    else if (distance < ARCHAEOLOGY_DIG_SITE_FAR_DIST && distance > ARCHAEOLOGY_DIG_SITE_MED_DIST)
+        telescopeEntry = ARCHAEOLOGY_DIG_SITE_MEDIUM_SURVEYBOT;
+    else if (distance < ARCHAEOLOGY_DIG_SITE_MED_DIST && distance > ARCHAEOLOGY_DIG_SITE_CLOSE_DIST)
+        telescopeEntry = ARCHAEOLOGY_DIG_SITE_CLOSE_SURVEYBOT;
+    else if (distance < ARCHAEOLOGY_DIG_SITE_CLOSE_DIST)
+        telescopeEntry = ARCHAEOLOGY_DIG_SITE_REWARD_PLAYER;
+
+    if (telescopeEntry != ARCHAEOLOGY_DIG_SITE_REWARD_PLAYER)
+    {
+        GameObject* pGameObj = new GameObject;
+        Position summonPos;
+        GetClosePoint(summonPos.m_positionX, summonPos.m_positionY, summonPos.m_positionZ, DEFAULT_WORLD_OBJECT_SIZE);
+        Map *map = GetMap();
+
+        if (!pGameObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), telescopeEntry, map, GetPhaseMask(), summonPos.m_positionX, summonPos.m_positionY, summonPos.m_positionZ, summonPos.GetAngle(m_actualDigPos.GetPositionX(), m_actualDigPos.GetPositionY()), 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
+        {
+            delete pGameObj;
+            return;
+        }
+        pGameObj->SetRespawnTime(6000 / IN_MILLISECONDS);
+        AddGameObject(pGameObj);
+        map->Add(pGameObj);
+    } else
+    {
+        // Summon object
+        std::list<uint32> treasureEntryList;
+        switch (GetZoneId())
+        {
+            case 4709: // Souther Barrens
+                treasureEntryList.push_back(204282); // Dwarf Find
+                treasureEntryList.push_back(206836); // Fossil Find
+                treasureEntryList.push_back(203071); // Night Elf Find
+                break;
+            case 4922: // Twilight Hightlands
+            case 3:    // Badlands
+            case 51:   // Searing gorge
+            case 38:   // loch modan
+                treasureEntryList.push_back(204282); // Dwarf Find
+                break;
+            case 267:  // Hillsbard Foothills
+            case 46:   // Burning Steppes
+            case 11:   // Wetlands
+                treasureEntryList.push_back(204282); // Dwarf Find
+                treasureEntryList.push_back(206836); // Fossil Find
+                break;
+            case 45:   // Arathi Highlands
+            case 47:   // Hinterlands
+                treasureEntryList.push_back(204282); // Dwarf Find
+                treasureEntryList.push_back(202655); // Troll find
+                break;
+            case 28:   // Weastern plaguelands
+            case 4:    // Blasted Lands
+            case 44:   // Redrige Mountains
+            case 15:   // Dustwallow Marsh
+                treasureEntryList.push_back(206836); // Fossil Find
+                break;
+            case 10:   // Duskwood
+            case 405:  // Desolance
+            case 406:  // Stonetalon Mountains
+                treasureEntryList.push_back(206836); // Fossil Find
+                treasureEntryList.push_back(203071); // Night Elf Find
+                break;
+            case 139:  // Eastern Plaguelands
+                treasureEntryList.push_back(206836); // Fossil Find
+                treasureEntryList.push_back(203071); // Night Elf Find
+                treasureEntryList.push_back(202655); // Troll find
+                if (skill_now >= 375)
+                    treasureEntryList.push_back(203078); // Nerubian find
+                break;
+            case 33:   // Norther Stranglethorn
+            case 8:    // Swamp of Sorrows
+            case 490:  // Un'Goro Crater
+            case 440:  // Tanaris
+                treasureEntryList.push_back(206836); // Fossil Find
+                treasureEntryList.push_back(202655); // Troll find
+                break;
+            case 357:  // Feralas
+            case 616:  // Mount Hyjal
+            case 331:  // Ashenvale
+            case 361:  // Felwood
+            case 618:  // Winterspring
+            case 16:   // Azshara
+            case 148:  // Darkshore
+            case 1377: // Silithus
+            case 2817: // Crystalsong forest
+                treasureEntryList.push_back(203071); // Night Elf Find
+                break;
+            case 3537: // Borean Thundra
+            case 65:   // Dragonblight
+                treasureEntryList.push_back(203071); // Night Elf Find
+                if (skill_now >= 375)
+                    treasureEntryList.push_back(203078); // Nerubian find
+                break;
+            case 5287: // Cape of Stranglethorn
+                treasureEntryList.push_back(202655); // Troll find
+                break;
+            case 66:   // Zul'Drak
+                treasureEntryList.push_back(202655); // Troll find
+                if (skill_now >= 375)
+                    treasureEntryList.push_back(203078); // Nerubian find
+                break;
+            case 394:  // Grizzly hills
+                treasureEntryList.push_back(202655); // Troll find
+                if (skill_now >= 375)
+                    treasureEntryList.push_back(207189); // Vrykul find
+                break;
+            case 3520: // Shadowmoon valley
+            case 3519: // Terokkar Forest
+            case 3483: // Hellfire Peninsula
+            case 3518: // Nagrand
+                if (skill_now >= 300)
+                {
+                    treasureEntryList.push_back(207188); // Draenei find
+                    treasureEntryList.push_back(207187); // Orc find
+                }
+                break;
+            case 3523: // Netherstorm
+            case 3521: // Zangarmash
+                if (skill_now >= 300)
+                    treasureEntryList.push_back(207188); // Draenei find
+                break;
+            case 210:  // Icecrown
+                if (skill_now >= 375)
+                {
+                    treasureEntryList.push_back(203078); // Nerubian find
+                    treasureEntryList.push_back(207189); // Vrykul find
+                }
+                break;
+            case 495:  // Howling Fjord
+            case 67:   // Storm Peaks
+                if (skill_now >= 375)
+                    treasureEntryList.push_back(207189); // Vrykul find
+                break;
+            case 5034: // Uldum
+                if (skill_now >= 450)
+                    treasureEntryList.push_back(207190); // tol'vir find
+                break;
+        }
+        uint8 randomFind = urand(1, treasureEntryList.size());
+        uint32 findEntry = 0;
+        uint8 count = 1;
+        for (std::list<uint32>::const_iterator itr = treasureEntryList.begin(); itr != treasureEntryList.end(); ++itr)
+        {
+            if (count == randomFind)
+            {
+                findEntry = (*itr);
+                break;
+            }
         }
 
-        // we do not double add it
-        if (have_site == true )
-            continue;
+        if (!findEntry)
+            return;
 
-        // if we are low on sites we have a high chance to add it
-        uint32 chance = (100 - sites_found * 100 / MAX_RESEARCH_SITES);
-        if (chance < 50)
-            chance = 50;
+        GameObject* pGameObj = new GameObject;
+        Position summonPos;
+        GetClosePoint(summonPos.m_positionX, summonPos.m_positionY, summonPos.m_positionZ, DEFAULT_WORLD_OBJECT_SIZE);
+        Map *map = GetMap();
 
-        if (roll_chance_i(chance) == false)
-            continue;
+        if (!pGameObj->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), findEntry, map, GetPhaseMask(), summonPos.m_positionX, summonPos.m_positionY, summonPos.m_positionZ, GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
+        {
+            delete pGameObj;
+            return;
+        }
 
-        // if this is not added because we do not have any, just because we want to refresh site then we random pick a slot
-        if (free_spot == 0)
-            free_spot = uint32(rand() % MAX_RESEARCH_SITES);
+        pGameObj->SetRespawnTime(30000 / IN_MILLISECONDS);
+        AddGameObject(pGameObj);
+        map->Add(pGameObj);
 
-        //assign the site to us
-        uint32 site_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + free_spot / 2) & 0xFFFF;
-        uint32 site_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + free_spot / 2) >> 16;
+        // Skill up
+        if (skill_now <= 50)
+            SetSkill(SKILL_ARCHAEOLOGY, GetSkillStep(SKILL_ARCHAEOLOGY), skill_now + 3, GetMaxSkillValue(SKILL_ARCHAEOLOGY));
 
-        uint32 new_value;
-        if (free_spot % 2 == 1)
-            new_value = (rs->id << 16) | (site_now_1);
-        else
-            new_value = (site_now_1 << 16) | (rs->id);
+        // Give currency 
+        uint32 currencyId;
+        switch (findEntry)
+        {
+            // Dwarf
+            case 204282: currencyId = 384; break;
+            // Draenei
+            case 207188: currencyId = 398; break;
+            // Fossil
+            case 206836: currencyId = 393; break;
+            // Nerubian
+            case 203078: currencyId = 400; break;
+            // Night Elf
+            case 203071: currencyId = 394; break;
+            // Orc
+            case 207187: currencyId = 397; break;
+            // Tol'vir
+            case 207190: currencyId = 401; break;
+            // Troll
+            case 202655: currencyId = 385; break;
+            // Vrykul
+            case 207189: currencyId = 399; break;
+        }
 
-        SetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + free_spot / 2, new_value);
-        added_site_count++;
+        ModifyCurrency(currencyId, urand(2,4) * PLAYER_CURRENCY_PRECISION);
 
-        if (added_site_count >= MAX_RESEARCH_SITES)
-            break;	// pointless to continue
+        // Reset coord
+        m_actualDigPos.m_positionX = 0.0f;
+        m_actualDigPos.m_positionY = 0.0f;
+        m_actualDigPos.m_positionZ = 0.0f;
+
+        m_doneDigSites++;
+
+        if (m_doneDigSites == 3)
+        {
+            // Remove site
+        }
     }
 }
 
