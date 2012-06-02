@@ -185,5 +185,4 @@ void WorldSession::HandleCompletedArtifactsOpcode(WorldPacket &recv_data)
     data << uint32(10); // Count
     // END FOR
     SendPacket(&data);
-	GetPlayer()->GenerateResearchProjects(6);
 }

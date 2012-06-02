@@ -17046,22 +17046,10 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder,
         return false;
     }
 
-    // Load archaeology dig sites
-    for (uint8 i = 0; i < 16; i++)
-        m_digSites[i] = 0;
-
-    if (QueryResult digResult = CharacterDatabase.PQuery("SELECT entry FROM character_digsites WHERE guid = %u", guid))
-    {
-        uint8 count = 0;
-        do
-        {
-            Field* digFields = digResult->Fetch();
-            uint32 digId = digFields[0].GetUInt32();
-            m_digSites[count] = digId;
-            count++;
-        } 
-        while (digResult->NextRow());
-    }
+    // Reset dig position
+    m_actualDigPos.m_positionX = 0.0f;
+    m_actualDigPos.m_positionY = 0.0f;
+    m_actualDigPos.m_positionZ = 0.0f;
 
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
@@ -19168,11 +19156,14 @@ void Player::SaveToDB()
     CharacterDatabase.CommitTransaction(trans);
 
     // Save archaeology dig sites
-    CharacterDatabase.PQuery("DELETE FROM character_digsites WHERE guid = %u", GetGUIDLow());
-    for (uint8 i = 0; i < 16; ++i)
+    if (HasSkill(SKILL_ARCHAEOLOGY))
     {
-        if (m_digSites[i] != 0)
-            CharacterDatabase.PQuery("INSERT INTO character_digsites VALUES (%u, %u)", GetGUIDLow(), m_digSites[i]);
+        CharacterDatabase.PQuery("DELETE FROM character_digsites WHERE guid = %u", GetGUIDLow());
+        for (uint8 i = 0; i < 16; ++i)
+        {
+            if (m_digSites[i] != 0)
+                CharacterDatabase.PQuery("INSERT INTO character_digsites VALUES (%u, %u)", GetGUIDLow(), m_digSites[i]);
+        }
     }
 
     // save pet (hunter pet level and experience and all type pets health/mana).
@@ -25816,7 +25807,7 @@ void Player::RemoveOrAddMasterySpells()
 }
 
 #define MAX_RESEARCH_SITES  4
-#define ARCHAEOLOGY_DIG_SITE_RADIUS					40
+#define ARCHAEOLOGY_DIG_SITE_RADIUS					60
 #define ARCHAEOLOGY_DIG_SITE_FAR_DIST				25
 #define ARCHAEOLOGY_DIG_SITE_MED_DIST				10
 #define ARCHAEOLOGY_DIG_SITE_CLOSE_DIST				5
@@ -25918,7 +25909,7 @@ uint8 Player::HasSavedDigSites()
 
 void Player::SetActualDigSitePosition()
 {
-    if (m_actualDigPos.m_positionX == 0.0f)
+    if (m_actualDigPos.m_positionX == 0.0f || m_actualDigPos.m_positionY == 0.0f || m_actualDigPos.m_positionZ == 0.0f)
     {
         m_actualDigPos.m_positionX = GetPositionX() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
         m_actualDigPos.m_positionY = GetPositionY() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
@@ -26107,31 +26098,34 @@ void Player::SpawnArchaeologyScope()
         if (skill_now <= 50)
             SetSkill(SKILL_ARCHAEOLOGY, GetSkillStep(SKILL_ARCHAEOLOGY), skill_now + 3, GetMaxSkillValue(SKILL_ARCHAEOLOGY));
 
-        // Give currency 
+        // Give currency & project
         uint32 currencyId;
+        uint32 branchId;
         switch (findEntry)
         {
             // Dwarf
-            case 204282: currencyId = 384; break;
+            case 204282: currencyId = 384; branchId = 1; break;
             // Draenei
-            case 207188: currencyId = 398; break;
+            case 207188: currencyId = 398; branchId = 2; break;
             // Fossil
-            case 206836: currencyId = 393; break;
+            case 206836: currencyId = 393; branchId = 3; break;
             // Nerubian
-            case 203078: currencyId = 400; break;
+            case 203078: currencyId = 400; branchId = 5; break;
             // Night Elf
-            case 203071: currencyId = 394; break;
+            case 203071: currencyId = 394; branchId = 4; break;
             // Orc
-            case 207187: currencyId = 397; break;
+            case 207187: currencyId = 397; branchId = 6; break;
             // Tol'vir
-            case 207190: currencyId = 401; break;
+            case 207190: currencyId = 401; branchId = 7; break;
             // Troll
-            case 202655: currencyId = 385; break;
+            case 202655: currencyId = 385; branchId = 8; break;
             // Vrykul
-            case 207189: currencyId = 399; break;
+            case 207189: currencyId = 399; branchId = 27; break;
         }
 
-        ModifyCurrency(currencyId, urand(2,4) * PLAYER_CURRENCY_PRECISION);
+        GenerateResearchProject(branchId);
+        ModifyCurrency(currencyId, urand(3, 4) * PLAYER_CURRENCY_PRECISION);
+
 
         // Reset coord
         m_actualDigPos.m_positionX = 0.0f;
@@ -26142,98 +26136,116 @@ void Player::SpawnArchaeologyScope()
 
         if (m_doneDigSites == 3)
         {
-            // Remove site
+            for (uint8 i = 0; i < HasSavedDigSites(); i++)
+            {
+                if (Creature* digSiteNpc = FindNearestCreature(m_digSites[i]+60000, 100.0f, true))
+                {
+                    uint8 slot = 0;
+                    for (slot = 0; slot < 8; slot++)
+                    {
+                        uint32 site_1 = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + slot) & 0xFFFF;
+			            uint32 site_2 = GetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + slot) >> 16;
+
+                        if (site_1 == m_digSites[i])
+                        {
+                            uint32 new_site = GetNewRandomSite(GetMapId());
+                            m_digSites[i] = new_site;
+                            SetDigSiteInSlot(slot, new_site, site_2);
+                            break;
+                        } else if (site_2 == m_digSites[i])
+                        {
+                            uint32 new_site = GetNewRandomSite(GetMapId());
+                            m_digSites[i] = new_site;
+                            SetDigSiteInSlot(slot, site_1, new_site);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
         }
     }
 }
 
-void Player::GenerateResearchProjects(uint32 max)
+uint32 Player::GetNewRandomSite(uint32 map)
 {
-    uint32 added_project_count = 0;
     uint32 skill_now = GetSkillValue(SKILL_ARCHAEOLOGY);
+    std::list<uint32> sitesList;
+    sitesList = sObjectMgr->GetResearchSiteList(map, skill_now, getLevel());
 
-    if(skill_now == 0)
+    uint32 rsite = urand(0, sitesList.size());
+    uint32 count = 0;
+    for (std::list<uint32>::const_iterator itr = sitesList.begin(); itr != sitesList.end(); ++itr)
+    {
+        if (count == rsite)
+            return rsite;
+        count++;
+    }
+
+    return 0;
+}
+
+void Player::SetDigSiteInSlot(uint32 slot, uint32 site1, uint32 site2)
+{
+    uint32 new_value = (site2 << 16) | (site1);
+    SetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + slot, new_value);
+}
+
+void Player::GenerateResearchProject(uint32 branchId)
+{
+    if (m_researchProject[branchId] != 0)
         return;
 
-    for(uint32 row=0; row < sResearchProjectStore.GetNumRows(); row++)
+    uint32 skill_now = GetSkillValue(SKILL_ARCHAEOLOGY);
+    std::list<uint32> projectList;
+    for(uint32 row = 39; row < sResearchProjectStore.GetNumRows(); row++)
     {
         ResearchProjectEntry *rs = sResearchProjectStore.LookupRow(row);
         if (!rs)
             continue;
 
-        //skip misc projects, they seem to contain junks
-        if (rs->branchId == 29)
+        if (rs->branchId != branchId)
             continue;
 
-        //let's not pick impossible projects
-        // if (rs->req_fragments > MAX(75, skill_now / 3 ) )	//[25,150]
-        // 	continue;
+        uint32 frag_req = 75;
+        if (skill_now / 3 > 75)
+            frag_req = skill_now / 3;
 
-        //stop generating crap
-        //		if( rs->Complexity < MAX( 0, skill_now / 75 - 2 ) )
-        //			continue;
+        if (rs->req_fragments > frag_req)
+            continue;
+        
+        projectList.push_back(rs->id);
+    }
 
-        //while continuesly logged in, let's not generate same crap ? Same crap gets it's chance reduced
-        /*uint32 skip_chance = 0; // m_temp_completed_projects[rs->RowId];
-        if( rand( skip_chance * rs->req_fragments / 2 ) )
-            continue;*/
-
-        //check if we have this site atm
-        bool have_site = false;
-        uint32 free_spot = 0xFFFF;
-        uint32 projects_found = 0;
-        for (uint32 sites=0; sites < MAX_RESEARCH_SITES / 2; sites++)
+    uint32 selectedProject = urand (0, projectList.size());
+    uint8 count = 0;;
+    for (std::list<uint32>::const_iterator itr = projectList.begin(); itr != projectList.end(); ++itr)
+    {
+        if (count == selectedProject)
         {
-            uint32 project_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + sites) & 0xFFFF;
-            uint32 project_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + sites) >> 16;
-            if (project_now_1 == rs->id || project_now_2 == rs->id)
+            int32 slot = -10;
+            int32 new_value = -10;
+            for (uint8 i = 0; i < 5; i++)
             {
-                have_site = true;
-                break;
+                uint32 project_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + i) & 0xFFFF;
+                uint32 project_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + i) >> 16;
+
+                if (project_now_1 == 0)
+                {
+                    slot = int32(i);
+                    new_value = (project_now_2 << 16) | (*itr);
+                    break;
+                } else if (project_now_2 == 0)
+                {
+                    slot = int32(i);
+                    new_value = ((*itr) << 16) | (project_now_1);
+                    break;
+                }
             }
-
-            if (project_now_1 == 0 && free_spot == 0xFFFF)
-                free_spot = sites * 2;
-            else if (project_now_2 == 0 && free_spot == 0xFFFF)
-                free_spot = sites * 2 +1;
-            if (project_now_1 != 0)
-                projects_found++;
-            if (project_now_2 != 0)
-                projects_found++;
+            SetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + slot, new_value);
+            m_researchProject[branchId] = (*itr);
+            break;
         }
-
-        //we do not double add it
-        if (have_site == true)
-            continue;
-
-        //we only add, do not replace existing ones
-        if (free_spot == 0xFFFF)
-            break;	///there is no chance to add more projects to us
-
-        //if we are low on sites we have a high chance to add it
-        uint32 chance = 100 - projects_found * 100 / MAX_RESEARCH_SITES;
-        if (chance < 50)
-            chance = 50;
-
-        if (chance < 525 * 100 / skill_now)
-            chance = 525 * 100 / skill_now;
-
-        if (roll_chance_i(chance) == false) 
-            continue;
-
-        //assign the site to us
-        uint32 project_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + free_spot / 2) & 0xFFFF;
-        uint32 project_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + free_spot / 2) >> 16;
-        uint32 new_value;
-
-        if (free_spot % 2 == 1)
-            new_value = (rs->id << 16) | (project_now_1);
-        else
-            new_value = (project_now_2 << 16) | (rs->id);
-
-        SetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + free_spot / 2, new_value);
-        added_project_count++;
-        if (added_project_count >= MAX_RESEARCH_SITES || added_project_count >= max)
-            break;	//pointless to continue
+        count++;
     }
 }
