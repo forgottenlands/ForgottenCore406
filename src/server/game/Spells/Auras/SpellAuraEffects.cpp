@@ -4186,8 +4186,30 @@ void AuraEffect::HandleAuraTrackResources(AuraApplication const *aurApp, uint8 m
             if (apply)
             {
                 if (target->ToPlayer()->HasSkill(SKILL_ARCHAEOLOGY))
+                {
+                    // Load archaeology dig sites
+                    for (uint8 i = 0; i < 16; i++)
+                        target->ToPlayer()->m_digSites[i] = 0;
+
+                    if (target->ToPlayer()->HasSkill(SKILL_ARCHAEOLOGY))
+                    {
+                        if (QueryResult digResult = CharacterDatabase.PQuery("SELECT entry FROM character_digsites WHERE guid = %u", target->ToPlayer()->GetGUID()))
+                        {
+                            uint8 count = 0;
+                            do
+                            {
+                                Field* digFields = digResult->Fetch();
+                                uint32 digId = digFields[0].GetUInt32();
+                                target->ToPlayer()->m_digSites[count] = digId;
+                                count++;
+                            } 
+                            while (digResult->NextRow());
+                        }
+                    }
                     target->ToPlayer()->GenerateResearchDigSites();
+                }
             }
+            target->SetUInt32Value(PLAYER_TRACK_RESOURCES, (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);
             break;
         default:    // Default tracks
             target->SetUInt32Value(PLAYER_TRACK_RESOURCES, (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);

@@ -1422,7 +1422,7 @@ struct ResearchSiteEntry
     uint32 id;                                              // 0 Id of the site
     uint32 mapId;                                           // 1 Unknow
     uint32 unk_2;                                           // 2 Unknow 2
-                                                            // 3 Site name
+    DBCString name;                                         // 3 Site name
                                                             // 4 Unkow 3 
 };
 
