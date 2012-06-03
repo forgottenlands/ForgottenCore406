@@ -11413,6 +11413,7 @@ uint32 Player::_GetCurrencyTotalCap(const CurrencyTypesEntry* currency) const {
         case CURRENCY_TIPE_ARCHEAOLOGY_NIGHT_ELF:
         case CURRENCY_TIPE_ARCHEAOLOGY_ORC:
         case CURRENCY_TIPE_ARCHEAOLOGY_TOLVIR:
+        case CURRENCY_TIPE_ARCHEAOLOGY_TROLL:
         case CURRENCY_TIPE_ARCHEAOLOGY_VRYKUL:
             cap *= PLAYER_CURRENCY_PRECISION;
             break;
@@ -17050,6 +17051,9 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder,
     m_actualDigPos.m_positionX = 0.0f;
     m_actualDigPos.m_positionY = 0.0f;
     m_actualDigPos.m_positionZ = 0.0f;
+
+    // Reset dig count
+    m_doneDigSites = 0;
 
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
@@ -25923,6 +25927,17 @@ void Player::SetActualDigSitePosition()
 {
     if (m_actualDigPos.m_positionX == 0.0f || m_actualDigPos.m_positionY == 0.0f || m_actualDigPos.m_positionZ == 0.0f)
     {
+        for (uint8 i = 0; i < HasSavedDigSites(); i++)
+        {
+            if (Creature* digSiteNpc = FindNearestCreature(m_digSites[i]+60000, 100.0f, true))
+            {
+                m_actualDigPos.m_positionX = digSiteNpc->GetPositionX() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
+                m_actualDigPos.m_positionY = digSiteNpc->GetPositionY() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
+                m_actualDigPos.m_positionZ = digSiteNpc->GetPositionZ();
+                return;
+            }
+        }
+
         m_actualDigPos.m_positionX = GetPositionX() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
         m_actualDigPos.m_positionY = GetPositionY() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
         m_actualDigPos.m_positionZ = GetPositionZ();
@@ -25932,7 +25947,7 @@ void Player::SetActualDigSitePosition()
 void Player::SpawnArchaeologyScope()
 {
     uint32 skill_now = GetSkillValue(SKILL_ARCHAEOLOGY);
-    float distance = 0;
+    float distance = 0;  
     distance = GetDistance2d(m_actualDigPos.m_positionX, m_actualDigPos.m_positionY);
     uint32 telescopeEntry;
 
@@ -26147,7 +26162,7 @@ void Player::SpawnArchaeologyScope()
 
         m_doneDigSites++;
 
-        if (m_doneDigSites == 3)
+        if (m_doneDigSites >= 3)
         {
             for (uint8 i = 0; i < HasSavedDigSites(); i++)
             {
