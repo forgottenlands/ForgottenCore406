@@ -9851,6 +9851,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (procSpell->Id != 12294)
                 return false;
         break;
+        case 48544: // Revitalize
+        case 48539:
+            if (procSpell->Id != 774 && procSpell->Id != 33763)
+                return false;
         default:
             break;
     }
