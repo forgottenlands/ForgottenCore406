@@ -4191,22 +4191,37 @@ void AuraEffect::HandleAuraTrackResources(AuraApplication const *aurApp, uint8 m
                     for (uint8 i = 0; i < 16; i++)
                         target->ToPlayer()->m_digSites[i] = 0;
 
-                    if (target->ToPlayer()->HasSkill(SKILL_ARCHAEOLOGY))
+                    if (QueryResult digResult = CharacterDatabase.PQuery("SELECT entry FROM character_digsites WHERE guid = %u", target->ToPlayer()->GetGUID()))
                     {
-                        if (QueryResult digResult = CharacterDatabase.PQuery("SELECT entry FROM character_digsites WHERE guid = %u", target->ToPlayer()->GetGUID()))
+                        uint8 count = 0;
+                        do
                         {
-                            uint8 count = 0;
-                            do
-                            {
-                                Field* digFields = digResult->Fetch();
-                                uint32 digId = digFields[0].GetUInt32();
-                                target->ToPlayer()->m_digSites[count] = digId;
-                                count++;
-                            } 
-                            while (digResult->NextRow());
-                        }
+                            Field* digFields = digResult->Fetch();
+                            uint32 digId = digFields[0].GetUInt32();
+                            target->ToPlayer()->m_digSites[count] = digId;
+                            count++;
+                        } 
+                        while (digResult->NextRow());
                     }
+
+                    // Load archaeology current artifacts
+                    for (uint8 i = 0; i < 28; i++)
+                        target->ToPlayer()->m_researchProject[i] = 0;
+
+                    if (QueryResult artifactsResult = CharacterDatabase.PQuery("SELECT entry, branchId FROM character_current_artifacts WHERE guid = %u", target->ToPlayer()->GetGUID()))
+                    {
+                        do
+                        {
+                            Field* artFields = artifactsResult->Fetch();
+                            uint32 artId = artFields[0].GetUInt32();
+                            uint32 branchId = artFields[1].GetUInt32();
+                            target->ToPlayer()->m_researchProject[branchId] = artId;
+                        } 
+                        while (artifactsResult->NextRow());
+                    }
+
                     target->ToPlayer()->GenerateResearchDigSites();
+                    target->ToPlayer()->GenerateSavedArtifacts();
                 }
             }
             target->SetUInt32Value(PLAYER_TRACK_RESOURCES, (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);

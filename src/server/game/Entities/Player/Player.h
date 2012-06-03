@@ -2858,11 +2858,13 @@ public:
     /***                ARCHAEOLOGY SYSTEM                 ***/
     /*********************************************************/
     void GenerateResearchDigSites();
-    void GenerateResearchProject(uint32 branchId);
+    void GenerateResearchProject(uint32 branchId, bool force, uint32 excludeId);
     void GenerateResearchDigSitesInMap(uint32 map, uint32 &slot);
     void SetActualDigSitePosition();
     void SpawnArchaeologyScope();
     void SetDigSiteInSlot(uint32 slot, uint32 site1, uint32 site2);
+    void GenerateSavedArtifacts();
+    void CompleteArtifact(uint32 artId, uint32 spellId, ByteBuffer &data);
     uint32 GetNewRandomSite(uint32 map);
     uint8 HasSavedDigSites();
     uint32 m_digSites[16];
