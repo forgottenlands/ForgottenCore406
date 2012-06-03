@@ -26166,7 +26166,7 @@ void Player::SpawnArchaeologyScope()
         {
             for (uint8 i = 0; i < HasSavedDigSites(); i++)
             {
-                if (Creature* digSiteNpc = FindNearestCreature(m_digSites[i]+60000, 100.0f, true))
+                if (Creature* digSiteNpc = FindNearestCreature(m_digSites[i]+60000, 500.0f, true))
                 {
                     uint8 slot = 0;
                     for (slot = 0; slot < 8; slot++)
@@ -26188,6 +26188,7 @@ void Player::SpawnArchaeologyScope()
                             break;
                         }
                     }
+                    m_doneDigSites = 0;
                     break;
                 }
             }
@@ -26206,7 +26207,7 @@ uint32 Player::GetNewRandomSite(uint32 map)
     for (std::list<uint32>::const_iterator itr = sitesList.begin(); itr != sitesList.end(); ++itr)
     {
         if (count == rsite)
-            return rsite;
+            return (*itr);
         count++;
     }
 
