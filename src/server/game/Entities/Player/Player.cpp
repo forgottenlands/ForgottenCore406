@@ -26090,6 +26090,9 @@ void Player::SpawnArchaeologyScope()
                 if (skill_now >= 450)
                     treasureEntryList.push_back(207190); // tol'vir find
                 break;
+            default:
+                treasureEntryList.push_back(206836); // Fossil Find
+                break;
         }
         uint8 randomFind = urand(1, treasureEntryList.size());
         uint32 findEntry = 0;
