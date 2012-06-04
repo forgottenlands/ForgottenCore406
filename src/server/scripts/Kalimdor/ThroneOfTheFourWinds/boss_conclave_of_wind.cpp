@@ -527,6 +527,8 @@ class boss_nezir: public CreatureScript
                 instance->SetData(DATA_NEZIR_EVENT, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
             }
+            
+            me->LowerPlayerDamageReq(me->GetMaxHealth());
         }
 
         void JustSummoned(Creature* summoned)
