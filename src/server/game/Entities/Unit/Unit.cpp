@@ -6738,8 +6738,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             if (dummySpell->SpellIconID == 2218)
             {
                 // Proc only from Abolish desease on self cast
-                if (procSpell->Id != 552 || pVictim != this
-                        || !roll_chance_i(triggerAmount)) return false;
+                if (procSpell->Id != 552 || pVictim != this || !roll_chance_i(triggerAmount))
+                    return false;
                 triggered_spell_id = 64136;
                 target = this;
                 break;
@@ -10140,15 +10140,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                             / 100.0f);
             break;
         }
-            // Body and Soul
-        case 64128:
-        case 65081:
-        {
-            // Proc only from PW:S cast
-            if (!(procSpell->SpellFamilyFlags [0] & 0x00000001)) return false;
-            break;
-        }
-            // Culling the Herd
+        // Culling the Herd
         case 70893:
         {
             // check if we're doing a critical hit

@@ -466,6 +466,10 @@ class spell_pri_power_word_shield : public SpellScriptLoader
 
                     if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 5338, 0))
                         caster->CastSpell(caster, 96219, true);
+
+                    if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2218, 0))
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            caster->CastSpell(GetTargetUnit(), 64128, true);
                 }
             }
 

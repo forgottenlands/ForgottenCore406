@@ -1918,6 +1918,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 case 73325: // Leap of faith
                 {
                     unitTarget->CastSpell(m_caster, 92832, false);
+
+                    if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2218, 0))
+                        if (roll_chance_i(aurEff->GetAmount()))
+                            m_caster->CastSpell(unitTarget, 64128, true);
                     break;
                 }
                 // Power Word : Fortitude
