@@ -9627,6 +9627,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
+         case 62600: //Savage Defense (proc fix) 
+         { 
+        Player* pl = ToPlayer();
+        if (!pl->HasAura(5487)) //5487 Bear form aura
+           return false;                   
+        break;
+         }
         // Persistent Shield (Scarab Brooch trinket)
         // This spell originally trigger 13567 - Dummy Trigger (vs dummy efect)
         case 26467:

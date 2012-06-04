@@ -21204,6 +21204,17 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot,
         SendBuyError(BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
         return false;
     }
+    
+    switch (pProto->ItemId)
+    {
+        case 67107:
+        case 62298:
+            if (GetGuildId() != 0)
+                if (Guild* pGuild = sObjectMgr->GetGuildById(GetGuildId()))
+                    if (pGuild->GetLevel() < 25)
+                        return false;
+            break;
+    }
 
     if (crItem->ExtendedCost) {
         ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(
