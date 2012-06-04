@@ -1194,14 +1194,12 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1,
     return false;
 }
 
-SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const *spellInfo,
-        uint32 form) {
+SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const *spellInfo, uint32 form) 
+{
     // talents that learn spells can have stance requirements that need ignore
     // (this requirement only for client-side stance show in talent description)
-    if (GetTalentSpellCost(spellInfo->Id) > 0
-            && (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL
-                    || spellInfo->Effect[1] == SPELL_EFFECT_LEARN_SPELL
-                    || spellInfo->Effect[2] == SPELL_EFFECT_LEARN_SPELL))
+    if (GetTalentSpellCost(spellInfo->Id) > 0 && 
+        (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[1] == SPELL_EFFECT_LEARN_SPELL  || spellInfo->Effect[2] == SPELL_EFFECT_LEARN_SPELL))
         return SPELL_CAST_OK;
 
     uint32 stanceMask = (form ? 1 << (form - 1) : 0);
@@ -1214,22 +1212,29 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const *spellInfo,
 
     bool actAsShifted = false;
     SpellShapeshiftFormEntry const *shapeInfo = NULL;
-    if (form > 0) {
+    if (form > 0) 
+    {
         shapeInfo = sSpellShapeshiftFormStore.LookupEntry(form);
-        if (!shapeInfo) {
-            sLog->outError("GetErrorAtShapeshiftedCast: unknown shapeshift %u",
-                    form);
+        if (!shapeInfo)
+        {
+            sLog->outError("GetErrorAtShapeshiftedCast: unknown shapeshift %u", form);
             return SPELL_CAST_OK;
         }
         actAsShifted = !(shapeInfo->flags1 & 1); // shapeshift acts as normal form for spells
     }
 
-    if (actAsShifted) {
+    if (actAsShifted) 
+    {
+        if (spellInfo->GetSpellFamilyName() == SPELLFAMILY_PRIEST && spellInfo->SchoolMask == SPELL_SCHOOL_MASK_HOLY && form == FORM_SPIRITOFREDEMPTION)
+            return SPELL_CAST_OK;
+
         if (spellInfo->Attributes & SPELL_ATTR0_NOT_SHAPESHIFT) // not while shapeshifted
             return SPELL_FAILED_NOT_SHAPESHIFT;
         else if (spellInfo->Stances != 0) // needs other shapeshift
             return SPELL_FAILED_ONLY_SHAPESHIFT;
-    } else {
+    } else 
+    {
+        sLog->outString("Shapeshift7");
         /* // needs shapeshift
          if (!(spellInfo->AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT) && spellInfo->Stances != 0)
          return SPELL_FAILED_ONLY_SHAPESHIFT;*/
@@ -1238,7 +1243,8 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const *spellInfo,
     // Check if stance disables cast of not-stance spells
     // Example: cannot cast any other spells in zombie or ghoul form
     // TODO: Find a way to disable use of these spells clientside
-    if (shapeInfo && shapeInfo->flags1 & 0x400) {
+    if (shapeInfo && shapeInfo->flags1 & 0x400)
+    {
         if (!(stanceMask & spellInfo->Stances))
             return SPELL_FAILED_ONLY_SHAPESHIFT;
     }

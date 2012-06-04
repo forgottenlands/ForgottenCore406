@@ -3314,8 +3314,8 @@ void AuraEffect::HandleModStealthLevel(AuraApplication const * aurApp,
     target->UpdateObjectVisibility();
 }
 
-void AuraEffect::HandleSpiritOfRedemption(AuraApplication const *aurApp,
-        uint8 mode, bool apply) const {
+void AuraEffect::HandleSpiritOfRedemption(AuraApplication const *aurApp, uint8 mode, bool apply) const 
+{
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
@@ -3325,8 +3325,10 @@ void AuraEffect::HandleSpiritOfRedemption(AuraApplication const *aurApp,
         return;
 
     // prepare spirit state
-    if (apply) {
-        if (target->GetTypeId() == TYPEID_PLAYER) {
+    if (apply) 
+    {
+        if (target->GetTypeId() == TYPEID_PLAYER)
+        {
             // disable breath/etc timers
             target->ToPlayer()->StopMirrorTimers();
 
