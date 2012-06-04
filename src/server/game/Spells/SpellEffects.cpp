@@ -875,20 +875,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             case SPELLFAMILY_DRUID:
             {
                 // Ferocious Bite
-                if (m_caster->GetTypeId() == TYPEID_PLAYER
-                        && (m_spellInfo->SpellFamilyFlags [0] & 0x000800000)
-                        && m_spellInfo->SpellVisual [0] == 6587)
-                {
-                    // converts each extra point of energy into ($f1+$AP/410) additional damage
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags[0] & 0x000800000) && m_spellInfo->SpellVisual[0] == 6587)
+                 {
+                
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    float multiple = ap / 410
-                            + m_spellInfo->EffectDamageMultiplier [effIndex];
-                    int32 energy = -(m_caster->ModifyPower(POWER_ENERGY, -30));
-                    damage += int32(energy * multiple);
-                    damage += int32(
-                            m_caster->ToPlayer()->GetComboPoints() * ap * 7
-                                    / 100);
-                }
+                    int32 numcombos = m_caster->ToPlayer()->GetComboPoints();
+                    int32 energy = -(m_caster->ModifyPower(POWER_ENERGY, -35));
+                    damage = int32(300 + 445 * numcombos  + ap * 0.11 * numcombos);
+                    damage *= (100+(energy*100/35))/100;
+                 }
+
                 // Starfire
                 else if (m_spellInfo->SpellFamilyFlags [0] & 0x00000004)
                 {
