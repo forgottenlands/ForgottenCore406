@@ -1234,7 +1234,6 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const *spellInfo, uint32 f
             return SPELL_FAILED_ONLY_SHAPESHIFT;
     } else 
     {
-        sLog->outString("Shapeshift7");
         /* // needs shapeshift
          if (!(spellInfo->AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT) && spellInfo->Stances != 0)
          return SPELL_FAILED_ONLY_SHAPESHIFT;*/
@@ -4156,7 +4155,7 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 45006:
         case 45010: // Wild Magic
         case 31347: // Doom
-        case 41635: // Prayer of Mending
+        case 41635: // Prayer of mending
         case 44869: // Spectral Blast
         case 45027: // Revitalize
         case 45976: // Muru Portal Channel
@@ -4760,6 +4759,10 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 87327: // Shadow Power Hotfix
             spellInfo->EffectBasePoints[0] = 15;
             count++;
+            break;
+        case 33110: // Prayer of mending
+        case 379:   // Earth Shield
+            spellInfo->speed = 1;
             break;
         default:
             break;
