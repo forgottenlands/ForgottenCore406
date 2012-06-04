@@ -186,36 +186,46 @@ uint32 const spell_warl_create_healthstone::spell_warl_create_healthstone_SpellS
 				{ 36892, 36893, 36894 } // Fel Healthstone
 		};
 
-class spell_warl_drain_soul: public SpellScriptLoader {
+class spell_warl_drain_soul: public SpellScriptLoader 
+{
 public:
-	spell_warl_drain_soul() :
-			SpellScriptLoader("spell_warl_drain_soul") {
-	} //1120
+    spell_warl_drain_soul() : SpellScriptLoader("spell_warl_drain_soul") 
+    { } //1120
 
-	class spell_warl_drain_soul_AuraScript: public AuraScript {
-		PrepareAuraScript(spell_warl_drain_soul_AuraScript)
+    class spell_warl_drain_soul_AuraScript: public AuraScript 
+    {
+        PrepareAuraScript(spell_warl_drain_soul_AuraScript)
 
-		void OnPeriodic(AuraEffect const* aurEff) {
-		}
+        void OnPeriodic(AuraEffect const* aurEff) 
+        {
+            // Pandemic
+            if (AuraEffect* aurEff = GetCaster()->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 4554, 0))
+            {
+                if (GetTarget()->HealthBelowPct(25))
+                    if (roll_chance_i(aurEff->GetAmount()))
+                        if (Aura* unstableAff = GetTarget()->GetAura(30108))
+                            unstableAff->RefreshDuration();
+            }
+        }
 
-		void OnRemove(AuraEffect const * aurEff,
-				AuraEffectHandleModes /*mode*/) {
-			if (Unit* caster = aurEff->GetBase()->GetCaster())
-				if (!GetTarget()->isAlive())
-					caster->CastSpell(caster, 79264, true);
-		}
+        void OnRemove(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/) 
+        {
+            if (Unit* caster = aurEff->GetBase()->GetCaster())
+                if (!GetTarget()->isAlive())
+                    caster->CastSpell(caster, 79264, true);
+        }
 
-		void Register() {
-			OnEffectRemove +=
-					AuraEffectRemoveFn(spell_warl_drain_soul_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
-			OnEffectPeriodic +=
-					AuraEffectPeriodicFn(spell_warl_drain_soul_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
-		}
-	};
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_warl_drain_soul_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_drain_soul_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
 
-	AuraScript* GetAuraScript() const {
-		return new spell_warl_drain_soul_AuraScript();
-	}
+    AuraScript* GetAuraScript() const 
+    {
+        return new spell_warl_drain_soul_AuraScript();
+    }
 };
 
 //80398 Dark Intent
@@ -641,6 +651,49 @@ public:
 	}
 };
 
+// 47236 - Demonic Pact
+class spell_warl_demonic_pact: public SpellScriptLoader 
+{
+public:
+    spell_warl_demonic_pact() : SpellScriptLoader("spell_warl_demonic_pact") {}
+
+    class spell_warl_demonic_pact_AuraScript: public AuraScript
+    {
+        PrepareAuraScript(spell_warl_demonic_pact_AuraScript);
+
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            if (!sSpellStore.LookupEntry(53646))
+                return false;
+
+            return true;
+        }
+
+        void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+
+            if (target->ToPlayer())
+                return;
+
+            if (Unit *caster = aurEff->GetBase()->GetCaster()->GetOwner())
+                if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 3220, 0))
+                    if (target->isPet())
+                        target->CastSpell(target, 53646, true, NULL, aurEff);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_warl_demonic_pact_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const 
+    {
+        return new spell_warl_demonic_pact_AuraScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
 	new spell_warl_demonic_empowerment();
@@ -658,4 +711,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soul_link();
     new spell_warl_demonic_circle_teleport();
     new spell_warlock_seduction();
+    new spell_warl_demonic_pact();
 }

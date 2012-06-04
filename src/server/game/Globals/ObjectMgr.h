@@ -1027,7 +1027,7 @@ public:
 
     // Archaeology sites info
     ResearchSiteInfo const* GetResearchSiteInfo(uint32 siteEntry) const;
-    std::list<uint32> ObjectMgr::GetResearchSiteList(uint32 mapId, uint32 skill, uint8 level) const;
+    std::list<uint32> GetResearchSiteList(uint32 mapId, uint32 skill, uint8 level) const;
 
     void ReturnOrDeleteOldMails(bool serverUp);
 

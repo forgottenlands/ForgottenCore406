@@ -6738,8 +6738,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             if (dummySpell->SpellIconID == 2218)
             {
                 // Proc only from Abolish desease on self cast
-                if (procSpell->Id != 552 || pVictim != this
-                        || !roll_chance_i(triggerAmount)) return false;
+                if (procSpell->Id != 552 || pVictim != this || !roll_chance_i(triggerAmount))
+                    return false;
                 triggered_spell_id = 64136;
                 target = this;
                 break;
@@ -7452,7 +7452,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     {
                         if (beaconTarget->IsWithinLOSInMap(pVictim))
                         {
-                            basepoints0 = damage;
+                            basepoints0 = damage / 2;
                             triggered_spell_id = 53652;
                             target = beaconTarget;
                             break;
@@ -9858,6 +9858,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (procSpell->Id != 12294)
                 return false;
         break;
+        case 48544: // Revitalize
+        case 48539:
+            if (!procSpell)
+                return false;
+
+            if (procSpell->Id != 774 && procSpell->Id != 33763)
+                return false;
         default:
             break;
     }
@@ -10140,15 +10147,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                             / 100.0f);
             break;
         }
-            // Body and Soul
-        case 64128:
-        case 65081:
-        {
-            // Proc only from PW:S cast
-            if (!(procSpell->SpellFamilyFlags [0] & 0x00000001)) return false;
-            break;
-        }
-            // Culling the Herd
+        // Culling the Herd
         case 70893:
         {
             // check if we're doing a critical hit
@@ -17298,22 +17297,18 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
 
     // if talent known but not triggered (check priest class for speedup check)
     bool SpiritOfRedemption = false;
-    if (pVictim->GetTypeId() == TYPEID_PLAYER
-            && pVictim->getClass() == CLASS_PRIEST)
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->getClass() == CLASS_PRIEST)
     {
-        AuraEffectList const& vDummyAuras = pVictim->GetAuraEffectsByType(
-                SPELL_AURA_DUMMY);
-        for (AuraEffectList::const_iterator itr = vDummyAuras.begin();
-                itr != vDummyAuras.end(); ++itr)
+        AuraEffectList const& vDummyAuras = pVictim->GetAuraEffectsByType(SPELL_AURA_DUMMY);
+        for (AuraEffectList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
         {
             if ((*itr)->GetSpellProto()->SpellIconID == 1654)
             {
                 AuraEffect * aurEff = *itr;
                 // save value before aura remove
-                uint32 ressSpellId = pVictim->GetUInt32Value(
-                        PLAYER_SELF_RES_SPELL);
-                if (!ressSpellId) ressSpellId =
-                        pVictim->ToPlayer()->GetResurrectionSpellId();
+                uint32 ressSpellId = pVictim->GetUInt32Value(PLAYER_SELF_RES_SPELL);
+                if (!ressSpellId) 
+                    ressSpellId = pVictim->ToPlayer()->GetResurrectionSpellId();
                 //Remove all expected to remove at death auras (most important negative case like DoT or periodic triggers)
                 pVictim->RemoveAllAurasOnDeath();
                 // restore for use at real death

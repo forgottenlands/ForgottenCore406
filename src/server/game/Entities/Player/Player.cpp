@@ -11413,6 +11413,7 @@ uint32 Player::_GetCurrencyTotalCap(const CurrencyTypesEntry* currency) const {
         case CURRENCY_TIPE_ARCHEAOLOGY_NIGHT_ELF:
         case CURRENCY_TIPE_ARCHEAOLOGY_ORC:
         case CURRENCY_TIPE_ARCHEAOLOGY_TOLVIR:
+        case CURRENCY_TIPE_ARCHEAOLOGY_TROLL:
         case CURRENCY_TIPE_ARCHEAOLOGY_VRYKUL:
             cap *= PLAYER_CURRENCY_PRECISION;
             break;
@@ -17051,6 +17052,9 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder,
     m_actualDigPos.m_positionY = 0.0f;
     m_actualDigPos.m_positionZ = 0.0f;
 
+    // Reset dig count
+    m_doneDigSites = 0;
+
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
 
@@ -19155,14 +19159,26 @@ void Player::SaveToDB()
 
     CharacterDatabase.CommitTransaction(trans);
 
-    // Save archaeology dig sites
+    
     if (HasSkill(SKILL_ARCHAEOLOGY))
     {
+        // Save archaeology dig sites
         CharacterDatabase.PQuery("DELETE FROM character_digsites WHERE guid = %u", GetGUIDLow());
         for (uint8 i = 0; i < 16; ++i)
         {
             if (m_digSites[i] != 0)
                 CharacterDatabase.PQuery("INSERT INTO character_digsites VALUES (%u, %u)", GetGUIDLow(), m_digSites[i]);
+        }
+    
+        // Save archaology artifacts
+        CharacterDatabase.PQuery("DELETE FROM character_current_artifacts WHERE guid = %u", GetGUIDLow());
+        for (uint8 i = 1; i < 28; ++i)
+        {
+            if (i == 9)
+                i = 27;
+
+            if (m_researchProject[i] != 0)
+                CharacterDatabase.PQuery("INSERT INTO character_current_artifacts VALUES (%u, %u, %u)", GetGUIDLow(), i, m_researchProject[i]);
         }
     }
 
@@ -25922,6 +25938,17 @@ void Player::SetActualDigSitePosition()
 {
     if (m_actualDigPos.m_positionX == 0.0f || m_actualDigPos.m_positionY == 0.0f || m_actualDigPos.m_positionZ == 0.0f)
     {
+        for (uint8 i = 0; i < HasSavedDigSites(); i++)
+        {
+            if (Creature* digSiteNpc = FindNearestCreature(m_digSites[i]+60000, 100.0f, true))
+            {
+                m_actualDigPos.m_positionX = digSiteNpc->GetPositionX() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
+                m_actualDigPos.m_positionY = digSiteNpc->GetPositionY() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
+                m_actualDigPos.m_positionZ = digSiteNpc->GetPositionZ();
+                return;
+            }
+        }
+
         m_actualDigPos.m_positionX = GetPositionX() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
         m_actualDigPos.m_positionY = GetPositionY() - ARCHAEOLOGY_DIG_SITE_RADIUS / 2 + (rand() % ARCHAEOLOGY_DIG_SITE_RADIUS);
         m_actualDigPos.m_positionZ = GetPositionZ();
@@ -25931,7 +25958,7 @@ void Player::SetActualDigSitePosition()
 void Player::SpawnArchaeologyScope()
 {
     uint32 skill_now = GetSkillValue(SKILL_ARCHAEOLOGY);
-    float distance = 0;
+    float distance = 0;  
     distance = GetDistance2d(m_actualDigPos.m_positionX, m_actualDigPos.m_positionY);
     uint32 telescopeEntry;
 
@@ -26074,6 +26101,9 @@ void Player::SpawnArchaeologyScope()
                 if (skill_now >= 450)
                     treasureEntryList.push_back(207190); // tol'vir find
                 break;
+            default:
+                treasureEntryList.push_back(206836); // Fossil Find
+                break;
         }
         uint8 randomFind = urand(1, treasureEntryList.size());
         uint32 findEntry = 0;
@@ -26085,6 +26115,7 @@ void Player::SpawnArchaeologyScope()
                 findEntry = (*itr);
                 break;
             }
+            count++;
         }
 
         if (!findEntry)
@@ -26134,7 +26165,7 @@ void Player::SpawnArchaeologyScope()
             case 207189: currencyId = 399; branchId = 27; break;
         }
 
-        GenerateResearchProject(branchId);
+        GenerateResearchProject(branchId, false, 0);
         ModifyCurrency(currencyId, urand(3, 4) * PLAYER_CURRENCY_PRECISION);
 
 
@@ -26145,11 +26176,11 @@ void Player::SpawnArchaeologyScope()
 
         m_doneDigSites++;
 
-        if (m_doneDigSites == 3)
+        if (m_doneDigSites >= 3)
         {
             for (uint8 i = 0; i < HasSavedDigSites(); i++)
             {
-                if (Creature* digSiteNpc = FindNearestCreature(m_digSites[i]+60000, 100.0f, true))
+                if (Creature* digSiteNpc = FindNearestCreature(m_digSites[i]+60000, 500.0f, true))
                 {
                     uint8 slot = 0;
                     for (slot = 0; slot < 8; slot++)
@@ -26171,6 +26202,7 @@ void Player::SpawnArchaeologyScope()
                             break;
                         }
                     }
+                    m_doneDigSites = 0;
                     break;
                 }
             }
@@ -26189,7 +26221,7 @@ uint32 Player::GetNewRandomSite(uint32 map)
     for (std::list<uint32>::const_iterator itr = sitesList.begin(); itr != sitesList.end(); ++itr)
     {
         if (count == rsite)
-            return rsite;
+            return (*itr);
         count++;
     }
 
@@ -26202,10 +26234,36 @@ void Player::SetDigSiteInSlot(uint32 slot, uint32 site1, uint32 site2)
     SetUInt32Value(PLAYER_FIELD_RESEARCH_SITE_1 + slot, new_value);
 }
 
-void Player::GenerateResearchProject(uint32 branchId)
+void Player::GenerateResearchProject(uint32 branchId, bool force, uint32 excludeId)
 {
-    if (m_researchProject[branchId] != 0)
+    if (m_researchProject[branchId] != 0 && !force)
         return;
+
+    // Remove old
+    if (force)
+    {
+        uint32 reset_value = 0;
+        uint8 resetSlot = 0;
+        for (uint8 i = 0; i < 5; i++)
+        {
+            uint32 project_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + i) & 0xFFFF;
+            uint32 project_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + i) >> 16;
+
+            if (project_now_1 == m_researchProject[branchId])
+            {
+                resetSlot = int32(i);
+                reset_value = (project_now_2 << 16) | 0;
+                break;
+            } else if (project_now_2 == m_researchProject[branchId])
+            {
+                resetSlot = int32(i);
+                reset_value = (0 << 16) | (project_now_1);
+                break;
+            }
+        }
+        SetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + resetSlot, reset_value);
+        m_researchProject[branchId] = 0;
+    }
 
     uint32 skill_now = GetSkillValue(SKILL_ARCHAEOLOGY);
     std::list<uint32> projectList;
@@ -26218,6 +26276,10 @@ void Player::GenerateResearchProject(uint32 branchId)
         if (rs->branchId != branchId)
             continue;
 
+        if (excludeId != 0)
+            if (rs->spellId == excludeId)
+                continue;
+
         uint32 frag_req = 75;
         if (skill_now / 3 > 75)
             frag_req = skill_now / 3;
@@ -26229,7 +26291,7 @@ void Player::GenerateResearchProject(uint32 branchId)
     }
 
     uint32 selectedProject = urand (0, projectList.size());
-    uint8 count = 0;;
+    uint8 count = 0;
     for (std::list<uint32>::const_iterator itr = projectList.begin(); itr != projectList.end(); ++itr)
     {
         if (count == selectedProject)
@@ -26253,10 +26315,100 @@ void Player::GenerateResearchProject(uint32 branchId)
                     break;
                 }
             }
-            SetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + slot, new_value);
+            if (slot >= 0 && new_value >= 0)
+                SetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + slot, new_value);
+
             m_researchProject[branchId] = (*itr);
             break;
         }
         count++;
+    }
+}
+
+void Player::GenerateSavedArtifacts()
+{
+    uint8 slot = 0;
+    for (uint8 i = 1; i < 28; i++)
+    {
+        if (i == 9)
+            i = 27;
+
+        uint32 project_1 = m_researchProject[i];
+        uint32 project_2 = 0;
+
+        if (i != 27)
+            project_2 = m_researchProject[i+1];
+
+        uint32 value = (project_2 << 16) | (project_1);
+        SetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + slot, value);
+        ++slot;
+        ++i;
+    }
+}
+
+void Player::CompleteArtifact(uint32 artId, uint32 spellId, ByteBuffer &data)
+{
+    uint32 target_mask, unk1, unk2, numberOfStones;
+    data >> target_mask >> unk1 >> unk2 >> numberOfStones;
+ 
+    if (numberOfStones == 256 || numberOfStones == 512 || numberOfStones == 768)
+        numberOfStones = numberOfStones / 256;
+    else 
+        numberOfStones = 0;
+
+    if (ResearchProjectEntry* rp = sResearchProjectStore.LookupRow(artId))
+    {
+        uint32 currencyId = 0;
+        uint32 stone = 0;
+        switch (rp->branchId)
+        {
+            // Dwarf
+            case 1: currencyId = 384;  stone = 52843; break;
+            // Draenei
+            case 2: currencyId = 398;  stone = 64394; break;
+            // Fossil
+            case 3: currencyId = 393;  stone = 0;     break;
+            // Nerubian
+            case 5: currencyId = 400;  stone = 64396; break;
+            // Night Elf
+            case 4: currencyId = 394;  stone = 63127; break;
+            // Orc
+            case 6: currencyId = 397;  stone = 64392; break;
+            // Tol'vir
+            case 7: currencyId = 401;  stone = 64397; break;
+            // Troll
+            case 8: currencyId = 385;  stone = 63128; break;
+            // Vrykul
+            case 27: currencyId = 399; stone = 64395; break;
+        }
+
+        uint32 currencySale = 0;
+        if (numberOfStones > 0)
+        {
+            if (HasItemCount(stone, numberOfStones, false))
+                currencySale = 12 * numberOfStones;
+        }
+
+        bool found = false;
+        for (uint8 x = 0; x < 5; x++)
+        {
+            uint32 project_now_1 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + x) & 0xFFFF;
+            uint32 project_now_2 = GetUInt32Value(PLAYER_FIELD_RESEARCHING_1 + x) >> 16;
+
+            if (project_now_1 == rp->id || project_now_2 == rp->id)
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            return;
+
+        int32 bp0 = int32(numberOfStones);
+        if (currencyId != 0)
+            if (GetCurrency(currencyId) >= rp->req_fragments - currencySale)
+                CastCustomSpell(this, rp->spellId, &bp0, NULL, NULL, false);
+                
     }
 }

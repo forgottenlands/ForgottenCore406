@@ -325,13 +325,13 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket) {
 			ACHIEVEMENT_CRITERIA_TYPE_USE_GAMEOBJECT, go->GetEntry());
 }
 
-void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket) {
+void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
+{
 	uint32 spellId, glyphIndex;
 	uint8 castCount, castFlags;
 	recvPacket >> castCount >> spellId >> glyphIndex >> castFlags;
 
-	sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: got cast spell packet, castCount: %u, spellId: %u, glyphIndex: %u, castFlags: %u, data length = %u", 
-        castCount, spellId, glyphIndex, castFlags,(uint32) recvPacket.size());
+	sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: got cast spell packet, castCount: %u, spellId: %u, glyphIndex: %u, castFlags: %u, data length = %u", castCount, spellId, glyphIndex, castFlags,(uint32) recvPacket.size());
    
 	// ignore for remote control state (for player case)
 	Unit* mover = _player->m_mover;
@@ -356,6 +356,17 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket) {
 		// not have spell in spellbook or spell passive and not casted by client
 		if (!mover->ToPlayer()->HasActiveSpell(spellId) || IsPassiveSpell(spellId)) 
         {
+            // Archeology craft artifacts
+            if (mover->ToPlayer()->HasSkill(SKILL_ARCHAEOLOGY))
+                for (uint32 i = 9; i < sResearchProjectStore.GetNumRows(); i++)
+                    if (ResearchProjectEntry* rp = sResearchProjectStore.LookupRow(i))
+                        if (rp->spellId == spellId)
+                        {
+                            mover->ToPlayer()->CompleteArtifact(rp->id, rp->spellId, recvPacket);
+                            recvPacket.rfinish();
+                            return;
+                        }
+
 			//cheater? kick? ban?
 			recvPacket.rfinish(); // prevent spam at ignore packet
 			return;

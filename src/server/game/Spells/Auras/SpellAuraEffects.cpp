@@ -1895,12 +1895,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         bonus += 0.02f;
                     if (caster->HasAura(78785)) // Blessing of the Grove rank 2
                         bonus += 0.04f;
-                    if (caster->HasAura(17111)) // Improved Rejuvenation rank 1
-                        bonus += 0.05f;
-                    if (caster->HasAura(17112)) // Improved Rejuvenation rank 2
-                        bonus += 0.1f;
-                    if (caster->HasAura(17113)) // Improved Rejuvenation rank 3
-                        bonus += 0.15f;
                     damage = int32(damage * bonus);
                     break;
                 }
@@ -3320,8 +3314,8 @@ void AuraEffect::HandleModStealthLevel(AuraApplication const * aurApp,
     target->UpdateObjectVisibility();
 }
 
-void AuraEffect::HandleSpiritOfRedemption(AuraApplication const *aurApp,
-        uint8 mode, bool apply) const {
+void AuraEffect::HandleSpiritOfRedemption(AuraApplication const *aurApp, uint8 mode, bool apply) const 
+{
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
@@ -3331,8 +3325,10 @@ void AuraEffect::HandleSpiritOfRedemption(AuraApplication const *aurApp,
         return;
 
     // prepare spirit state
-    if (apply) {
-        if (target->GetTypeId() == TYPEID_PLAYER) {
+    if (apply) 
+    {
+        if (target->GetTypeId() == TYPEID_PLAYER)
+        {
             // disable breath/etc timers
             target->ToPlayer()->StopMirrorTimers();
 
@@ -4191,22 +4187,37 @@ void AuraEffect::HandleAuraTrackResources(AuraApplication const *aurApp, uint8 m
                     for (uint8 i = 0; i < 16; i++)
                         target->ToPlayer()->m_digSites[i] = 0;
 
-                    if (target->ToPlayer()->HasSkill(SKILL_ARCHAEOLOGY))
+                    if (QueryResult digResult = CharacterDatabase.PQuery("SELECT entry FROM character_digsites WHERE guid = %u", target->ToPlayer()->GetGUID()))
                     {
-                        if (QueryResult digResult = CharacterDatabase.PQuery("SELECT entry FROM character_digsites WHERE guid = %u", target->ToPlayer()->GetGUID()))
+                        uint8 count = 0;
+                        do
                         {
-                            uint8 count = 0;
-                            do
-                            {
-                                Field* digFields = digResult->Fetch();
-                                uint32 digId = digFields[0].GetUInt32();
-                                target->ToPlayer()->m_digSites[count] = digId;
-                                count++;
-                            } 
-                            while (digResult->NextRow());
-                        }
+                            Field* digFields = digResult->Fetch();
+                            uint32 digId = digFields[0].GetUInt32();
+                            target->ToPlayer()->m_digSites[count] = digId;
+                            count++;
+                        } 
+                        while (digResult->NextRow());
                     }
+
+                    // Load archaeology current artifacts
+                    for (uint8 i = 0; i < 28; i++)
+                        target->ToPlayer()->m_researchProject[i] = 0;
+
+                    if (QueryResult artifactsResult = CharacterDatabase.PQuery("SELECT entry, branchId FROM character_current_artifacts WHERE guid = %u", target->ToPlayer()->GetGUID()))
+                    {
+                        do
+                        {
+                            Field* artFields = artifactsResult->Fetch();
+                            uint32 artId = artFields[0].GetUInt32();
+                            uint32 branchId = artFields[1].GetUInt32();
+                            target->ToPlayer()->m_researchProject[branchId] = artId;
+                        } 
+                        while (artifactsResult->NextRow());
+                    }
+
                     target->ToPlayer()->GenerateResearchDigSites();
+                    target->ToPlayer()->GenerateSavedArtifacts();
                 }
             }
             target->SetUInt32Value(PLAYER_TRACK_RESOURCES, (apply) ? ((uint32) 1) << (GetMiscValue() - 1) : 0);

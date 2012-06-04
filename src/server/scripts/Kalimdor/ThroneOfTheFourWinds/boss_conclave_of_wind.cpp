@@ -527,6 +527,8 @@ class boss_nezir: public CreatureScript
                 instance->SetData(DATA_NEZIR_EVENT, DONE);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
             }
+            
+            me->LowerPlayerDamageReq(me->GetMaxHealth());
         }
 
         void JustSummoned(Creature* summoned)
@@ -738,6 +740,7 @@ enum rohashSpells
     SPELL_WIND_BLAST                              = 85480,
     SPELL_DEFEATING_WINDS                         = 85573,
     SPELL_HURRICANE                               = 84643,
+    SPELL_STORM_SHIELD                            = 93059,
 };  
 
 class boss_rohash: public CreatureScript
@@ -747,7 +750,8 @@ class boss_rohash: public CreatureScript
 
     struct boss_rohashAI: public BossAI
     {
-        boss_rohashAI(Creature* creature) : BossAI(creature, DATA_ROHASH_EVENT), summons(me)       {
+        boss_rohashAI(Creature* creature) : BossAI(creature, DATA_ROHASH_EVENT), summons(me)      
+        {
             instance = me->GetInstanceScript();
         }
         
@@ -876,6 +880,9 @@ class boss_rohash: public CreatureScript
             {
                 castWind = false;
                 me->CastSpell(me, SPELL_WIND_BLAST, true);
+                if (me->GetMap()->IsHeroic())
+                    me->CastSpell(me, SPELL_STORM_SHIELD, true);
+
                 events.ScheduleEvent(EVENT_WIND_BLAST, 60000, 0, 0);
             }
             else
