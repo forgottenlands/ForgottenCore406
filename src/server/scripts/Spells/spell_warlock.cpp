@@ -651,49 +651,6 @@ public:
 	}
 };
 
-// 47236 - Demonic Pact
-class spell_warl_demonic_pact: public SpellScriptLoader 
-{
-public:
-    spell_warl_demonic_pact() : SpellScriptLoader("spell_warl_demonic_pact") {}
-
-    class spell_warl_demonic_pact_AuraScript: public AuraScript
-    {
-        PrepareAuraScript(spell_warl_demonic_pact_AuraScript);
-
-        bool Validate(SpellEntry const * /*spellEntry*/)
-        {
-            if (!sSpellStore.LookupEntry(53646))
-                return false;
-
-            return true;
-        }
-
-        void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* target = GetTarget();
-
-            if (target->ToPlayer())
-                return;
-
-            if (Unit *caster = aurEff->GetBase()->GetCaster()->GetOwner())
-                if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 3220, 0))
-                    if (target->isPet())
-                        target->CastSpell(target, 53646, true, NULL, aurEff);
-        }
-
-        void Register()
-        {
-            OnEffectApply += AuraEffectApplyFn(spell_warl_demonic_pact_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript *GetAuraScript() const 
-    {
-        return new spell_warl_demonic_pact_AuraScript();
-    }
-};
-
 void AddSC_warlock_spell_scripts()
 {
 	new spell_warl_demonic_empowerment();
@@ -711,5 +668,4 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soul_link();
     new spell_warl_demonic_circle_teleport();
     new spell_warlock_seduction();
-    new spell_warl_demonic_pact();
 }
