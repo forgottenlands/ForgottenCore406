@@ -192,27 +192,32 @@ public:
                         uiIntroTimer = 13000;
                         break;
                     case 3:
-                        DoScriptText(AN_3, pTrall);
+                        if (pTrall)
+                            DoScriptText(AN_3, pTrall);
                         ++uiIntroPhase;
                         uiIntroTimer = 8000;
                         break;
                     case 4:
-                        DoScriptText(AN_4, pGarrosh);
+                        if (pGarrosh)
+                            DoScriptText(AN_4, pGarrosh);
                         ++uiIntroPhase;
                         uiIntroTimer = 6000;
                         break;
                     case 5:
-                        DoScriptText(AN_5, pKing);
+                        if (pKing)
+                            DoScriptText(AN_5, pKing);
                         ++uiIntroPhase;
                         uiIntroTimer = 8000;
                         break;
                     case 6:
-                        DoScriptText(AN_6, pLady);
+                        if (pLady)
+                            DoScriptText(AN_6, pLady);
                         ++uiIntroPhase;
                         uiIntroTimer = 8000;
                         break;
                     case 7:
-                        DoScriptText(AN_7, pHighlord);
+                        if (pHighlord)
+                            DoScriptText(AN_7, pHighlord);
                         ++uiIntroPhase;
                         uiIntroTimer = 3000;
                         break;
