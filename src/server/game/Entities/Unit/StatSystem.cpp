@@ -405,7 +405,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                         break;
                     case FORM_BEAR:
                     case FORM_DIREBEAR:
-                        val2 = (getLevel() * 3.0f) + GetStat(STAT_STRENGTH) * 2.0f - 20.0f;
+                        val2 = (getLevel() * 3.0f) + GetStat(STAT_STRENGTH) * 2.0f + GetStat(STAT_AGILITY) * 2.0f - 20.0f;
                         break;
                     case FORM_MOONKIN:
                         val2 = (getLevel() * 1.5f) + GetStat(STAT_STRENGTH) * 2.0f - 20.0f;
