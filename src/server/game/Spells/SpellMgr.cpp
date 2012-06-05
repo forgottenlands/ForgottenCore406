@@ -4763,6 +4763,16 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 33110: // Prayer of mending
         case 379:   // Earth Shield
             spellInfo->speed = 1;
+            count++;
+            break;
+        case 50589: // Immolation Aura
+            spellInfo->Attributes = 0;
+            count++;
+            break;
+        case 54785: // Demonic Leap
+            spellInfo->Attributes = SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY | SPELL_ATTR0_UNK4;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
+            count++;
             break;
         default:
             break;

@@ -401,6 +401,10 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             && (getPetType() == SUMMON_PET || getPetType() == HUNTER_PET)) owner->ToPlayer()->SetLastPetNumber(
             pet_number);
 
+    // Demonic Pact
+    if (AuraEffect* aurEff = owner->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 3220, 0))
+        CastSpell(this, 53646, true);
+
     m_loading = false;
 
     return true;

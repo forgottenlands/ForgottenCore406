@@ -2898,7 +2898,8 @@ void Spell::EffectJump(SpellEffIndex effIndex)
 
 void Spell::EffectJumpDest(SpellEffIndex effIndex)
 {
-    if (m_caster->isInFlight()) return;
+    if (m_caster->isInFlight())
+        return;
 
     // Init dest coordinates
     float x, y, z;
@@ -2906,19 +2907,31 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     {
         m_targets.m_dstPos.GetPosition(x, y, z);
 
-        if (m_spellInfo->EffectImplicitTargetA [effIndex]
-                == TARGET_DEST_TARGET_BACK)
+        if (m_spellInfo->Id == 54785)
+        {
+            Unit* pTarget = NULL;
+            if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
+                pTarget = m_targets.getUnitTarget();
+            else if (m_caster->getVictim()) 
+                pTarget = m_caster->getVictim();
+            else if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                pTarget = ObjectAccessor::GetUnit(*m_caster, m_caster->ToPlayer()->GetSelection());
+
+            if (pTarget)
+                pTarget->GetPosition(x, y, z);
+        }
+
+        if (m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_DEST_TARGET_BACK)
         {
             // explicit cast data from client or server-side cast
             // some spell at client send caster
             Unit* pTarget = NULL;
-            if (m_targets.getUnitTarget()
-                    && m_targets.getUnitTarget() != m_caster) pTarget =
-                    m_targets.getUnitTarget();
-            else if (m_caster->getVictim()) pTarget = m_caster->getVictim();
-            else if (m_caster->GetTypeId() == TYPEID_PLAYER) pTarget =
-                    ObjectAccessor::GetUnit(*m_caster,
-                            m_caster->ToPlayer()->GetSelection());
+            if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
+                pTarget = m_targets.getUnitTarget();
+            else if (m_caster->getVictim()) 
+                pTarget = m_caster->getVictim();
+            else if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                pTarget = ObjectAccessor::GetUnit(*m_caster, m_caster->ToPlayer()->GetSelection());
         }
     }
     else
@@ -2930,8 +2943,7 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     }
 
     float speedXY, speedZ;
-    CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY,
-            speedZ);
+    CalculateJumpSpeeds(effIndex, m_caster->GetExactDist2d(x, y), speedXY, speedZ);
     m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ);
 }
 
