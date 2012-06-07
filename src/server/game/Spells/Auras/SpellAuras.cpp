@@ -347,12 +347,13 @@ Aura * Aura::Create(SpellEntry const* spellproto, uint8 effMask,
         casterGUID = caster->GetGUID();
     }
     // check if aura can be owned by owner
-    if (owner->isType(TYPEMASK_UNIT)) {
-        if (!owner->IsInWorld() || ((Unit*) owner)->IsDuringRemoveFromWorld()) {
+    if (owner->isType(TYPEMASK_UNIT))
+    {
+        if (!owner->IsInWorld() || ((Unit*) owner)->IsDuringRemoveFromWorld()) 
+        {
             // owner not in world so
             // don't allow to own not self casted single target auras
-            if (casterGUID != owner->GetGUID()
-                    && IsSingleTargetSpell(spellproto))
+            if (casterGUID != owner->GetGUID() && IsSingleTargetSpell(spellproto))
                 return NULL;
         }
     }
