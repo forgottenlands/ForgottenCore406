@@ -6515,10 +6515,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Seed of Corruption
             if (dummySpell->SpellFamilyFlags [1] & 0x00000010)
             {
-                if (procSpell && procSpell->SpellFamilyFlags [1] & 0x8000) return false;
+                if (procSpell && procSpell->SpellFamilyFlags [1] & 0x8000)
+                    return false;
                 // if damage is more than need or target die from damage deal finish spell
-                if (triggeredByAura->GetAmount() <= int32(damage)
-                        || GetHealth() <= damage)
+                if (triggeredByAura->GetAmount() <= int32(damage) || GetHealth() <= damage)
                 {
                     // remember guid before aura delete
                     uint64 casterGuid = triggeredByAura->GetCasterGUID();
@@ -6526,18 +6526,16 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     // Remove aura (before cast for prevent infinite loop handlers)
                     RemoveAurasDueToSpell(triggeredByAura->GetId());
 
-                    uint32 spell = sSpellMgr->GetSpellWithRank(27285,
-                            sSpellMgr->GetSpellRank(dummySpell->Id));
+                    uint32 spell = 27285;
 
                     // Cast finish spell (triggeredByAura already not exist!)
-                    if (Unit* caster = GetUnit(*this, casterGuid)) caster->CastSpell(
-                            this, spell, true, castItem);
+                    if (Unit* caster = GetUnit(*this, casterGuid)) 
+                        caster->CastSpell(this, spell, true, castItem);
                     return true; // no hidden cooldown
                 }
 
                 // Damage counting
-                triggeredByAura->SetAmount(
-                        triggeredByAura->GetAmount() - damage);
+                triggeredByAura->SetAmount(triggeredByAura->GetAmount() - damage);
                 return true;
             }
             // Seed of Corruption (Mobs cast) - no die req
