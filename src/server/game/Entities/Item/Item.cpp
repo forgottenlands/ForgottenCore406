@@ -381,6 +381,8 @@ Item::Item() {
 	m_refundRecipient = 0;
 	m_paidMoney = 0;
 	m_paidExtendedCost = 0;
+
+    m_fakeDisplayEntry = 0;
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner) {
@@ -585,6 +587,9 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields,
 	SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, fields[9].GetUInt32());
 	SetText(fields[10].GetString());
 
+    if (uint32 fakeEntry = sObjectMgr->GetFakeItemEntry(guid))
+        SetFakeDisplay(fakeEntry);
+
 	if (need_save) // normal item changed state set not work at loading
 	{
 		PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(
@@ -599,9 +604,11 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields,
 	return true;
 }
 
-void Item::DeleteFromDB(SQLTransaction& trans) {
-	PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(
-			CHAR_DEL_ITEM_INSTANCE);
+void Item::DeleteFromDB(SQLTransaction& trans) 
+{
+    sObjectMgr->RemoveFakeItem(GetGUIDLow());
+    RemoveFakeDisplay();
+	PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
 	stmt->setUInt32(0, GetGUIDLow());
 	trans->Append(stmt);
 }
@@ -1373,4 +1380,41 @@ bool Item::CheckSoulboundTradeExpire() {
 	}
 
 	return false;
+}
+
+FakeResult Item::SetFakeDisplay(uint32 iEntry)
+{
+    if (!iEntry)
+    {
+        RemoveFakeDisplay();
+        return FAKE_ERR_OK;
+    }
+
+    ItemPrototype const* otherTmpl = sObjectMgr->GetItemPrototype(iEntry);
+
+    if (!otherTmpl)
+        return FAKE_ERR_CANT_FIND_ITEM;
+
+    if (GetProto()->Quality == ITEM_QUALITY_LEGENDARY || otherTmpl->Quality == ITEM_QUALITY_POOR)
+        return FAKE_ERR_WRONG_QUALITY;
+
+    if (m_fakeDisplayEntry != iEntry)
+    {
+        sObjectMgr->SetFekeItem(GetGUIDLow(), iEntry);
+
+        (!m_fakeDisplayEntry) ? CharacterDatabase.PExecute("INSERT INTO fake_items VALUES (%u, %u)", GetGUIDLow(), iEntry) :
+                                CharacterDatabase.PExecute("UPDATE fake_items SET fakeEntry = %u WHERE guid = %u", iEntry, GetGUIDLow());
+        m_fakeDisplayEntry = iEntry;
+    }
+
+    return FAKE_ERR_OK;
+}
+
+void Item::RemoveFakeDisplay()
+{
+    if (GetFakeDisplayEntry())
+    {
+        m_fakeDisplayEntry = 0;
+        CharacterDatabase.PExecute("DELETE FROM fake_items WHERE guid = %u", GetGUIDLow());
+    }
 }

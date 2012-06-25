@@ -392,15 +392,15 @@ typedef UNORDERED_MAP<uint32, PointOfInterestLocale> PointOfInterestLocaleMap;
 typedef std::multimap<uint32, uint32> QuestRelations;
 typedef std::pair<QuestRelations::const_iterator, QuestRelations::const_iterator> QuestRelationBounds;
 typedef std::multimap<uint32, uint32> AreaTriggerQuestStart;
-typedef std::pair<AreaTriggerQuestStart::const_iterator,
-        AreaTriggerQuestStart::const_iterator> AreaTriggerQuestStartBounds;
+typedef std::pair<AreaTriggerQuestStart::const_iterator, AreaTriggerQuestStart::const_iterator> AreaTriggerQuestStartBounds;
 typedef std::multimap<uint32, ItemRequiredTarget> ItemRequiredTargetMap;
-typedef std::pair<ItemRequiredTargetMap::const_iterator,
-        ItemRequiredTargetMap::const_iterator> ItemRequiredTargetMapBounds;
+typedef std::pair<ItemRequiredTargetMap::const_iterator, ItemRequiredTargetMap::const_iterator> ItemRequiredTargetMapBounds;
+typedef std::map<uint32, uint32> FakeItemsContainer;
 
-struct PetLevelInfo {
-    PetLevelInfo() :
-            health(0), mana(0) {
+struct PetLevelInfo 
+{
+    PetLevelInfo() : health(0), mana(0) 
+    {
         for (uint8 i = 0; i < MAX_STATS; ++i)
             stats[i] = 0;
     }
@@ -706,6 +706,10 @@ public:
         return NULL;
     }
 
+    uint32 GetFakeItemEntry(uint32 itemGuid);
+    void SetFekeItem(uint32 itemGuid, uint32 fakeEntry);
+    void RemoveFakeItem(uint32 itemGuid);
+
     static InstanceTemplate const* GetInstanceTemplate(uint32 map)
     {
         return sInstanceTemplate.LookupEntry<InstanceTemplate>(map);
@@ -964,6 +968,7 @@ public:
     void LoadItemLocales();
     void LoadItemSetNames();
     void LoadItemSetNameLocales();
+    void LoadFakeItems();
     void LoadQuestLocales();
     void LoadNpcTextLocales();
     void LoadPageTextLocales();
@@ -1443,6 +1448,7 @@ private:
     ItemTemplateContainer ItemTemplateStore;
     ItemLocaleMap mItemLocaleMap;
     ItemSetNameLocaleMap mItemSetNameLocaleMap;
+    FakeItemsContainer _fakeItemsStore;
     QuestLocaleMap mQuestLocaleMap;
     NpcTextLocaleMap mNpcTextLocaleMap;
     PageTextLocaleMap mPageTextLocaleMap;
