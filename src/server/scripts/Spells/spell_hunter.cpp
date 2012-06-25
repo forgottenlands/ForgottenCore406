@@ -511,9 +511,14 @@ public:
 	class spell_hun_steady_shot_SpellScript: public SpellScript {
 		PrepareSpellScript(spell_hun_steady_shot_SpellScript)
 
+        bool Load() 
+        {
+			castCount = 0;
+			return true;
+		}
+
 		void HandleDummy(SpellEffIndex /*effIndex*/) {
-			++castCount;
-			if (castCount > 1) {
+
 				if (Unit* caster = GetCaster()) {
 					int32 speed0 = 0;
 					if (caster->HasAura(53221))
@@ -528,14 +533,12 @@ public:
 								HUNTER_SPELL_STREADY_SHOT_ATTACK_SPEED, &speed0,
 								NULL, NULL, true, 0, 0, caster->GetGUID());
 
-					castCount = 0;
 
 					if (caster->GetTypeId() != TYPEID_PLAYER)
 						return;
 
 					caster->ToPlayer()->KilledMonsterCredit(44175, 0);
 				}
-			}
 		}
 
 		void Register() {
