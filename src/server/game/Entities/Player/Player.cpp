@@ -21415,21 +21415,26 @@ bool Player::ReduceSpellCooldown(uint32 spell_id, uint32 seconds)
         return false;
     }
 
-void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo,
-        uint32 itemId, Spell* spell, bool infinityCooldown) {
+void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, Spell* spell, bool infinityCooldown)
+{
     // init cooldown values
     uint32 cat = 0;
     int32 rec = -1;
     int32 catrec = -1;
+    int32 diffCool = 0;
 
     // some special item spells without correct cooldown in SpellInfo
     // cooldown information stored in item prototype
     // This used in same way in WorldSession::HandleItemQuerySingleOpcode data sending to client.
 
-    if (itemId) {
-        if (ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId)) {
-            for (uint8 idx = 0; idx < MAX_ITEM_SPELLS; ++idx) {
-                if (uint32(proto->Spells[idx].SpellId) == spellInfo->Id) {
+    if (itemId)
+    {
+        if (ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemId)) 
+        {
+            for (uint8 idx = 0; idx < MAX_ITEM_SPELLS; ++idx) 
+            {
+                if (uint32(proto->Spells[idx].SpellId) == spellInfo->Id) 
+                {
                     cat = proto->Spells[idx].SpellCategory;
                     rec = proto->Spells[idx].SpellCooldown;
                     catrec = proto->Spells[idx].SpellCategoryCooldown;
@@ -21440,7 +21445,8 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo,
     }
 
     // if no cooldown found above then base at DBC data
-    if (rec < 0 && catrec < 0) {
+    if (rec < 0 && catrec < 0) 
+    {
         cat = spellInfo->Category;
         rec = spellInfo->RecoveryTime;
         catrec = spellInfo->CategoryRecoveryTime;
@@ -21452,18 +21458,18 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo,
     time_t recTime;
 
     // overwrite time for selected category
-    if (infinityCooldown) {
+    if (infinityCooldown)
+    {
         // use +MONTH as infinity mark for spell cooldown (will checked as MONTH/2 at save ans skipped)
         // but not allow ignore until reset or re-login
         catrecTime = catrec > 0 ? curTime + infinityCooldownDelay : 0;
         recTime = rec > 0 ? curTime + infinityCooldownDelay : catrecTime;
-    } else {
+    } 
+    else 
+    {
         // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
         // prevent 0 cooldowns set by another way
-        if (rec <= 0 && catrec <= 0
-                && (cat == 76
-                        || (IsAutoRepeatRangedSpell(spellInfo)
-                                && spellInfo->Id != 75)))
+        if (rec <= 0 && catrec <= 0 && (cat == 76 || (IsAutoRepeatRangedSpell(spellInfo) && spellInfo->Id != 75)))
             rec = GetAttackTime(RANGED_ATTACK);
 
         // Now we have cooldown data (if found any), time to apply mods
@@ -21492,13 +21498,13 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo,
         AddSpellCooldown(spellInfo->Id, itemId, recTime);
 
     // category spells
-    if (cat && catrec > 0) {
-        SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(
-                cat);
-        if (i_scstore != sSpellCategoryStore.end()) {
-            for (SpellCategorySet::const_iterator i_scset =
-                    i_scstore->second.begin();
-                    i_scset != i_scstore->second.end(); ++i_scset) {
+    if (cat && catrec > 0) 
+    {
+        SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(cat);
+        if (i_scstore != sSpellCategoryStore.end())
+        {
+            for (SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
+            {
                 if (*i_scset == spellInfo->Id) // skip main spell, already handled above
                     continue;
 
@@ -21508,15 +21514,16 @@ void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo,
     }
 }
 
-void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time) {
+void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time) 
+{
     SpellCooldown sc;
     sc.end = end_time;
     sc.itemid = itemid;
     m_spellCooldowns[spellid] = sc;
 }
 
-void Player::SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId,
-        Spell* spell) {
+void Player::SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId, Spell* spell) 
+{
     // start cooldowns at server side, if any
     AddSpellAndCategoryCooldowns(spellInfo, itemId, spell);
 

@@ -3766,25 +3766,25 @@ void Spell::_handle_finish_phase() {
     }
 }
 
-void Spell::SendSpellCooldown() {
+void Spell::SendSpellCooldown() 
+{
     if (m_caster->GetTypeId() != TYPEID_PLAYER) return;
 
     Player* _player = (Player*) m_caster;
 
     // mana/health/etc potions, disabled by client (until combat out as declarate)
-    if (m_CastItem && m_CastItem->IsPotion()) {
+    if (m_CastItem && m_CastItem->IsPotion()) 
+    {
         // need in some way provided data for Spell::finish SendCooldownEvent
         _player->SetLastPotionId(m_CastItem->GetEntry());
         return;
     }
 
     // have infinity cooldown but set at aura apply                  // do not set cooldown for triggered spells (needed by reincarnation)
-    if (m_spellInfo->Attributes
-            & (SPELL_ATTR0_DISABLED_WHILE_ACTIVE | SPELL_ATTR0_PASSIVE)
-            || m_IsTriggeredSpell) return;
+    if (m_spellInfo->Attributes & (SPELL_ATTR0_DISABLED_WHILE_ACTIVE | SPELL_ATTR0_PASSIVE) || m_IsTriggeredSpell) 
+        return;
 
-    _player->AddSpellAndCategoryCooldowns(m_spellInfo,
-            m_CastItem ? m_CastItem->GetEntry() : 0, this);
+    _player->AddSpellAndCategoryCooldowns(m_spellInfo, m_CastItem ? m_CastItem->GetEntry() : 0, this);
 }
 
 void Spell::update(uint32 difftime) {
@@ -4113,43 +4113,43 @@ void Spell::SendSpellStart() {
     m_caster->SendMessageToSet(&data, true);
 }
 
-void Spell::SendSpellGo() {
+void Spell::SendSpellGo() 
+{
     // not send invisible spell casting
-    if (!IsNeedSendToClient()) return;
+    if (!IsNeedSendToClient())
+        return;
 
     //sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Sending SMSG_SPELL_GO id=%u", m_spellInfo->Id);
 
     uint32 castFlags = CAST_FLAG_UNKNOWN_9;
 
     // triggered spells with spell visual != 0
-    if ((m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo))
-            || m_triggeredByAuraSpell) castFlags |= CAST_FLAG_PENDING;
+    if ((m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || m_triggeredByAuraSpell) 
+        castFlags |= CAST_FLAG_PENDING;
 
-    if (m_spellInfo->Attributes & SPELL_ATTR0_REQ_AMMO) castFlags |=
-            CAST_FLAG_AMMO; // arrows/bullets visual
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER
-            || (m_caster->GetTypeId() == TYPEID_UNIT
-                    && m_caster->ToCreature()->isPet()))
-            && m_spellInfo->powerType != POWER_HEALTH) castFlags |=
-            CAST_FLAG_POWER_LEFT_SELF; // should only be sent to self, but the current messaging doesn't make that possible
+    if (m_spellInfo->Attributes & SPELL_ATTR0_REQ_AMMO) 
+        castFlags |= CAST_FLAG_AMMO; // arrows/bullets visual
+    if ((m_caster->GetTypeId() == TYPEID_PLAYER || (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->isPet()))
+            && m_spellInfo->powerType != POWER_HEALTH) 
+            castFlags |= CAST_FLAG_POWER_LEFT_SELF; // should only be sent to self, but the current messaging doesn't make that possible
 
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER)
-            && (m_caster->getClass() == CLASS_DEATH_KNIGHT)
-            && m_spellInfo->runeCostID
-            && m_spellInfo->powerType == POWER_RUNE) {
+    if ((m_caster->GetTypeId() == TYPEID_PLAYER) && (m_caster->getClass() == CLASS_DEATH_KNIGHT) && m_spellInfo->runeCostID && m_spellInfo->powerType == POWER_RUNE)
+    {
         castFlags |= CAST_FLAG_UNKNOWN_19; // same as in SMSG_SPELL_START
         castFlags |= CAST_FLAG_RUNE_LIST; // rune cooldowns list
         castFlags |= CAST_FLAG_UNKNOWN_9; // ??
     }
 
-    if (IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_ACTIVATE_RUNE)) {
+    if (IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_ACTIVATE_RUNE)) 
+    {
         castFlags |= CAST_FLAG_RUNE_LIST; // rune cooldowns list
         castFlags |= CAST_FLAG_UNKNOWN_19; // same as in SMSG_SPELL_START
     }
 
     WorldPacket data(SMSG_SPELL_GO, 50); // guess size
 
-    if (m_CastItem) data.append(m_CastItem->GetPackGUID());
+    if (m_CastItem) 
+        data.append(m_CastItem->GetPackGUID());
     else
         data.append(m_caster->GetPackGUID());
 
@@ -4172,45 +4172,77 @@ void Spell::SendSpellGo() {
 
     m_targets.write(data);
 
-    if (castFlags & CAST_FLAG_POWER_LEFT_SELF) data
-            << uint32(m_caster->GetPower((Powers) m_spellInfo->powerType));
+    if (castFlags & CAST_FLAG_POWER_LEFT_SELF) 
+        data << uint32(m_caster->GetPower((Powers)m_spellInfo->powerType));
 
     if (castFlags & CAST_FLAG_RUNE_LIST) // rune cooldowns list
-            {
+    {
         Player* player = m_caster->ToPlayer();
         uint8 runeMaskInitial = m_runesState;
         uint8 runeMaskAfterCast = player->GetRunesState();
         data << uint8(runeMaskInitial); // runes state before
         data << uint8(runeMaskAfterCast); // runes state after
-        for (uint8 i = 0; i < MAX_RUNES; ++i) {
+        for (uint8 i = 0; i < MAX_RUNES; ++i)
+        {
             uint8 mask = (1 << i);
             float baseCd = float(player->GetRuneBaseCooldown(i));
-            data
-                    << uint8(
-                            (baseCd - float(player->GetRuneCooldown(i)))
-                                    / baseCd * 255); // rune cooldown passed
+            data << uint8((baseCd - float(player->GetRuneCooldown(i))) / baseCd * 255); // rune cooldown passed
         }
     }
 
     if (castFlags & CAST_FLAG_UNKNOWN_18) // unknown wotlk
-            {
+    {
         data << float(0);
         data << uint32(0);
     }
 
-    if (castFlags & CAST_FLAG_AMMO) WriteAmmoToPacket(&data);
+    if (castFlags & CAST_FLAG_AMMO) 
+        WriteAmmoToPacket(&data);
 
     if (castFlags & CAST_FLAG_UNKNOWN_20) // unknown wotlk
-            {
+    {
         data << uint32(0);
         data << uint32(0);
     }
 
-    if (m_targets.getTargetMask() & TARGET_FLAG_DEST_LOCATION) {
+    if (m_targets.getTargetMask() & TARGET_FLAG_DEST_LOCATION) 
+    {
         data << uint8(0);
     }
 
     m_caster->SendMessageToSet(&data, true);
+
+    // Sanctity of Battle
+    if (m_caster->ToPlayer() && m_caster->HasAura(25956))
+    {
+        // category spells
+        if (m_spellInfo->Category == 1264)
+        {
+            // Crusader Strike & Divine Storm benefit from haste Sanctity of Battle
+            float haste = (2 - m_caster->ToPlayer()->GetFloatValue(UNIT_MOD_CAST_SPEED));
+            int32 cooldown = 4500;
+            int32 diffCool = 0;
+            if (haste > 0)
+            {
+                cooldown /= haste;
+                diffCool = 4500-cooldown;
+            }
+
+            SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(m_spellInfo->Category);
+            if (i_scstore != sSpellCategoryStore.end())
+            {
+                for (SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
+                {
+                    m_caster->ToPlayer()->AddSpellCooldown(*i_scset, 0, uint32(time(NULL) + cooldown/1000));
+                    WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+                    data << uint32(*i_scset);
+                    data << uint64(m_caster->GetGUID());
+                    data << int32(-diffCool);
+                    m_caster->ToPlayer()->GetSession()->SendPacket(&data);
+                }
+            }
+        }
+    }
 }
 
 void Spell::WriteAmmoToPacket(WorldPacket * data) {
@@ -4284,53 +4316,53 @@ void Spell::WriteAmmoToPacket(WorldPacket * data) {
      *data << uint32(ammoInventoryType);*/
 }
 
-void Spell::WriteSpellGoTargets(WorldPacket * data) {
+void Spell::WriteSpellGoTargets(WorldPacket * data) 
+{
     // This function also fill data for channeled spells:
     // m_needAliveTargetMask req for stop channelig if one target die
     uint32 hit = m_UniqueGOTargetInfo.size(); // Always hits on GO
     uint32 miss = 0;
-    for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin();
-            ihit != m_UniqueTargetInfo.end(); ++ihit) {
+    for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit) 
+    {
         if ((*ihit).effectMask == 0) // No effect apply - all immuned add state
-                {
+        {
             // possibly SPELL_MISS_IMMUNE2 for this??
             ihit->missCondition = SPELL_MISS_IMMUNE2;
             ++miss;
-        } else if ((*ihit).missCondition == SPELL_MISS_NONE) ++hit;
+        } 
+        else if ((*ihit).missCondition == SPELL_MISS_NONE)
+            ++hit;
         else
             ++miss;
     }
 
     *data << (uint8) hit;
-    for (std::list<TargetInfo>::const_iterator ihit =
-            m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end();
-            ++ihit) {
+    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit) 
+    {
         if ((*ihit).missCondition == SPELL_MISS_NONE) // Add only hits
-                {
+        {
             *data << uint64(ihit->targetGUID);
             m_channelTargetEffectMask |= ihit->effectMask;
         }
     }
 
-    for (std::list<GOTargetInfo>::const_iterator ighit =
-            m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end();
-            ++ighit)
+    for (std::list<GOTargetInfo>::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end(); ++ighit)
         *data << uint64(ighit->targetGUID); // Always hits
 
     *data << (uint8) miss;
-    for (std::list<TargetInfo>::const_iterator ihit =
-            m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end();
-            ++ihit) {
+    for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit) 
+    {
         if (ihit->missCondition != SPELL_MISS_NONE) // Add only miss
-                {
+        {
             *data << uint64(ihit->targetGUID);
             *data << uint8(ihit->missCondition);
-            if (ihit->missCondition == SPELL_MISS_REFLECT) *data
-                    << uint8(ihit->reflectResult);
+            if (ihit->missCondition == SPELL_MISS_REFLECT) 
+                *data << uint8(ihit->reflectResult);
         }
     }
     // Reset m_needAliveTargetMask for non channeled spell
-    if (!IsChanneledSpell(m_spellInfo)) m_channelTargetEffectMask = 0;
+    if (!IsChanneledSpell(m_spellInfo)) 
+        m_channelTargetEffectMask = 0;
 }
 
 void Spell::SendLogExecute() {
