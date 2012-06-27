@@ -17088,8 +17088,7 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect *triggeredByAura)
     uint64 caster_guid = triggeredByAura->GetCasterGUID();
 
     //Currently only Prayer of Mending
-    if (!(spellProto->SpellFamilyName == SPELLFAMILY_PRIEST
-            && spellProto->SpellFamilyFlags [1] & 0x20))
+    if (!(spellProto->SpellFamilyName == SPELLFAMILY_PRIEST && spellProto->SpellFamilyFlags [1] & 0x20))
     {
         sLog->outDebug(
                 LOG_FILTER_UNITS,
@@ -17108,33 +17107,35 @@ bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect *triggeredByAura)
     if (jumps > 0)
     {
         float radius;
-        if (spellProto->EffectRadiusIndex [effIdx]) radius =
-                (float) GetSpellRadiusForTarget(
-                        triggeredByAura->GetCaster(),
-                        sSpellRadiusStore.LookupEntry(
-                                spellProto->EffectRadiusIndex [effIdx]));
-        else radius = (float) GetSpellMaxRangeForTarget(
-                triggeredByAura->GetCaster(),
-                sSpellRangeStore.LookupEntry(spellProto->rangeIndex));
+        if (spellProto->EffectRadiusIndex [effIdx]) 
+            radius = (float) GetSpellRadiusForTarget(triggeredByAura->GetCaster(), sSpellRadiusStore.LookupEntry(spellProto->EffectRadiusIndex [effIdx]));
+        else 
+            radius = (float) GetSpellMaxRangeForTarget(triggeredByAura->GetCaster(), sSpellRangeStore.LookupEntry(spellProto->rangeIndex));
 
         if (Unit * caster = triggeredByAura->GetCaster())
         {
-            if (Player * modOwner = caster->GetSpellModOwner()) modOwner->ApplySpellMod(
-                    spellProto->Id, SPELLMOD_RADIUS, radius, NULL);
+            if (Player * modOwner = caster->GetSpellModOwner()) 
+                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_RADIUS, radius, NULL);
 
             if (Unit *target = GetNextRandomRaidMemberOrPet(radius))
             {
-                CastCustomSpell(target, spellProto->Id, &heal, NULL, NULL, true,
-                        NULL, triggeredByAura, caster_guid);
-                if (Aura * aura = target->GetAura(spellProto->Id, caster->GetGUID())) aura->SetCharges(
-                        jumps);
+                CastCustomSpell(target, spellProto->Id, &heal, NULL, NULL, true, NULL, triggeredByAura, caster_guid);
+                if (Aura * aura = target->GetAura(spellProto->Id, caster->GetGUID()))
+                    aura->SetCharges(jumps);
             }
         }
     }
 
     // heal
-    CastCustomSpell(this, 33110, &heal, NULL, NULL, true, NULL, NULL,
-            caster_guid);
+
+    // Glyph of prayer of mending
+    if (jumps == 4)
+    {
+        if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_PRIEST, 2219, 0))
+            heal += heal * aurEff->GetAmount() / 100;
+    }
+
+    CastCustomSpell(this, 33110, &heal, NULL, NULL, true, NULL, NULL, caster_guid);
     return true;
 }
 bool Unit::HandleAuraRaidProcFromCharge(AuraEffect* triggeredByAura)
