@@ -6710,28 +6710,40 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 if (!target)
                     return false;
 
-                // Multiple effects stack, so let's try to find this aura.
-                int32 bonus = 0;
-                if (AuraEffect *aurEff = target->GetAuraEffect(47753, 0))
-                    bonus =	aurEff->GetAmount();
-
-                basepoints0 = damage * triggerAmount / 100 + bonus;
-
-                // Mastery
-                if (ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
+                // Proc on criticals and prayer of heling
+                if (procEx & PROC_EX_CRITICAL_HIT || procSpell->Id == 596)
                 {
-                    if (ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == BS_PRIEST_DISCIPLINE)
+                    // Multiple effects stack, so let's try to find this aura.
+                    int32 bonus = 0;
+                    if (AuraEffect *aurEff = target->GetAuraEffect(47753, 0))
+                        bonus =	aurEff->GetAmount();
+
+                    // Mastery
+                    if (ToPlayer()->HasAuraType(SPELL_AURA_MASTERY))
                     {
-                        int32 bp = int32(basepoints0 * (0.2f + (0.025f * ToPlayer()->GetMasteryPoints())));
-                        basepoints0 += bp;
+                        if (ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == BS_PRIEST_DISCIPLINE)
+                        {
+                            int32 bp = int32(2.0f + (2.5f * ToPlayer()->GetMasteryPoints()));
+                            triggerAmount += bp;
+                        }
                     }
+
+                    // PoH Crits proc buff twice
+                    if (procEx & PROC_EX_CRITICAL_HIT && procSpell->Id == 596)
+                        triggerAmount *= 2;
+                    
+                    basepoints0 = damage * triggerAmount / 100 + bonus;
+                    
+                    // Divine aegis max size is 40% of the target health
+                    if (basepoints0 > int32(target->GetMaxHealth() * 40 /100))
+                        basepoints0 = target->GetMaxHealth() * 40 /100;
+
+                    triggered_spell_id = 47753;
+                } 
+                else
+                {
+                    return false;
                 }
-
-                // Divine aegis max size is 40% of the target health
-                if (basepoints0 > int32(target->GetMaxHealth() * 40 /100))
-                    basepoints0 = target->GetMaxHealth() * 40 /100;
-
-                triggered_spell_id = 47753;
                 break;
             }
             // Body and Soul
