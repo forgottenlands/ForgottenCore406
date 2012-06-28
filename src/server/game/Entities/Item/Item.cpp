@@ -1401,9 +1401,13 @@ FakeResult Item::SetFakeDisplay(uint32 iEntry)
     if (m_fakeDisplayEntry != iEntry)
     {
         sObjectMgr->SetFekeItem(GetGUIDLow(), iEntry);
+        if (!m_fakeDisplayEntry)
+        {
+            CharacterDatabase.PExecute("DELETE FROM fake_items WHERE guid = %u", GetGUIDLow());
+            CharacterDatabase.PExecute("INSERT INTO fake_items VALUES (%u, %u)", GetGUIDLow(), iEntry);
+        } else
+            CharacterDatabase.PExecute("UPDATE fake_items SET fakeEntry = %u WHERE guid = %u", iEntry, GetGUIDLow());
 
-        (!m_fakeDisplayEntry) ? CharacterDatabase.PExecute("INSERT INTO fake_items VALUES (%u, %u)", GetGUIDLow(), iEntry) :
-                                CharacterDatabase.PExecute("UPDATE fake_items SET fakeEntry = %u WHERE guid = %u", iEntry, GetGUIDLow());
         m_fakeDisplayEntry = iEntry;
     }
 
