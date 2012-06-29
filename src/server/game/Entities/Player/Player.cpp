@@ -17531,8 +17531,7 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder,
     }
 
     _LoadCurrency(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CURRENCY));
-    _LoadConquestPointsWeekCap(
-            holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CP_WEEK_CAP));
+    _LoadConquestPointsWeekCap(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CP_WEEK_CAP));
     _LoadTalents(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADTALENTS));
     _LoadTalentBranchSpecs(
             holder->GetPreparedResult(
@@ -22699,17 +22698,6 @@ void Player::ResetCurrencyWeekCap()
     for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end(); ++itr)
         itr->second.weekCount = 0;
 
-    // Calculating week cap for conquest points
-    CharacterDatabase.Execute(
-            "UPDATE character_cp_weekcap SET weekCap = ROUND(1.4326 * (1511.26 / (1 + 1639.28 / exp(0.00412 * `maxWeekRating`))) + 857.15) WHERE `source`=0 AND `maxWeekRating` BETWEEN 1500 AND 3000");
-    CharacterDatabase.PExecute(
-            "UPDATE character_cp_weekcap SET weekCap = '%u' WHERE `source`=0 AND `maxWeekRating` < 1500",
-            PLAYER_DEFAULT_CONQUEST_POINTS_WEEK_CAP);
-    CharacterDatabase.Execute(
-            "UPDATE character_cp_weekcap SET weekCap =3000 WHERE `source`=0 AND `maxWeekRating` > 3000");
-    CharacterDatabase.Execute(
-            "UPDATE character_cp_weekcap SET maxWeekRating=0");
-
     if (m_maxWeekRating[CP_SOURCE_ARENA] <= 1500)
         m_conquestPointsWeekCap[CP_SOURCE_ARENA] = PLAYER_DEFAULT_CONQUEST_POINTS_WEEK_CAP;
     else if (m_maxWeekRating[CP_SOURCE_ARENA] > 3000)
@@ -22719,21 +22707,9 @@ void Player::ResetCurrencyWeekCap()
 
     m_maxWeekRating[CP_SOURCE_ARENA] = 0; // player must win at least 1 arena for week to change m_conquestPointsWeekCap
 
-    _SaveConquestPointsWeekCap();
+    // _SaveConquestPointsWeekCap();
     _SaveCurrency();
     SendCurrencies();
-
-    // Arena Teams
-    for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot) 
-    {
-        uint32 arena_team_id = GetArenaTeamId(arena_slot);
-        if (!arena_team_id)
-            continue;
-        ArenaTeam* arenaTeam = sObjectMgr->GetArenaTeamById(arena_team_id);
-        arenaTeam->FinishWeek();
-        arenaTeam->SaveToDB();
-        arenaTeam->NotifyStatsChanged();
-    }
 }
 
 void Player::UpdateMaxWeekRating(ConquestPointsSources source, uint8 slot)

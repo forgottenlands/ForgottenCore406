@@ -1256,3 +1256,22 @@ void BattlegroundMgr::DoCompleteAchievement(uint32 achievement, Player * player)
         player->CompletedAchievement(AE);
     }
 }
+
+void BattlegroundMgr::ResetArenaWeekStatusAndCap()
+{
+    for (ObjectMgr::ArenaTeamMap::iterator titr = sObjectMgr->GetArenaTeamMapBegin(); titr != sObjectMgr->GetArenaTeamMapEnd(); ++titr)
+    {
+        if (ArenaTeam * at = titr->second)
+        {
+            at->FinishWeek();                              // set played this week etc values to 0 in memory, too
+            at->SaveToDB();                                // save changes
+            at->NotifyStatsChanged();                      // notify the players of the changes
+        }
+    }
+
+    // Update cap on DB
+    CharacterDatabase.Execute("UPDATE character_cp_weekcap SET weekCap = ROUND(1.4326 * (1511.26 / (1 + 1639.28 / exp(0.00412 * `maxWeekRating`))) + 857.15) WHERE `source`=0 AND `maxWeekRating` BETWEEN 1500 AND 3000");
+    CharacterDatabase.PExecute("UPDATE character_cp_weekcap SET weekCap = '%u' WHERE `source`=0 AND `maxWeekRating` < 1500", PLAYER_DEFAULT_CONQUEST_POINTS_WEEK_CAP);
+    CharacterDatabase.Execute("UPDATE character_cp_weekcap SET weekCap =3000 WHERE `source`=0 AND `maxWeekRating` > 3000");
+    CharacterDatabase.Execute("UPDATE character_cp_weekcap SET maxWeekRating=0");
+}

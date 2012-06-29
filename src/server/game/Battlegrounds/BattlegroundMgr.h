@@ -94,6 +94,8 @@ class BattlegroundMgr
         void ToggleArenaTesting();
         void ToggleTesting();
 
+        void ResetArenaWeekStatusAndCap();
+
         void SetHolidayWeekends(uint32 mask);
 
         bool isArenaTesting() const { return m_ArenaTesting; }

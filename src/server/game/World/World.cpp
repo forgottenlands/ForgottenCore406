@@ -2824,9 +2824,14 @@ void World::ResetCurrencyWeekCap()
 {
     sLog->outDetail("Currencies week caps reset for all characters.");
     CharacterDatabase.Execute("UPDATE character_currency SET thisweek = 0");
+    
+    // Reset Arenas
+    sBattlegroundMgr->ResetArenaWeekStatusAndCap();
+
+    // Send Week Cap to online players
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-        if (itr->second->GetPlayer())
-            itr->second->GetPlayer()->ResetCurrencyWeekCap();
+        if (Player* player = itr->second->GetPlayer())
+            player->ResetCurrencyWeekCap();  
 
     m_NextCurrencyReset = time_t(m_NextCurrencyReset + WEEK);
     sWorld->setWorldState(WS_CURRENCY_RESET_TIME, uint64(m_NextCurrencyReset));
