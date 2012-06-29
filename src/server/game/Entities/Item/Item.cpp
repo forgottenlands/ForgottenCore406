@@ -1420,5 +1420,6 @@ void Item::RemoveFakeDisplay()
     {
         m_fakeDisplayEntry = 0;
         CharacterDatabase.PExecute("DELETE FROM fake_items WHERE guid = %u", GetGUIDLow());
+        sObjectMgr->RemoveFakeItem(GetGUIDLow());
     }
 }
