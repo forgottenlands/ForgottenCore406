@@ -9638,13 +9638,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
-         case 62600: //Savage Defense (proc fix) 
-         { 
-        Player* pl = ToPlayer();
-        if (!pl->HasAura(5487)) //5487 Bear form aura
-           return false;                   
-        break;
-         }
+        case 62600: //Savage Defense (proc fix) 
+        { 
+            Player* pl = ToPlayer();
+            if (!pl->HasAura(5487)) //5487 Bear form aura
+               return false;                   
+            break;
+        }
         case 88687: // Surge of light
         case 88690:
             if (procSpell->Id != 2061 && procSpell->Id != 585 && procSpell->Id != 2050 && procSpell->Id != 2060)
@@ -9880,6 +9880,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 return false;
 
             if (procSpell->Id != 774 && procSpell->Id != 33763)
+                return false;
+        case 30293: // Soul Leech
+        case 30295:
+            if (!procSpell)
+                return false;
+
+            if (procSpell->Id != 17877 && procSpell->Id != 6353 && procSpell->Id != 50796)
                 return false;
         default:
             break;
