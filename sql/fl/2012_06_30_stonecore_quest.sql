@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `Objectives`='Slay High Priestess Azil', `ObjectiveText1`='High Priesess Azil slain', `ReqCreatureOrGOId1`=42333 WHERE  `entry`=5000002 LIMIT 1;

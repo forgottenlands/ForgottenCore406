@@ -118,6 +118,20 @@ class boss_high_priestess_azil: public CreatureScript
         void JustDied(Unit* killer)
         {
             summons.DespawnAll();
+
+            if (me->GetMap()->IsHeroic())
+            {
+                if (!me->GetMap()->GetPlayers().isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
+                    {
+                        if (i->getSource())
+                        {
+                            i->getSource()->KilledMonsterCredit(42333, 0);
+                        }
+                    }
+                }
+            }
         }
 
         void UpdateAI(const uint32 diff)
