@@ -4774,6 +4774,10 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
             count++;
             break;
+        case 47764: // Gravity Well Effect
+        case 47765:
+            spellInfo->EffectRadiusIndex[0] = 13;
+            break;
         default:
             break;
         }

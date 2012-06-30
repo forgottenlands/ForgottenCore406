@@ -2563,7 +2563,7 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
-                if (m_spellInfo->Id == 54786) // Demon Leap
+                if (m_spellInfo->Id == 54786 || m_spellInfo->Id == 79050 ) // Demon Leap && Energy Shield
                 {
                     radius = 5;
                     targetType = SPELL_TARGETS_ENEMY;
