@@ -12082,6 +12082,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                     if (pVictim->GetDiseasesByCaster(owner->GetGUID()) > 0) 
                         DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
 
+            // Merciless Combat
+            if (spellProto->Id == 45477 || spellProto->Id == 49184)
+                if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 2656, 0))
+                    if (pVictim->GetHealthPct() <= 35.0f)
+                        DoneTotalMod += float(aurEff->GetAmount() / 100.0f);
+
             // Rune Strike
             if (spellProto->SpellFamilyFlags [1] & 0x20000000)
             {
@@ -13211,12 +13217,13 @@ bool Unit::IsDamageToThreatSpell(SpellEntry const * spellInfo) const
     return false;
 }
 
-void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,
-        WeaponAttackType attType, SpellEntry const *spellProto)
+void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType attType, SpellEntry const *spellProto)
 {
-    if (!pVictim) return;
+    if (!pVictim)
+        return;
 
-    if (*pdamage == 0) return;
+    if (*pdamage == 0) 
+        return;
 
     uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
 
@@ -13225,12 +13232,10 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,
     int32 TakenFlatBenefit = 0;
 
     // ..done (for creature type by mask) in taken
-    AuraEffectList const& mDamageDoneCreature = GetAuraEffectsByType(
-            SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
-    for (AuraEffectList::const_iterator i = mDamageDoneCreature.begin();
-            i != mDamageDoneCreature.end(); ++i)
-        if (creatureTypeMask & uint32((*i)->GetMiscValue())) DoneFlatBenefit +=
-                (*i)->GetAmount();
+    AuraEffectList const& mDamageDoneCreature = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
+    for (AuraEffectList::const_iterator i = mDamageDoneCreature.begin(); i != mDamageDoneCreature.end(); ++i)
+        if (creatureTypeMask & uint32((*i)->GetMiscValue())) 
+            DoneFlatBenefit += (*i)->GetAmount();
 
     // ..done
     // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
@@ -13240,56 +13245,48 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,
 
     if (attType == RANGED_ATTACK)
     {
-        APbonus += pVictim->GetTotalAuraModifier(
-                SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
+        APbonus += pVictim->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
 
         // ..done (base at attack power and creature type)
-        AuraEffectList const& mCreatureAttackPower = GetAuraEffectsByType(
-                SPELL_AURA_MOD_RANGED_ATTACK_POWER_VERSUS);
-        for (AuraEffectList::const_iterator i = mCreatureAttackPower.begin();
-                i != mCreatureAttackPower.end(); ++i)
-            if (creatureTypeMask & uint32((*i)->GetMiscValue())) APbonus +=
-                    (*i)->GetAmount();
+        AuraEffectList const& mCreatureAttackPower = GetAuraEffectsByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_VERSUS);
+        for (AuraEffectList::const_iterator i = mCreatureAttackPower.begin(); i != mCreatureAttackPower.end(); ++i)
+            if (creatureTypeMask & uint32((*i)->GetMiscValue())) 
+                APbonus += (*i)->GetAmount();
     }
     else
     {
-        APbonus += pVictim->GetTotalAuraModifier(
-                SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS);
+        APbonus += pVictim->GetTotalAuraModifier(SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS);
 
         // ..done (base at attack power and creature type)
-        AuraEffectList const& mCreatureAttackPower = GetAuraEffectsByType(
-                SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS);
-        for (AuraEffectList::const_iterator i = mCreatureAttackPower.begin();
-                i != mCreatureAttackPower.end(); ++i)
-            if (creatureTypeMask & uint32((*i)->GetMiscValue())) APbonus +=
-                    (*i)->GetAmount();
+        AuraEffectList const& mCreatureAttackPower = GetAuraEffectsByType(SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS);
+        for (AuraEffectList::const_iterator i = mCreatureAttackPower.begin(); i != mCreatureAttackPower.end(); ++i)
+            if (creatureTypeMask & uint32((*i)->GetMiscValue()))
+                APbonus += (*i)->GetAmount();
     }
 
     if (APbonus != 0) // Can be negative
     {
         bool normalized = false;
-        if (spellProto) for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            if (spellProto->Effect [i] == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
-            {
-                normalized = true;
-                break;
-            }
-        DoneFlatBenefit += int32(
-                APbonus / 14.0f * GetAPMultiplier(attType, normalized));
+        if (spellProto)
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                if (spellProto->Effect [i] == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
+                {
+                    normalized = true;
+                    break;
+                }
+
+        DoneFlatBenefit += int32(APbonus / 14.0f * GetAPMultiplier(attType, normalized));
     }
 
     // ..taken
-    AuraEffectList const& mDamageTaken = pVictim->GetAuraEffectsByType(
-            SPELL_AURA_MOD_DAMAGE_TAKEN);
-    for (AuraEffectList::const_iterator i = mDamageTaken.begin();
-            i != mDamageTaken.end(); ++i)
-        if ((*i)->GetMiscValue() & GetMeleeDamageSchoolMask()) TakenFlatBenefit +=
-                (*i)->GetAmount();
+    AuraEffectList const& mDamageTaken = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
+    for (AuraEffectList::const_iterator i = mDamageTaken.begin(); i != mDamageTaken.end(); ++i)
+        if ((*i)->GetMiscValue() & GetMeleeDamageSchoolMask()) TakenFlatBenefit += (*i)->GetAmount();
 
-    if (attType != RANGED_ATTACK) TakenFlatBenefit +=
-            pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN);
-    else TakenFlatBenefit += pVictim->GetTotalAuraModifier(
-            SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN);
+    if (attType != RANGED_ATTACK)
+        TakenFlatBenefit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN);
+    else
+        TakenFlatBenefit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN);
 
     // Done/Taken total percent damage auras
     float DoneTotalMod = 1.0f;
@@ -13300,41 +13297,33 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,
     // SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT  included in weapon damage
 
     // SPELL_AURA_MOD_DAMAGE_PERCENT_DONE for non-physical spells like Scourge Strike, Frost Strike, this is NOT included in weapon damage
-    if (spellProto) if (GetSpellSchoolMask(spellProto)
-            != SPELL_SCHOOL_MASK_NORMAL)
+    if (spellProto) 
+        if (GetSpellSchoolMask(spellProto) != SPELL_SCHOOL_MASK_NORMAL)
     {
-        AuraEffectList const &mModDamagePercentDone = GetAuraEffectsByType(
-                SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-        for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin();
-                i != mModDamagePercentDone.end(); ++i)
-            if (((*i)->GetMiscValue() & GetSpellSchoolMask(spellProto))
-                    && !((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)) DoneTotalMod *=
-                    ((*i)->GetAmount() + 100.0f) / 100.0f;
+        AuraEffectList const &mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+        for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+            if (((*i)->GetMiscValue() & GetSpellSchoolMask(spellProto)) && !((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL))
+                DoneTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
     }
 
-    AuraEffectList const &mDamageDoneVersus = GetAuraEffectsByType(
-            SPELL_AURA_MOD_DAMAGE_DONE_VERSUS);
-    for (AuraEffectList::const_iterator i = mDamageDoneVersus.begin();
-            i != mDamageDoneVersus.end(); ++i)
-        if (creatureTypeMask & uint32((*i)->GetMiscValue())) DoneTotalMod *=
-                ((*i)->GetAmount() + 100.0f) / 100.0f;
+    AuraEffectList const &mDamageDoneVersus = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS);
+    for (AuraEffectList::const_iterator i = mDamageDoneVersus.begin(); i != mDamageDoneVersus.end(); ++i)
+        if (creatureTypeMask & uint32((*i)->GetMiscValue())) 
+            DoneTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
 
     // bonus against aurastate
-    AuraEffectList const &mDamageDoneVersusAurastate = GetAuraEffectsByType(
-            SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE);
-    for (AuraEffectList::const_iterator i = mDamageDoneVersusAurastate.begin();
-            i != mDamageDoneVersusAurastate.end(); ++i)
-        if (pVictim->HasAuraState(AuraState((*i)->GetMiscValue()))) DoneTotalMod *=
-                ((*i)->GetAmount() + 100.0f) / 100.0f;
+    AuraEffectList const &mDamageDoneVersusAurastate = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE);
+    for (AuraEffectList::const_iterator i = mDamageDoneVersusAurastate.begin(); i != mDamageDoneVersusAurastate.end(); ++i)
+        if (pVictim->HasAuraState(AuraState((*i)->GetMiscValue()))) 
+            DoneTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
 
     // done scripted mod (take it from owner)
     Unit * owner = GetOwner() ? GetOwner() : this;
-    AuraEffectList const &mOverrideClassScript = owner->GetAuraEffectsByType(
-            SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-    for (AuraEffectList::const_iterator i = mOverrideClassScript.begin();
-            i != mOverrideClassScript.end(); ++i)
+    AuraEffectList const &mOverrideClassScript = owner->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+    for (AuraEffectList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
     {
-        if (!(*i)->IsAffectedOnSpell(spellProto)) continue;
+        if (!(*i)->IsAffectedOnSpell(spellProto))
+            continue;
 
         switch ((*i)->GetMiscValue())
         {
@@ -13345,24 +13334,24 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,
                 // Merciless Combat
                 if ((*i)->GetSpellProto()->SpellIconID == 2656)
                 {
-                    if (!pVictim->HealthAbovePct(35)) DoneTotalMod *= (100.0f
-                            + (*i)->GetAmount()) / 100.0f;
+                    if (!pVictim->HealthAbovePct(35)) 
+                        DoneTotalMod *= (100.0f + (*i)->GetAmount()) / 100.0f;
                 }
                 // Tundra Stalker
                 else
                 {
                     // Frost Fever (target debuff)
-                    if (pVictim->HasAura(55095)) DoneTotalMod *=
-                            ((*i)->GetAmount() + 100.0f) / 100.0f;
+                    if (pVictim->HasAura(55095)) 
+                        DoneTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
                 }
                 break;
             }
-                // Rage of Rivendare
+            // Rage of Rivendare
             case 7293:
             {
-                if (pVictim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE,
-                        SPELLFAMILY_DEATHKNIGHT, 0, 0x02000000, 0)) if (SpellChainNode const *chain = sSpellMgr->GetSpellChainNode((*i)->GetId())) DoneTotalMod *=
-                        (chain->rank * 2.0f + 100.0f) / 100.0f;
+                if (pVictim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0x02000000, 0))
+                    if (SpellChainNode const *chain = sSpellMgr->GetSpellChainNode((*i)->GetId())) 
+                        DoneTotalMod *= (chain->rank * 2.0f + 100.0f) / 100.0f;
                 break;
             }
         }
@@ -13373,29 +13362,30 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,
     {
         case SPELLFAMILY_DEATHKNIGHT:
             // Glacier Rot
-            if (spellProto->SpellFamilyFlags [0] & 0x2
-                    || spellProto->SpellFamilyFlags [1] & 0x6) if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 196, 0)) if (pVictim->GetDiseasesByCaster(
-                    owner->GetGUID()) > 0) DoneTotalMod *= (100.0f
-                    + aurEff->GetAmount()) / 100.0f;
+            if (spellProto->SpellFamilyFlags [0] & 0x2 || spellProto->SpellFamilyFlags [1] & 0x6) 
+                if (AuraEffect * aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 196, 0)) 
+                    if (pVictim->GetDiseasesByCaster(owner->GetGUID()) > 0) 
+                        DoneTotalMod *= (100.0f + aurEff->GetAmount()) / 100.0f;
+
+            // Merciless Combat
+            if (spellProto->Id == 49020 || spellProto->Id == 49143)
+                if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 2656, 0))
+                    if (pVictim->GetHealthPct() <= 35.0f)
+                        DoneTotalMod += float(aurEff->GetAmount() / 100.0f);
             break;
     }
 
     // ..taken
-    AuraEffectList const& mModDamagePercentTaken =
-            pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
-    for (AuraEffectList::const_iterator i = mModDamagePercentTaken.begin();
-            i != mModDamagePercentTaken.end(); ++i)
-        if ((*i)->GetMiscValue() & GetMeleeDamageSchoolMask()) TakenTotalMod *=
-                ((*i)->GetAmount() + 100.0f) / 100.0f;
+    AuraEffectList const& mModDamagePercentTaken = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
+    for (AuraEffectList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
+        if ((*i)->GetMiscValue() & GetMeleeDamageSchoolMask())
+            TakenTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
 
     // From caster spells
-    AuraEffectList const& mOwnerTaken = pVictim->GetAuraEffectsByType(
-            SPELL_AURA_MOD_DAMAGE_FROM_CASTER);
-    for (AuraEffectList::const_iterator i = mOwnerTaken.begin();
-            i != mOwnerTaken.end(); ++i)
-        if ((*i)->GetCasterGUID() == GetGUID()
-                && (*i)->IsAffectedOnSpell(spellProto)) TakenTotalMod *=
-                ((*i)->GetAmount() + 100.0f) / 100.0f;
+    AuraEffectList const& mOwnerTaken = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER);
+    for (AuraEffectList::const_iterator i = mOwnerTaken.begin(); i != mOwnerTaken.end(); ++i)
+        if ((*i)->GetCasterGUID() == GetGUID() && (*i)->IsAffectedOnSpell(spellProto)) 
+            TakenTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
 
     // .. taken pct (special attacks)
     if (spellProto)
@@ -13404,27 +13394,21 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,
         uint32 mechanicMask = GetAllSpellMechanicMask(spellProto);
 
         // Shred, Maul - "Effects which increase Bleed damage also increase Shred damage"
-        if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID
-                && spellProto->SpellFamilyFlags [0] & 0x00008800) mechanicMask |=
-                (1 << MECHANIC_BLEED);
+        if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID && spellProto->SpellFamilyFlags [0] & 0x00008800) 
+            mechanicMask |= (1 << MECHANIC_BLEED);
 
         if (mechanicMask)
         {
-            AuraEffectList const& mDamageDoneMechanic =
-                    pVictim->GetAuraEffectsByType(
-                            SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT);
-            for (AuraEffectList::const_iterator i = mDamageDoneMechanic.begin();
-                    i != mDamageDoneMechanic.end(); ++i)
-                if (mechanicMask & uint32(1 << ((*i)->GetMiscValue()))) TakenTotalMod *=
-                        ((*i)->GetAmount() + 100.0f) / 100.0f;
+            AuraEffectList const& mDamageDoneMechanic = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT);
+            for (AuraEffectList::const_iterator i = mDamageDoneMechanic.begin(); i != mDamageDoneMechanic.end(); ++i)
+                if (mechanicMask & uint32(1 << ((*i)->GetMiscValue()))) 
+                    TakenTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
         }
     }
 
     // .. taken pct: dummy auras
-    AuraEffectList const& mDummyAuras = pVictim->GetAuraEffectsByType(
-            SPELL_AURA_DUMMY);
-    for (AuraEffectList::const_iterator i = mDummyAuras.begin();
-            i != mDummyAuras.end(); ++i)
+    AuraEffectList const& mDummyAuras = pVictim->GetAuraEffectsByType(SPELL_AURA_DUMMY);
+    for (AuraEffectList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
     {
         switch ((*i)->GetSpellProto()->SpellIconID)
         {
@@ -13446,41 +13430,35 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,
             case 19:
             case 1804:
             {
-                if ((*i)->GetSpellProto()->SpellFamilyName
-                        != SPELLFAMILY_PALADIN) continue;
+                if ((*i)->GetSpellProto()->SpellFamilyName != SPELLFAMILY_PALADIN) 
+                    continue;
 
-                if ((*i)->GetMiscValue()
-                        & (spellProto ? GetSpellSchoolMask(spellProto) : 0)) TakenTotalMod *=
-                        ((*i)->GetAmount() + 100.0f) / 100.0f;
+                if ((*i)->GetMiscValue() & (spellProto ? GetSpellSchoolMask(spellProto) : 0)) 
+                    TakenTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
                 break;
             }
                 // Ebon Plague
             case 1933:
-                if ((*i)->GetMiscValue()
-                        & (spellProto ? GetSpellSchoolMask(spellProto) : 0)) TakenTotalMod *=
-                        ((*i)->GetAmount() + 100.0f) / 100.0f;
+                if ((*i)->GetMiscValue() & (spellProto ? GetSpellSchoolMask(spellProto) : 0))
+                    TakenTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
                 break;
         }
     }
 
     // .. taken pct: class scripts
-    AuraEffectList const& mclassScritAuras = GetAuraEffectsByType(
-            SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-    for (AuraEffectList::const_iterator i = mclassScritAuras.begin();
-            i != mclassScritAuras.end(); ++i)
+    AuraEffectList const& mclassScritAuras = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+    for (AuraEffectList::const_iterator i = mclassScritAuras.begin(); i != mclassScritAuras.end(); ++i)
     {
         switch ((*i)->GetMiscValue())
         {
             case 6427:
             case 6428: // Dirty Deeds
-                if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT,
-                        spellProto, this))
+                if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, spellProto, this))
                 {
-                    AuraEffect* eff0 = (*i)->GetBase()->GetEffect(0);
+                    AuraEffect* eff0 = (*i)->GetBase()->GetEffect(0); 
                     if (!eff0 || (*i)->GetEffIndex() != 1)
                     {
-                        sLog->outError("Spell structure of DD (%u) changed.",
-                                (*i)->GetId());
+                        sLog->outError("Spell structure of DD (%u) changed.", (*i)->GetId());
                         continue;
                     }
 
@@ -13493,30 +13471,22 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,
 
     if (attType != RANGED_ATTACK)
     {
-        AuraEffectList const& mModMeleeDamageTakenPercent =
-                pVictim->GetAuraEffectsByType(
-                        SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT);
-        for (AuraEffectList::const_iterator i =
-                mModMeleeDamageTakenPercent.begin();
-                i != mModMeleeDamageTakenPercent.end(); ++i)
+        AuraEffectList const& mModMeleeDamageTakenPercent = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT);
+        for (AuraEffectList::const_iterator i = mModMeleeDamageTakenPercent.begin(); i != mModMeleeDamageTakenPercent.end(); ++i)
             TakenTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
     }
     else
     {
-        AuraEffectList const& mModRangedDamageTakenPercent =
-                pVictim->GetAuraEffectsByType(
-                        SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT);
-        for (AuraEffectList::const_iterator i =
-                mModRangedDamageTakenPercent.begin();
-                i != mModRangedDamageTakenPercent.end(); ++i)
+        AuraEffectList const& mModRangedDamageTakenPercent = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT);
+        for (AuraEffectList::const_iterator i = mModRangedDamageTakenPercent.begin(); i != mModRangedDamageTakenPercent.end(); ++i)
             TakenTotalMod *= ((*i)->GetAmount() + 100.0f) / 100.0f;
     }
 
     float tmpDamage = float(int32(*pdamage) + DoneFlatBenefit) * DoneTotalMod;
 
     // apply spellmod to Done damage
-    if (spellProto) if (Player* modOwner = GetSpellModOwner()) modOwner->ApplySpellMod(
-            spellProto->Id, SPELLMOD_DAMAGE, tmpDamage);
+    if (spellProto) if (Player* modOwner = GetSpellModOwner()) 
+        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamage);
 
     tmpDamage = (tmpDamage + TakenFlatBenefit) * TakenTotalMod;
 
