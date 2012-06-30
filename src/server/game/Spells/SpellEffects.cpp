@@ -1220,21 +1220,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 case 12850: // (now good common check for this spells)
                 case 12868:
                 {
-                    if (!unitTarget) return;
+                    if (!unitTarget) 
+                        return;
 
                     float damage;
                     // DW should benefit of attack power, damage percent mods etc.
                     // TODO: check if using offhand damage is correct and if it should be divided by 2
-                    if (m_caster->haveOffhandWeapon()
-                            && m_caster->getAttackTimer(BASE_ATTACK)
-                                    > m_caster->getAttackTimer(OFF_ATTACK)) damage =
-                            (m_caster->GetFloatValue(
-                                    UNIT_FIELD_MINOFFHANDDAMAGE)
-                                    + m_caster->GetFloatValue(
-                                            UNIT_FIELD_MAXOFFHANDDAMAGE)) / 2;
-                    else damage = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE)
-                            + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE))
-                            / 2;
+                    if (m_caster->haveOffhandWeapon() && m_caster->getAttackTimer(BASE_ATTACK) > m_caster->getAttackTimer(OFF_ATTACK)) 
+                        damage = (m_caster->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE)) / 2;
+                    else 
+                        damage = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE)) / 2;
 
                     switch (m_spellInfo->Id)
                     {
@@ -1255,20 +1250,17 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     };
 
                     // get remaining damage of old Deep Wound aura
-                    AuraEffect* deepWound = unitTarget->GetAuraEffect(12721, 0,
-                            m_caster->GetGUID());
+                    AuraEffect* deepWound = unitTarget->GetAuraEffect(12721, 0, m_caster->GetGUID());
                     if (deepWound)
                     {
-                        int32 remainingTicks =
-                                deepWound->GetBase()->GetDuration()
-                                        / deepWound->GetAmplitude();
+                        int32 remainingTicks = deepWound->GetBase()->GetDuration() / deepWound->GetAmplitude();
                         damage += remainingTicks * deepWound->GetAmount();
                     }
 
                     // 1 tick/sec * 6 sec = 6 ticks
                     int32 deepWoundsDotBasePoints0 = int32(damage / 6);
-                    m_caster->CastCustomSpell(unitTarget, 12721,
-                            &deepWoundsDotBasePoints0, NULL, NULL, true, NULL);
+
+                    m_caster->CastCustomSpell(unitTarget, 12721, &deepWoundsDotBasePoints0, NULL, NULL, true, NULL);
                     return;
                 }
                 case 13567: // Dummy Trigger
