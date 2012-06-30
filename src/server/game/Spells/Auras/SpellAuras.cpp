@@ -1074,6 +1074,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         caster->CastSpell(caster, spellId, true);
                 }
                 break;
+            case 79683: //Arcane Missile!
+                    {
+                        if (caster->HasAura(44445) || // Hot Streak
+                            caster->HasAura(44546) || caster->HasAura(44548) || caster->HasAura(44549)) // Brain Freeze
+                        {
+                            caster->RemoveAurasDueToSpell(79683);
+                            break;
+                        }
+                    }
             case 44544: // Fingers of Frost
             {
                 // See if we already have the indicator aura. If not, create one.

@@ -4166,10 +4166,15 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID,
             else
             {
                 bool isSingleTarget = aura->IsSingleTarget() && caster;
-                if (isSingleTarget) aura->UnregisterSingleTarget();
-                newAura = Aura::TryCreate(aura->GetSpellProto(), effMask,
-                        stealer, NULL, &baseDamage [0], NULL,
-                        aura->GetCasterGUID());
+
+                if (aura->GetSpellProto()->Id == 33763)
+                    if (!caster->HasAura(33891))
+                        isSingleTarget = true;
+
+                if (isSingleTarget) 
+                    aura->UnregisterSingleTarget();
+
+                newAura = Aura::TryCreate(aura->GetSpellProto(), effMask, stealer, NULL, &baseDamage [0], NULL, aura->GetCasterGUID());
                 // strange but intended behaviour: Stolen single target auras won't be treated as single targeted
                 if (newAura && isSingleTarget)
                 {
@@ -4177,10 +4182,11 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID,
                     caster->GetSingleCastAuras().push_back(aura);
                     newAura->UnregisterSingleTarget();
                 }
-                if (!newAura) return;
-                newAura->SetLoadedState(dur, dur,
-                        stealCharge ? 1 : aura->GetCharges(), 1,
-                        recalculateMask, &damage [0]);
+
+                if (!newAura)
+                    return;
+
+                newAura->SetLoadedState(dur, dur, stealCharge ? 1 : aura->GetCharges(), 1, recalculateMask, &damage [0]);
                 newAura->ApplyForTargets();
             }
 
