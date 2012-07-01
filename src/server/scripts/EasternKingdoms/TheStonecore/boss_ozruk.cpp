@@ -83,6 +83,8 @@ class boss_ozruk: public CreatureScript
                             target->SetDisplayId(11686);
                             target->setFaction(14);
                             target->SetReactState(REACT_PASSIVE);
+                            target->SetSpeed(MOVE_RUN, 0.0f);
+                            target->SetSpeed(MOVE_WALK, 0.0f);
                             target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                             me->CastSpell(target, SPELL_GROUND_SLAM, false);
                         }
@@ -92,7 +94,7 @@ class boss_ozruk: public CreatureScript
                     case EVENT_ELEMENTIUM_BULWARK:
                         me->AddAura(SPELL_ELEMENTIUM_BULWARK, me);
                         me->AddAura(SPELL_ELEMENTIUM_SPIKE_SHIELD, me);
-                        events.ScheduleEvent(EVENT_PARALYZE, urand(8000, 9000), 0, 0); 
+                        events.ScheduleEvent(EVENT_PARALYZE, urand(6000, 8000), 0, 0); 
                         break;
                     case EVENT_PARALYZE:
                         me->AddAura(92427, me);
