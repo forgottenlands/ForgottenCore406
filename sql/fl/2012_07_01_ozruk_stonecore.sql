@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `ScriptName`='boss_ozruk' WHERE  `entry`=42188 LIMIT 1;

@@ -4778,6 +4778,17 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 47765:
             spellInfo->EffectRadiusIndex[0] = 13;
             break;
+        case 95341: // Paralyze
+            spellInfo->EffectRadiusIndex[0] = 12;
+            break;
+        case 92662: //Shatter
+        case 78807:
+            spellInfo->EffectRadiusIndex[0] = 18;
+            spellInfo->EffectRadiusIndex[1] = 18;
+            break;
+        case 79351: // Force Grip
+            spellInfo->EffectTriggerSpell[0] = 79358;
+            break;
         default:
             break;
         }

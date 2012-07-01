@@ -264,7 +264,8 @@ public:
 
         void IsSummonedBy(Unit* summoner)
         {
-            events.ScheduleEvent(EVENT_AURA, 4000, 0, 0);
+            if (summoner->GetEntry() == 42333 || summoner->GetEntry() == 49624)
+                events.ScheduleEvent(EVENT_AURA, 4000, 0, 0);
         }
 
         void UpdateAI(const uint32 diff)

@@ -20,12 +20,23 @@
 
 enum Spells
 {
-
+    SPELL_GROUND_SLAM                             = 95338,
+    SPELL_ELEMENTIUM_BULWARK                      = 92659,
+    SPELL_ELEMENTIUM_SPIKE_SHIELD                 = 92429,
+    SPELL_PARALYZE_DAMAGE                         = 94661,
+    SPELL_PARALYZE                                = 95341,
+    SPELL_SHATTER                                 = 92662,
+    SPELL_ENRAGE                                  = 80467,
 };
 
 enum Events
 {
-
+    EVENT_GROUND_SLAM = 1,
+    EVENT_ELEMENTIUM_BULWARK,
+    EVENT_ELEMENTIUM_SPIKE_SHIELD,
+    EVENT_PARALYZE,
+    EVENT_SHATTER,
+    EVENT_ENRAGE
 };
 
 class boss_ozruk: public CreatureScript
@@ -36,9 +47,18 @@ class boss_ozruk: public CreatureScript
     struct boss_ozrukAI: public BossAI
     {
         boss_ozrukAI(Creature* creature) : BossAI(creature, DATA_OZRUK) { }
+    
+        EventMap events;
 
         void Reset()
         {
+            events.Reset();
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            events.ScheduleEvent(EVENT_GROUND_SLAM, urand(8000, 10000), 0, 0);
+            events.ScheduleEvent(EVENT_ELEMENTIUM_BULWARK, urand(10000, 15000), 0, 0); 
         }
 
         void UpdateAI(const uint32 diff)
@@ -55,7 +75,34 @@ class boss_ozruk: public CreatureScript
             {
                 switch (eventId)
                 {
-                
+                    case EVENT_GROUND_SLAM:
+                        Position pos;
+                        pos = me->getVictim()->GetPosition();
+                        if (Creature* target = me->SummonCreature(42499, pos, TEMPSUMMON_MANUAL_DESPAWN, 0, 0))
+                        {
+                            target->SetDisplayId(11686);
+                            target->setFaction(14);
+                            target->SetReactState(REACT_PASSIVE);
+                            target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                            me->CastSpell(target, SPELL_GROUND_SLAM, false);
+                        }
+
+                        events.ScheduleEvent(EVENT_GROUND_SLAM, urand(16000, 22000), 0, 0);
+                        break;
+                    case EVENT_ELEMENTIUM_BULWARK:
+                        me->AddAura(SPELL_ELEMENTIUM_BULWARK, me);
+                        me->AddAura(SPELL_ELEMENTIUM_SPIKE_SHIELD, me);
+                        events.ScheduleEvent(EVENT_PARALYZE, urand(8000, 9000), 0, 0); 
+                        break;
+                    case EVENT_PARALYZE:
+                        me->AddAura(92427, me);
+                        DoCastVictim(SPELL_PARALYZE);
+                        events.ScheduleEvent(EVENT_SHATTER, 3000, 0, 0);
+                        break;
+                    case EVENT_SHATTER:
+                        me->CastSpell(me, SPELL_SHATTER, false);
+                        events.ScheduleEvent(EVENT_ELEMENTIUM_BULWARK, urand(13000, 16000), 0, 0); 
+                        break;
                 }
             }
 
