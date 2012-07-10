@@ -5490,12 +5490,7 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                     if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
                     {
                         if (item->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER) 
-                        {
-                            if (m_spellInfo->Id == 16511)
-                                totalDamagePercentMod *= 1.5f;
-                            else if (m_spellInfo->Id == 8676)
-                                totalDamagePercentMod *= 1.8f;
-                        }
+                            totalDamagePercentMod *= 1.447f;
                     }
                 }
             }
