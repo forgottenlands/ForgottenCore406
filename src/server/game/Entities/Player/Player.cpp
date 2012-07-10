@@ -11289,7 +11289,8 @@ bool Player::HasCurrency(uint32 id, uint32 count) const {
     return itr != m_currencies.end() && itr->second.totalCount >= count;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count) {
+void Player::ModifyCurrency(uint32 id, int32 count)
+{
     if (!count)
         return;
 
@@ -11299,14 +11300,17 @@ void Player::ModifyCurrency(uint32 id, int32 count) {
     int32 oldTotalCount = 0;
     int32 oldWeekCount = 0;
     PlayerCurrenciesMap::iterator itr = m_currencies.find(id);
-    if (itr == m_currencies.end()) {
+    if (itr == m_currencies.end())
+    {
         PlayerCurrency cur;
         cur.state = PLAYERCURRENCY_NEW;
         cur.totalCount = 0;
         cur.weekCount = 0;
         m_currencies[id] = cur;
         itr = m_currencies.find(id);
-    } else {
+    } 
+    else
+    {
         oldTotalCount = itr->second.totalCount;
         oldWeekCount = itr->second.weekCount;
     }
@@ -11320,20 +11324,23 @@ void Player::ModifyCurrency(uint32 id, int32 count) {
         newWeekCount = 0;
 
     uint32 totalCap = _GetCurrencyTotalCap(currency);
-    if (totalCap && int32(totalCap) < newTotalCount) {
+    if (totalCap && int32(totalCap) < newTotalCount) 
+    {
         int32 delta = newTotalCount - totalCap;
         newTotalCount = totalCap;
         newWeekCount -= delta;
     }
 
     uint32 weekCap = _GetCurrencyWeekCap(currency);
-    if (weekCap && int32(weekCap) < newWeekCount) {
+    if (weekCap && int32(weekCap) < newWeekCount) 
+    {
         int32 delta = newWeekCount - weekCap;
         newWeekCount = weekCap;
         newTotalCount -= delta;
     }
 
-    if (newTotalCount != oldTotalCount) {
+    if (newTotalCount != oldTotalCount)
+    {
         if (itr->second.state != PLAYERCURRENCY_NEW)
             itr->second.state = PLAYERCURRENCY_CHANGED;
 
@@ -11341,21 +11348,19 @@ void Player::ModifyCurrency(uint32 id, int32 count) {
         itr->second.weekCount = newWeekCount;
 
         // probably excessive checks
-        if (IsInWorld() && !GetSession()->PlayerLoading()) {
+        if (IsInWorld() && !GetSession()->PlayerLoading()) 
+        {
             WorldPacket packet(SMSG_UPDATE_CURRENCY, 12);
             packet << uint32(id);
-            packet
-                    << uint32(
-                            weekCap ?
-                                    (newWeekCount / PLAYER_CURRENCY_PRECISION) :
-                                    0);
+            packet << uint32(weekCap ? (newWeekCount / PLAYER_CURRENCY_PRECISION) : 0);
             packet << uint32(newTotalCount / PLAYER_CURRENCY_PRECISION);
             GetSession()->SendPacket(&packet);
         }
     }
 }
 
-void Player::SetCurrency(uint32 id, uint32 count) {
+void Player::SetCurrency(uint32 id, uint32 count) 
+{
     ModifyCurrency(id, int32(count) - GetCurrency(id));
 }
 
@@ -17530,33 +17535,26 @@ bool Player::_LoadFromDB(uint32 guid, SQLQueryHolder * holder,
                 GetName(), GetGUIDLow(), m_specsCount, m_activeSpec);
     }
 
-    _LoadCurrency(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CURRENCY));
     _LoadConquestPointsWeekCap(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CP_WEEK_CAP));
+    _LoadCurrency(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CURRENCY));
+    
     _LoadTalents(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADTALENTS));
-    _LoadTalentBranchSpecs(
-            holder->GetPreparedResult(
-                    PLAYER_LOGIN_QUERY_LOADTALENTBRANCHSPECS));
+    _LoadTalentBranchSpecs(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADTALENTBRANCHSPECS));
     _LoadSpells(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADSPELLS));
 
     _LoadGlyphs(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADGLYPHS));
-    _LoadAuras(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADAURAS),
-            time_diff);
+    _LoadAuras(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADAURAS), time_diff);
     _LoadGlyphAuras();
     // add ghost flag (must be after aura load: PLAYER_FLAGS_GHOST set in aura)
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         m_deathState = DEAD;
 
     // after spell load, learn rewarded spell if need also
-    _LoadQuestStatus(
-            holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS));
-    _LoadQuestStatusRewarded(
-            holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADQUESTSTATUSREW));
-    _LoadDailyQuestStatus(
-            holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS));
-    _LoadWeeklyQuestStatus(
-            holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADWEKLYQUESTSTATUS));
-    _LoadRandomBGStatus(
-            holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADRANDOMBG));
+    _LoadQuestStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS));
+    _LoadQuestStatusRewarded(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADQUESTSTATUSREW));
+    _LoadDailyQuestStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS));
+    _LoadWeeklyQuestStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADWEKLYQUESTSTATUS));
+    _LoadRandomBGStatus(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADRANDOMBG));
 
     // after spell and quest load
     InitTalentForLevel();
@@ -18441,23 +18439,23 @@ void Player::_LoadCurrency(PreparedQueryResult result) {
     //         0         1      2
     // "SELECT currency, count, thisweek FROM character_currency WHERE guid = '%u'"
 
-    if (result) {
-        do {
+    if (result) 
+    {
+        do 
+        {
             Field *fields = result->Fetch();
 
             uint32 currency_id = fields[0].GetUInt16();
             uint32 totalCount = fields[1].GetUInt32();
             uint32 weekCount = fields[2].GetUInt32();
 
-            const CurrencyTypesEntry* entry = sCurrencyTypesStore.LookupEntry(
-                    currency_id);
-            if (!entry) {
+            const CurrencyTypesEntry* entry = sCurrencyTypesStore.LookupEntry(currency_id);
+            if (!entry)
+            {
                 sLog->outError(
-                        "Player::_LoadCurrency: %s has not existing currency %u, removing.",
-                        GetName(), currency_id);
+                        "Player::_LoadCurrency: %s has not existing currency %u, removing.", GetName(), currency_id);
                 CharacterDatabase.PExecute(
-                        "DELETE FROM character_currency WHERE currency = '%u'",
-                        currency_id);
+                        "DELETE FROM character_currency WHERE currency = '%u'", currency_id);
                 continue;
             }
 
@@ -19628,23 +19626,23 @@ void Player::_SaveSpells(SQLTransaction& trans) {
     }
 }
 
-void Player::_SaveCurrency() {
-    for (PlayerCurrenciesMap::iterator itr = m_currencies.begin();
-            itr != m_currencies.end();) {
+void Player::_SaveCurrency() 
+{
+    for (PlayerCurrenciesMap::iterator itr = m_currencies.begin(); itr != m_currencies.end();) 
+    {
         if (itr->second.state == PLAYERCURRENCY_CHANGED)
             CharacterDatabase.PExecute(
                     "UPDATE character_currency SET `count` = '%u', thisweek = '%u' WHERE guid = '%u' AND currency = '%u'",
-                    itr->second.totalCount, itr->second.weekCount, GetGUIDLow(),
-                    itr->first);
+                    itr->second.totalCount, itr->second.weekCount, GetGUIDLow(), itr->first);
         else if (itr->second.state == PLAYERCURRENCY_NEW)
             CharacterDatabase.PExecute(
                     "INSERT INTO character_currency (guid, currency, `count`, thisweek) VALUES ('%u', '%u', '%u', '%u')",
-                    GetGUIDLow(), itr->first, itr->second.totalCount,
-                    itr->second.weekCount);
+                    GetGUIDLow(), itr->first, itr->second.totalCount, itr->second.weekCount);
 
         if (itr->second.state == PLAYERCURRENCY_REMOVED)
             m_currencies.erase(itr++);
-        else {
+        else
+        {
             itr->second.state = PLAYERCURRENCY_UNCHANGED;
             ++itr;
         }
