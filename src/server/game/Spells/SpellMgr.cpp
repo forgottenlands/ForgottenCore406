@@ -3267,7 +3267,7 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group,
         break;
     }
 
-    return 10 * IN_MILLISECONDS;
+    return 8 * IN_MILLISECONDS;
 }
 
 bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group) {
