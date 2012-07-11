@@ -5,9 +5,6 @@
 *
 * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
 *
-* Copyright (C) 2012 DeepshjirCataclysm Repack
-* By Naios
-*
 * This program is free software; you can redistribute it and/or modify it
 * under the terms of the GNU General Public License as published by the
 * Free Software Foundation; either version 2 of the License, or (at your
@@ -52,6 +49,7 @@ enum Spells
     // Chimaeron
     SPELL_DOUBLE_ATTACK                 = 88826,
     SPELL_CAUSTIC_SLIME                 = 82935,
+    SPELL_CAUSTIC_SLIME_MISSILE         = 82913,
     SPELL_MASSACRE                      = 82848,
     SPELL_FEUD                          = 88872,
     SPELL_BREAK                         = 82881,
@@ -180,16 +178,18 @@ public:
                 case EVENT_MASSACRE:
                     DoCastVictim(SPELL_MASSACRE);
                     me->AttackStop();
-                    if(urand(0,2) == 0)
+                    if(urand(0, 2) == 0)
+                    {
                         if(Creature* bile_o_tron = ObjectAccessor::GetCreature(*me,instance->GetData64(NPC_BILE_O_TRON)))
                         {
                             bile_o_tron->AI()->DoAction(ACTION_BILE_O_TRON_SYSTEM_FAILURE);
 
-                            events.ScheduleEvent(EVENT_MASSACRE, 45000);
-                            events.ScheduleEvent(EVENT_DOUBLE_ATTACK, urand(2000, 3000));
-                        }else
-                            events.ScheduleEvent(EVENT_MASSACRE, 27000);
-                        break;
+                            events.ScheduleEvent(EVENT_MASSACRE, 35000);
+                            events.ScheduleEvent(EVENT_FEUD, 1000);
+                        }
+                    }else
+                        events.ScheduleEvent(EVENT_MASSACRE, 27000);
+                    break;
 
                 case EVENT_FEUD:
                     DoCast(me,SPELL_FEUD);
@@ -199,12 +199,14 @@ public:
 
                 case EVENT_DOUBLE_ATTACK:
                     DoCast(me, SPELL_DOUBLE_ATTACK);
-                    events.ScheduleEvent(EVENT_DOUBLE_ATTACK, urand(13000,15000));
+                    events.ScheduleEvent(EVENT_DOUBLE_ATTACK, urand(13000, 15000));
                     break;
 
                 case EVENT_CAUSTIC_SLIME:
-                    DoCastAOE(SPELL_CAUSTIC_SLIME);
-                    events.ScheduleEvent(EVENT_CAUSTIC_SLIME, urand(10000,12000));
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                        me->CastSpell(target, SPELL_CAUSTIC_SLIME_MISSILE, false);
+
+                    events.ScheduleEvent(EVENT_CAUSTIC_SLIME, urand(10000, 12000));
                     break;
 
                 case EVENT_BREAK:
@@ -419,9 +421,51 @@ public:
     };
 };
 
+class spell_finkles_mixture : public SpellScriptLoader {
+public:
+	spell_finkles_mixture() : SpellScriptLoader("spell_finkles_mixture") 
+    { }
+
+	class spell_finkles_mixture_AuraScript: public AuraScript 
+    {
+		PrepareAuraScript(spell_finkles_mixture_AuraScript);
+
+		void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & canBeRecalculated)
+        {
+			// Set absorbtion amount to unlimited
+			amount = -1;
+		}
+
+		void Absorb(AuraEffect * aurEff, DamageInfo &dmgInfo, uint32 & absorbAmount) 
+        {
+			Unit * target = GetTarget();
+			if (dmgInfo.GetDamage() < target->GetHealth())
+				return;
+
+            if (target->GetHealth() < 10000)
+                return;
+
+			target->SetHealth(1);
+			absorbAmount = dmgInfo.GetDamage();
+		}
+
+		void Register() 
+        {
+			DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_finkles_mixture_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_SCHOOL_ABSORB);
+			OnEffectAbsorb += AuraEffectAbsorbFn(spell_finkles_mixture_AuraScript::Absorb, EFFECT_1);
+		}
+	};
+
+	AuraScript *GetAuraScript() const 
+    {
+		return new spell_finkles_mixture_AuraScript();
+	}
+};
+
 void AddSC_boss_chimaeron()
 {
     new boss_chimaeron();
     new mob_finkle_einhorn();
     new mob_bile_o_tron();
+    new spell_finkles_mixture();
 }

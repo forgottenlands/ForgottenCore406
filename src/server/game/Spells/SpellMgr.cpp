@@ -4789,6 +4789,12 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 79351: // Force Grip
             spellInfo->EffectTriggerSpell[0] = 79358;
             break;
+        case 91928: // Magma Spit
+        case 78068:
+        case 91917:
+        case 91927:
+            spellInfo->EffectTriggerSpell[1] = 0;
+            break;
         default:
             break;
         }

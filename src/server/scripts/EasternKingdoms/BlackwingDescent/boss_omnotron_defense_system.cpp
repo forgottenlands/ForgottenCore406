@@ -161,10 +161,10 @@ public:
         {
             if(!intialized)
             {
-                trons[0] = ObjectAccessor::GetCreature(*me,instance->GetData64(NPC_MAGMATRON));
-                trons[1] = ObjectAccessor::GetCreature(*me,instance->GetData64(NPC_ELECTRON));
-                trons[2] = ObjectAccessor::GetCreature(*me,instance->GetData64(NPC_ARCANOTRON));
-                trons[3] = ObjectAccessor::GetCreature(*me,instance->GetData64(NPC_TOXITRON));
+                trons[0] = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_MAGMATRON));
+                trons[1] = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_ELECTRON));
+                trons[2] = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_ARCANOTRON));
+                trons[3] = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_TOXITRON));
 
                 for(uint8 i = 0; i<=3; i++)
                     if(trons[i] == NULL)
@@ -183,22 +183,21 @@ public:
                 {
                     switch (eventId)
                     {
+                        case EVENT_ACTIVATE_NEXT_CONSTRUCT:
+                            ActivateNextTron();
 
-                    case EVENT_ACTIVATE_NEXT_CONSTRUCT:
-                        ActivateNextTron();
+                            events.ScheduleEvent(EVENT_ACTIVATE_NEXT_CONSTRUCT, 45000);
+                            break;
 
-                        events.ScheduleEvent(EVENT_ACTIVATE_NEXT_CONSTRUCT, 45000);
-                        break;
+                        case EVENT_UPDATE_HEALTH:
+                            for(uint8 i = 0; i<=3; i++)
+                                trons[i]->SetHealth(me->GetHealth());
 
-                    case EVENT_UPDATE_HEALTH:
-                        for(uint8 i = 0; i<=3; i++)
-                            trons[i]->SetHealth(me->GetHealth());
+                            events.ScheduleEvent(EVENT_UPDATE_HEALTH, 1000);
+                            break;
 
-                        events.ScheduleEvent(EVENT_UPDATE_HEALTH, 1000);
-                        break;
-
-                    default:
-                        break;
+                        default:
+                            break;
                     }
                 }		
             }
@@ -377,6 +376,8 @@ public:
             
             if (instance)
                 instance->HandleGameObject(instance->GetData64(GOB_DOOR_PRE_BOSSES), true);
+
+            me->LowerPlayerDamageReq(me->GetMaxHealth());
         }
 
         void MovementInform(uint32 type, uint32 id)

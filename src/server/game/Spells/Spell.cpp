@@ -2569,6 +2569,12 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     targetType = SPELL_TARGETS_ENEMY;
                     break;
                 }
+                if (m_spellInfo->Id == 88287 || m_spellInfo->Id == 91914 || m_spellInfo->Id == 91921 || m_spellInfo->Id == 91922 || m_spellInfo->Id == 82848) // Massive Crash & Massacre
+                {
+                    radius = 100;
+                    targetType = SPELL_TARGETS_ENEMY;
+                    break;
+                }
                 radius = GetSpellRadius(m_spellInfo, i, false);
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
