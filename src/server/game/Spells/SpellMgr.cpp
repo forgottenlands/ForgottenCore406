@@ -4762,6 +4762,7 @@ void SpellMgr::LoadSpellCustomAttr() {
             break;
         case 33110: // Prayer of mending
         case 379:   // Earth Shield
+        case 88688: // Surge of light
             spellInfo->speed = 1;
             count++;
             break;

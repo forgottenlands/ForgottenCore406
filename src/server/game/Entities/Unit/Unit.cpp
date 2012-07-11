@@ -9646,6 +9646,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
            return false;                   
         break;
          }
+        case 88687: // Surge of light
+        case 88690:
+            if (procSpell->Id != 2061 && procSpell->Id != 585 && procSpell->Id != 2050 && procSpell->Id != 2060)
+                return false;
+            break;
         // Persistent Shield (Scarab Brooch trinket)
         // This spell originally trigger 13567 - Dummy Trigger (vs dummy efect)
         case 26467:
