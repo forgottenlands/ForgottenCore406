@@ -35,6 +35,7 @@ enum Events
     EVENT_FEUD,
     EVENT_SEC_MASSACRE,
     EVENT_BREAK,
+    EVENT_FAILURE,
 };
 
 enum Actions
@@ -179,15 +180,8 @@ public:
                     DoCastVictim(SPELL_MASSACRE);
                     me->AttackStop();
                     if(urand(0, 2) == 0)
-                    {
-                        if(Creature* bile_o_tron = ObjectAccessor::GetCreature(*me,instance->GetData64(NPC_BILE_O_TRON)))
-                        {
-                            bile_o_tron->AI()->DoAction(ACTION_BILE_O_TRON_SYSTEM_FAILURE);
-
-                            events.ScheduleEvent(EVENT_MASSACRE, 35000);
-                            events.ScheduleEvent(EVENT_FEUD, 1000);
-                        }
-                    }else
+                        events.ScheduleEvent(EVENT_FAILURE, 1000, 0, 0);
+                    else
                         events.ScheduleEvent(EVENT_MASSACRE, 27000);
                     break;
 
@@ -195,6 +189,16 @@ public:
                     DoCast(me,SPELL_FEUD);
                     if(Creature* victor_nefarian = ObjectAccessor::GetCreature(*me,instance->GetData64(NPC_LORD_VICTOR_NEFARIAN)))
                         DoScriptText(SAY_FEUD, victor_nefarian);
+                    break;
+
+                case EVENT_FAILURE:
+                    if(Creature* bile_o_tron = ObjectAccessor::GetCreature(*me,instance->GetData64(NPC_BILE_O_TRON)))
+                    {
+                        bile_o_tron->AI()->DoAction(ACTION_BILE_O_TRON_SYSTEM_FAILURE);
+
+                        events.ScheduleEvent(EVENT_MASSACRE, 35000);
+                        events.ScheduleEvent(EVENT_FEUD, 1000);
+                    }
                     break;
 
                 case EVENT_DOUBLE_ATTACK:
