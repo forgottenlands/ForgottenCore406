@@ -2104,7 +2104,8 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask,
 
             // If there isn't caster check if caster should be the pet. ex warlock soul link
             if (!caster && pVictim && (*itr)->GetBase()->GetSpellProto()->Effect[(*itr)->GetEffIndex()] == SPELL_EFFECT_APPLY_AREA_AURA_OWNER)
-                caster = ObjectAccessor::GetPet(*pVictim, pVictim->GetPetGUID())->ToUnit();
+                if (Pet* pet = ObjectAccessor::GetPet(*pVictim, pVictim->GetPetGUID()))
+                    caster = pet->ToUnit();
 
 			if (!caster || (caster == pVictim) || !caster->IsInWorld() || !caster->isAlive())
                 continue;
