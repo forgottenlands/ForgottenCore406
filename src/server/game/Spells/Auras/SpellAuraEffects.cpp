@@ -1895,16 +1895,6 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             }
             switch (m_spellProto->Id) 
             {
-                case 774: 
-                {
-                    float bonus = 1.0f;
-                    if (caster->HasAura(78784)) // Blessing of the Grove rank 1
-                        bonus += 0.02f;
-                    if (caster->HasAura(78785)) // Blessing of the Grove rank 2
-                        bonus += 0.04f;
-                    damage = int32(damage * bonus);
-                    break;
-                }
                 case 29841: // Second Wind r1
                     damage = int32(caster->GetMaxHealth() * 0.002f);
                     break;
