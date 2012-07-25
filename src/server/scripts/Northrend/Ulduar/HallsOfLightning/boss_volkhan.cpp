@@ -311,7 +311,8 @@ public:
             Creature* pAnvil = m_pInstance->instance->GetCreature(m_pInstance->GetData64(DATA_VOLKHAN_ANVIL));
 
             float fX, fY, fZ;
-            me->GetContactPoint(pAnvil, fX, fY, fZ, INTERACTION_DISTANCE);
+            if (pAnvil)
+                me->GetContactPoint(pAnvil, fX, fY, fZ, INTERACTION_DISTANCE);
 
             // Health check
             if (!m_bCanShatterGolem && me->HealthBelowPct(100 - 20 * m_uiHealthAmountModifier) && !m_bMove)

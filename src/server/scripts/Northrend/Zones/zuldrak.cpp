@@ -872,10 +872,13 @@ public:
 
         void JustDied(Unit* killer)
         {
-            if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+            if (me->ToTempSummon())
             {
-                std::string sText = (std::string(killer->GetName()) + " has defeated Yg.. Yggg-really big worm!");
-                summoner->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
+                if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+                {
+                    std::string sText = (std::string(killer->GetName()) + " has defeated Yg.. Yggg-really big worm!");
+                    summoner->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
+                }
             }
 
             if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())

@@ -235,8 +235,9 @@ public:
                         events.ScheduleEvent(EVENT_LAVA_SPEW, urand(7000,9000));
                         break;
                     case EVENT_IN_RANGE_CHECK:
-                        if (me->GetDistance(me->getVictim()) > 10.0f)
-                            DoCast(me, SPELL_MOLTEN_TANTRUM);
+                        if (me->getVictim())
+                            if (me->GetDistance(me->getVictim()) > 10.0f)
+                                DoCast(me, SPELL_MOLTEN_TANTRUM);
 
                         events.ScheduleEvent(EVENT_IN_RANGE_CHECK, 5000);
                         break;
