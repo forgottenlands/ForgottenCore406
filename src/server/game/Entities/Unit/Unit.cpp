@@ -16989,7 +16989,19 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura * aura,
         if (pVictim) allow = ToPlayer()->isHonorOrXPTarget(pVictim);
 
         // Shadow Word: Death & Victory Rush - can trigger from every kill
-        if (aura->GetId() == 32409 || aura->GetId() == 32215) allow = true;
+        if (aura->GetId() == 32409 || aura->GetId() == 32215) 
+        {
+            allow = true;
+
+            // Don't proc victory rush on totems
+            if (pVictim->isTotem())
+                allow = false;
+
+            // Don't proc vistory rush on shadowflend and mirror images
+            if (pVictim->GetEntry() == 19668 || pVictim->GetEntry() == 46956)
+                allow = false;
+        }
+
         if (!allow) return false;
     }
     // Aura added by spell can`t trigger from self (prevent drop charges/do triggers)
