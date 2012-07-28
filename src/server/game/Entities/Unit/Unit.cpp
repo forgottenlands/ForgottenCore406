@@ -3537,17 +3537,10 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
     }
     _RemoveNoStackAurasDueToAura(aura);
 
-    if (aura->IsRemoved()) 
-        return;
+    if (aura->IsRemoved()) return;
 
-    bool isSingle = IsSingleTargetSpell(aura->GetSpellProto());
-    
-    if (aura->GetSpellProto()->Id == 33763)
-        if (!caster->HasAura(33891))
-            isSingle = true;
-
-    aura->SetIsSingleTarget(caster && isSingle);
-
+    aura->SetIsSingleTarget(
+            caster && IsSingleTargetSpell(aura->GetSpellProto()));
     if (aura->IsSingleTarget())
     {
         ASSERT((IsInWorld() && !IsDuringRemoveFromWorld()) || (aura->GetCasterGUID() == GetGUID()));
