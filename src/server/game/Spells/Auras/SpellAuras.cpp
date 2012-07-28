@@ -353,7 +353,7 @@ Aura * Aura::Create(SpellEntry const* spellproto, uint8 effMask,
         {
             // owner not in world so
             // don't allow to own not self casted single target auras
-            if (casterGUID != owner->GetGUID() && IsSingleTargetSpell(spellproto, caster))
+            if (casterGUID != owner->GetGUID() && IsSingleTargetSpell(spellproto))
                 return NULL;
         }
     }
@@ -830,7 +830,7 @@ bool Aura::CanBeSaved() const {
         return false;
 
     if (GetCasterGUID() != GetOwner()->GetGUID())
-        if (IsSingleTargetSpell(GetSpellProto(), GetCaster()))
+        if (IsSingleTargetSpell(GetSpellProto()))
             return false;
 
     // Can't be saved - aura handler relies on calculated amount and changes it
@@ -1876,18 +1876,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     }
 }
 
-bool Aura::CanBeAppliedOn(Unit *target) 
-{
+bool Aura::CanBeAppliedOn(Unit *target) {
     // unit not in world or during remove from world
-    if (!target->IsInWorld() || target->IsDuringRemoveFromWorld()) 
-    {
+    if (!target->IsInWorld() || target->IsDuringRemoveFromWorld()) {
         // area auras mustn't be applied
         if (GetOwner() != target)
             return false;
         // not selfcasted single target auras mustn't be applied
-        if (GetCasterGUID() != GetOwner()->GetGUID() && IsSingleTargetSpell(GetSpellProto(), GetCaster()))
+        if (GetCasterGUID() != GetOwner()->GetGUID()
+                && IsSingleTargetSpell(GetSpellProto()))
             return false;
-
     } else if (GetOwner() != target)
         return CheckAreaTarget(target);
     return true;

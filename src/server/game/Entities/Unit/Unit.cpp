@@ -3540,7 +3540,13 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
     if (aura->IsRemoved()) 
         return;
 
-    aura->SetIsSingleTarget(caster && IsSingleTargetSpell(aura->GetSpellProto(), caster));
+    bool isSingle = IsSingleTargetSpell(aura->GetSpellProto());
+    
+    if (aura->GetSpellProto()->Id == 33763)
+        if (!caster->HasAura(33891))
+            isSingle = true;
+
+    aura->SetIsSingleTarget(caster && isSingle);
 
     if (aura->IsSingleTarget())
     {
@@ -4241,12 +4247,14 @@ void Unit::RemoveAurasWithAttribute(uint32 flags)
 void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
 {
     // single target auras from other casters
-    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin();
+            iter != m_appliedAuras.end();)
     {
         AuraApplication const * aurApp = iter->second;
         Aura const * aura = aurApp->GetBase();
 
-        if (aura->GetCasterGUID() != GetGUID() && IsSingleTargetSpell(aura->GetSpellProto(), aura->GetCaster()))
+        if (aura->GetCasterGUID() != GetGUID()
+                && IsSingleTargetSpell(aura->GetSpellProto()))
         {
             if (!newPhase) RemoveAura(iter);
             else
@@ -4264,7 +4272,8 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
     for (AuraList::iterator iter = scAuras.begin(); iter != scAuras.end();)
     {
         Aura * aura = *iter;
-        if (aura->GetUnitOwner() != this && !aura->GetUnitOwner()->InSamePhase(newPhase))
+        if (aura->GetUnitOwner() != this
+                && !aura->GetUnitOwner()->InSamePhase(newPhase))
         {
             aura->Remove();
             iter = scAuras.begin();

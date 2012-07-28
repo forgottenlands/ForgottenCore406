@@ -1155,33 +1155,16 @@ bool SpellMgr::_isPositiveSpell(uint32 spellId, bool deep) const {
     return true;
 }
 
-bool IsSingleTargetSpell(SpellEntry const *spellInfo, Unit* caster)
-{
+bool IsSingleTargetSpell(SpellEntry const *spellInfo) {
     // all other single target spells have if it has AttributesEx5
     if (spellInfo->AttributesEx5 & SPELL_ATTR5_SINGLE_TARGET_SPELL)
         return true;
 
-    // Custom Handled cases
-    switch (spellInfo->Id)
-    {
-        // Lifebloom
-        case 33763:
-            if (caster)
-                if (!caster->HasAura(33891))
-                    return true;
-                else
-                    return false;
-
-            return true;
-            break;
-    }
-
-    switch (GetSpellSpecific(spellInfo))
-    {
-        case SPELL_SPECIFIC_JUDGEMENT:
-            return true;
-        default:
-            break;
+    switch (GetSpellSpecific(spellInfo)) {
+    case SPELL_SPECIFIC_JUDGEMENT:
+        return true;
+    default:
+        break;
     }
 
     return false;
