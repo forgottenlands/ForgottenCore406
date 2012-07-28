@@ -1160,6 +1160,9 @@ bool IsSingleTargetSpell(SpellEntry const *spellInfo) {
     if (spellInfo->AttributesEx5 & SPELL_ATTR5_SINGLE_TARGET_SPELL)
         return true;
 
+    if (spellInfo->Id == 33763)
+        return true;
+
     switch (GetSpellSpecific(spellInfo)) {
     case SPELL_SPECIFIC_JUDGEMENT:
         return true;
