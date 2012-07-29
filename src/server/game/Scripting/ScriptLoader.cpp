@@ -644,6 +644,10 @@ void AddSC_boss_drahga_shadowburner();
 void AddSC_boss_erudax();
 void AddSC_instance_grim_batol();
 void AddSC_instance_throne_of_the_tides();	//Throne of the Tides
+void AddSC_boss_commander_ulthok();
+void AddSC_boss_erunak_stonespeaker();
+void AddSC_boss_lady_nazjar();
+void AddSC_neptulon();
 void AddSC_instance_blackrock_caverns();	//Blackrock Caverns
 void AddSC_boss_romogg_bonecrusher();
 void AddSC_boss_corla_herald_of_twilight();
@@ -1331,7 +1335,11 @@ void AddNorthrendScripts() {
     AddSC_boss_drahga_shadowburner();
     AddSC_boss_erudax();
     AddSC_instance_grim_batol();
-    AddSC_instance_throne_of_the_tides();//Throne of the Tides
+    AddSC_instance_throne_of_the_tides(); //Throne of the Tides
+    AddSC_boss_commander_ulthok();
+    AddSC_boss_erunak_stonespeaker();
+    AddSC_boss_lady_nazjar();
+    AddSC_neptulon();
     AddSC_instance_blackrock_caverns(); //Blackrock Caverns
     AddSC_boss_romogg_bonecrusher();
     AddSC_boss_corla_herald_of_twilight();
