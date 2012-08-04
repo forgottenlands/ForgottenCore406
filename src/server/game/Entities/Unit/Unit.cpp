@@ -17894,12 +17894,16 @@ void Unit::RemoveCharmedBy(Unit *charmer)
             case CHARM_TYPE_VEHICLE:
                 charmer->ToPlayer()->SetClientControl(charmer, 1);
                 charmer->ToPlayer()->SetViewpoint(this, false);
+				if (GetTypeId() == TYPEID_PLAYER)
+					ToPlayer()->SetMover(this);
                 break;
             case CHARM_TYPE_POSSESS:
                 charmer->ToPlayer()->SetClientControl(charmer, 1);
                 charmer->ToPlayer()->SetViewpoint(this, false);
                 charmer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                break;
+                if (GetTypeId() == TYPEID_PLAYER)
+					ToPlayer()->SetMover(this);
+				break;
             case CHARM_TYPE_CHARM:
                 if (GetTypeId() == TYPEID_UNIT
                         && charmer->getClass() == CLASS_WARLOCK)
