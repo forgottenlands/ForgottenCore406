@@ -1186,14 +1186,19 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target) {
 
     // All calculated do it!
     // Do healing and triggers
-    if (m_healing > 0) {
-        bool crit = caster->isSpellCrit(unitTarget, m_spellInfo,
-                m_spellSchoolMask);
+    if (m_healing > 0) 
+    {
+        bool crit = caster->isSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask);
+
+        // Victory rush HEAL can't crit
+        if (m_spellInfo->Id == 34428) 
+            crit = false;
+
         uint32 addhealth = m_healing;
-        if (crit) {
+        if (crit) 
+        {
             procEx |= PROC_EX_CRITICAL_HIT;
-            addhealth = caster->SpellCriticalHealingBonus(m_spellInfo,
-                    addhealth, NULL);
+            addhealth = caster->SpellCriticalHealingBonus(m_spellInfo, addhealth, NULL);
         } else
             procEx |= PROC_EX_NORMAL_HIT;
 

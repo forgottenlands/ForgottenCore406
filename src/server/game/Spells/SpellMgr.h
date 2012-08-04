@@ -364,7 +364,7 @@ bool CanSpellDispelAura(SpellEntry const * dispelSpell,
 bool CanSpellPierceImmuneAura(SpellEntry const * pierceSpell,
         SpellEntry const * aura);
 
-bool IsSingleTargetSpell(SpellEntry const *spellInfo, Unit* caster);
+bool IsSingleTargetSpell(SpellEntry const *spellInfo);
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1,
         SpellEntry const *spellInfo2);
 

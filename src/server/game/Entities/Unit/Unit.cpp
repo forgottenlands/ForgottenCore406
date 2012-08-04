@@ -3537,11 +3537,10 @@ void Unit::_AddAura(UnitAura * aura, Unit * caster)
     }
     _RemoveNoStackAurasDueToAura(aura);
 
-    if (aura->IsRemoved()) 
-        return;
+    if (aura->IsRemoved()) return;
 
-    aura->SetIsSingleTarget(caster && IsSingleTargetSpell(aura->GetSpellProto(), caster));
-
+    aura->SetIsSingleTarget(
+            caster && IsSingleTargetSpell(aura->GetSpellProto()));
     if (aura->IsSingleTarget())
     {
         ASSERT((IsInWorld() && !IsDuringRemoveFromWorld()) || (aura->GetCasterGUID() == GetGUID()));
@@ -4160,15 +4159,10 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID,
             else
             {
                 bool isSingleTarget = aura->IsSingleTarget() && caster;
-
-                if (aura->GetSpellProto()->Id == 33763)
-                    if (!caster->HasAura(33891))
-                        isSingleTarget = true;
-
-                if (isSingleTarget) 
-                    aura->UnregisterSingleTarget();
-
-                newAura = Aura::TryCreate(aura->GetSpellProto(), effMask, stealer, NULL, &baseDamage [0], NULL, aura->GetCasterGUID());
+                if (isSingleTarget) aura->UnregisterSingleTarget();
+                newAura = Aura::TryCreate(aura->GetSpellProto(), effMask,
+                        stealer, NULL, &baseDamage [0], NULL,
+                        aura->GetCasterGUID());
                 // strange but intended behaviour: Stolen single target auras won't be treated as single targeted
                 if (newAura && isSingleTarget)
                 {
@@ -4176,11 +4170,10 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID,
                     caster->GetSingleCastAuras().push_back(aura);
                     newAura->UnregisterSingleTarget();
                 }
-
-                if (!newAura)
-                    return;
-
-                newAura->SetLoadedState(dur, dur, stealCharge ? 1 : aura->GetCharges(), 1, recalculateMask, &damage [0]);
+                if (!newAura) return;
+                newAura->SetLoadedState(dur, dur,
+                        stealCharge ? 1 : aura->GetCharges(), 1,
+                        recalculateMask, &damage [0]);
                 newAura->ApplyForTargets();
             }
 
@@ -4241,12 +4234,14 @@ void Unit::RemoveAurasWithAttribute(uint32 flags)
 void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
 {
     // single target auras from other casters
-    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin();
+            iter != m_appliedAuras.end();)
     {
         AuraApplication const * aurApp = iter->second;
         Aura const * aura = aurApp->GetBase();
 
-        if (aura->GetCasterGUID() != GetGUID() && IsSingleTargetSpell(aura->GetSpellProto(), aura->GetCaster()))
+        if (aura->GetCasterGUID() != GetGUID()
+                && IsSingleTargetSpell(aura->GetSpellProto()))
         {
             if (!newPhase) RemoveAura(iter);
             else
@@ -4264,7 +4259,8 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase)
     for (AuraList::iterator iter = scAuras.begin(); iter != scAuras.end();)
     {
         Aura * aura = *iter;
-        if (aura->GetUnitOwner() != this && !aura->GetUnitOwner()->InSamePhase(newPhase))
+        if (aura->GetUnitOwner() != this
+                && !aura->GetUnitOwner()->InSamePhase(newPhase))
         {
             aura->Remove();
             iter = scAuras.begin();
@@ -16989,7 +16985,19 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura * aura,
         if (pVictim) allow = ToPlayer()->isHonorOrXPTarget(pVictim);
 
         // Shadow Word: Death & Victory Rush - can trigger from every kill
-        if (aura->GetId() == 32409 || aura->GetId() == 32215) allow = true;
+        if (aura->GetId() == 32409 || aura->GetId() == 32215) 
+        {
+            allow = true;
+
+            // Don't proc victory rush on totems
+            if (pVictim->isTotem())
+                allow = false;
+
+            // Don't proc vistory rush on shadowflend and mirror images
+            if (pVictim->GetEntry() == 19668 || pVictim->GetEntry() == 46956)
+                allow = false;
+        }
+
         if (!allow) return false;
     }
     // Aura added by spell can`t trigger from self (prevent drop charges/do triggers)

@@ -347,13 +347,12 @@ Aura * Aura::Create(SpellEntry const* spellproto, uint8 effMask,
         casterGUID = caster->GetGUID();
     }
     // check if aura can be owned by owner
-    if (owner->isType(TYPEMASK_UNIT))
-    {
-        if (!owner->IsInWorld() || ((Unit*) owner)->IsDuringRemoveFromWorld()) 
-        {
+    if (owner->isType(TYPEMASK_UNIT)) {
+        if (!owner->IsInWorld() || ((Unit*) owner)->IsDuringRemoveFromWorld()) {
             // owner not in world so
             // don't allow to own not self casted single target auras
-            if (casterGUID != owner->GetGUID() && IsSingleTargetSpell(spellproto, caster))
+            if (casterGUID != owner->GetGUID()
+                    && IsSingleTargetSpell(spellproto))
                 return NULL;
         }
     }
@@ -830,7 +829,7 @@ bool Aura::CanBeSaved() const {
         return false;
 
     if (GetCasterGUID() != GetOwner()->GetGUID())
-        if (IsSingleTargetSpell(GetSpellProto(), GetCaster()))
+        if (IsSingleTargetSpell(GetSpellProto()))
             return false;
 
     // Can't be saved - aura handler relies on calculated amount and changes it
@@ -1074,15 +1073,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         caster->CastSpell(caster, spellId, true);
                 }
                 break;
-            case 79683: //Arcane Missile!
-                    {
-                        if (caster->HasAura(44445) || // Hot Streak
-                            caster->HasAura(44546) || caster->HasAura(44548) || caster->HasAura(44549)) // Brain Freeze
-                        {
-                            caster->RemoveAurasDueToSpell(79683);
-                            break;
-                        }
-                    }
             case 44544: // Fingers of Frost
             {
                 // See if we already have the indicator aura. If not, create one.
@@ -1876,18 +1866,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     }
 }
 
-bool Aura::CanBeAppliedOn(Unit *target) 
-{
+bool Aura::CanBeAppliedOn(Unit *target) {
     // unit not in world or during remove from world
-    if (!target->IsInWorld() || target->IsDuringRemoveFromWorld()) 
-    {
+    if (!target->IsInWorld() || target->IsDuringRemoveFromWorld()) {
         // area auras mustn't be applied
         if (GetOwner() != target)
             return false;
         // not selfcasted single target auras mustn't be applied
-        if (GetCasterGUID() != GetOwner()->GetGUID() && IsSingleTargetSpell(GetSpellProto(), GetCaster()))
+        if (GetCasterGUID() != GetOwner()->GetGUID()
+                && IsSingleTargetSpell(GetSpellProto()))
             return false;
-
     } else if (GetOwner() != target)
         return CheckAreaTarget(target);
     return true;
