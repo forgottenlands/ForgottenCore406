@@ -21,6 +21,17 @@
 #include"WorldPacket.h"
 #include"lost_city_of_the_tolvir.h"
 
+enum Texts
+{
+    SAY_INTRO = 0,
+    SAY_AGGRO = 1,
+    SAY_EVENT_1 = 2,
+    SAY_EVENT_2 = 2,
+    SAY_EVENT_3 = 2,
+    SAY_KILL = 3,
+    SAY_DEATH = 4,
+};
+
 enum Spells 
 {
     SPELL_DEFLECT_SHIELD                          = 84589,
@@ -105,6 +116,8 @@ public:
             if (pInstance)
                 pInstance->SetData(DATA_SIAMAT_EVENT, DONE);
 
+				Talk(SAY_DEATH);
+				
             if (me->GetMap()->IsHeroic())
             {
                 if (!me->GetMap()->GetPlayers().isEmpty())
@@ -127,6 +140,7 @@ public:
             switch (summoned->GetEntry())
             {
                 case NPC_MINION_OF_SIAMAT:
+					Talk(SAY_EVENT_1);
                     summoned->CastSpell(summoned, SPELL_DEPLETION, true);
                     break;
                 case NPC_CLOUD_BURST:
@@ -157,12 +171,20 @@ public:
             if (pInstance)
                 pInstance->SetData(DATA_SIAMAT_EVENT, IN_PROGRESS);
 
+            Talk(SAY_INTRO);
+            Talk(SAY_AGGRO);
+
             events.ScheduleEvent(EVENT_DEFLECT_SHIELD, 1000);
             events.ScheduleEvent(EVENT_STORM_BOLT, urand(3000, 4000));
             events.ScheduleEvent(EVENT_SUMMON_CLOUD_BURST, urand(8000, 15000));
             events.ScheduleEvent(EVENT_SUMMON_SERVANT, urand(2000, 4000));
             events.ScheduleEvent(EVENT_SUMMON_MINION, urand(5000, 8000));
             DoZoneInCombat();
+        }
+
+		void KilledUnit(Unit* /*victim*/)
+        {
+            Talk(SAY_KILL);
         }
 
         void UpdateAI(const uint32 uiDiff) 
@@ -193,6 +215,7 @@ public:
                         {
                             if (Creature* servant = me->SummonCreature(NPC_SERVANT_OF_SIAMAT, SummonLocations[servantCount], TEMPSUMMON_CORPSE_DESPAWN))
                             {
+								Talk(SAY_EVENT_3);
                                 servant->AddThreat(servant, 10.0f);
                                 DoZoneInCombat(servant);
                             }
