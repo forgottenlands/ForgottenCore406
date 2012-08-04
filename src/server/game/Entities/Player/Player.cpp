@@ -3153,10 +3153,18 @@ void Player::GiveLevel(uint8 level) {
 	GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
 
     // Learn running wild and riding to worgens that reach level 20
-    if (level == 20 && getRace() == RACE_WORGEN)
+    if (level == 20)
     {
-        learnSpell(87840, false); // Running wild
-        learnSpell(33388, false); // Riding
+        switch (getRace())
+        {
+            case RACE_WORGEN:
+                learnSpell(87840, false); // Running wild
+                learnSpell(33388, false); // Riding
+                break;
+            case RACE_GOBLIN:
+                learnSpell(69046, false); // Pack Hobgoblin
+                break;
+        }
     }
 
     if (level == 85 || level == 50)

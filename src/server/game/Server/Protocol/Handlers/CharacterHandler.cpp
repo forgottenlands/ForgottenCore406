@@ -1152,6 +1152,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder) {
         }
     }
 
+	if (pCurrChar->getRace() == RACE_GOBLIN && pCurrChar->getLevel() >= 20)
+    {
+        // Pack Hobgoblin
+        if (!pCurrChar->HasSpell(69046))
+            pCurrChar->learnSpell(69046, false);
+    }
+	
     std::string IP_str = GetRemoteAddress();
     sLog->outChar("Account: %d (IP: %s) Login Character:[%s] (GUID: %u)",
             GetAccountId(), IP_str.c_str(), pCurrChar->GetName(),
