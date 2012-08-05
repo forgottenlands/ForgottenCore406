@@ -329,6 +329,15 @@ public:
                     instance->DoRemoveAurasDueToSpellOnPlayers(76133);
                 me->SetVisible(false);
                 Finished = true;
+
+                if (!me->GetMap()->GetPlayers().isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
+                    {
+                        if (i->getSource()->hasQuest(5000006))
+                            i->getSource()->CompleteQuest(5000006);
+                    }
+                }
             }
         }
     };
