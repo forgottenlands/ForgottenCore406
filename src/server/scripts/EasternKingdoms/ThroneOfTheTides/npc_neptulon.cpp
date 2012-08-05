@@ -336,6 +336,8 @@ public:
                     {
                         if (i->getSource()->hasQuest(5000006))
                             i->getSource()->CompleteQuest(5000006);
+
+                        i->getSource()->ModifyCurrency(395, me->GetMap()->IsHeroic() ? 7000 : 3000);
                     }
                 }
             }
