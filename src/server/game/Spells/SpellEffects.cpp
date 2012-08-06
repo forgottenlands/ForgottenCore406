@@ -5614,6 +5614,19 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 {
                     // "You attempt to finish the wounded target off, firing a long range attack dealing % weapon damage plus RAP*0.45+543."
                     shotMod = 0.45f;
+
+                    // Glyph of Kill Shot
+                    if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3676, 0))
+                    {
+                        if (Player* c = m_caster->ToPlayer())
+                        {
+                            if (!c->HasSpellCooldown(63067))
+                            {
+                                c->RemoveSpellCooldown(53351, true);
+                                c->AddSpellCooldown(63067, 0, time(NULL) + 6);
+                            }
+                        }
+                    }
                     break;
                 }
                 case 56641: // Steady Shot
