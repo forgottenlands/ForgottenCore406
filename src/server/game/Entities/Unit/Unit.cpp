@@ -10087,7 +10087,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
         case 50227:
         {
             // Remove cooldown on Shield Slam
-            sLog->outString("CD!");
             if (GetTypeId() == TYPEID_PLAYER) 
                 ToPlayer()->RemoveSpellCooldown(23922, true);
             break;
