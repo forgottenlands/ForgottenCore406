@@ -12686,7 +12686,7 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto,
     if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK
             && (spellProto->SpellFamilyFlags [0] & 0x10000))
     {
-        healamount = 0.45 * (GetMaxHealth() - 10 * (STAT_STAMINA - 180));
+        healamount = healamount = 0.45 * GetCreateHealth();
         return healamount;
     }
     // Healing Done
