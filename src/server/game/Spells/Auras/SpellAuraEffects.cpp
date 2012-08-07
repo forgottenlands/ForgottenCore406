@@ -3063,23 +3063,13 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const {
             switch (GetMiscValue())
             {
                 case FORM_CAT:
+                    //FORCED REMOVE OF NURTURING INSTINCT (just to be sure)
+                    if(target->HasAura(47179)){
+                        target->RemoveAura(47179);
+                    }
                     // Savage Roar
                     if (target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 0, 0x10000000, 0))
                         target->CastSpell(target, 62071, true);
-                    // Nurturing Instinct
-                    if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT, SPELLFAMILY_DRUID, 2254, 0)) {
-                        uint32 spellId = 0;
-                        switch (aurEff->GetId()) 
-                        {
-                            case 33872:
-                                spellId = 47179;
-                                break;
-                            case 33873:
-                                spellId = 47180;
-                                break;
-                        }
-                        target->CastSpell(target, spellId, true, NULL, this);
-                    }
                     // Master Shapeshifter - Cat
                     if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))  {
                         if (target->HasAura(48418))
@@ -3144,6 +3134,47 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const {
                 ++itr;
         }
     }
+
+    //AT APPLY AND REMOVE
+    switch (GetMiscValue()) {
+		case FORM_DIREBEAR:
+        case FORM_BEAR:
+			//thick hide: add/remove armor multiplier when shift in and/or shift out to/from bear form 
+			float amount;
+			if (target->HasAura(16929))
+				amount = float(target->GetAura(16929)->GetEffect(1)->GetAmount());
+			if (target->HasAura(16930))
+				amount = float(target->GetAura(16930)->GetEffect(1)->GetAmount());
+			if (target->HasAura(16931))
+				amount = float(target->GetAura(16931)->GetEffect(1)->GetAmount());
+			if (target->HasAura(16929) || target->HasAura(16930) || target->HasAura(16931))
+				target->HandleStatModifier(UNIT_MOD_ARMOR, BASE_PCT,amount, apply);
+			break;
+		// NEW - FOR NURTURING INSTINCT, CAT FORM
+        case FORM_CAT:
+            if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT, SPELLFAMILY_DRUID, 2254, 0)) {
+				switch (aurEff->GetId()) {
+						case 33872:
+                                if(target->HasAura(47179)){
+									target->RemoveAura(47179);
+								}
+								else {
+									target->CastSpell(target, 47179, true, NULL, this);
+								}
+                                break;
+						case 33873:
+                                if(target->HasAura(47180)){
+									target->RemoveAura(47180);
+								}
+								else {
+									target->CastSpell(target, 47180, true, NULL, this);
+								}
+                                break;
+                }
+            }
+			break;
+			
+	    }
 
     if (GetMiscValue() == FORM_CAT)
         if (target && (target->HasAura(17002) || target->HasAura(24866)))
