@@ -12576,7 +12576,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
     }
 
     // bonus for caster from specific auras
-    AuraEffectList const& mCritChanceForCasterSpell = victim->GetAuraEffectsByType(SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER);
+    AuraEffectList const& mCritChanceForCasterSpell = pVictim->GetAuraEffectsByType(SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER);
  	for (AuraEffectList::const_iterator i = mCritChanceForCasterSpell.begin(); i != mCritChanceForCasterSpell.end(); ++i)
  	{
  	    if (!(*i)->IsAffectedOnSpell(spellProto))
