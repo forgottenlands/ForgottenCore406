@@ -869,6 +869,22 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 
                     if (back_damage < int32(unitTarget->GetHealth())) 
                         m_caster->CastCustomSpell(m_caster, 32409, &back_damage, 0, 0, true);
+
+                    // Glyph of Shadow Word: Death
+                    if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 1980, 0))
+                    {
+                        if (Player* c = m_caster->ToPlayer())
+                        {
+                            if (!c->HasSpellCooldown(55682))
+                            {
+                                if (unitTarget->HealthBelowPct(25))
+                                {
+                                    c->RemoveSpellCooldown(32379, true);
+                                    c->AddSpellCooldown(55682, 0, time(NULL) + 6);
+                                }
+                            }
+                        }
+                    }
                 }
                 break;
             }
@@ -5598,6 +5614,19 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                 {
                     // "You attempt to finish the wounded target off, firing a long range attack dealing % weapon damage plus RAP*0.45+543."
                     shotMod = 0.45f;
+
+                    // Glyph of Kill Shot
+                    if (AuraEffect* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3676, 0))
+                    {
+                        if (Player* c = m_caster->ToPlayer())
+                        {
+                            if (!c->HasSpellCooldown(63067))
+                            {
+                                c->RemoveSpellCooldown(53351, true);
+                                c->AddSpellCooldown(63067, 0, time(NULL) + 6);
+                            }
+                        }
+                    }
                     break;
                 }
                 case 56641: // Steady Shot
