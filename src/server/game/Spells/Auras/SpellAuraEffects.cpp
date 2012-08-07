@@ -389,8 +389,8 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] = { &AuraEffect::HandleNULL, /
         &AuraEffect::HandleModCanCastWhileWalking, //330 SPELL_AURA_CAST_WHILE_WALKING
         &AuraEffect::HandleNULL, //331
         &AuraEffect::HandleAuraReplaceSpell,//332 SPELL_AURA_332_REPLACE_SPELL
-		&AuraEffect::HandleAuraReplaceSpell,//333 SPELL_AURA_333_REPLACE_SPELL
-		&AuraEffect::HandleNULL, //334
+        &AuraEffect::HandleAuraReplaceSpell,//333 SPELL_AURA_333_REPLACE_SPELL
+        &AuraEffect::HandleNULL, //334
         &AuraEffect::HandleNULL, //335
         &AuraEffect::HandleNULL, //336
         &AuraEffect::HandleAuraSaleForGuild,//337
@@ -563,7 +563,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
             break;
         case SPELLFAMILY_WARLOCK:
             // Shadow Ward
-			if (m_spellProto->Id == 6229 || m_spellProto->Id == 91711) 
+            if (m_spellProto->Id == 6229 || m_spellProto->Id == 91711) 
             {
                 // +80.68% from sp bonus
                 DoneActualBenefit += caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.8068f;
@@ -682,7 +682,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
         if (!caster)
             break;
         // Rupture
-		if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellProto->Id == 1943)
+        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellProto->Id == 1943)
         {
             m_canBeRecalculated = false;
             if (caster->GetTypeId() != TYPEID_PLAYER)
@@ -692,12 +692,12 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
             //3 points: ${($m1+$b1*3+0.03*$AP)*6} damage over 12 secs
             //4 points: ${($m1+$b1*4+0.03428571*$AP)*7} damage over 14 secs
             //5 points: ${($m1+$b1*5+0.0375*$AP)*8} damage over 16 secs
-			float AP_per_combo[6] = { 0.0f, 0.015f, 0.024f, 0.03f, 0.03428571f, 0.0375f };
+            float AP_per_combo[6] = { 0.0f, 0.015f, 0.024f, 0.03f, 0.03428571f, 0.0375f };
             uint8 cp = caster->ToPlayer()->GetComboPoints();
             if (cp > 5)
                 cp = 5;
 
-			amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * AP_per_combo[cp]);
+            amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * AP_per_combo[cp]);
 
             // Revealing Strike
             if (GetBase()->GetUnitOwner()->HasAura(84617))
@@ -752,7 +752,7 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
             }
         }
         // Rend
-		else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR && GetSpellProto()->SpellFamilyFlags[0] & 0x20)
+        else if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR && GetSpellProto()->SpellFamilyFlags[0] & 0x20)
         {
             m_canBeRecalculated = false;
             // $0.2*(($MWB+$mwb)/2+$AP/14*$MWS) bonus per tick
@@ -806,14 +806,14 @@ int32 AuraEffect::CalculateAmount(Unit *caster) {
                     int32 energizePct = amount;
                     amount = int32((GetBase()->GetCaster()->GetMaxPower(POWER_MANA) * amount / 100) / GetTotalTicks());
 
-				    if (GetBase()->GetCaster() != GetBase()->GetUnitOwner())
-				    {
-					    if (AuraEffect* aurEff = GetBase()->GetCaster()->GetDummyAuraEffect(SPELLFAMILY_DRUID, 62, 0))
-					    {
-						    int32 bp0 = energizePct / 2 / 10;
-						    GetBase()->GetCaster()->CastCustomSpell(GetBase()->GetCaster(), 54833, &bp0, 0, 0, true, 0, 0, 0);
-					    }
-				    }
+                    if (GetBase()->GetCaster() != GetBase()->GetUnitOwner())
+                    {
+                        if (AuraEffect* aurEff = GetBase()->GetCaster()->GetDummyAuraEffect(SPELLFAMILY_DRUID, 62, 0))
+                        {
+                            int32 bp0 = energizePct / 2 / 10;
+                            GetBase()->GetCaster()->CastCustomSpell(GetBase()->GetCaster(), 54833, &bp0, 0, 0, true, 0, 0, 0);
+                        }
+                    }
                 }
             }
         // Owlkin Frenzy
@@ -2297,22 +2297,22 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const {
                     m_spellProto->EffectTriggerSpell[m_effIndex], true);
         break;
     }
-	case SPELLFAMILY_WARLOCK: 
+    case SPELLFAMILY_WARLOCK: 
     {
-		switch (GetSpellProto()->Id) 
+        switch (GetSpellProto()->Id) 
         {
-		    // Demonic Circle
-		    case 48018:
-			    if (GameObject *obj = target->GetGameObject(GetSpellProto()->Id)) 
+            // Demonic Circle
+            case 48018:
+                if (GameObject *obj = target->GetGameObject(GetSpellProto()->Id)) 
                 {
                     AuraApplication* aurApp = GetBase()->GetApplicationOfTarget(target->GetGUID());
-				    if (target->IsWithinDist(obj, GetSpellMaxRange(48020, true)))
+                    if (target->IsWithinDist(obj, GetSpellMaxRange(48020, true)))
                         aurApp->SendFakeAuraUpdate(62388, false);
                     else
                         aurApp->SendFakeAuraUpdate(62388, true);
-			    } else
+                } else
                     target->RemoveAura(48018);
-			    break;
+                break;
         }
         break;
     }
@@ -3063,23 +3063,13 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const {
             switch (GetMiscValue())
             {
                 case FORM_CAT:
+                    //FORCED REMOVE OF NURTURING INSTINCT (just to be sure)
+                    if(target->HasAura(47179)){
+                        target->RemoveAura(47179);
+                    }
                     // Savage Roar
                     if (target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, 0, 0x10000000, 0))
                         target->CastSpell(target, 62071, true);
-                    // Nurturing Instinct
-                    if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT, SPELLFAMILY_DRUID, 2254, 0)) {
-                        uint32 spellId = 0;
-                        switch (aurEff->GetId()) 
-                        {
-                            case 33872:
-                                spellId = 47179;
-                                break;
-                            case 33873:
-                                spellId = 47180;
-                                break;
-                        }
-                        target->CastSpell(target, spellId, true, NULL, this);
-                    }
                     // Master Shapeshifter - Cat
                     if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))  {
                         if (target->HasAura(48418))
@@ -3144,6 +3134,34 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const {
                 ++itr;
         }
     }
+
+    //AT APPLY AND REMOVE
+    switch (GetMiscValue()) {
+        // NEW - FOR NURTURING INSTINCT, CAT FORM
+        case FORM_CAT:
+            if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT, SPELLFAMILY_DRUID, 2254, 0)) {
+                switch (aurEff->GetId()) {
+                        case 33872:
+                                if(target->HasAura(47179)){
+                                    target->RemoveAura(47179);
+                                }
+                                else {
+                                    target->CastSpell(target, 47179, true, NULL, this);
+                                }
+                                break;
+                        case 33873:
+                                if(target->HasAura(47180)){
+                                    target->RemoveAura(47180);
+                                }
+                                else {
+                                    target->CastSpell(target, 47180, true, NULL, this);
+                                }
+                                break;
+                }
+            }
+            break;
+            
+        }
 
     if (GetMiscValue() == FORM_CAT)
         if (target && (target->HasAura(17002) || target->HasAura(24866)))
