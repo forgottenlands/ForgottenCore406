@@ -12517,10 +12517,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         if (spellProto->Id == 8092)
                         {
                             if (AuraEffect* aurEff = pVictim->GetAuraEffect(87178, 0, GetGUID()))
-                            {
-                                crit_chance += aurEff->GetAmount();
                                 pVictim->RemoveAura(87178, GetGUID());
-                            }
                         }
                         break;
                 }
@@ -12577,6 +12574,20 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
         default:
             return false;
     }
+
+    // bonus for caster from specific auras
+    AuraEffectList const& mCritChanceForCasterSpell = victim->GetAuraEffectsByType(SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER);
+ 	for (AuraEffectList::const_iterator i = mCritChanceForCasterSpell.begin(); i != mCritChanceForCasterSpell.end(); ++i)
+ 	{
+ 	    if (!(*i)->IsAffectedOnSpell(spellProto))
+ 	        continue;
+        
+        if ((*i)->GetCasterGUID() != this->GetGUID())
+            continue;
+        
+        crit_chance += (*i)->GetAmount();
+    }
+
     // percent done
     // only players use intelligence for critical chance computations
     if (Player* modOwner = GetSpellModOwner())
