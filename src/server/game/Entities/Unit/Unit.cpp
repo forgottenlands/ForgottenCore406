@@ -9226,35 +9226,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                 break;
             case SPELLFAMILY_WARLOCK:
             {
-                // Drain Soul
-                if (auraSpellInfo->SpellFamilyFlags [0] & 0x4000)
-                {
-                    // Improved Drain Soul
-                    Unit::AuraEffectList const& mAddFlatModifier =
-                            GetAuraEffectsByType(SPELL_AURA_DUMMY);
-                    for (Unit::AuraEffectList::const_iterator i =
-                            mAddFlatModifier.begin();
-                            i != mAddFlatModifier.end(); ++i)
-                    {
-                        if ((*i)->GetMiscValue() == SPELLMOD_CHANCE_OF_SUCCESS
-                                && (*i)->GetSpellProto()->SpellIconID == 113)
-                        {
-                            int32 value2 = CalculateSpellDamage(this,
-                                    (*i)->GetSpellProto(), 2);
-                            basepoints0 = value2 * GetMaxPower(POWER_MANA)
-                                    / 100;
-                            // Drain Soul
-                            CastCustomSpell(this, 18371, &basepoints0, NULL,
-                                    NULL, true, castItem, triggeredByAura);
-                            break;
-                        }
-                    }
-                    // Not remove charge (aura removed on death in any cases)
-                    // Need for correct work Drain Soul SPELL_AURA_CHANNEL_DEATH_ITEM aura
-                    return false;
-                }
                 // Nether Protection
-                else if (auraSpellInfo->SpellIconID == 1985)
+                if (auraSpellInfo->SpellIconID == 1985)
                 {
                     if (!procSpell) return false;
                     switch (GetFirstSchoolInMask(GetSpellSchoolMask(procSpell)))
@@ -12048,8 +12021,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                         }
             }
             // Drain Soul - increased damage for targets under 25 % HP
-            if (spellProto->Id == 1120)
-                if (pVictim->GetHealthPct() < 25.0f)
+            if (spellProto->SpellFamilyFlags[0] & 0x00004000)
+                 if (pVictim->HealthBelowPct(25))
                     DoneTotalMod *= 2;
 
             // Shadow Bite (15% increase from each dot)

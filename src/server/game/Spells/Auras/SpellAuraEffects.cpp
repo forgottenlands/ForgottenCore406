@@ -7247,24 +7247,6 @@ void AuraEffect::HandleChannelDeathItem(AuraApplication const *aurApp,
         if (GetSpellProto()->EffectItemType[m_effIndex] == 0)
             return;
 
-        // Soul Shard
-        if (GetSpellProto()->EffectItemType[m_effIndex] == 6265) {
-            // Soul Shard only from units that grant XP or honor
-            if (!plCaster->isHonorOrXPTarget(target)
-                    || (target->GetTypeId() == TYPEID_UNIT
-                            && !target->ToCreature()->isTappedBy(plCaster)))
-                return;
-
-            // If this is Drain Soul, check for Glyph of Drain Soul
-            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK
-                    && (GetSpellProto()->SpellFamilyFlags[0] & 0x00004000)) {
-                // Glyph of Drain Soul - chance to create an additional Soul Shard
-                if (AuraEffect *aur = caster->GetAuraEffect(58070, 0))
-                    if (roll_chance_i(aur->GetMiscValue()))
-                        caster->CastSpell(caster, 58068, true, 0, aur); // We _could_ simply do ++count here, but Blizz does it this way :)
-            }
-        }
-
         //Adding items
         uint32 noSpaceForCount = 0;
         uint32 count = m_amount;
