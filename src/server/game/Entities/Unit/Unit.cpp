@@ -9009,6 +9009,28 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
             }
             break;
         }
+        case SPELLFAMILY_ROGUE:
+            switch(dummySpell->Id)
+            {
+            // Gouge
+                case 1776:
+                    *handled = true;
+                    //Gouge damage effect
+                    if(procSpell && procSpell->Id == 1776)
+                        return false;
+                    //Rupture
+                    if(procSpell && procSpell->Id == 1943)
+                        return false;
+                    //Garrote
+                    if(procSpell && procSpell->Id == 703)
+                        return false;
+                    //Glyph of Hemorrage
+                    if(procSpell && procSpell->Id == 89775)
+                        return false;
+                    return true;
+                break;
+	        }
+        break;
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Blood of the North
