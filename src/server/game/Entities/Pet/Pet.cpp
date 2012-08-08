@@ -545,6 +545,18 @@ void Pet::DeleteFromDB(uint32 guidlow)
 void Pet::setDeathState(DeathState s) // overwrite virtual Creature::setDeathState and Unit::setDeathState
 {
     Creature::setDeathState(s);
+    // Fix Demonic Rebirth
+        if (getPetType() == SUMMON_PET)
+        {
+            if (GetOwner()){
+                if(AuraEffect* aurEff = GetOwner()->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 1981,0)){
+                    if (roll_chance_i(aurEff->GetAmount())){
+                         int32 bp0 = 0 - aurEff->GetAmount();
+                         GetOwner()->CastCustomSpell(GetOwner(), 88448, &bp0, NULL, NULL, true, 0, 0, 0);
+                    }
+                }
+            }
+        }
     if (getDeathState() == CORPSE)
     {
         if (getPetType() == HUNTER_PET)
