@@ -1362,7 +1362,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
         {
             unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
             //TODO: This is a hack. But we do not know what types of stealth should be interrupted by CC
-            if ((m_customAttr & SPELL_ATTR0_CU_AURA_CC) && unit->IsControlledByPlayer() && m_spellInfo->Id != 1160) 
+            if ((m_customAttr & SPELL_ATTR0_CU_AURA_CC) && unit->IsControlledByPlayer()
+                && m_spellInfo->Id != 1160 && m_spellInfo->Id != 99 && m_spellInfo->Id != 12323) 
                 unit->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
         } 
         else
