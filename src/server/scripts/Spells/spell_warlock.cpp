@@ -186,47 +186,46 @@ uint32 const spell_warl_create_healthstone::spell_warl_create_healthstone_SpellS
 				{ 36892, 36893, 36894 } // Fel Healthstone
 		};
 
-class spell_warl_drain_soul: public SpellScriptLoader 
-{
-public:
-    spell_warl_drain_soul() : SpellScriptLoader("spell_warl_drain_soul") 
-    { } //1120
+// 1120 Drain Soul
+ class spell_warl_drain_soul: public SpellScriptLoader 
+ {
+ public:
+    spell_warl_drain_soul() : SpellScriptLoader("spell_warl_drain_soul") { }
 
-    class spell_warl_drain_soul_AuraScript: public AuraScript 
-    {
+    class spell_warl_drain_soul_AuraScript: public AuraScript {
         PrepareAuraScript(spell_warl_drain_soul_AuraScript)
 
-        void OnPeriodic(AuraEffect const* aurEff) 
+        void OnPeriodic(AuraEffect const* /*aurEff*/)
         {
             // Pandemic
-            if (AuraEffect* aurEff = GetCaster()->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 4554, 0))
+            if (AuraEffect* aurEff = GetCaster()->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 4554, 1))
             {
+                SpellEntry const* spellproto = aurEff->GetSpellProto();
                 if (GetTarget()->HealthBelowPct(25))
-                    if (roll_chance_i(aurEff->GetAmount()))
-                        if (Aura* unstableAff = GetTarget()->GetAura(30108))
-                            unstableAff->RefreshDuration();
+                    if (roll_chance_i(spellproto->EffectBasePoints[0]))
+                        if (AuraEffect* aur = GetTarget()->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0, 0x100, 0, GetCaster()->GetGUID()))
+                           aur->GetBase()->RefreshDuration();
             }
-        }
+         }
 
-        void OnRemove(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/) 
+        void OnRemove(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = aurEff->GetBase()->GetCaster())
                 if (!GetTarget()->isAlive())
                     caster->CastSpell(caster, 79264, true);
         }
 
-        void Register()
-        {
+        void Register() {
             OnEffectRemove += AuraEffectRemoveFn(spell_warl_drain_soul_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_drain_soul_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
         }
     };
 
-    AuraScript* GetAuraScript() const 
-    {
+    AuraScript* GetAuraScript() const {
         return new spell_warl_drain_soul_AuraScript();
     }
 };
+
 
 //80398 Dark Intent
 class spell_warlock_dark_intent: public SpellScriptLoader {
