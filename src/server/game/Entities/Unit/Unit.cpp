@@ -8924,6 +8924,14 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                     return true;
                 }
             }
+            else if(dummySpell->Id == 20066)
+            {
+            // Repentance vs Censure 
+                *handled = true;
+                if(procSpell && procSpell->Id == 31803)
+                    return false;
+                return true;
+            }
             // Light's Grace (temp solution)
             else if (dummySpell->Id == 31834)
             {
