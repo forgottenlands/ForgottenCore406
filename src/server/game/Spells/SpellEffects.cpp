@@ -769,16 +769,16 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 {
                     unitTarget->RemoveAndSaveSoulSwapDots(m_caster);
                     m_caster->CastSpell(m_caster, 86211, true);
-
-                    // Glyph of Soul Swap cooldown
-                    if (m_caster->HasAura(56226))
-                        m_caster->CastSpell(m_caster, 94229, false);
                 }
                 // Soul Swap Exhale
                 else if (m_spellInfo->Id == 86213)
                 {
                     if (m_caster->CastSavedSoulSwapDots(unitTarget))
+                    {
                         m_caster->RemoveAura(86211);
+                        // Glyph of Soul Swap cooldown
+                        m_caster->CastSpell(m_caster, 94229, false);
+                    }
                 }
 
                 // Searing pain with soulburn
