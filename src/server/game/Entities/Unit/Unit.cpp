@@ -12699,6 +12699,12 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto,
     if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK
             && (spellProto->SpellFamilyFlags [0] & 0x10000))
     {
+		// Healthstone with soulburn up
+		if (pVictim->HasAura(74434))
+		{
+			pVictim->RemoveAura(74434);
+			pVictim->CastSpell(pVictim, 79437,true);
+		}
         healamount = healamount = 0.45 * GetCreateHealth();
         return healamount;
     }

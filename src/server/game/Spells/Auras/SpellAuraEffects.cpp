@@ -5628,18 +5628,40 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const *aurApp,
 
     Unit *target = aurApp->GetTarget();
 
-    if (apply) {
-        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE,
-                float(GetAmount()), apply);
-        target->ModifyHealth(GetAmount());
-    } else {
-        if (int32(target->GetHealth()) > GetAmount())
-            target->ModifyHealth(-GetAmount());
-        else
-            target->SetHealth(1);
-        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE,
-                float(GetAmount()), apply);
-    }
+    //Amount shared between the whole function
+	int32 amount = GetAmount(); 
+
+	// Custom handled amounts
+	switch (GetId())
+	{
+		// Soulburn: Healthstone
+		case 79437:
+			if (target && apply)
+			{
+				amount = target->GetMaxHealth() * GetAmount() / 100;
+				if (AuraEffect* aurEff = target->GetAuraEffect(79437, 0, target->GetGUID()))
+					aurEff->SetAmount(amount);
+			}
+             break;
+	}
+     
+	if (apply) 
+	{
+		target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(amount), apply);
+		target->ModifyHealth(amount);
+	}
+	else 
+	{
+		if (int32(target->GetHealth()) > amount)
+		{
+			target->ModifyHealth(-amount);
+		}
+		else
+		{
+			target->SetHealth(1);
+		}
+		target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(amount), apply);
+	}
 }
 
 void AuraEffect::HandleAuraModIncreaseMaxHealth(AuraApplication const *aurApp,
