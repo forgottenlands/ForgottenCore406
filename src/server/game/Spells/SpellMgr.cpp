@@ -697,9 +697,11 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo) {
         switch (spellInfo->Id)
         {
             // Curse of Weakness
+            // Curse of Exhaustion
             // Curse of the Elements
             // Curse of Tongues
             case 702:
+            case 18223:
             case 1490:
             case 1714:
                 return SPELL_SPECIFIC_CURSE;
