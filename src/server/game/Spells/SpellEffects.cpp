@@ -2774,17 +2774,15 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             m_caster->CastSpell(unitTarget, 31790, true);
             return;
         }
-            // Cloak of Shadows
+        // Cloak of Shadows
         case 35729:
         {
             uint32 dispelMask = GetDispellMask(DISPEL_ALL);
             Unit::AuraApplicationMap& Auras = unitTarget->GetAppliedAuras();
-            for (Unit::AuraApplicationMap::iterator iter = Auras.begin();
-                    iter != Auras.end();)
+            for (Unit::AuraApplicationMap::iterator iter = Auras.begin(); iter != Auras.end();)
             {
                 // remove all harmful spells on you...
-                SpellEntry const* spell =
-                        iter->second->GetBase()->GetSpellProto();
+                SpellEntry const* spell = iter->second->GetBase()->GetSpellProto();
                 if ((spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC // only affect magic spells
                 || ((1 << spell->Dispel) & dispelMask))
                 // ignore positive and passive auras

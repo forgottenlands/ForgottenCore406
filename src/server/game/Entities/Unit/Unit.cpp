@@ -2825,8 +2825,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     modHitChance += GetTotalAuraModifierByMiscMask(
             SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT, schoolMask);
     // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
-    modHitChance += pVictim->GetTotalAuraModifierByMiscMask(
-            SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
+    modHitChance += pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
     // Reduce spell hit chance for Area of effect spells from victim SPELL_AURA_MOD_AOE_AVOIDANCE aura
     if (IsAreaOfEffectSpell(spell)) modHitChance -=
             pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE);
@@ -18262,47 +18261,63 @@ void Unit::ApplyResilience(const Unit *pVictim, int32 *damage) const
 
 // Melee based spells can be miss, parry or dodge on this step
 // Crit or block - determined on damage calculation phase! (and can be both in some time)
-float Unit::MeleeSpellMissChance(const Unit *pVictim, WeaponAttackType attType,
-        int32 skillDiff, uint32 spellId) const
+float Unit::MeleeSpellMissChance(const Unit *pVictim, WeaponAttackType attType, int32 skillDiff, uint32 spellId) const
 {
     // Calculate hit chance (more correct for chance mod)
     int32 HitChance;
 
     // PvP - PvE melee chances
-    if (spellId || attType == RANGED_ATTACK || !haveOffhandWeapon()) HitChance =
-            95;
-    else HitChance = 76;
+    if (spellId || attType == RANGED_ATTACK || !haveOffhandWeapon())
+		HitChance = 95;
+    else 
+        HitChance = 76;
 
     // Hit chance depends from victim auras
-    if (attType == RANGED_ATTACK) HitChance += pVictim->GetTotalAuraModifier(
-            SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
-    else HitChance += pVictim->GetTotalAuraModifier(
-            SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
+    if (attType == RANGED_ATTACK) 
+		HitChance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
+    else 
+		HitChance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
+
+    // Cloak of Shadow
+    if (pVictim->HasAura(31224))
+    {
+        if (const SpellEntry* spell = sSpellStore.LookupEntry(spellId))
+        {
+            if (spell->SchoolMask != SPELL_SCHOOL_NORMAL)
+                HitChance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);
+        }
+    }
 
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (spellId)
     {
-        if (Player *modOwner = GetSpellModOwner()) modOwner->ApplySpellMod(
-                spellId, SPELLMOD_RESIST_MISS_CHANCE, HitChance);
+        if (Player *modOwner = GetSpellModOwner()) 
+			modOwner->ApplySpellMod(spellId, SPELLMOD_RESIST_MISS_CHANCE, HitChance);
     }
 
     // Miss = 100 - hit
     float miss_chance = 100.0f - HitChance;
 
     // Bonuses from attacker aura and ratings
-    if (attType == RANGED_ATTACK) miss_chance -= m_modRangedHitChance;
-    else miss_chance -= m_modMeleeHitChance;
+    if (attType == RANGED_ATTACK) 
+		miss_chance -= m_modRangedHitChance;
+    else 
+		miss_chance -= m_modMeleeHitChance;
 
     // bonus from skills is 0.04%
     //miss_chance -= skillDiff * 0.04f;
     int32 diff = -skillDiff;
-    if (pVictim->GetTypeId() == TYPEID_PLAYER) miss_chance +=
-            diff > 0 ? diff * 0.04f : diff * 0.02f;
-    else miss_chance += diff > 10 ? 2 + (diff - 10) * 0.4f : diff * 0.1f;
+    if (pVictim->GetTypeId() == TYPEID_PLAYER) 
+		miss_chance += diff > 0 ? diff * 0.04f : diff * 0.02f;
+    else
+		miss_chance += diff > 10 ? 2 + (diff - 10) * 0.4f : diff * 0.1f;
 
     // Limit miss chance from 0 to 60%
-    if (miss_chance < 0.0f) return 0.0f;
-    if (miss_chance > 60.0f) return 60.0f;
+    if (miss_chance < 0.0f) 
+		return 0.0f;
+    if (miss_chance > 60.0f) 
+		return 60.0f;
+
     return miss_chance;
 }
 
