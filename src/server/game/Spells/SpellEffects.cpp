@@ -5743,14 +5743,6 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
                         + 100.0f) / 100.0f;
                 break;
             }
-            // Necrotic Strike
-            if (m_spellInfo->Id == 73975)
-            {
-                float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                float heal = 0.75f * ap;
-                unitTarget->SetAbsorbHeal(heal);
-                break;
-            }
             break;
         }
     }
