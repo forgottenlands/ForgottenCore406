@@ -2309,13 +2309,13 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const {
                     if (target->IsWithinDist(obj, GetSpellMaxRange(48020, true)))
                         aurApp->SendFakeAuraUpdate(62388, false);
                     else
-					{
 						aurApp->SendFakeAuraUpdate(62388, true);
-						//Demonic Cirle: summon fix, no need to cast it twice
-						target->CastSpell(target, 48018,true);
-					}
                 } else
-                    target->RemoveAura(48018);
+				{
+					target->RemoveAura(48018);
+					//Demonic Cirle: summon fix, no need to cast it twice
+                    target->CastSpell(target, 48018,true);
+				}
                 break;
         }
         break;
