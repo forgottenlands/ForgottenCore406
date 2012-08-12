@@ -18283,7 +18283,7 @@ float Unit::MeleeSpellMissChance(const Unit *pVictim, WeaponAttackType attType, 
     {
         if (const SpellEntry* spell = sSpellStore.LookupEntry(spellId))
         {
-            if (spell->SchoolMask != SPELL_SCHOOL_NORMAL)
+            if (spell->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
                 HitChance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);
         }
     }
