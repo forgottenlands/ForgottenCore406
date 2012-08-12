@@ -776,8 +776,10 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     if (m_caster->CastSavedSoulSwapDots(unitTarget))
                     {
                         m_caster->RemoveAura(86211);
+
                         // Glyph of Soul Swap cooldown
-                        m_caster->CastSpell(m_caster, 94229, false);
+                        if (m_caster->HasAura(56226))
+                            m_caster->CastSpell(m_caster, 94229, false);
                     }
                 }
 
