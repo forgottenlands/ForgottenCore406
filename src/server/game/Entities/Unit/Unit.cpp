@@ -4348,6 +4348,31 @@ void Unit::RemoveAndSaveSoulSwapDots(Unit* caster)
 	    }
     }
 }
+
+// Return the number of dots copied from the source target
+int Unit::GetSoulSwapDotsCount()
+{
+    int count = 0;
+
+    // SpellFamilyMask
+    if (SpellEntry const *soulSwapDots = sSpellStore.LookupEntry(92794))
+    {
+        //Affliction dots list
+        flag96 affDots = soulSwapDots->EffectSpellClassMask[0];
+
+	    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+	    {
+            Aura *removed = iter->second->GetBase();
+		    SpellEntry const *spell = removed->GetSpellProto();
+            //Check iff there are any affliction dots
+		    if (spell->SpellFamilyFlags & affDots)
+                ++count;
+		    ++iter;
+	    }
+    }
+    return count;
+}
+
 // Cast all removed auras (if the target is note the source)
 bool Unit::CastSavedSoulSwapDots(Unit* target)
 {

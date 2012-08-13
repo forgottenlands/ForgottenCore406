@@ -2002,6 +2002,7 @@ public:
     void RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1,
             uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID);
     void RemoveAndSaveSoulSwapDots(Unit* caster);
+    int GetSoulSwapDotsCount();
     bool CastSavedSoulSwapDots(Unit* target);
     bool SaveSoulSwapAura(Aura* savedAura, uint8 number);
     bool SaveSoulSwapDotSource(uint64 dotSourceUnitGUID);

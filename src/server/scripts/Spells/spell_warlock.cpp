@@ -444,6 +444,39 @@ class spell_soul_swap_buff : public SpellScriptLoader
         }
 };
 
+//86121 Soul Swap
+class spell_warl_soul_swap: public SpellScriptLoader {
+public:
+        spell_warl_soul_swap() : SpellScriptLoader("spell_warl_soul_swap") { }
+
+        class spell_warl_soul_swap_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_soul_swap_SpellScript)
+
+            SpellCastResult CheckRequirement()
+            {
+                if (Unit* caster = GetTargetUnit()) 
+                {
+                    //Check if there are any dots on the target
+                    if(caster->GetSoulSwapDotsCount() == 0)
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_warl_soul_swap_SpellScript::CheckRequirement);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_warl_soul_swap_SpellScript();
+        }
+};
+
 class spell_soul_swap_exhale : public SpellScriptLoader
 {
     public:
@@ -662,6 +695,7 @@ void AddSC_warlock_spell_scripts()
 	new spell_warl_shadow_bite();
 	new spell_warl_drain_life();
     new spell_soul_swap_buff();
+    new spell_warl_soul_swap();
     new spell_soul_swap_exhale();
     new spell_warl_fel_flame();
     new spell_warl_soul_link();
