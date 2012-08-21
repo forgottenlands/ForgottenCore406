@@ -546,17 +546,21 @@ void Pet::setDeathState(DeathState s) // overwrite virtual Creature::setDeathSta
 {
     Creature::setDeathState(s);
     // Fix Demonic Rebirth
-        if (getPetType() == SUMMON_PET)
+    if (getPetType() == SUMMON_PET)
+    {
+        if (GetOwner())
         {
-            if (GetOwner()){
-                if(AuraEffect* aurEff = GetOwner()->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 1981,0)){
-                    if (roll_chance_i(aurEff->GetAmount())){
-                         int32 bp0 = 0 - aurEff->GetAmount();
-                         GetOwner()->CastCustomSpell(GetOwner(), 88448, &bp0, NULL, NULL, true, 0, 0, 0);
-                    }
+            if(AuraEffect* aurEff = GetOwner()->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 1981,0))
+            {
+                if (!GetOwner()->HasSpellCooldown(aurEff->GetId()) && roll_chance_i(aurEff->GetAmount()))
+                {
+                    int32 bp0 = 0 - aurEff->GetAmount();
+                    GetOwner()->CastCustomSpell(GetOwner(), 88448, &bp0, NULL, NULL, true, 0, 0, 0);
+                    GetOwner()->AddSpellCooldown(aurEff->GetId(), 0, time(NULL) + 120);
                 }
             }
         }
+    }
     if (getDeathState() == CORPSE)
     {
         if (getPetType() == HUNTER_PET)
