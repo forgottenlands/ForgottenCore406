@@ -41,6 +41,44 @@ enum WarlockSpells {
 	WARLOCK_FELHUNTER_SHADOWBITE_R1 = 54049
 };
 
+//71521 spell_warl_Hand_of_Guldan
+class spell_warl_Hand_of_Guldan: public SpellScriptLoader 
+{
+public:
+    spell_warl_Hand_of_Guldan() : SpellScriptLoader("spell_warl_Hand_of_Guldan") 
+    {}
+
+    class spell_warl_Hand_of_Guldan_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_warl_Hand_of_Guldan_SpellScript)
+
+        void OnApply() 
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!target)
+                return;
+
+            if (!caster)
+                return;
+
+            //Cast the debuff on the target (it applies the aura)
+            caster->CastSpell(target, 86000, true);
+        }
+
+        void Register()
+        {
+            OnHit += SpellHitFn(spell_warl_Hand_of_Guldan_SpellScript::OnApply);
+        }
+    };
+
+    SpellScript* GetSpellScript() const 
+    {
+        return new spell_warl_Hand_of_Guldan_SpellScript();
+    }
+};
+
 // 47193 Demonic Empowerment
 class spell_warl_demonic_empowerment: public SpellScriptLoader {
 public:
@@ -685,6 +723,7 @@ public:
 
 void AddSC_warlock_spell_scripts()
 {
+	new spell_warl_Hand_of_Guldan();
 	new spell_warl_demonic_empowerment();
 	new spell_warl_everlasting_affliction();
 	new spell_warl_create_healthstone();
