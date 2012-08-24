@@ -1451,6 +1451,21 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
     Unit * target = aurApp->GetTarget();
 
+    uint32 spellId = GetId();
+
+    //Fix Jinx: Curse of the Elements
+    if(spellId == 86105 || spellId == 85547)
+    {
+        //Cast a new Jinx for refreshing the jinx effects on nearby enemies
+        caster->CastSpell(target,spellId,true);
+
+        //Start the periodic tick, here is the loop that keeps the jinx up
+        if(AuraEffect* aurEff = target->GetAuraEffect(spellId, caster->GetGUID()))
+        {
+            aurEff->SetPeriodicTimer(1000);
+            aurEff->SetPeriodic(true);
+        }
+    }
     switch (GetAuraType()) 
     {
         case SPELL_AURA_PERIODIC_DAMAGE:

@@ -700,10 +700,14 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo) {
             // Curse of Exhaustion
             // Curse of the Elements
             // Curse of Tongues
+            // Jinx rank 1
+            // Jinx rank 2
             case 702:
             case 18223:
             case 1490:
             case 1714:
+            case 85547:
+            case 86105:
                 return SPELL_SPECIFIC_CURSE;
             // Demon Armor 
             // Fel Armor 
@@ -3436,6 +3440,14 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone,
 
 bool SpellMgr::CanAurasStack(Aura const *aura1, Aura const *aura2,
         bool sameCaster) const {
+
+    uint32 id1=aura1->GetId();
+    uint32 id2=aura2->GetId();
+
+    //Fix Jinx to prevent not stacking curse and jinx
+    if((id1 == 1490 && (id2 == 85547 || id2 == 86105)) || (id2 == 1490 && (id1 == 85547 || id1 == 86105)))
+        return true;
+
     SpellEntry const *spellInfo_1 = aura1->GetSpellProto();
     SpellEntry const *spellInfo_2 = aura2->GetSpellProto();
     SpellSpecific spellSpec_1 = GetSpellSpecific(spellInfo_1);
@@ -4806,6 +4818,15 @@ void SpellMgr::LoadSpellCustomAttr() {
         }
 
         switch (spellInfo->SpellFamilyName) {
+        case SPELLFAMILY_WARLOCK:
+            switch (spellInfo->Id)
+            {
+                //Jinx rank 1°/2°
+                case 85547:
+                case 86105:
+                    spellInfo->DurationIndex = 36;  //1 second
+                    break;
+            }
         case SPELLFAMILY_WARRIOR:
             // Shout
             if (spellInfo->SpellFamilyFlags[0] & 0x20000 || spellInfo->SpellFamilyFlags[1] & 0x20)

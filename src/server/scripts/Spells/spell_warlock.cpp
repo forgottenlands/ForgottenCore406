@@ -79,6 +79,199 @@ public:
     }
 };
 
+//1490 spell_warl_Curse_of_the_Elements
+class spell_warl_Curse_of_the_Elements: public SpellScriptLoader 
+{
+public:
+    spell_warl_Curse_of_the_Elements() : SpellScriptLoader("spell_warl_Curse_of_the_Elements") 
+    {}
+
+    class spell_warl_Curse_of_the_Elements_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_warl_Curse_of_the_Elements_SpellScript)
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/) 
+        {
+            //It needs the caster in order to localize the right debuff when there are more then one on the same target
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!target)
+                return;
+
+            if (!caster)
+                return;
+            
+            //If there is the Curse of the Elements set the duration of Jinx
+            if (caster->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 5002,0))
+            {
+                //Id of the jinx to cast, depending on the talents the warlock has
+                uint32 jinxRankSpellId;
+
+                //Check if warlock has the either the first or the second rank of jinx
+                if(caster->HasAura(85479))
+                    jinxRankSpellId = 86105;
+                else if (caster->HasAura(18179))
+                    jinxRankSpellId = 85547;
+
+                //Cast Jinx
+                caster->CastSpell(target,jinxRankSpellId,true);
+
+                //Start the periodic tick
+                if(AuraEffect* aurEff = target->GetAuraEffect(jinxRankSpellId, caster->GetGUID()))
+                {
+                    aurEff->SetPeriodicTimer(1000);
+                    aurEff->SetPeriodic(true);
+                }
+            }   
+        }
+
+        void Register()
+        {
+            OnEffect += SpellEffectFn(spell_warl_Curse_of_the_Elements_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const 
+    {
+        return new spell_warl_Curse_of_the_Elements_SpellScript();
+    }
+};
+
+//86105 85547 spell_warl_Jinx
+class spell_warl_Jinx: public SpellScriptLoader 
+{
+public:
+    spell_warl_Jinx() : SpellScriptLoader("spell_warl_Jinx") 
+    {}
+
+    class spell_warl_Jinx_SpellScript: public SpellScript
+    {
+        PrepareSpellScript(spell_warl_Jinx_SpellScript)
+
+        //Set the global var with the calling one
+        void setPreviousCurseDuration(int32 d)
+        {
+            previousCurseDuration = d;
+        }
+
+        //Set the global var with the calling one
+        void setPreviousCurseId(uint32 i)
+        {
+            previousCurseId = i;
+        }
+        
+        //Set the global var with the calling one
+        void setCast(bool b)
+        {
+            canCastJinx = b;
+        }
+        
+        //This script run every time before the "aoe jinx" is applied
+        void BeforeApply() 
+        {
+            //True at the begging
+            setCast(true);
+
+            //It needs the caster in order to localize the right debuff when there are more then one on the same target
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            
+            if (!target)
+                return;
+
+            if (!caster)
+                return;
+            
+            //Check for already applied curse, sorry for the hardcode, more elegant method was too long...
+            // Weakness
+            if(target->HasAura(702))
+            {
+                //Set the global var
+                setCast(false);
+                //Set the global var with the local one
+                setPreviousCurseId(702);
+            }
+            //Exhaustion
+            else if(target->HasAura(18223))
+            {
+                //Set the global var
+                setCast(false);
+                //Set the global var with the local one
+                setPreviousCurseId(18223);
+            }
+            //Toungues
+            else if(target->HasAura(1714))
+            {
+                //Set the global var
+                setCast(false);
+                //Set the global var with the local one
+                setPreviousCurseId(1714);
+            }
+
+            //Set the duration of another curse if present
+            if(!canCastJinx)
+            {
+                //Set the local aura for the global one
+                if((previousCurseId == 702 || previousCurseId == 18223 || previousCurseId == 1714) && target->GetAura(previousCurseId, caster->GetGUID()))
+                    setPreviousCurseDuration(target->GetAura(previousCurseId, caster->GetGUID())->GetDuration());
+            }
+        }
+
+        //This script run every time an "aoe jinx" is applied
+        void AfterApply() 
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            Aura* aur;
+
+            if (!target)
+                return;
+
+            if (!caster)
+                return;
+
+            aur = target->GetAura(GetSpellInfo()->Id, caster->GetGUID());
+            if(!aur)
+                return;
+
+            //Check if the global variable is set. If yes so there is another curse that has more priority than jinx. Just recast it and for the duration to the stored one
+            if(previousCurseId == 702 || previousCurseId == 18223 || previousCurseId == 1714)
+            {
+                //Cast the previous curse
+                caster->CastSpell(target, previousCurseId, true);
+
+                //Set the previous duration of the curse
+                target->GetAura(previousCurseId, caster->GetGUID())->SetDuration(previousCurseDuration, true);
+
+                //Reset the previousCurse vars
+                previousCurseId = NULL;
+                previousCurseDuration = NULL;
+            }
+        }
+
+        void Register()
+        {
+            BeforeHit += SpellHitFn(spell_warl_Jinx_SpellScript::BeforeApply);
+            AfterHit += SpellHitFn(spell_warl_Jinx_SpellScript::AfterApply);
+        }
+
+        //Data of the last curse, used for a rollback
+        uint32 previousCurseId;
+
+        //Data of the last curse, used for a rollback
+        int32 previousCurseDuration;
+
+        //True if no curse is on the target
+        bool canCastJinx;
+    };
+
+    SpellScript* GetSpellScript() const 
+    {
+        return new spell_warl_Jinx_SpellScript();
+    }
+};
+
 // 47193 Demonic Empowerment
 class spell_warl_demonic_empowerment: public SpellScriptLoader {
 public:
@@ -724,6 +917,8 @@ public:
 void AddSC_warlock_spell_scripts()
 {
 	new spell_warl_Hand_of_Guldan();
+    new spell_warl_Curse_of_the_Elements();
+	new spell_warl_Jinx();
 	new spell_warl_demonic_empowerment();
 	new spell_warl_everlasting_affliction();
 	new spell_warl_create_healthstone();
