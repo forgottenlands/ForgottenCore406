@@ -721,10 +721,25 @@ public:
 
                 return SPELL_CAST_OK;
             }
+            
+            void BeforeEffect(SpellEffIndex /*effIndex*/) 
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!target)
+                    return;
+
+                if (!caster)
+                    return;
+
+                target->CastSpell(caster, 92795, true, 0, 0, caster->GetGUID());
+            }
 
             void Register()
             {
                 OnCheckCast += SpellCheckCastFn(spell_warl_soul_swap_SpellScript::CheckRequirement);
+                OnEffect += SpellEffectFn(spell_warl_soul_swap_SpellScript::BeforeEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
 
