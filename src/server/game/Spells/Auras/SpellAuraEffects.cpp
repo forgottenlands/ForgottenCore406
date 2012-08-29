@@ -1272,6 +1272,18 @@ void AuraEffect::ApplySpellMod(Unit *target, bool apply) {
     }
 }
 
+//Sets the instance array with the list of target parameter
+void AuraEffect::SetUnitList(std::list<Unit *> & targetList)
+{
+    m_unitList = targetList;
+}
+
+//Just returns current target list
+std::list<Unit*> AuraEffect::GetUnitList() const
+{
+    return m_unitList;
+}
+
 void AuraEffect::Update(uint32 diff, Unit *caster) {
     if (m_isPeriodic
             && (GetBase()->GetDuration() >= 0 || GetBase()->IsPassive()
@@ -1453,19 +1465,68 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
     uint32 spellId = GetId();
 
-    //Fix Jinx: Curse of the Elements
-    if(spellId == 86105 || spellId == 85547)
-    {
-        //Cast a new Jinx for refreshing the jinx effects on nearby enemies
-        caster->CastSpell(target,spellId,true);
 
-        //Start the periodic tick, here is the loop that keeps the jinx up
-        if(AuraEffect* aurEff = target->GetAuraEffect(spellId, caster->GetGUID()))
-        {
-            aurEff->SetPeriodicTimer(1000);
-            aurEff->SetPeriodic(true);
-        }
+    switch(GetSpellProto()->SpellFamilyName)
+    {
+        case SPELLFAMILY_WARLOCK:
+            switch(spellId)
+            {
+                //Fix Hand of Gul'dan
+                case 86000:
+                    //It handles only the sixth periodic tick for the stun
+                    if(m_tickNumber == 7)
+                    {
+                        if(AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 140, 0))
+                        {
+                            uint32 spellId;
+
+                            if(caster->HasAura(89604))
+                                //Rank 1
+                                spellId = 93975;
+                            else
+                                //Rank 2
+                                spellId = 93986;
+
+                            //This is a secure check, it will probably never gives false unless the core throws an exception
+                            if(this->GetUnitList().size() > 0)
+                            {
+                                //Get the target list stored in spell_warlock.cpp Hand of Gul'dan's script
+                                std::list<Unit*> targets = this->GetUnitList();
+
+                                //Loops for the whole targets
+                                for (std::list<Unit*>::iterator singleTarget = targets.begin(); singleTarget != targets.end(); ++singleTarget) 
+                                {
+                                    //Check the current target instance until it finds the correct one
+                                    if((*singleTarget) == target)
+                                    {
+                                        //Cast the stun (modded for affecting only one target
+                                        caster->CastSpell(target, spellId, true);
+
+                                        //Exit from the loop
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                break;
+                //Fix Jinx: Curse of the Elements
+                case 86105:
+                case 85547:
+                    //Cast a new Jinx for refreshing the jinx effects on nearby enemies
+                    caster->CastSpell(target,spellId,true);
+
+                    //Start the periodic tick, here is the loop that keeps the jinx up
+                    if(AuraEffect* aurEff = target->GetAuraEffect(spellId, caster->GetGUID()))
+                    {
+                        aurEff->SetPeriodicTimer(1000);
+                        aurEff->SetPeriodic(true);
+                    }
+                break;
+            }
+        break;
     }
+
     switch (GetAuraType()) 
     {
         case SPELL_AURA_PERIODIC_DAMAGE:

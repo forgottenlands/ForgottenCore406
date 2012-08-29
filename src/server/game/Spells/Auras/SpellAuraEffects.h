@@ -118,6 +118,9 @@ public:
 	void HandleEffect(Unit * target, uint8 mode, bool apply);
 	void ApplySpellMod(Unit * target, bool apply);
 
+    void SetUnitList(std::list<Unit *> & targetList);
+    std::list<Unit *> GetUnitList() const;
+
 	void Update(uint32 diff, Unit * caster);
 	void UpdatePeriodic(Unit * caster);
 
@@ -169,6 +172,8 @@ private:
 	int32 m_periodicTimer;
 	int32 m_amplitude;
 	uint32 m_tickNumber;
+
+    std::list<Unit*> m_unitList;
 private:
 	bool IsPeriodicTickCrit(Unit * target, Unit const * caster) const;
 

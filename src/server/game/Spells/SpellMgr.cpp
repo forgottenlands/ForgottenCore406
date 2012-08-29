@@ -4821,10 +4821,42 @@ void SpellMgr::LoadSpellCustomAttr() {
         case SPELLFAMILY_WARLOCK:
             switch (spellInfo->Id)
             {
-                //Jinx rank 1°/2°
+                //Jinx rank 1-2
                 case 85547:
                 case 86105:
                     spellInfo->DurationIndex = 36;  //1 second
+                    count += 2;
+                    break;
+                //Hand of Gul'dan talent
+                case 71521:
+                    spellInfo->EffectRadiusIndex[0] = 26; //4 yards
+                    count++;
+                break;
+                //Hand of Gul'dan aura
+                case 86000:
+                    //Fix aura targets, it won't be linked with specific targets
+                    spellInfo->Effect[0] = SPELL_EFFECT_PERSISTENT_AREA_AURA;
+                    spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DYNOBJ_ENEMY;
+                    spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+                    spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
+                    spellInfo->EffectAmplitude[0] = 1000;
+                    count++;
+                    break;
+                // Aura of Foreboding's root rank 1-2
+                case 93974:
+                case 93987:
+                    spellInfo->Targets = TARGET_FLAG_DEST_LOCATION;
+                    spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
+                    spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_DST;
+                    count += 2;
+                    break;
+                // Aura of Foreboding's stun rank 1-2
+                case 93975:
+                case 93986:
+                    //Force to be a single target spell because the perioc effect handles one instance for each target affected by the debuff
+                    spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+                    spellInfo->EffectImplicitTargetB[0] = TARGET_NONE;
+                    count += 2;
                     break;
             }
         case SPELLFAMILY_WARRIOR:

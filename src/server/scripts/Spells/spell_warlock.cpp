@@ -52,7 +52,7 @@ public:
     {
         PrepareSpellScript(spell_warl_Hand_of_Guldan_SpellScript)
 
-        void OnApply() 
+        void BeforeEffect(SpellEffIndex /*effIndex*/) 
         {
             Unit* caster = GetCaster();
             Unit* target = GetHitUnit();
@@ -65,11 +65,37 @@ public:
 
             //Cast the debuff on the target (it applies the aura)
             caster->CastSpell(target, 86000, true);
+
+            //Cast also the roots if the warlock has the talent
+            if(AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 140, 0))
+            {
+                if(aurEff->GetId() == 89604)
+                    //Rank 1
+                    caster->CastSpell(target, 93974, true);
+                else
+                    //Rank 2
+                    caster->CastSpell(target, 93987, true);
+            }
+
+            //Check the aura not the auraEffect because the aura effect of the Hand of Gul'dan is not applied on the targets. It's is on the ground, they just get the debuff (aura)
+            if(target->HasAura(86000, caster->GetGUID()))
+            {
+                Aura *aur = target->GetAura(86000, caster->GetGUID());
+                //Get the AuraEffect object from the aura
+                AuraEffect *aurEff = aur->GetEffect(EFFECT_0);
+                std::list<Unit*> targets;
+
+                //Get the targets that took the Hand of Gul'dan's debuff at the beginning (for the stun if they remain in the 4 yard range for 6 sec)
+                aurEff->GetTargetList(targets);
+
+                //Set the instance variable for the targets stun check
+                aurEff->SetUnitList(targets);
+            }
         }
 
         void Register()
         {
-            OnHit += SpellHitFn(spell_warl_Hand_of_Guldan_SpellScript::OnApply);
+            OnEffect += SpellEffectFn(spell_warl_Hand_of_Guldan_SpellScript::BeforeEffect, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
@@ -916,9 +942,9 @@ public:
 
 void AddSC_warlock_spell_scripts()
 {
-	new spell_warl_Hand_of_Guldan();
+    new spell_warl_Hand_of_Guldan();
     new spell_warl_Curse_of_the_Elements();
-	new spell_warl_Jinx();
+    new spell_warl_Jinx();
 	new spell_warl_demonic_empowerment();
 	new spell_warl_everlasting_affliction();
 	new spell_warl_create_healthstone();
