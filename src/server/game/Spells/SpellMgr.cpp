@@ -700,14 +700,10 @@ SpellSpecific GetSpellSpecific(SpellEntry const * spellInfo) {
             // Curse of Exhaustion
             // Curse of the Elements
             // Curse of Tongues
-            // Jinx rank 1
-            // Jinx rank 2
             case 702:
             case 18223:
             case 1490:
             case 1714:
-            case 85547:
-            case 86105:
                 return SPELL_SPECIFIC_CURSE;
             // Demon Armor 
             // Fel Armor 
@@ -3443,10 +3439,6 @@ bool SpellMgr::CanAurasStack(Aura const *aura1, Aura const *aura2,
 
     uint32 id1=aura1->GetId();
     uint32 id2=aura2->GetId();
-
-    //Fix Jinx to prevent not stacking curse and jinx
-    if((id1 == 1490 && (id2 == 85547 || id2 == 86105)) || (id2 == 1490 && (id1 == 85547 || id1 == 86105)))
-        return true;
 
     SpellEntry const *spellInfo_1 = aura1->GetSpellProto();
     SpellEntry const *spellInfo_2 = aura2->GetSpellProto();
