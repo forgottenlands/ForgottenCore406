@@ -9972,6 +9972,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     // dummy basepoints or other customs
     switch (trigger_spell_id)
     {
+        //Warlock Cremation talent
+        case 89603:
+            if (Aura* aur = pVictim->GetAura(348, GetGUID()))
+                aur->RefreshDuration();
+            break;
         // Strength of Soul
         case 89490:
             if (procSpell->Id == 2050 || procSpell->Id == 2060 || procSpell->Id == 2061)
