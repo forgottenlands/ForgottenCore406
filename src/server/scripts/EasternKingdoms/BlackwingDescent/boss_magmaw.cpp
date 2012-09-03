@@ -173,11 +173,13 @@ public:
                 head->GetVehicleKit()->RemoveAllPassengers();
             }
 
+			instance->SetData(DATA_MAGMAW, NOT_STARTED);
             _Reset();
         }
 
         void EnterCombat(Unit* /*who*/)
         {
+			DoZoneInCombat();
             if(Creature* head = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_MAGMAWS_HEAD)))
                 head->AI()->DoZoneInCombat(head);
 
@@ -194,7 +196,7 @@ public:
                 if (Creature* nefarian = me->SummonCreature(NPC_NEFARIAN_HELPER_HEROIC, HeroicPositions[0], TEMPSUMMON_MANUAL_DESPAWN))
                     nefarian->AI()->DoZoneInCombat();
             }
-
+			instance->SetData(DATA_MAGMAW, IN_PROGRESS);
             _EnterCombat();
         }
 
@@ -309,6 +311,7 @@ public:
                 head->DisappearAndDie();
 
             DespawnMinions();
+			instance->SetData(DATA_MAGMAW, DONE);
             _JustDied();
         }
 
