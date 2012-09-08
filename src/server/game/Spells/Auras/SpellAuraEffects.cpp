@@ -3947,6 +3947,60 @@ void AuraEffect::HandleAuraTransform(AuraApplication const *aurApp, uint8 mode,
                 case 53806:
                     target->SetDisplayId(22512);
                     break;
+                // Corsair Costume
+                case 50517:
+                case 51926:
+                        {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+                        switch (target->getRace())
+                            {
+                                // Blood Elf
+                            case RACE_BLOODELF:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25032 : 25043);
+                                break;
+                                // Orc
+                            case RACE_ORC:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25039 : 25050);
+                                break;
+                                // Troll
+                            case RACE_TROLL:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25041 : 25052);
+                                break;
+                                // Tauren
+                            case RACE_TAUREN:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25040 : 25051);
+                                break;
+                                // Undead
+                            case RACE_UNDEAD_PLAYER:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25042 : 25053);
+                                break;
+                                // Draenei
+                            case RACE_DRAENEI:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25033 : 25044);
+                                break;
+                                // Dwarf
+                            case RACE_DWARF:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25034 : 25045);
+                                break;
+                                // Gnome
+                            case RACE_GNOME:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25035 : 25046);
+                                break;
+                                // Human
+                            case RACE_HUMAN:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25037 : 25048);
+                                break;
+                                // Night Elf
+                            case RACE_NIGHTELF:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25038 : 25049);
+                                break;
+                            default:
+                                break;
+                            }
+                            break;
+                        }
+                        // Pygmy Oil
                 default:
                     break;
                 }
