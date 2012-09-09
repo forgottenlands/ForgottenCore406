@@ -83,6 +83,7 @@ void AddSC_npc_spell_click_spells();
 void AddSC_npcs_special();
 void AddSC_npc_taxi();
 void AddSC_achievement_scripts();
+void AddSC_npc_questcompleter();
 
 //eastern kingdoms
 void AddSC_alterac_valley();//Alterac Valley
@@ -764,6 +765,7 @@ void AddWorldScripts() {
     AddSC_achievement_scripts();
     AddSC_chat_log();
     AddSC_DuelReset();
+    AddSC_npc_questcompleter();
 #endif
 }
 
