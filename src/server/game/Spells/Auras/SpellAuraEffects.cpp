@@ -1510,7 +1510,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         }
                     }
                 break;
-                //Fix Jinx: Curse of the Elements
+                /*
                 case 86105:
                 case 85547:
                     //Cast a new Jinx for refreshing the jinx effects on nearby enemies
@@ -1523,6 +1523,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         aurEff->SetPeriodic(true);
                     }
                 break;
+                */
             }
         break;
     }
