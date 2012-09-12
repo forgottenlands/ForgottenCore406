@@ -1100,13 +1100,13 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     switch (m_caster->GetPower(POWER_HOLY_POWER))
                     {
                         case 0:
-                            damage = int32(damage * 1.16f);
+                            damage = damage * 1 + int32(0.1 * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                             break;
                         case 1:
-                            damage = int32((damage * 1.16f) * 3);
+                            damage = damage * 3 + int32(0.3 * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                             break;
                         case 2:
-                            damage = int32((damage * 1.16f) * 6);
+                            damage = damage * 3 + int32(0.6 * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                             break;
                     }
                 }

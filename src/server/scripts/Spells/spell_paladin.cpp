@@ -545,7 +545,7 @@ public:
 };
 
 // Shield of Righteous
-// Spell Id: 53600
+/* Spell Id: 53600
 class spell_pal_shield_of_righteous : public SpellScriptLoader
 {
 public:
@@ -555,7 +555,7 @@ public:
     {
         PrepareSpellScript(spell_pal_shield_of_righteous_SpellScript)
 
-        void CalculateDamage(SpellEffIndex /*effIndex*/)
+        void CalculateDamage(SpellEffIndex )
         {
             if(Unit* caster = GetCaster())
             {
@@ -587,7 +587,7 @@ public:
         return new spell_pal_shield_of_righteous_SpellScript();
     }
 };
-
+*/
 class spell_pal_judgements_of_the_wise : public SpellScriptLoader
 {
     public:
@@ -696,7 +696,6 @@ void AddSC_paladin_spell_scripts() {
     new spell_pal_blessing_of_sanctuary();
     new spell_pal_guarded_by_the_light();
     new spell_pal_judgement_of_command();
-    new spell_pal_shield_of_righteous();
     new spell_pal_judgements_of_the_wise();
     new spell_pal_light_of_dawn();
 }
