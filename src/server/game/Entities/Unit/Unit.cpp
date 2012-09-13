@@ -19073,6 +19073,10 @@ void Unit::ExitVehicle()
     WorldPacket data;
     BuildHeartBeatMsg(&data);
     SendMessageToSet(&data, false);
+    
+    //Fix Traveler's Tundra Mammoth
+    if(vehicle->GetVehicleInfo()->m_ID == 312 && this->GetTypeId() == TYPEID_UNIT)
+        this->ToCreature()->ForcedDespawn();
 
     if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION)) 
         if (((Minion*) vehicle->GetBase())->GetOwner() == this) 
