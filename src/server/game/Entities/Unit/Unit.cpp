@@ -2170,13 +2170,6 @@ void Unit::CalcHealAbsorb(Unit *pVictim, const SpellEntry *healSpell, uint32 &he
         if ((*i)->GetAmount() <= 0) existExpired = true;
     }
 
-    // Necrotic Strike
-    if (pVictim->HasAura(73975))
-    {
-        int32 heal = int32(pVictim->GetAbsorbHeal());
-        RemainingHeal -= heal;
-    }
-
     // No negative heal
     if (RemainingHeal < 0) RemainingHeal = 0;
 

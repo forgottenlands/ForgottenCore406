@@ -4921,6 +4921,14 @@ void SpellMgr::LoadSpellCustomAttr() {
                     && spellInfo->SpellFamilyFlags[0] & 0x2)
                 spellInfo->SpellFamilyFlags[0] |= 0x40;
             count++;
+            switch (spellInfo->Id)
+            {
+                //Necrotic Strike
+                case 73975:
+                    spellInfo->DurationIndex = 8;  //15 seconds
+                    count++;
+                break;
+            }
             break;
         case SPELLFAMILY_PRIEST:
             // Holy Nova 10yd

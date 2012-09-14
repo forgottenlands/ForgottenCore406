@@ -69,13 +69,12 @@ public:
             {
                 if (!target)//
                     return;
-                    int32 nsbp = caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f;//initial scale
-                    int32 getheal = target->GetAbsorbHeal();//Get current absorb value if any
-                    int32 heal = nsbp + getheal;//define &| combine values
+                
+                int32 nsbp = caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f;//initial scale
 
                 if (Aura* NS = target->GetAura(73975))
                 {
-                    target->SetAbsorbHeal(heal);//set absorb value
+                    target->SetAbsorbHeal(nsbp);//set absorb value
                 }
             }
         }
