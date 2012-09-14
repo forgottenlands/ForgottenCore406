@@ -4822,6 +4822,7 @@ void SpellMgr::LoadSpellCustomAttr() {
                 //Hand of Gul'dan talent
                 case 71521:
                     spellInfo->EffectRadiusIndex[0] = 26; //4 yards
+                    spellInfo->EffectTriggerSpell[1] = 0;
                     count++;
                 break;
                 //Hand of Gul'dan aura
