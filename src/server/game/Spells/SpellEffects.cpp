@@ -7080,23 +7080,26 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_WARLOCK:
         {
+            switch (m_spellInfo->Id)
             {
-                sLog->outDebug(LOG_FILTER_NETWORKIO, "Spell: Casted Demon Soul");
-                if (m_caster)
-                {
-                    if (!unitTarget || !unitTarget->isAlive()) 
-                        return;
-                    if(unitTarget->GetEntry() == 416)            // Summoned Imp
-                        m_caster->CastSpell(m_caster,79459,true);
-                    if(unitTarget->GetEntry() == 1860)           // Summoned Voidwalker
-                        m_caster->CastSpell(m_caster,79464,true);
-                    if(unitTarget->GetEntry() == 417)            // Summoned Felhunter
-                        m_caster->CastSpell(m_caster,79460,true);
-                    if(unitTarget->GetEntry() == 1863)           // Summoned Succubus
-                        m_caster->CastSpell(m_caster,79463,true);
-                    if(unitTarget->GetEntry() == 17252)          // Summoned Felguard
-                        m_caster->CastSpell(m_caster,79462,true);
-                }
+                case 77801:
+                    sLog->outDebug(LOG_FILTER_NETWORKIO, "Spell: Casted Demon Soul");
+                    if (m_caster && m_caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if (!unitTarget || !unitTarget->isAlive()) 
+                            return;
+                        if(unitTarget->GetEntry() == 416)            // Summoned Imp
+                            m_caster->CastSpell(m_caster,79459,true);
+                        if(unitTarget->GetEntry() == 1860)           // Summoned Voidwalker
+                            m_caster->CastSpell(m_caster,79464,true);
+                        if(unitTarget->GetEntry() == 417)            // Summoned Felhunter
+                            m_caster->CastSpell(m_caster,79460,true);
+                        if(unitTarget->GetEntry() == 1863)           // Summoned Succubus
+                            m_caster->CastSpell(m_caster,79463,true);
+                        if(unitTarget->GetEntry() == 17252)          // Summoned Felguard
+                            m_caster->CastSpell(m_caster,79462,true);
+                    }
+                break;
             }
             break;
         }
