@@ -1196,6 +1196,17 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             }
         }
 
+        // Master Demonologist (Warlock Demonology Mastery)
+        if (m_caster->HasAuraType(SPELL_AURA_MASTERY) && m_caster->GetShapeshiftForm() == FORM_METAMORPHOSIS && m_caster->getClass() == CLASS_WARLOCK)
+        {
+            if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_WARLOCK_DEMONOLOGY)
+            {
+                // Increase damage by 2.0*Mastery points
+                uint32 pct = uint32(16.0f + 2.0f * m_caster->ToPlayer()->GetMasteryPoints());
+                AddPctN(damage, pct);
+            }
+        }
+
         // Fiery Apocalypse (Warlock Destrucion Mastery)
         if (m_caster->HasAuraType(SPELL_AURA_MASTERY) && m_spellInfo->SchoolMask == SPELL_SCHOOL_MASK_FIRE && m_caster->getClass() == CLASS_WARLOCK)
         {

@@ -12081,6 +12081,17 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             if (spellProto->SpellFamilyFlags [1] & 0x00400000 && isPet() && GetOwner()) 
                 if (uint8 count = pVictim->GetDoTsByCaster(GetOwnerGUID())) 
                     AddPctN(DoneTotalMod, 15 * count);
+
+            // Master Demonologist (Warlock Demonology Mastery) for pets
+            if (isPet() && GetOwner() && GetOwner()->HasAuraType(SPELL_AURA_MASTERY) && GetOwner()->getClass() == CLASS_WARLOCK)
+            {
+                if (GetOwner()->ToPlayer()->GetTalentBranchSpec(GetOwner()->ToPlayer()->GetActiveSpec()) == BS_WARLOCK_DEMONOLOGY)
+                {
+                    // Increase damage by 2.0*Mastery points
+                    uint32 pct = uint32(16.0f + 2.0f * GetOwner()->ToPlayer()->GetMasteryPoints());
+                    AddPctN(DoneTotalMod, pct);
+                }
+            }
             break;
         case SPELLFAMILY_HUNTER:
             // Steady Shot
