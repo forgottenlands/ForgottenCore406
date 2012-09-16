@@ -885,7 +885,7 @@ public:
 
             SpellCastResult CheckRequirement()
             {
-                if (Unit* caster = GetTargetUnit()) 
+                if (Unit* caster = GetCaster()) 
                 {
                     if (Aura* rawFury = caster->GetAura(91832))
                     {
@@ -895,7 +895,7 @@ public:
                     }
 
                 }
-                return SPELL_FAILED_NO_POWER;
+                return SPELL_FAILED_SUCCESS;
             }
             
             void BeforeEffect(SpellEffIndex /*effIndex*/) 
