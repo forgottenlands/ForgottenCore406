@@ -1721,10 +1721,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
             bool crit = IsPeriodicTickCrit(target, caster);
             if (crit)
-            {
                 damage = caster->SpellCriticalDamageBonus(m_spellProto, damage, target);
-                DarkIntentHandler(caster);
-            }
 
             if (!(sSpellMgr->GetSpellCustomAttr(GetId()) & SPELL_ATTR0_CU_IGNORE_RESI))
             {
@@ -1992,10 +1989,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
             bool crit = IsPeriodicTickCrit(target, caster);
             if (crit)
-            {
                 damage = caster->SpellCriticalHealingBonus(m_spellProto, damage, target);
-                DarkIntentHandler(caster);
-            }
 
             sLog->outDetail(
                     "PeriodicTick: %u (TypeId: %u) heal of %u (TypeId: %u) for %u health inflicted by %u",
@@ -2563,61 +2557,6 @@ void AuraEffect::PeriodicDummyTick(Unit *target, Unit *caster) const {
         break;
     default:
         break;
-    }
-}
-
-//Handles the Dark Intent's buff from dots/hots
-void AuraEffect::DarkIntentHandler(Unit * caster) const
-{
-    //Get the friendly target that has Dark Intent
-    Unit* target = caster->getDarkIntentTarget();
-
-    if(!caster || !target || !target->isAlive() || !target->isValid() )
-        return;
-    
-    //85768 is always applied on the warlock dark intent's owner
-    if(caster->HasAura(85768) || caster->HasAura(85767))
-    {
-        //Id of Dark Intent depending on the class of the target
-        uint32 darkIntentId;
-        switch (target->getClass())
-        {
-            case CLASS_WARRIOR:
-                darkIntentId = 94313;
-            break;
-            case CLASS_PALADIN:
-                darkIntentId = 94323;
-            break;
-            case CLASS_HUNTER:
-                darkIntentId = 94320;
-            break;
-            case CLASS_ROGUE:
-                darkIntentId = 94324;
-            break;
-            case CLASS_PRIEST:
-                darkIntentId = 94311;
-            break;
-            case CLASS_DEATH_KNIGHT:
-                darkIntentId = 94312;
-            break;
-            case CLASS_SHAMAN:
-                darkIntentId = 94319;
-            break;
-            case CLASS_MAGE:
-                darkIntentId = 85759;
-            break;
-            case CLASS_WARLOCK:
-                darkIntentId = 94310;
-            break;
-            case CLASS_DRUID:
-                darkIntentId = 94318;
-            break;
-        
-        }
-
-        //Prevent not classified unit
-        if(darkIntentId)
-            caster->CastSpell(target, darkIntentId, true);
     }
 }
 
