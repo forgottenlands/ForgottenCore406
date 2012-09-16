@@ -12553,7 +12553,10 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         if (spellProto->Id == 8092)
                         {
                             if (AuraEffect* aurEff = pVictim->GetAuraEffect(87178, 0, GetGUID()))
+                            {
+                                crit_chance += aurEff->GetAmount();
                                 pVictim->RemoveAura(87178, GetGUID());
+                            }
                         }
                         break;
                 }
