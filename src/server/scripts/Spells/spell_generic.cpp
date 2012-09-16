@@ -874,7 +874,59 @@ class spell_gen_launch : public SpellScriptLoader
         }
 };
 
-void AddSC_generic_spell_scripts() {
+// Forged Fury (trinket)
+class spell_gen_forged_fury: public SpellScriptLoader {
+public:
+        spell_gen_forged_fury() : SpellScriptLoader("spell_gen_forged_fury") { }
+
+        class spell_gen_forged_fury_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_forged_fury_SpellScript)
+
+            SpellCastResult CheckRequirement()
+            {
+                if (Unit* caster = GetTargetUnit()) 
+                {
+                    if (Aura* rawFury = caster->GetAura(91832))
+                    {
+                        //Check if there are any dots on the target
+                        if (rawFury->GetStackAmount() >= 5)
+                            return SPELL_CAST_OK;
+                    }
+
+                }
+                return SPELL_FAILED_NO_POWER;
+            }
+            
+            void BeforeEffect(SpellEffIndex /*effIndex*/) 
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!target)
+                    return;
+
+                if (!caster)
+                    return;
+
+                caster->RemoveAurasDueToSpell(91832);
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_gen_forged_fury_SpellScript::CheckRequirement);
+                OnEffect += SpellEffectFn(spell_gen_forged_fury_SpellScript::BeforeEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_gen_forged_fury_SpellScript();
+        }
+};
+
+void AddSC_generic_spell_scripts() 
+{
 	new spell_gen_absorb0_hitlimit1();
 	new spell_gen_aura_of_anger();
 	new spell_gen_burn_brutallus();
@@ -893,6 +945,7 @@ void AddSC_generic_spell_scripts() {
 	new spell_gen_shroud_of_death();
 	new spell_gen_dungeon_credit();
 	new spell_gen_profession_research();
-        new spell_gen_vengeance();
-        new spell_gen_launch();
+    new spell_gen_vengeance();
+    new spell_gen_launch();
+    new spell_gen_forged_fury();
 }
