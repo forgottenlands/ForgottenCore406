@@ -6579,7 +6579,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 return true;
             }
             // Improved Soul Fire, the spellIconID is shared with Decimation so it's not enough
-            if (dummySpell->SpellIconID == 184 && triggeredByAura->GetCaster()->HasAura(18119))
+            if (dummySpell->SpellIconID == 184 && (HasAura(18119) || HasAura(18120)))
             {
                 basepoints0 = triggerAmount;
                 triggered_spell_id = 85383;
