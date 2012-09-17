@@ -426,9 +426,19 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell * spell)
         }
     } 
 
-    // Master Marksman Aimed Shot! hack
-    if (spell && spell->GetSpellInfo()->Id == 82928)
-        castTime = -1;
+    //Casting time hackfixes
+    if(spell)
+        switch(spell->GetSpellInfo()->Id)
+        {
+            // Master Marksman Aimed Shot! hack
+            case 82928:
+                castTime = -1;
+                break;
+            // Starfire fix
+            case 2912:
+                castTime += 1000;
+                break;
+        }
 
     // Dark Simulacrum
     if (spell && spell->GetCaster())
