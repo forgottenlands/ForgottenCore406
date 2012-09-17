@@ -3914,6 +3914,10 @@ void AuraEffect::HandleAuraTransform(AuraApplication const *aurApp, uint8 mode,
                             case RACE_UNDEAD_PLAYER:
                                 target->SetDisplayId(target->getGender() == GENDER_MALE ? 25042 : 25053);
                                 break;
+                                // Goblin
+                            case RACE_GOBLIN:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 25036 : 25047);
+                                break;
                                 // Draenei
                             case RACE_DRAENEI:
                                 target->SetDisplayId(target->getGender() == GENDER_MALE ? 25033 : 25044);
@@ -3933,6 +3937,10 @@ void AuraEffect::HandleAuraTransform(AuraApplication const *aurApp, uint8 mode,
                                 // Night Elf
                             case RACE_NIGHTELF:
                                 target->SetDisplayId(target->getGender() == GENDER_MALE ? 25038 : 25049);
+                                break;
+                                // WORGEN
+                            case RACE_WORGEN:
+                                target->SetDisplayId(target->getGender() == GENDER_MALE ? 33377 : 33460);
                                 break;
                             default:
                                 break;
