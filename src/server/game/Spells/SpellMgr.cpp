@@ -4692,6 +4692,7 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 687: // Demon and fel armor (Nether Ward)
         case 28176:
             spellInfo->EffectBasePoints[2] = 6229;
+            spellInfo->SchoolMask = 32;
             count++;
             break;
         case 81208: // Chakra Serenity Chakra sanctuary
