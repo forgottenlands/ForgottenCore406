@@ -6623,7 +6623,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     break;
                 }
                     //Soul Leech
-                case 30293:
+                /*case 30293:
                 case 30295:
                 case 30296:
                 {
@@ -6667,7 +6667,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     target = this;
                     triggered_spell_id = 30294;
                     break;
-                }
+                }*/
                     // Shadowflame (Voidheart Raiment set bonus)
                 case 37377:
                 {
@@ -9906,8 +9906,18 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
             if (!procSpell)
                 return false;
 
-            if (procSpell->Id != 17877 && procSpell->Id != 6353 && procSpell->Id != 50796)
-                return false;
+            //Pct for both mana and health
+            basepoints0 = auraSpellInfo->EffectBasePoints[0];
+
+            //Soul Leech Mana
+            CastCustomSpell(this, 59117, &basepoints0, NULL, NULL, true);
+        
+            //Cast Replenishment
+            CastSpell(this, 57669, true);
+
+            target = this;
+            trigger_spell_id = 30294;
+        break;
         default:
             break;
     }
