@@ -35,6 +35,7 @@ enum WarlockSpells {
 	WARLOCK_DEMONIC_EMPOWERMENT_FELGUARD = 54508,
 	WARLOCK_DEMONIC_EMPOWERMENT_FELHUNTER = 54509,
 	WARLOCK_DEMONIC_EMPOWERMENT_IMP = 54444,
+	WARLOCK_DARK_INTENT_EFFECT = 85767,
 	//WARLOCK_IMPROVED_HEALTHSTONE_R1         = 18692,
 	//WARLOCK_IMPROVED_HEALTHSTONE_R2         = 18693,
 	WARLOCK_FELHUNTER_SHADOWBITE_R1 = 54049
@@ -366,8 +367,8 @@ public:
 			if (!caster || !target)
 				return;
 
-            //Save the target
-            caster->setDarkIntentTargets(target);
+			caster->CastSpell(target, WARLOCK_DARK_INTENT_EFFECT, true);
+			target->CastSpell(caster, WARLOCK_DARK_INTENT_EFFECT, true);
 		}
 
 		void Register() {
