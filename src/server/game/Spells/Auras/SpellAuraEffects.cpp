@@ -6775,6 +6775,13 @@ void AuraEffect::HandleAuraDummy(AuraApplication const *aurApp, uint8 mode,
                 break;
             }
             case 33763:
+			   if (!caster || !target)
+				return;
+			   //Fix Revitalize
+               if (caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID, 2862, EFFECT_0))
+                   //Cast Replenishment
+					caster->CastSpell(caster, 57669, true);
+					
                 if (target->HasAura(92363, GetCasterGUID())) // Get talent Malfurion's gift rank 1
                     if (roll_chance_i(2)) // Procs only 2% of the time
                         target->CastSpell(caster, 16870, true, NULL, this); // Clearcasting
