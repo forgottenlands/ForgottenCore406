@@ -36,6 +36,8 @@ enum Events
     EVENT_SEC_MASSACRE,
     EVENT_BREAK,
     EVENT_FAILURE,
+
+    EVENT_CHECK_POS,
 };
 
 enum Actions
@@ -144,7 +146,7 @@ public:
             events.ScheduleEvent(EVENT_DOUBLE_ATTACK, urand(13000,15000));
             events.ScheduleEvent(EVENT_CAUSTIC_SLIME, urand(10000,12000));
             events.ScheduleEvent(EVENT_BREAK, urand(14000,16000));
-
+            events.ScheduleEvent(EVENT_CHECK_POS, 1000);
             _EnterCombat();
         }
 
@@ -218,6 +220,14 @@ public:
                     events.ScheduleEvent(EVENT_BREAK, 14000);
                     break;
 
+                case EVENT_CHECK_POS:
+                    if (me->GetDistance2d(-107.521f, 12.371f) > 60.0f)
+                    {
+                        me->AI()->EnterEvadeMode();
+                        me->SetHealth(me->GetMaxHealth());
+                    }
+                    events.ScheduleEvent(EVENT_CHECK_POS, 1000);
+                    break;
                 default:
                     break;
                 }
