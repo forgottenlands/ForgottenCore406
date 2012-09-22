@@ -2414,6 +2414,18 @@ public:
     uint32 SpellCriticalDamageBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);
     uint32 SpellCriticalHealingBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);
 
+    void setDarkIntentTargets(Unit* target)
+    {
+        if(!target)
+            return;
+
+        m_darkIntentUnit = target;
+    }
+    Unit* getDarkIntentTarget()
+    {
+        return m_darkIntentUnit;
+    }
+
     void SetLastManaUse(uint32 spellCastTime) {
         m_lastManaUse = spellCastTime;
     }
@@ -2874,6 +2886,8 @@ private:
     bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
     Spell const* _focusSpell;
     bool _targetLocked; // locks the target during spell cast for proper facing
+
+    Unit* m_darkIntentUnit; //Could be either the warlock owner of the DI or  the friendly buffed target
 };
 
 namespace Trinity {
