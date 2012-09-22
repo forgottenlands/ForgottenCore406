@@ -3951,15 +3951,12 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->StackAmount = 1; // should be inf
             count++;
             break;
-        case 51514: // Hex
         case 118: // Polymorph
         case 61305: // Polymorph (other animal)
         case 28272: // polymorph (other animal)
         case 61721: // Polymorph (other animal)
         case 61780: // Polymorph (other animal)
         case 28271: // Polymorph (other animal)
-        case 8122: // Physic Scream
-        case 5484: // Howl of Terror
             spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
             count++;
             break;
