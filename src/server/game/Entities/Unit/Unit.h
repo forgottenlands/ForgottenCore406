@@ -2423,10 +2423,7 @@ public:
     }
     Unit* getDarkIntentTarget()
     {
-        if(m_darkIntentUnit != NULL)
-            return m_darkIntentUnit;
-        
-        return NULL;
+        return m_darkIntentUnit;
     }
 
     void SetLastManaUse(uint32 spellCastTime) {
