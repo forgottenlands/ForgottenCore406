@@ -324,16 +324,19 @@ public:
 
                 DoScriptText(RAND(SAY_FORGE_1, SAY_FORGE_2), me);
 
-                if (me->GetDistance(pAnvil) > 5)
+                if (pAnvil)
                 {
-                    me->GetMotionMaster()->Clear();
-                    me->SetReactState(REACT_PASSIVE);
-                    me->GetMotionMaster()->MovePoint(5,fX,fY,fZ);
-            }
+                    if (me->GetDistance(pAnvil) > 5)
+                    {
+                        me->GetMotionMaster()->Clear();
+                        me->SetReactState(REACT_PASSIVE);
+                        me->GetMotionMaster()->MovePoint(5,fX,fY,fZ);
+                    }
+                }
 
                     DoScriptText(EMOTE_TO_ANVIL, me);
-                m_bMove=true;
-                    }
+                    m_bMove=true;
+            }
 
             if (me->IsWithinMeleeRange(pAnvil,5) && m_bMove)
             {
