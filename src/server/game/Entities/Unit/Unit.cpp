@@ -11844,9 +11844,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         {
             case 4920: // Molten Fury
             case 4919:
-            case 6917: // Death's Embrace
-            case 6926:
-            case 6928:
             {
                 if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, spellProto, this)) 
                     DoneTotalMod *= (100.0f + (*i)->GetAmount()) / 100.0f;
@@ -11879,12 +11876,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 DoneTotalMod *= (modPercent + 100.0f) / 100.0f;
                 break;
             }
-            case 6916: // Death's Embrace
-            case 6925:
-            case 6927:
-                if (HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, spellProto, this)) 
-                    DoneTotalMod *= (100.0f + (*i)->GetAmount()) / 100.0f;
-                break;
             case 5481: // Starfire Bonus
             {
                 if (pVictim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x200002, 0, 0)) 
@@ -12082,6 +12073,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                             break;
                         }
             }
+			
+			//Death's Embrace - increases damage for targets under 25% HP
+            if (AuraEffect const* aurEff = this->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 3223, EFFECT_0))
+				if (pVictim->HealthBelowPct(25))
+                    DoneTotalMod += (aurEff->GetAmount() * 3 + 3) / 100.0f;
+			
             // Drain Soul - increased damage for targets under 25 % HP
             if (spellProto->SpellFamilyFlags[0] & 0x00004000)
                  if (pVictim->HealthBelowPct(25))
