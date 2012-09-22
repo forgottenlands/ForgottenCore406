@@ -2481,6 +2481,11 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                 case TARGET_UNIT_TARGET_ENEMY:
                 case TARGET_UNIT_NEARBY_ENTRY: // fix me
                     range = GetSpellMaxRange(m_spellInfo, false);
+
+                    // Blitz hack
+                    if (m_spellInfo->Id == 100)
+                        range = 3;
+
                     if (modOwner) modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
                     SearchChainTarget(unitList, range, maxTargets, SPELL_TARGETS_ENEMY);
                     break;
