@@ -31,6 +31,44 @@
 enum DruidSpells {
 	DRUID_INCREASED_MOONFIRE_DURATION = 38414, DRUID_NATURES_SPLENDOR = 57865
 };
+//5185 8936 50464 Resto - Empowered Touch
+class spell_dru_empowered_touch: public SpellScriptLoader 
+{
+public:
+    spell_dru_empowered_touch() :SpellScriptLoader("spell_dru_empowered_touch") {}
+
+	class spell_dru_empowered_touch_SpellScript: public SpellScript 
+    {
+		PrepareSpellScript(spell_dru_empowered_touch_SpellScript);
+
+		void BeforeEffect(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!target)
+                return;
+
+            if (!caster)
+                return;
+
+            if(AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2251, EFFECT_1))
+                if (roll_chance_i(aurEff->GetAmount()))
+                    if (Aura* aur = target->GetAura(33763))
+                        aur->RefreshDuration();
+		}
+
+		void Register() 
+        {
+            OnEffect += SpellEffectFn(spell_dru_empowered_touch_SpellScript::BeforeEffect, EFFECT_0, SPELL_EFFECT_HEAL);
+		}
+	};
+
+	SpellScript* GetSpellScript() const 
+    {
+		return new spell_dru_empowered_touch_SpellScript();
+	}
+};
 
 // 62606 - Savage Defense
 class spell_dru_savage_defense: public SpellScriptLoader {
@@ -382,6 +420,7 @@ class spell_dru_swift_flight_passive : public SpellScriptLoader
 };
 
 void AddSC_druid_spell_scripts() {
+    new spell_dru_empowered_touch();
 	new spell_dru_savage_defense();
 	new spell_dru_t10_restoration_4p_bonus();
 	new spell_dru_glyph_of_starfire();

@@ -12983,6 +12983,22 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto,
         DoneTotal += int32(DoneAdvertisedBenefit * coeff * factorMod);
     }
 
+    switch(spellProto->SpellFamilyName)
+    {
+        case SPELLFAMILY_DRUID:
+            switch(spellProto->Id)
+            {
+                //Fix Empowered Touch - Regroth direct Heal
+                case 8936:
+                    //Only the direct heal
+                    if(effIndex == EFFECT_0)
+                        if(AuraEffect* aurEff = this->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DRUID, 2251, EFFECT_0))
+                            DoneTotalMod *= (aurEff->GetAmount() + 100.0f) / 100.0f;
+                break;
+            }
+        break;
+    }
+
     // use float as more appropriate for negative values and percent applying
     float heal = (int32(healamount) + DoneTotal) * DoneTotalMod;
     // apply spellmod to Done amount
