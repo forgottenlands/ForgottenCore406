@@ -629,7 +629,14 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     damage = uint32(6 + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45);
                 // Intercept
                 else if (m_spellInfo->Id == 20253)
+                {
+                    //Juggernaut CD part
+                    if (m_caster->HasAura(64976) && m_caster->ToPlayer())
+                    {
+                        m_caster->ToPlayer()->AddSpellCooldown(100, 0, time(NULL) + 13); //15 - 2 from Juggernaut
+                    }
                     damage = uint32(1+ m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12);
+                }
                 // Execute
                 else if (m_spellInfo->Id == 5308)
                 {
@@ -2120,14 +2127,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 {
                     m_caster->CastCustomSpell(unitTarget, 23885, &damage, NULL,
                             NULL, true, NULL);
-                    return;
-                }
-                    // Intercept
-                case 20252:
-                {
-                    //Juggernaut CD part
-                    if (m_caster->HasAura(64976)) m_caster->ToPlayer()->AddSpellCooldown(
-                            100, 0, time(NULL) + 13); //15 - 2 from Juggernaut
                     return;
                 }
             }
