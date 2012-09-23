@@ -1141,10 +1141,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 target->RemoveMovementImpairingAuras();
                             }
                         break;
-                    case 85767: //Dark Intent buff from warlock
-                        //Save the target
-                        target->setDarkIntentTargets(caster);
-                        break;
                 }
             break;
         case SPELLFAMILY_PRIEST:
