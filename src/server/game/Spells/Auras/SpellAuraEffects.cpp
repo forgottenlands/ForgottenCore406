@@ -1292,6 +1292,8 @@ void AuraEffect::Update(uint32 diff, Unit *caster) {
             m_periodicTimer -= diff;
         else // tick also at m_periodicTimer == 0 to prevent lost last tick in case max m_duration == (max m_periodicTimer)*N
         {
+            Unit* owner = this->GetBase()->GetOwner()->ToUnit();
+
             ++m_tickNumber;
 
             // update before tick (aura can be removed in TriggerSpell or PeriodicTick calls)
@@ -1301,7 +1303,8 @@ void AuraEffect::Update(uint32 diff, Unit *caster) {
             std::list<AuraApplication*> effectApplications;
             GetApplicationList(effectApplications);
             // tick on targets of effects
-            if (!caster || !caster->HasUnitState(UNIT_STAT_ISOLATED)) {
+            // Fix Hots/Dots when the healer/dps is under cyclone
+            if ((!caster || !caster->HasUnitState(UNIT_STAT_ISOLATED)) || (owner && owner != caster && caster->HasAura(33786))) {
                 for (std::list<AuraApplication*>::iterator apptItr =
                         effectApplications.begin();
                         apptItr != effectApplications.end(); ++apptItr)
