@@ -2577,9 +2577,6 @@ void AuraEffect::DarkIntentHandler(Unit * caster) const
         {
             //Get the friendly target that has Dark Intent
             target = caster->getDarkIntentTarget();
-            
-            if (!target)
-                return;
 
             //Id of Dark Intent depending on the class of the target
             uint32 darkIntentId;
