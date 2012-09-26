@@ -55,7 +55,12 @@ public:
             if(AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 2251, EFFECT_1))
                 if (roll_chance_i(aurEff->GetAmount()))
                     if (Aura* aur = target->GetAura(33763))
+                    {
                         aur->RefreshDuration();
+                        if(caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE, SPELLFAMILY_DRUID,2862, EFFECT_0))
+                            //Cast Replenishment
+                            caster->CastSpell(caster, 57669, true);
+                    }
 		}
 
 		void Register() 
