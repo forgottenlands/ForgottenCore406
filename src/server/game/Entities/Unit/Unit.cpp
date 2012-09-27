@@ -7018,18 +7018,29 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     return false;
                 }
                 // Leader of the Pack
-                case 24932:
+                case 17007:
                 {
                     if (triggerAmount <= 0) 
                         return false;
-                    basepoints0 = int32(CountPctFromMaxHealth(triggerAmount));
-                    target = this;
-                    triggered_spell_id = 34299;
-                    if (triggeredByAura->GetCasterGUID() != GetGUID()) 
-                        break;
-                    int32 basepoints1 = triggerAmount * 2;
-                    // Mana Part
-                    CastCustomSpell(this, 68285, &basepoints1, 0, 0, true, 0, triggeredByAura);
+						
+                    if (!(GetShapeshiftForm() == FORM_CAT || GetShapeshiftForm() == FORM_BEAR))
+                        return false;
+                    
+                    int32 bpHealth = int32(CountPctFromMaxHealth(triggerAmount));
+                    int32 bpMana = uint32(float(triggerAmount * 2) * GetMaxPower(POWER_MANA) / 100.0f);
+                    
+                    if(ToPlayer())
+                    {
+                        if(!ToPlayer()->HasSpellCooldown(dummySpell->Id))
+                        {
+                            // Health Part
+                            CastCustomSpell(this, 34299, &bpHealth, 0, 0, true);
+                            // Mana Part
+                            CastCustomSpell(this, 68285, &bpMana, 0, 0, true);
+                            //Custom cooldown
+                            ToPlayer()->AddSpellCooldown(dummySpell->Id, 0, time(NULL) + 6);
+                        }
+                    }
                     break;
                 }
                 // Healing Touch (Dreamwalker Raiment set)

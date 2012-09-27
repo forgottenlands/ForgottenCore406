@@ -3114,11 +3114,13 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const {
                     target->CastSpell(target, itr->first, true, NULL, this);
             }
             // Leader of the Pack
-            if (target->ToPlayer()->HasSpell(17007)) 
+            if (target->ToPlayer()->GetDummyAuraEffect(SPELLFAMILY_DRUID, 312, EFFECT_0))
             {
-                SpellEntry const *spellInfo = sSpellStore.LookupEntry(24932);
-                if (spellInfo && spellInfo->Stances & (1 << (GetMiscValue() - 1)))
-                    target->CastSpell(target, 24932, true, NULL, this);
+                if (GetMiscValue() == FORM_CAT || GetMiscValue() == FORM_BEAR) // "While in Cat Form or Bear Form"
+					target->CastSpell(target, 24932, true);
+                else if(target->HasAura(24932))
+                    //Removes switch to travel form for example...
+                    target->RemoveAura(24932);
             }
             // Improved Barkskin - apply/remove armor bonus due to shapeshift
             if (target->ToPlayer()->HasSpell(63410) || target->ToPlayer()->HasSpell(63411))
@@ -3198,6 +3200,10 @@ void AuraEffect::HandleShapeshiftBoosts(Unit *target, bool apply) const {
             target->RemoveAurasDueToSpell(spellId);
         if (spellId2)
             target->RemoveAurasDueToSpell(spellId2);
+
+		// Remove Leader of the Pack in human form
+        if (target->HasAura(24932))
+            target->RemoveAurasDueToSpell(24932);
 
         // Improved Barkskin - apply/remove armor bonus due to shapeshift
         if (Player *pl=target->ToPlayer())
