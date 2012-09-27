@@ -1175,6 +1175,13 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         }
     }
 
+    // Water Elemental Health (50% of the mage health)
+    if (GetEntry() == 510 && petlevel == 85)
+    {
+        if (Unit* owner = GetOwner())
+            SetCreateHealth(owner->GetMaxHealth() * 0.5f);
+    }
+
     UpdateAllStats();
 
     SetFullHealth();
