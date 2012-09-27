@@ -169,8 +169,8 @@ enum Powers {
     POWER_SOUL_SHARDS = 7,
     POWER_ECLIPSE = 8,
     POWER_HOLY_POWER = 9,
-    //POWER_UNK                           = 10,
-    MAX_POWERS = 10,
+    POWER_SOUND = 10, // Atramedes sound power
+    MAX_POWERS = 11,
     POWER_ALL = 127, // default for class?
     POWER_HEALTH = 0xFFFFFFFE
 // (-2 as signed value)
