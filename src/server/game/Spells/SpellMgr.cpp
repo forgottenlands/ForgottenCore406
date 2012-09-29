@@ -4819,6 +4819,10 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 91927:
             spellInfo->EffectTriggerSpell[1] = 0;
             break;
+        case 88824:
+            spellInfo->EffectBasePoints[0] = 30;
+            spellInfo->EffectMiscValueB[0] = 30;
+            break;
         default:
             break;
         }
