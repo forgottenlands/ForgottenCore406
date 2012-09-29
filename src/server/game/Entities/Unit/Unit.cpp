@@ -13002,13 +13002,16 @@ uint32 Unit::SpellHealingBonus(Unit *pVictim, SpellEntry const *spellProto,
             }
             
             //Mastery: Symbiosis (Druid Restoration Mastery)
-            if (this->HasAuraType(SPELL_AURA_MASTERY) && spellProto->SchoolMask == SPELL_SCHOOL_MASK_NATURE && this->getClass() == CLASS_DRUID)
-                if (this->ToPlayer()->GetTalentBranchSpec(this->ToPlayer()->GetActiveSpec()) == BS_DRUID_RESTORATION)
-                    if(pVictim->ToPlayer()->HasAuraTypeWithCaster(SPELL_AURA_PERIODIC_HEAL, this->GetGUID()))
-                    {
-                        uint32 pct = uint32(12.0f + 1.45f * this->ToPlayer()->GetMasteryPoints());
-                        AddPctN(DoneTotalMod, pct);
-                    }
+            if (ToPlayer())
+            {
+                if (HasAuraType(SPELL_AURA_MASTERY) && spellProto->SchoolMask == SPELL_SCHOOL_MASK_NATURE && getClass() == CLASS_DRUID)
+                    if (ToPlayer()->GetTalentBranchSpec(ToPlayer()->GetActiveSpec()) == BS_DRUID_RESTORATION)
+                        if(pVictim->HasAuraTypeWithCaster(SPELL_AURA_PERIODIC_HEAL, GetGUID()))
+                        {
+                            uint32 pct = uint32(12.0f + 1.45f * ToPlayer()->GetMasteryPoints());
+                            AddPctN(DoneTotalMod, pct);
+                        }
+            }
         break;
     }
 
@@ -15475,6 +15478,10 @@ void Unit::SetPower(Powers power, uint32 val)
     data << uint32(val);
     SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
 
+    if (power == POWER_SOUND)
+    {
+        sLog->outString("power.. %d", val);
+    }
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
     {
