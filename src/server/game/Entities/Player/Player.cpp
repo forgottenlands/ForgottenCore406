@@ -19681,7 +19681,7 @@ void Player::_SaveStats(SQLTransaction& trans) {
             GetGUIDLow());
     std::ostringstream ss;
     ss
-            << "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, maxpower8, maxpower9, maxpower10, maxpower11 "
+            << "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, maxpower8, maxpower9, maxpower10, maxpower11, "
                     "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
                     "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower) VALUES ("
             << GetGUIDLow() << ", " << GetMaxHealth() << ", ";
