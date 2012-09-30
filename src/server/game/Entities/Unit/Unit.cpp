@@ -7026,8 +7026,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     if (!(GetShapeshiftForm() == FORM_CAT || GetShapeshiftForm() == FORM_BEAR))
                         return false;
                     
-                    int32 bpHealth = int32(CountPctFromMaxHealth(triggerAmount));
-                    int32 bpMana = uint32(float(triggerAmount * 2) * GetMaxPower(POWER_MANA) / 100.0f);
+                    int32 bpHealth = int32(CountPctFromMaxHealth(triggerAmount / 2));
+                    int32 bpMana = uint32(float(triggerAmount) * GetMaxPower(POWER_MANA) / 100.0f);
                     
                     if(ToPlayer())
                     {
