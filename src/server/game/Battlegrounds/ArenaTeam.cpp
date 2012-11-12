@@ -152,7 +152,7 @@ bool ArenaTeam::AddMember(const uint64& playerGuid)
     if (result)
         matchMakerRating = (*result)[0].GetUInt32();
     else
-        matchMakerRating = sWorld->getIntConfig(CONFIG_ARENA_START_MATCHMAKER_RATING);
+        matchMakerRating = 1500;
 
     // Remove all player signatures from other petitions
     // This will prevent player from joining too many arena teams and corrupt arena team data integrity
