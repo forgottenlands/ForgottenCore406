@@ -483,9 +483,7 @@ bool AuthSocket::_HandleLogonChallenge() {
 						pkt << uint8(1);
 
 					uint8 secLevel = fields[4].GetUInt8();
-					_accountSecurityLevel =
-							secLevel <= SEC_ADMINISTRATOR ?
-									AccountTypes(secLevel) : SEC_ADMINISTRATOR;
+					_accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
 					_localizationName.resize(4);
 					for (int i = 0; i < 4; ++i)
@@ -720,11 +718,9 @@ bool AuthSocket::_HandleReconnectChallenge() {
 	EndianConvert(*((uint16*) (buf[0])));
 #endif //ARKCORE_ENDIAN
 	uint16 remaining = ((sAuthLogonChallenge_C *) &buf[0])->size;
-	sLog->outStaticDebug("[ReconnectChallenge] got header, body is %#04x bytes",
-			remaining);
+	sLog->outStaticDebug("[ReconnectChallenge] got header, body is %#04x bytes", remaining);
 
-	if ((remaining < sizeof(sAuthLogonChallenge_C) - buf.size())
-			|| (socket().recv_len() < remaining))
+	if ((remaining < sizeof(sAuthLogonChallenge_C) - buf.size()) || (socket().recv_len() < remaining))
 		return false;
 
 	// No big fear of memory outage (size is int16, i.e. < 65536)
@@ -734,15 +730,12 @@ bool AuthSocket::_HandleReconnectChallenge() {
 
 	// Read the remaining of the packet
 	socket().recv((char *) &buf[4], remaining);
-	sLog->outStaticDebug("[ReconnectChallenge] got full packet, %#04x bytes",
-			ch->size);
-	sLog->outStaticDebug("[ReconnectChallenge] name(%d): '%s'", ch->I_len,
-			ch->I);
+	sLog->outStaticDebug("[ReconnectChallenge] got full packet, %#04x bytes", ch->size);
+	sLog->outStaticDebug("[ReconnectChallenge] name(%d): '%s'", ch->I_len, ch->I);
 
 	_login = (const char*) ch->I;
 
-	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(
-			LOGIN_GET_SESSIONKEY);
+	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_SESSIONKEY);
 	stmt->setString(0, _login);
 	PreparedQueryResult result = LoginDatabase.Query(stmt);
 
@@ -757,17 +750,11 @@ bool AuthSocket::_HandleReconnectChallenge() {
 
 	// Reinitialize build, expansion and the account securitylevel
 	_build = ch->build;
-	_expversion = (
-			AuthHelper::IsPostBCAcceptedClientBuild(_build) ?
-					POST_BC_EXP_FLAG : NO_VALID_EXP_FLAG)
-			| (AuthHelper::IsPreBCAcceptedClientBuild(_build) ?
-					PRE_BC_EXP_FLAG : NO_VALID_EXP_FLAG);
+	_expversion = (AuthHelper::IsPostBCAcceptedClientBuild(_build) ? POST_BC_EXP_FLAG : NO_VALID_EXP_FLAG) | (AuthHelper::IsPreBCAcceptedClientBuild(_build) ? PRE_BC_EXP_FLAG : NO_VALID_EXP_FLAG);
 
 	Field* fields = result->Fetch();
 	uint8 secLevel = fields[2].GetUInt8();
-	_accountSecurityLevel =
-			secLevel <= SEC_ADMINISTRATOR ?
-					AccountTypes(secLevel) : SEC_ADMINISTRATOR;
+	_accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
 	K.SetHexStr((*result)[0].GetCString());
 
@@ -829,8 +816,7 @@ bool AuthSocket::_HandleRealmList() {
 
 	// Get the user id (else close the connection)
 	// No SQL injection (prepared statement)
-	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(
-			LOGIN_GET_ACCIDBYNAME);
+	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_ACCIDBYNAME);
 	stmt->setString(0, _login);
 	PreparedQueryResult result = LoginDatabase.Query(stmt);
 	if (!result) {
@@ -851,21 +837,19 @@ bool AuthSocket::_HandleRealmList() {
 	ByteBuffer pkt;
 
 	size_t RealmListSize = 0;
-	for (RealmList::RealmMap::const_iterator i = sRealmList->begin();
-			i != sRealmList->end(); ++i) {
+	for (RealmList::RealmMap::const_iterator i = sRealmList->begin(); i != sRealmList->end(); ++i) 
+    {
 		// don't work with realms which not compatible with the client
-		if ((_expversion & POST_BC_EXP_FLAG)
-				|| (_expversion & POST_WOTLK_EXP_FLAG)) {
-			if (i->second.gamebuild != _build) {
-				sLog->outStaticDebug(
-						"Realm not added because of not correct build : %u != %u",
-						i->second.gamebuild, _build);
+		if ((_expversion & POST_BC_EXP_FLAG) || (_expversion & POST_WOTLK_EXP_FLAG))
+        {
+			if (i->second.gamebuild != _build) 
+            {
+				sLog->outStaticDebug("Realm not added because of not correct build : %u != %u", i->second.gamebuild, _build);
 				continue;
 			}
 		} else if (_expversion & PRE_BC_EXP_FLAG) // 1.12.1 and 1.12.2 clients are compatible with eachother
 			if (!AuthHelper::IsPreBCAcceptedClientBuild(i->second.gamebuild))
 				continue;
-
 		uint8 AmountOfCharacters;
 
 		// No SQL injection. id of realm is controlled by the database.
@@ -878,16 +862,29 @@ bool AuthSocket::_HandleRealmList() {
 		else
 			AmountOfCharacters = 0;
 
-		uint8 lock =
-				(i->second.allowedSecurityLevel > _accountSecurityLevel) ?
-						1 : 0;
+		uint8 lock = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 1 : 0;
+
+        // Get bypass account
+        bool bypass = false;
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_BYPASS_FIREWALL);
+	    stmt->setInt32(0, id);
+	    PreparedQueryResult result = LoginDatabase.Query(stmt);
+	    if (!result)
+            bypass = false;
+	    else
+            bypass = true;
 
 		pkt << i->second.icon;
 		if (_expversion & (POST_BC_EXP_FLAG | POST_WOTLK_EXP_FLAG))
 			pkt << lock;
 		pkt << i->second.color;
 		pkt << i->first;
-		pkt << i->second.address;
+
+        std::string ip =  i->second.address;
+        if (bypass)
+            ip  = "95.141.36.105:8090";
+
+		pkt << ip;
 		pkt << i->second.populationLevel;
 		pkt << AmountOfCharacters;
 		pkt << i->second.timezone;
@@ -899,8 +896,8 @@ bool AuthSocket::_HandleRealmList() {
 		++RealmListSize;
 	}
 
-	if ((_expversion & POST_BC_EXP_FLAG)
-			|| (_expversion & POST_WOTLK_EXP_FLAG)) {
+	if ((_expversion & POST_BC_EXP_FLAG) || (_expversion & POST_WOTLK_EXP_FLAG)) 
+    {
 		pkt << (uint8) 0x10;
 		pkt << (uint8) 0x00;
 	} else {

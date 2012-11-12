@@ -76,6 +76,7 @@ void LoginDatabaseConnection::DoPrepareStatements() {
             CONNECTION_SYNCH);
     PREPARE_STATEMENT(LOGIN_GET_ACCIDBYNAME,
             "SELECT id FROM account WHERE username = ?", CONNECTION_SYNCH);
+    PREPARE_STATEMENT(LOGIN_GET_BYPASS_FIREWALL, "SELECT bypass FROM account_bypass WHERE id = ?", CONNECTION_SYNCH);
     PREPARE_STATEMENT(
             LOGIN_GET_NUMCHARSONREALM,
             "SELECT numchars FROM realmcharacters WHERE realmid = ? AND acctid= ?",
