@@ -101,9 +101,9 @@ public:
         SpellCastResult CheckCastMeet()
         {
             Unit* pet = GetCaster()->GetGuardianPet();
-            Unit* petTarget = pet->getVictim();
             if (!pet)
                 return SPELL_FAILED_NO_PET;
+            Unit* petTarget = pet->getVictim();
 
             // Make sure pet has a target and target is within 5 yards
             if (!petTarget || !pet->IsWithinDist(petTarget, 5.0f, true))
@@ -129,7 +129,7 @@ public:
         void Register()
         {
             OnCheckCast += SpellCheckCastFn(spell_hun_kill_command_SpellScript::CheckCastMeet);
-            OnEffectHit += SpellEffectFn(spell_hun_kill_command_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            OnEffect += SpellEffectFn(spell_hun_kill_command_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
 

@@ -1068,7 +1068,19 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                 break;
             }
             case SPELLFAMILY_HUNTER:
-            { // Rapid Recuperation
+            {
+                switch(m_spellInfo->Id)
+                {
+                    case 83381:
+                        Unit * petOwner = m_caster->isPet() ? m_caster->GetOwner() : NULL;
+                        if(petOwner)
+                        {
+                            damage = int32(849 + petOwner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.516f);
+                        }
+                    break;
+                }
+
+                // Rapid Recuperation
                 if (m_caster->HasAura(3045)) if (m_caster->HasAura(53228)) // Rank 1
                 m_caster->CastSpell(m_caster, 53230, true);
                 else if (m_caster->HasAura(53232)) // Rank 2
