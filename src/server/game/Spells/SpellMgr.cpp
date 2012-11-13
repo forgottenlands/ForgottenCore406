@@ -4891,6 +4891,21 @@ void SpellMgr::LoadSpellCustomAttr() {
                     spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_PET;
                     count++;
                     break;
+                //Immolation trap
+                case 13795:
+                    spellInfo->Effect[0] = SPELL_EFFECT_SUMMON_OBJECT_SLOT3;
+                    count++;
+                    break;
+                //Explosive Trap
+                case 13813:
+                    spellInfo->Effect[0] = SPELL_EFFECT_SUMMON_OBJECT_SLOT3;
+                    count++;
+                    break;
+                //Snake Trap
+                case 34600:
+                    spellInfo->Effect[0] = SPELL_EFFECT_SUMMON_OBJECT_SLOT4;
+                    count++;
+                    break;
             }
 
             // Monstrous Bite target fix
