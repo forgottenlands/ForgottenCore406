@@ -42,6 +42,45 @@ enum HunterSpells
 	HUNTER_SPELL_STREADY_SHOT_ATTACK_SPEED        = 53220,
     HUNTER_SPELL_KILL_COMMAND                     = 34026,
     HUNTER_SPELL_KILL_COMMAND_TRIGGER             = 83381,
+    HUNTER_SPELL_CAMOUFLAGE_STEALTH               = 9572,
+};
+//80326 Camouflage
+class spell_hun_camouflage: public SpellScriptLoader 
+{
+    public:
+    spell_hun_camouflage() : SpellScriptLoader("spell_hun_camouflage"){ }
+
+    class spell_hun_camouflage_AuraScript: public AuraScript 
+    {
+        PrepareAuraScript(spell_hun_camouflage_AuraScript)
+
+		void HandlePeriodic(AuraEffect const * aurEff) 
+        {
+            if(Unit * target = GetTarget())
+            {
+                if (!target->ToPlayer() && !target->ToPet())
+				    return;
+
+                if(!target->isMoving())
+                {
+                    if(!target->HasAura(HUNTER_SPELL_CAMOUFLAGE_STEALTH))
+                    {
+                        target->AddAura(HUNTER_SPELL_CAMOUFLAGE_STEALTH, target);
+                    }
+                }
+            }
+		}
+
+		void Register() 
+        {
+			OnEffectPeriodic += AuraEffectPeriodicFn(spell_hun_camouflage_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+		}
+    };
+
+    AuraScript* GetAuraScript() const 
+    {
+        return new spell_hun_camouflage_AuraScript();
+    }
 };
 
 class spell_hun_kill_command : public SpellScriptLoader
@@ -564,6 +603,7 @@ public:
 };
 
 void AddSC_hunter_spell_scripts() {
+	new spell_hun_camouflage();
 	new spell_hun_invigoration();
 	new spell_hun_last_stand_pet();
 	new spell_hun_masters_call();

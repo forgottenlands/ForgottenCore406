@@ -4882,6 +4882,17 @@ void SpellMgr::LoadSpellCustomAttr() {
             count++;
             break;
         case SPELLFAMILY_HUNTER:
+            switch (spellInfo->Id)
+            {
+                //Camouflage
+                case 51755:
+                    spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_PET;
+                    spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_PET;
+                    spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_PET;
+                    count++;
+                    break;
+            }
+
             // Monstrous Bite target fix
             // seems we incorrectly handle spell with "no target"
             if (spellInfo->SpellIconID == 599)

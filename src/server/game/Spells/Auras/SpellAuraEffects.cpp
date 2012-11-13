@@ -3365,6 +3365,20 @@ void AuraEffect::HandleModCamouflage(AuraApplication const *aurApp, uint8 mode,
         target->RemoveAura(80326);
         target->RemoveAura(80325);
     }
+
+    if(Player* player = target->ToPlayer())
+    {
+        if(GetId() == 51755 && player->getClass() == CLASS_HUNTER)
+        {
+            if(Pet* pet = player->GetPet())
+            {
+                if(pet->HasAura(GetId()))
+                {
+                    pet->RemoveAurasDueToSpell(GetId());
+                }
+            }
+        }
+    }
 }
 
 void AuraEffect::HandleModStealth(AuraApplication const *aurApp, uint8 mode,
