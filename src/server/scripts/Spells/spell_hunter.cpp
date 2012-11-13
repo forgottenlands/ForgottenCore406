@@ -236,7 +236,15 @@ public:
 		}
 
 		void HandleScriptEffect(SpellEffIndex /*effIndex*/) {
-			if (Unit * target = GetHitUnit()) {
+            Unit* target = GetHitUnit();
+			Unit* ally = GetTargetUnit();
+
+			if (!target || !ally)
+				return;
+            
+            target->CastSpell(target, 62305, true);
+            target->CastSpell(ally, 54216, true);
+			/*if (Unit * target = GetHitUnit()) {
 				target->CastSpell(target, GetEffectValue(), true);
 				target->CastSpell(target, HUNTER_SPELL_MASTERS_CALL_TRIGGERED,
 						true);
@@ -250,7 +258,7 @@ public:
 							SpellMgr::CalculateSpellEffectAmount(GetSpellInfo(),
 									EFFECT_0), true);
 				}
-			}
+			}*/
 		}
 
 		void Register() {
