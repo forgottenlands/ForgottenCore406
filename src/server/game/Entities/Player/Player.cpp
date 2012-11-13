@@ -25769,6 +25769,9 @@ void Player::RemoveOrAddMasterySpells()
 
         if (HasAura(77222))
             RemoveAurasDueToSpell(77222);
+
+        if (HasAura(76838))
+            RemoveAurasDueToSpell(76838);
 	} 
     else if (HasAuraType(SPELL_AURA_MASTERY)) 
     {

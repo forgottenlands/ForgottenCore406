@@ -8940,6 +8940,23 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                 }
             }
             break;
+		case SPELLFAMILY_WARRIOR:
+		{
+            switch(dummySpell->Id)
+            {
+				// Strikes of Opportunity Arms Mastery 
+				case 76838:
+					if (Player* caster = ToPlayer())
+					{
+						int32 chance = int32(16.0f + 2.0f * caster->GetMasteryPoints());
+						if (roll_chance_i(chance))
+							caster->CastSpell(pVictim, 16459, true);
+					}
+					return true;
+				break;
+			}
+			break;
+		}
         case SPELLFAMILY_PALADIN:
         {
             // Judgements of the Just
