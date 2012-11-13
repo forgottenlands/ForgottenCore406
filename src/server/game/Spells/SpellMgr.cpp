@@ -4906,6 +4906,11 @@ void SpellMgr::LoadSpellCustomAttr() {
                     spellInfo->Effect[0] = SPELL_EFFECT_SUMMON_OBJECT_SLOT4;
                     count++;
                     break;
+				//Spirit Bond
+				case 19579:
+				case 24529:
+					spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_HEAL;
+					break;
             }
 
             // Monstrous Bite target fix
