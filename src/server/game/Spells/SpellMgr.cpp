@@ -3919,6 +3919,9 @@ void SpellMgr::LoadSpellCustomAttr() {
         }
 
         switch (i) {
+		case 12712: //Two-Handed Weapon Specialization
+			spellInfo->EffectBasePoints[0] = 20;
+			break;
         case 77515: // Mastery: Dreadblade
             spellInfo->EffectBasePoints[0] = 20;
             count++;
