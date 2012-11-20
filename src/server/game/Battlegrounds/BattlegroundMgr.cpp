@@ -208,7 +208,7 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket *data, Battlegro
             *data << uint32(arenatype); // On retail 0x101F is sent here, but we need this value to be returned in PORT opcode
             // end
 
-            *data << uint8(0); // teamsize, 0 if not arena
+            *data << uint32(bg->isArena() ? arenatype : 0); // teamsize, 0 if not arena
             *data << uint32(Time2); // time in queue
         }break;
     case STATUS_WAIT_JOIN:
@@ -293,7 +293,7 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
 
     if ((type & 64) != 0)                                                // arena
     {
-        for (int8 i = 1; i >= 0; --i)
+        for (int8 i = 0; i < BG_TEAMS_COUNT; ++i)
         {
             uint32 at_id = bg->m_ArenaTeamIds[i];
             ArenaTeam* at = sObjectMgr->GetArenaTeamById(at_id);
@@ -306,15 +306,16 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket *data, Battleground *bg)
     if ((type & 128) != 0)
     {
         // it seems this must be according to BG_WINNER_A/H and _NOT_ BG_TEAM_A/H
-        for (int8 i = 1; i >= 0; --i)
+        for (int8 i = 0; i < BG_TEAMS_COUNT; ++i)
         {
             uint32 pointsLost = bg->m_ArenaTeamRatingChanges[i] < 0 ? abs(bg->m_ArenaTeamRatingChanges[i]) : 0;
             uint32 pointsGained = bg->m_ArenaTeamRatingChanges[i] > 0 ? bg->m_ArenaTeamRatingChanges[i] : 0;
             uint32 MatchmakerRating = bg->m_ArenaTeamMMR[i];
 
+            *data << uint32(MatchmakerRating);  // Matchmaking Value
             *data << uint32(pointsLost);        // Rating Lost
             *data << uint32(pointsGained);      // Rating gained
-            *data << uint32(MatchmakerRating);  // Matchmaking Value
+              
             sLog->outDebug(LOG_FILTER_BATTLEGROUND, "rating change: %d", bg->m_ArenaTeamRatingChanges[i]);
         }
     }

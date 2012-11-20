@@ -1128,6 +1128,9 @@ void Battleground::AddPlayer(Player* plr)
             plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
             plr->ResetAllPowers();
         }
+        // Unit Frames
+        plr->SetByteValue(PLAYER_BYTES_3, 3, plr->GetBGTeam());
+
         WorldPacket teammate;
         teammate.Initialize(SMSG_ARENA_OPPONENT_UPDATE, 8);
         teammate << uint64(plr->GetGUID());
