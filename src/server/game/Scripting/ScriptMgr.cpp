@@ -1256,17 +1256,14 @@ void ScriptMgr::OnPlayerCreate(Player *player) {
 }
 
 void ScriptMgr::OnPlayerDelete(uint64 guid) {
-    FOREACH_SCRIPT(PlayerScript)->OnDelete(guid);
+    FOREACH_SCRIPT(PlayerScript)
+    ->OnDelete(guid);
 }
 
 void ScriptMgr::OnPlayerBindToInstance(Player* player, Difficulty difficulty,
         uint32 mapid, bool permanent) {
-    FOREACH_SCRIPT(PlayerScript)->OnBindToInstance(player, difficulty, mapid, permanent);
-}
-
-void ScriptMgr::OnPlayerRemoveFromBattleground(Player* player, Battleground* bg)
-{
-    FOREACH_SCRIPT(PlayerScript)->OnPlayerRemoveFromBattleground(player, bg);
+    FOREACH_SCRIPT(PlayerScript)
+    ->OnBindToInstance(player, difficulty, mapid, permanent);
 }
 
 void ScriptMgr::OnPlayerDamageDealt(Player* player, Unit* victim,

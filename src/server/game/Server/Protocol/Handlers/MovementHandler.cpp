@@ -117,9 +117,7 @@ void WorldSession::HandleMoveWorldportAckOpcode() {
                         else if (Battleground *bg = _player->GetBattleground())
                         {
                             if (_player->IsInvitedForBattlegroundInstance(_player->GetBattlegroundId()))
-                                 bg->AddPlayer(_player);
-							if (!_player->isGameMaster())
-                                bg->AddPlayer(_player);
+                            bg->AddPlayer(_player);
                         }
                     }
 
