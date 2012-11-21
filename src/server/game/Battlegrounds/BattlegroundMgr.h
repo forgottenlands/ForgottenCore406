@@ -110,6 +110,8 @@ class BattlegroundMgr
         static HolidayIds BGTypeToWeekendHolidayId(BattlegroundTypeId bgTypeId);
         static BattlegroundTypeId WeekendHolidayIdToBGType(HolidayIds holiday);
         static bool IsBGWeekend(BattlegroundTypeId bgTypeId);
+		//ARENA WATCHER
+		BattlegroundSet GetAllBattlegroundsWithTypeId(BattlegroundTypeId bgTypeId) { return m_Battlegrounds[bgTypeId]; }
         void DoCompleteAchievement(uint32 achievement, Player * player = NULL);
     private:
 

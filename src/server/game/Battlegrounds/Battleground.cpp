@@ -524,6 +524,7 @@ inline void Battleground::_ProcessLeave(uint32 diff)
             RemovePlayerAtLeave(itr->first, true, true);// remove player from BG
             // do not change any battleground's private variables
         }
+		GetBgMap()->RemoveAllPlayers();
     }
 }
 
@@ -1014,6 +1015,7 @@ void Battleground::RemovePlayerAtLeave(const uint64& guid, bool Transport, bool 
         if (Transport)
             plr->TeleportToBGEntryPoint();
 
+		sScriptMgr->OnPlayerRemoveFromBattleground(plr, this);
         sLog->outDetail("BATTLEGROUND: Removed player %s from Battleground.", plr->GetName());
         plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, ACHIEVEMENT_CRITERIA_CONDITION_BG_MAP, GetMapId(), true);
     }
@@ -1196,6 +1198,7 @@ void Battleground::AddOrSetPlayerToCorrectBgGroup(Player* player, uint32 team)
 // This method should be called when player logs into running battleground
 void Battleground::EventPlayerLoggedIn(Player* player)
 {
+    uint64 guid = player->GetGUID();
     // player is correct pointer
     for (std::deque<uint64>::iterator itr = m_OfflineQueue.begin(); itr != m_OfflineQueue.end(); ++itr)
     {
@@ -1205,6 +1208,11 @@ void Battleground::EventPlayerLoggedIn(Player* player)
             break;
         }
     }
+
+	
+    if (!IsPlayerInBattleground(guid))
+        return;
+
     m_Players[player->GetGUID()].OfflineRemoveTime = 0;
     PlayerAddedToBGCheckIfBGIsRunning(player);
     // if battleground is starting, then add preparation aura
@@ -1214,6 +1222,9 @@ void Battleground::EventPlayerLoggedIn(Player* player)
 // This method should be called when player logs out from running battleground
 void Battleground::EventPlayerLoggedOut(Player* player)
 {
+	uint64 guid = player->GetGUID();
+	if (!IsPlayerInBattleground(guid))
+        return;
     // player is correct pointer, it is checked in WorldSession::LogoutPlayer()
     m_OfflineQueue.push_back(player->GetGUID());
     m_Players[player->GetGUID()].OfflineRemoveTime = sWorld->GetGameTime() + MAX_OFFLINE_TIME;

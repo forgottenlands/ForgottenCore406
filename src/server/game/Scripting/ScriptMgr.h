@@ -907,6 +907,9 @@ public:
             uint32 /*mapid*/, bool /*permanent*/) {
     }
 
+	virtual void OnPlayerRemoveFromBattleground(Player* /*player*/, Battleground* /*bg*/) { }
+
+
     virtual void OnDamageDealt(Player* /*player*/, Unit* /*victim*/,
             uint32& /*damage*/, DamageEffectType /*damageType*/,
             SpellEntry const* /*spellProto*/) {
@@ -1245,6 +1248,7 @@ public:
     void OnPlayerDelete(uint64 guid);
     void OnPlayerBindToInstance(Player* player, Difficulty difficulty,
             uint32 mapid, bool permanent);
+	void OnPlayerRemoveFromBattleground(Player* player, Battleground* bg);
     void OnPlayerDamageDealt(Player* player, Unit* victim, uint32& damage,
             DamageEffectType damageType, SpellEntry const *spellProto);
     void OnPlayerSpellCastWithProto(Player* player,
