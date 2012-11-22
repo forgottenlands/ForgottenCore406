@@ -4833,6 +4833,15 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectBasePoints[0] = 30;
             spellInfo->EffectMiscValueB[0] = 30;
             break;
+        case 75116: // Burning Light (HoO)
+            spellInfo->Effect[1] = 6;
+            spellInfo->EffectBasePoints[1] = 1;
+            spellInfo->EffectApplyAuraName[1] = 26;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_CASTER;
+            spellInfo->EffectMiscValue[1] = 0;
+            spellInfo->EffectMiscValueB[1] = 0;
+            break;
         default:
             break;
         }
