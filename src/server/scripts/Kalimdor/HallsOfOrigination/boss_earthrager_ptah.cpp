@@ -20,13 +20,7 @@
  */
 
  /*
- Made By: Jenova
- Project: Atlantiss Core
-
- Known Bugs:
-
- TODO:
- 1. Needs Testing
+Author: dimiandre
  */
 
 #include "ScriptPCH.h"
@@ -49,34 +43,36 @@ enum CreatureIds
 
 enum Spells
 {
-    SPELL_FLAME_BOLT = 77370,
-    SPELL_RAGING_SMASH = 83650,
-    SPELL_EARTH_POINT = 75339,
-    SPELL_DUST_MOVE = 75547,
-    SPELL_VORTEX_DUST = 93570,
+    SPELL_FLAME_BOLT                              = 77370,
+    SPELL_RAGING_SMASH                            = 83650,
+    SPELL_EARTH_POINT                             = 75339,
+    SPELL_DUST_MOVE                               = 75546,
+    SPELL_VORTEX_DUST                             = 93570,
+    SPELL_SUMMON_DUSTBONE_HORROR                  = 75521,
+    SPELL_SUMMON_JEWELED_SCARAB                   = 75462,
 };
 
 enum Events
 {
-    EVENT_FLAME_BOLT,
+    EVENT_FLAME_BOLT = 1,
     EVENT_RAGING_SMASH,
     EVENT_EARTH_POINT,
-    EVENT_SUMMON,
-    EVENT_DUST_MOVE,
-    EVENT_VORTEX_DUST,
+    EVENT_PHASE_2,
+};
+
+enum actions
+{
+    ACTION_NONE,
+    ACTION_START_COUNT,
 };
 
 enum SummonIds
 {
     NPC_HORROR   = 40810,
     NPC_SCARAB   = 40458,
-};
-
-const Position aSpawnLocations[3] =
-{
-    {-530.561584f, -370.613525f, 156.935913f, 5.081081f},
-    {-484.478302f, -371.117584f, 155.954208f, 4.429200f},
-    {-507.319977f, -381.939392f, 154.764664f, 4.700163f},
+    NPC_SPIKE    = 44765,
+    NPC_STORM    = 40406,
+    NPC_QUICKSAND = 40503,
 };
 
 class boss_ptah : public CreatureScript
@@ -94,11 +90,19 @@ class boss_ptah : public CreatureScript
             InstanceScript* pInstance;
             EventMap events;
             SummonList Summons;
+            uint8 uiPhase;
 
             void EnterCombat(Unit * /*who*/)
             {
+                uiPhase = 0;
                 EnterPhaseGround();
                 me->MonsterYell(SAY_AGGRO, 0, 0);
+            }
+
+            void Reset()
+            {
+                Summons.DespawnAll();
+                uiPhase = 0;
             }
 
             void JustDied(Unit* /*killer*/)
@@ -124,9 +128,50 @@ class boss_ptah : public CreatureScript
                 events.ScheduleEvent(EVENT_FLAME_BOLT, 7500);
                 events.ScheduleEvent(EVENT_RAGING_SMASH, urand(4000, 10000));
                 events.ScheduleEvent(EVENT_EARTH_POINT, 8000);
-                events.ScheduleEvent(EVENT_SUMMON, 50000);
-                events.ScheduleEvent(EVENT_DUST_MOVE, 15000);
-                events.ScheduleEvent(EVENT_VORTEX_DUST, urand(14000, 20000));
+            }
+
+            void EnterPhaseUnderground()
+            {
+                uiPhase++;
+                events.CancelEvent(EVENT_FLAME_BOLT);
+                events.CancelEvent(EVENT_RAGING_SMASH);
+                events.CancelEvent(EVENT_EARTH_POINT);
+
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                {
+                    Position pos;
+                    pos = target->GetPosition();
+                    me->SummonCreature(NPC_STORM, pos, TEMPSUMMON_MANUAL_DESPAWN, 0, 0);
+                }
+
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                {
+                    Position pos;
+                    pos = target->GetPosition();
+                    if (Creature* sand = me->SummonCreature(NPC_QUICKSAND, pos, TEMPSUMMON_MANUAL_DESPAWN, 0, 0))
+                    {
+                        sand->AttackStop();
+                        sand->StopMoving();
+                        sand->SetReactState(REACT_PASSIVE);
+                        sand->CastSpell(sand, SPELL_DUST_MOVE, true);
+                    }
+                }
+
+                // Summon two horrors
+                for (int i = 0; i < 2; i++)
+                    me->CastSpell(me, SPELL_SUMMON_DUSTBONE_HORROR, true);
+
+                // Summon height scarabs
+                for (int i = 0; i < 8; i++)
+                    me->CastSpell(me, SPELL_SUMMON_JEWELED_SCARAB, true);
+
+                // Set deathstate
+                me->SetReactState(REACT_PASSIVE);
+                me->AttackStop();
+                me->StopMoving();
+
+                events.ScheduleEvent(EVENT_PHASE_2, urand(10000, 20000));
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
             void UpdateAI(const uint32 diff)
@@ -135,44 +180,49 @@ class boss_ptah : public CreatureScript
                     return;
 
                 events.Update(diff);
-
+                
+                if (uiPhase == 0 && me->HealthBelowPct(51))
+                    EnterPhaseUnderground();
+                
                 while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch(eventId)
                     {
-                    case EVENT_FLAME_BOLT:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
-                            DoCast(target, SPELL_FLAME_BOLT);
-                        events.ScheduleEvent(EVENT_FLAME_BOLT, 7500);
-                        return;
-                    case EVENT_RAGING_SMASH:
-                        DoCast(me->getVictim(), SPELL_RAGING_SMASH);
-                        events.ScheduleEvent(EVENT_RAGING_SMASH, urand(4000, 10000));
-                        return;
-                    case EVENT_EARTH_POINT:
-                        me->MonsterYell(SAY_SPELL, LANG_UNIVERSAL, NULL);
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM,1,100,true))
-                            DoCast(target, SPELL_EARTH_POINT);
-                        events.ScheduleEvent(EVENT_EARTH_POINT, 8000);
-                        return;
-                    case EVENT_SUMMON:
-                        me->SummonCreature(NPC_HORROR, aSpawnLocations[0].GetPositionX(), aSpawnLocations[0].GetPositionY(), aSpawnLocations[0].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
-                        me->SummonCreature(NPC_SCARAB, aSpawnLocations[1].GetPositionX(), aSpawnLocations[1].GetPositionY(), aSpawnLocations[1].GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
-                        events.ScheduleEvent(EVENT_SUMMON, 50000);
-                        return;
-                    case EVENT_DUST_MOVE:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
-                            DoCast(target, SPELL_DUST_MOVE);
-                        events.ScheduleEvent(EVENT_DUST_MOVE, 15000);
-                        return;
-                    case EVENT_VORTEX_DUST:
-                        if (IsHeroic())
-                        {
-                            DoCastAOE(SPELL_VORTEX_DUST);
+                        case EVENT_FLAME_BOLT:
+                            me->CastSpell(me, SPELL_FLAME_BOLT, false);
+                            events.ScheduleEvent(EVENT_FLAME_BOLT, urand(15000, 20000));
+                            return;
+                        case EVENT_RAGING_SMASH:
+                            DoCast(me->getVictim(), SPELL_RAGING_SMASH);
+                            events.ScheduleEvent(EVENT_RAGING_SMASH, urand(7000, 15000));
+                            return;
+                        case EVENT_EARTH_POINT:
+                            me->MonsterYell(SAY_SPELL, LANG_UNIVERSAL, NULL);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            {
+                                Position pos;
+                                pos = target->GetPosition();
+                                if (Creature* spike = me->SummonCreature(NPC_SPIKE, pos, TEMPSUMMON_MANUAL_DESPAWN, 0, 0)) 
+                                {
+                                    spike->CastSpell(spike, 94974, false);
+                                    spike->SetReactState(REACT_PASSIVE);
+                                    if (spike->AI())
+                                        spike->AI()->DoAction(ACTION_START_COUNT);
+                                    
+                                    spike->AttackStop();
+                                    spike->StopMoving();
+                                }
+                            }
+                            events.ScheduleEvent(EVENT_EARTH_POINT, urand(8000, 20000));
+                            break;
+                        case EVENT_PHASE_2:
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            me->Attack(me->getVictim(), true);
+                           
+                            EnterPhaseGround();
+                            break;
                         }
-                        events.ScheduleEvent(EVENT_VORTEX_DUST, urand(14000, 20000));
-                        return;
-                    }
                 }
                 DoMeleeAttackIfReady();
             }
@@ -180,11 +230,69 @@ class boss_ptah : public CreatureScript
 
     CreatureAI* GetAI(Creature* creature) const
     {
-                return new boss_ptahAI(creature);
+        return new boss_ptahAI(creature);
     }
 };
 
+enum spikevents
+{
+    EVENT_0,
+    EVENT_SPIKE,
+    EVENT_DESPAWN,
+};
+
+class npc_earth_spike : public CreatureScript
+{
+    public:
+        npc_earth_spike() : CreatureScript("npc_earth_spike") {}
+
+        struct npc_earth_spikeAI : public ScriptedAI
+        {
+            npc_earth_spikeAI(Creature* creature) : ScriptedAI(creature)
+            { }
+            
+            EventMap events;
+
+
+            void DoAction(int32 actionId)
+            {
+                switch (actionId)
+                {
+                    case ACTION_START_COUNT:
+                        events.ScheduleEvent(EVENT_SPIKE, 4000);
+                        break;
+                }
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                events.Update(diff);
+                
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch(eventId)
+                    {
+                        case EVENT_SPIKE:
+                            me->CastSpell(me, 75339, true);
+                            events.ScheduleEvent(EVENT_DESPAWN, 2500);
+                            break;
+                        case EVENT_DESPAWN:
+                            me->DisappearAndDie();
+                            break;
+                    }
+                }
+            }
+
+         };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_earth_spikeAI(creature);
+    }
+};
+            
 void AddSC_boss_ptah()
 {
     new boss_ptah();
+    new npc_earth_spike();
 }
