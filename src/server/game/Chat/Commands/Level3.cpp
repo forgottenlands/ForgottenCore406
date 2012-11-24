@@ -4836,7 +4836,7 @@ bool ChatHandler::HandleSendMessageCommand(const char *args)
 
 bool ChatHandler::HandleFlushArenaPointsCommand(const char * /*args*/)
 {
-    sBattlegroundMgr->DistributeArenaPoints();
+    sWorld->ManualResetCurrencyWeekCap();
     return true;
 }
 

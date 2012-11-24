@@ -797,6 +797,8 @@ class World
 
         uint32 GetCleaningFlags() { return m_CleaningFlags; }
         void   SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
+		//custom: reset arene manuale by Sceicco
+		void ManualResetCurrencyWeekCap();
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters

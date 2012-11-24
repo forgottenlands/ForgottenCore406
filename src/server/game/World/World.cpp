@@ -2967,3 +2967,30 @@ void World::SendWintergraspState()
         }
     }
 }
+
+void World::ManualResetCurrencyWeekCap()
+{
+    sLog->outDetail("Currencies MANUAL reset for all characters.");
+
+	std::string str = "-- FLUSH PUNTI ARENA / CONQUEST / CAP SETTIMANALI --";
+	std::string str1 = "Reset stato arene...";
+    std::string str2 = "Reset dei cap settimanali (player offline)...";
+    std::string str3 = "Reset dei cap settimanali (player online)...";
+	std::string str4 = "FLUSH EFFETTUATO";
+
+	sWorld->SendServerMessage(SERVER_MSG_STRING,str.c_str());
+
+	sWorld->SendServerMessage(SERVER_MSG_STRING,str1.c_str());
+	CharacterDatabase.Execute("UPDATE character_currency SET thisweek = 0");
+    
+    // Reset Arenas
+	sWorld->SendServerMessage(SERVER_MSG_STRING,str2.c_str());
+    sBattlegroundMgr->ResetArenaWeekStatusAndCap();
+
+    // Send Week Cap to online players
+	sWorld->SendServerMessage(SERVER_MSG_STRING,str3.c_str());
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if (Player* player = itr->second->GetPlayer())
+            player->ResetCurrencyWeekCap();  
+	sWorld->SendServerMessage(SERVER_MSG_STRING,str4.c_str());
+}
