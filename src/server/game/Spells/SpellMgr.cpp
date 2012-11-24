@@ -4872,6 +4872,9 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 91206:
             spellInfo->EffectRadiusIndex[0] = 28;
             break;
+        case 74370: // Astral Rain
+            spellInfo->EffectRadiusIndex[0] = 12;
+            break;
         default:
             break;
         }

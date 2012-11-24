@@ -183,7 +183,6 @@ class boss_anraphet : public CreatureScript
                     switch(eventId)
                     {
                         case EVENT_ALPHA_BEAMS:
-                            sLog->outString("BEAM");
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             {
                                 Position pos;
