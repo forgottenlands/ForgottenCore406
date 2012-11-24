@@ -1973,8 +1973,9 @@ void World::Update(uint32 diff)
     if (m_gameTime > m_NextRandomBGReset)
         ResetRandomBG();
 
+    /* Remove automatic Currency Reset (We use Cron for this)
     if (m_gameTime > m_NextCurrencyReset)
-        ResetCurrencyWeekCap();
+        ResetCurrencyWeekCap();*/
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
