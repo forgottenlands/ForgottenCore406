@@ -59,6 +59,8 @@ enum Spells
     //Spore
     SPELL_NOXIOUS_SPORE                    = 75702,    //Triggered by Spore Cloud
     SPELL_SPORE_CLOUD                      = 75701
+
+    // 79766
 };
 
 enum NPCs
@@ -89,15 +91,6 @@ enum Events
     EVENT_SUMMON_SPORE         = 5
 };
 
-enum Timers
-{
-    TIMER_WITHER               = 7500,
-    TIMER_CONSUME_LIFE         = 20000,
-    TIMER_RAMPANT_GROWTH       = 15000,
-    TIMER_SUMMON_POD           = 5000,
-    TIMER_SUMMON_SPORE         = 15000
-};
-
 class boss_ammunae : public CreatureScript
 {
     public:
@@ -111,25 +104,29 @@ class boss_ammunae : public CreatureScript
             }
 
             InstanceScript* instance;
+            bool isCasting;
 
             void Reset()
             {
                 if (instance)
                     instance->SetData(DATA_AMMUNAE_EVENT, NOT_STARTED);
+
+                isCasting = false;
+                me->setPowerType(POWER_ENERGY);
+                me->SetMaxPower(POWER_ENERGY, 100);
+                me->SetPower(POWER_ENERGY, 0);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
-                //DoScriptText(SAY_AGGRO, me);
-
+                me->SetPower(POWER_RUNIC_POWER, 0);
                 if (instance)
                     instance->SetData(DATA_AMMUNAE_EVENT, IN_PROGRESS);
 
-                events.ScheduleEvent(EVENT_WITHER, TIMER_WITHER);
-                events.ScheduleEvent(EVENT_CONSUME_LIFE, TIMER_CONSUME_LIFE);
-                events.ScheduleEvent(EVENT_RAMPANT_GROWTH, TIMER_RAMPANT_GROWTH);
-                events.ScheduleEvent(EVENT_SUMMON_POD, TIMER_SUMMON_POD);
-                events.ScheduleEvent(EVENT_SUMMON_SPORE, TIMER_SUMMON_SPORE);
+                events.ScheduleEvent(EVENT_WITHER, urand(7500, 10000));
+                events.ScheduleEvent(EVENT_CONSUME_LIFE, urand(20000, 25000));
+                events.ScheduleEvent(EVENT_SUMMON_POD, urand(5000, 10000));
+                events.ScheduleEvent(EVENT_SUMMON_SPORE, urand(15000, 20000));
 
                 DoZoneInCombat();
             }
@@ -147,16 +144,20 @@ class boss_ammunae : public CreatureScript
                 uint32 count = pCreatureList.size();
                 for(std::list<Creature*>::iterator iter = pCreatureList.begin(); iter != pCreatureList.end(); ++iter)
                 {
-                    (*iter)->SummonCreature(NPC_BLOODPETAL_BLOSSOM, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+                    if (Creature* bloodpetal = (*iter)->SummonCreature(NPC_BLOODPETAL_BLOSSOM, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()))
+                    {
+                        bloodpetal->CastSpell(bloodpetal, 75768, true);
+                        DoZoneInCombat(bloodpetal);
+                    }
                     (*iter)->ForcedDespawn();
                 }
             }
 
             void DoRampartGrowth()
             {
-                //DoScriptText(SAY_GROWTH, me);
                 me->SetPower(POWER_ENERGY, 0);
-                DoCastAOE(SPELL_RAMPANT_GROWTH);
+                isCasting = false;
+                me->CastSpell(me, SPELL_RAMPANT_GROWTH, true);
                 RampartSummon(NPC_SEEDING_POD, 100);
             }
 
@@ -168,23 +169,33 @@ class boss_ammunae : public CreatureScript
                 if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
+                events.Update(diff);
+
+                if (me->GetPower(POWER_ENERGY) == 100 && !isCasting)
+                {
+                    events.ScheduleEvent(EVENT_RAMPANT_GROWTH, 1000);
+                    isCasting = true;
+                }
+                
                 while(uint32 eventId = events.ExecuteEvent())
                 {
                     switch(eventId)
                     {
                         case EVENT_WITHER:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
-                                DoCast(target, SPELL_WITHER);
-                                events.ScheduleEvent(EVENT_WITHER, 1000);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                                me->CastSpell(target, SPELL_WITHER, true);
+
+                            events.ScheduleEvent(EVENT_WITHER, urand(18000, 20000));
                             break;
                         case EVENT_CONSUME_LIFE:
-                            DoCast(me->getVictim(), SPELL_CONSUME_LIFE_DAMAGE_EFFECT);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                                 me->CastSpell(target, SPELL_CONSUME_LIFE_DAMAGE_EFFECT, true);
+
+                            me->CastSpell(me, 75665, true);
                             events.ScheduleEvent(EVENT_CONSUME_LIFE, urand(15000, 22000));
                             break;
                         case EVENT_RAMPANT_GROWTH:
-                            if (me->GetPower(POWER_ENERGY) == me->GetMaxPower(POWER_ENERGY))
                                 DoRampartGrowth();
-                            events.ScheduleEvent(EVENT_RAMPANT_GROWTH, 10000);
                             break;
                         case EVENT_SUMMON_POD:
                             me->SummonCreature(NPC_SEEDING_POD, me->GetPositionX()+rand()%10, me->GetPositionY()+rand()%10, me->GetPositionZ());
@@ -239,6 +250,11 @@ public:
         uint32 SlashTimer;
 
         void Reset()
+        {
+            SlashTimer = 5000;
+        }
+
+        void EnterCombat(Unit* who)
         {
             SlashTimer = 5000;
         }
@@ -301,28 +317,29 @@ public:
 
         void Energize()
         {
-            if (IsHeroic())
+            if (Unit *target = me->FindNearestCreature(BOSS_AMMUNAE, 100.0f, true))
             {
-                if (Unit *target = me->FindNearestCreature(BOSS_AMMUNAE, 100))
-                {
-                    DoCast(SPELL_ENERGIZE);
-                    DoCast(target, SPELL_ENERGIZE);
-                    DoCast(SPELL_ENERGIZING_GROWTH);
-                    DoCast(target, SPELL_ENERGIZING_GROWTH);
-                }
-            }
-            else
-            {
-                if (Unit *target = me->FindNearestCreature(BOSS_AMMUNAE, 100))
-                {
-                    DoCast(SPELL_ENERGIZE);
-                    DoCast(target, SPELL_ENERGIZE);
-                }
+                if (!target->HasAura(SPELL_ENERGIZE))
+                    me->AddAura(SPELL_ENERGIZE, target);
             }
         }
 
         void UpdateAI(uint32 const diff)
         {
+            if (me->GetMap())
+            {  
+                if (me->GetMap()->IsHeroic())
+                {
+                    if (!me->HasAura(SPELL_ENERGIZING_GROWTH))
+                        me->CastSpell(me, SPELL_ENERGIZING_GROWTH, true);
+                }
+                else
+                {
+                    if (!me->HasAura(75624))
+                        me->CastSpell(me, 75624, true);
+                }
+            }
+
             if (EnergizeTimer <= diff)
             {
                 Energize();
@@ -333,6 +350,12 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             // used to despawn corpse immediately
+
+            if (Unit *target = me->FindNearestCreature(BOSS_AMMUNAE, 100.0f, true))
+            {
+                if (target->HasAura(SPELL_ENERGIZE))
+                    target->RemoveAura(SPELL_ENERGIZE);
+            }
             me->DespawnOrUnsummon();
         }
     };

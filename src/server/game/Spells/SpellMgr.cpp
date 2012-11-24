@@ -4875,6 +4875,13 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 74370: // Astral Rain
             spellInfo->EffectRadiusIndex[0] = 12;
             break;
+        case 89124: // Energizing Growth
+            spellInfo->EffectRadiusIndex[0] = 12;
+            break;
+        case 75790: // Rampant Growth 
+        case 89888:
+            spellInfo->EffectRadiusIndex[1] = 12;
+            break;
         default:
             break;
         }
