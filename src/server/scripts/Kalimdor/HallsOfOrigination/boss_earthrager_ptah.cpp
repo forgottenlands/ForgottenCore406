@@ -29,14 +29,14 @@ Author: dimiandre
 #include "ScriptedCreature.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "halls_of_origination.h"
 
 #define SAY_AGGRO "More carrion for the swarm..."
 #define SAY_DIED "Ptah... is... no more..."
 #define SAY_SPELL "Dust to dust."
 
-enum CreatureIds
+enum ptahCreatureIds
 {
-    BOSS_EARTHRAGER_PTAH        = 39428,
     MOB_HORROR                  = 40810,
     MOB_SCARAB                  = 40458,
 };
@@ -108,6 +108,11 @@ class boss_ptah : public CreatureScript
             void JustDied(Unit* /*killer*/)
             {
                 me->MonsterYell(SAY_DIED, 0, 0);
+
+                if (pInstance)
+                {
+                    pInstance->HandleGameObject(pInstance->GetData64(DATA_BOSS_DOOR), false, 0);  
+                }
             }
 
             void JustSummoned(Creature *pSummoned)

@@ -171,6 +171,10 @@ class boss_temple_guardian_anhuur : public CreatureScript
                 GameObject* Bridge = me->FindNearestGameObject(GO_ANHUUR_BRIDGE, 200);
                 if (Bridge)
                     Bridge->SetGoState(GO_STATE_ACTIVE);
+
+                if (GameObject* door = me->FindNearestGameObject(GO_ANHUUR_DOOR, 200.0)) 
+                    if (pInstance)
+                        pInstance->HandleGameObject(door->GetGUID(), true, 0);    
             }
 
             void EnterCombat(Unit* /*Ent*/)

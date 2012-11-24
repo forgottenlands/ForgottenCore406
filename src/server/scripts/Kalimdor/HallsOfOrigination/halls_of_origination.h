@@ -42,14 +42,20 @@ enum Data64
     DATA_ISISET,
     DATA_AMMUNAE,
     DATA_SETESH,
-    DATA_RAJH
+    DATA_RAJH,
+    DATA_ELEVATOR,
+    DATA_BOSS_DOOR,
+    DATA_BRIDGE,
+    DATA_ANHUUR_DOOR,
 };
 
 enum GameObjectIds
 {
-    GO_ORIGINATION_ELEVATOR,
+    GO_ORIGINATION_ELEVATOR     = 207547,
     GO_LARGE_STONE_OBELISK      = 207410,
-    GO_ANHUUR_BRIDGE            = 206506
+    GO_ANHUUR_BRIDGE            = 206506,
+    GO_BOSS_DOOR                = 202314,
+    GO_ANHUUR_DOOR              = 202307,
 };
 
 enum CreatureIds

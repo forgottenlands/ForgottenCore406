@@ -56,6 +56,8 @@ public:
         uint64 OriginationElevatorGUID;
         uint64 uiTeamInInstance;
         uint64 uiAnhuurBridgeGUID;
+        uint64 uiBossDoor;
+        uint64 uiAnhuurDoor;
 
         void Initialize()
         {
@@ -127,6 +129,12 @@ public:
                     if (GetData(DATA_TEMPLE_GUARDIAN_ANHUUR) == DONE)
                             HandleGameObject(uiAnhuurBridgeGUID, true, go);
                     break;
+                case GO_BOSS_DOOR:
+                    uiBossDoor = go->GetGUID();
+                    break;
+                case GO_ANHUUR_DOOR:
+                    uiAnhuurDoor = go->GetGUID();
+                    break;
             }
         }
 
@@ -148,6 +156,9 @@ public:
                     return uiSetesh;
                 case DATA_RAJH:
                     return uiRajh;
+                case DATA_BOSS_DOOR:
+                    sLog->outString("getdata64");
+                    return uiBossDoor;
             }
             return 0;
         }

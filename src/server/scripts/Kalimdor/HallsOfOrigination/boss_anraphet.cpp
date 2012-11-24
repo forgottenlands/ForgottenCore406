@@ -55,7 +55,7 @@ enum ScriptTexts
 enum Spells
 {
     //Anraphet
-	SPELL_ALPHA_BEAMS          = 76184,
+	SPELL_ALPHA_BEAMS          = 76912,
     SPELL_CRUMBLING_RUIN       = 75609,
     SPELL_DESTRUCTION_PROTOCOL = 77437,
     SPELL_NEMESIS_STRIKE       = 75604,
@@ -105,13 +105,14 @@ class boss_anraphet : public CreatureScript
 
         struct boss_anraphetAI : public BossAI
         {
-            boss_anraphetAI(Creature* creature) : BossAI(creature, DATA_ANRAPHET_EVENT)
+            boss_anraphetAI(Creature* creature) : BossAI(creature, DATA_ANRAPHET_EVENT), summons(me)
             {
                 instance = me->GetInstanceScript();
             }
 
             InstanceScript* instance;
             uint8 wardenKilled;
+            SummonList summons;
 
             void Reset()
             {
@@ -121,6 +122,12 @@ class boss_anraphet : public CreatureScript
                     instance->SetData(DATA_ANRAPHET_EVENT, NOT_STARTED);
 
                 wardenKilled = 0;
+                summons.DespawnAll();
+            }
+
+            void JustSummoned(Creature* pSummon)
+            {
+                summons.Summon(pSummon);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -130,8 +137,7 @@ class boss_anraphet : public CreatureScript
                 if (instance)
                     instance->SetData(DATA_ANRAPHET_EVENT, IN_PROGRESS);
 
-                events.ScheduleEvent(EVENT_ALPHA_BEAMS, 8000+rand()%2000);
-                events.ScheduleEvent(EVENT_CRUMBLING_RUIN, urand(10000, 16000));
+                events.ScheduleEvent(EVENT_ALPHA_BEAMS, urand(8000, 10000));
                 events.ScheduleEvent(EVENT_NEMESIS_STRIKE, 12000);
                 events.ScheduleEvent(EVENT_OMEGA_STANCE, 10000);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN);
@@ -146,7 +152,7 @@ class boss_anraphet : public CreatureScript
 
             void WardenKilled()
             {
-                wardenKilled++;
+                // wardenKilled++;
 
                 if (wardenKilled == 4)
                     preBattlePhase();
@@ -177,22 +183,38 @@ class boss_anraphet : public CreatureScript
                     switch(eventId)
                     {
                         case EVENT_ALPHA_BEAMS:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
+                            sLog->outString("BEAM");
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            {
+                                Position pos;
+                                pos = target->GetPosition();
                                 DoCast(target, SPELL_ALPHA_BEAMS);
-                                events.ScheduleEvent(EVENT_ALPHA_BEAMS, urand(8000, 12000));
+                                if (Creature* beam = me->SummonCreature(41144, pos, TEMPSUMMON_MANUAL_DESPAWN, 0, 0))
+                                {
+                                    beam->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                    DoZoneInCombat(beam);
+                                    beam->AttackStop();
+                                    beam->StopMoving();
+                                    beam->CastSpell(beam, 91205, true);
+                                }
+                            }
+                            events.ScheduleEvent(EVENT_ALPHA_BEAMS, urand(8000, 12000));
                             break;
                         case EVENT_CRUMBLING_RUIN:
-                            DoCast(me->getVictim(), SPELL_CRUMBLING_RUIN);
+                            sLog->outString("ruin");
+                            me->CastSpell(me, SPELL_CRUMBLING_RUIN, true);
                             events.ScheduleEvent(EVENT_CRUMBLING_RUIN, urand(10000, 16000));
                             break;
                         case EVENT_NEMESIS_STRIKE:
-                            DoCast(me->getVictim(), SPELL_NEMESIS_STRIKE);
-                            events.ScheduleEvent(EVENT_NEMESIS_STRIKE, 2000);
+                            sLog->outString("strike");
+                            me->CastSpell(me->getVictim(), SPELL_NEMESIS_STRIKE, true);
+                            events.ScheduleEvent(EVENT_NEMESIS_STRIKE, urand(4000, 12000));
                             break;
                         case EVENT_OMEGA_STANCE:
-                            //DoScriptText(SAY_OMEGA, me);
+                            sLog->outString("stance");
                             DoCast(me, SPELL_OMEGA_STANCE);
-                            events.ScheduleEvent(EVENT_OMEGA_STANCE, 14000);
+                            events.ScheduleEvent(EVENT_OMEGA_STANCE, urand(18000, 30000));
+                            events.ScheduleEvent(EVENT_CRUMBLING_RUIN, urand(2000, 2500));
                             break;
                         default:
                             break;
@@ -204,8 +226,6 @@ class boss_anraphet : public CreatureScript
 
             void JustDied(Unit* /*who*/)
             {
-                //DoScriptText(SAY_DEATH, me);
-
                 if (instance)
                     instance->SetData(DATA_ANRAPHET_EVENT, DONE);
             }

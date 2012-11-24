@@ -4864,6 +4864,14 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 75547: // Quicksand
             spellInfo->EffectRadiusIndex[0] = 37;
             break;
+        case 76956: // Alpha beam
+        case 91177:
+            spellInfo->EffectRadiusIndex[0] = 8;
+            break;
+        case 75609: // Crumbling Ruin
+        case 91206:
+            spellInfo->EffectRadiusIndex[0] = 28;
+            break;
         default:
             break;
         }
