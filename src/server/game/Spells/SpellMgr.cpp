@@ -4842,6 +4842,39 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectMiscValue[1] = 0;
             spellInfo->EffectMiscValueB[1] = 0;
             break;
+        case 75540: // Flame Bolt
+        case 89881:
+            spellInfo->EffectRadiusIndex[0] = 25;
+            break;
+        case 94974: // Earth Spike (visual)
+            spellInfo->EffectTriggerSpell[0] = 0;
+            break;
+        case 75339: // Earth Spike (dmg)
+        case 89882:
+            spellInfo->EffectRadiusIndex[0] = 26;
+            spellInfo->EffectRadiusIndex[1] = 26;
+            spellInfo->EffectTriggerSpell[2] = 0;
+            break;
+        case 75521: // Summon Dustbone Horror
+            spellInfo->EffectMiscValue[0] = 40787;
+            // no break
+        case 75462: // Summon Jeweled Scarab
+            spellInfo->EffectRadiusIndex[0] = 10;
+            break;
+        case 75547: // Quicksand
+            spellInfo->EffectRadiusIndex[0] = 37;
+            break;
+        case 76956: // Alpha beam
+        case 91177:
+            spellInfo->EffectRadiusIndex[0] = 8;
+            break;
+        case 75609: // Crumbling Ruin
+        case 91206:
+            spellInfo->EffectRadiusIndex[0] = 28;
+            break;
+        case 74370: // Astral Rain
+            spellInfo->EffectRadiusIndex[0] = 12;
+            break;
         default:
             break;
         }

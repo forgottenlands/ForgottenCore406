@@ -128,14 +128,14 @@ class boss_isiset : public CreatureScript
             void Reset()
             {
                 RemoveSummons();
-                SupernovaTimer = 15000+rand()%5000;
-                AstralRainTimer = 10000;
-                CelestialCallPhase3Timer = 25000;
-                CelestialCallPhase2Timer = 25000;
-                CelestialCallPhase1Timer = 25000;
-                VeilOfSkyPhase3Timer = 20000;
-                VeilOfSkyPhase2Timer = 20000;
-                VeilOfSkyPhase1Timer = 20000;
+                SupernovaTimer = urand(15000, 25000);
+                AstralRainTimer = urand(10000, 12000);
+                CelestialCallPhase3Timer = urand(10000, 25000);
+                CelestialCallPhase2Timer = urand(10000, 25000);
+                CelestialCallPhase1Timer = urand(10000, 25000);
+                VeilOfSkyPhase3Timer = urand(12000, 20000);
+                VeilOfSkyPhase2Timer = urand(12000, 20000);
+                VeilOfSkyPhase1Timer = urand(12000, 20000);
                 Phased = false;
                 AstralRain = true;
                 VeilOfSky = true;
@@ -145,19 +145,27 @@ class boss_isiset : public CreatureScript
 
             void SummonedCreatureDespawn(Creature* summon)
             {
-                switch(summon->GetEntry())
+                if (Phased)
                 {
-                    case 39720: // Astral Rain
-                        AstralRain = false;
-                        break;
-                    case 39721: // Celestial Call
-                        CelestialCall = false;
-                        break;
-                    case 39722: // Veil of Sky
-                        VeilOfSky = false;
-                        break;
+                    switch(summon->GetEntry())
+                    {
+                        case 39720: // Astral Rain
+                            AstralRain = false;
+                            break;
+                        case 39721: // Celestial Call
+                            CelestialCall = false;
+                            break;
+                        case 39722: // Veil of Sky
+                            VeilOfSky = false;
+                            break;
+                    }
+                    Phased = false;
+                    me->SetVisible(true);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->Attack(me->getVictim(), true);
+                    RemoveSummons();
                 }
-                RemoveSummons();
             }
 
             void RemoveSummons()
@@ -184,6 +192,9 @@ class boss_isiset : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
+                if (Phased)
+                    return;
+
                 if ((me->GetHealth() * 100 / me->GetMaxHealth() <= 66) && Phase == 0)
                 {
                     Phase = 1;
@@ -193,6 +204,11 @@ class boss_isiset : public CreatureScript
                     me->SummonCreature(39720, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
                     me->SummonCreature(39721, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
                     me->SummonCreature(39722, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->AttackStop();
+                    me->StopMoving();
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetVisible(false);
                 }
 
                 if ((me->GetHealth() * 100 / me->GetMaxHealth() <= 33) && Phase == 1)
@@ -207,6 +223,11 @@ class boss_isiset : public CreatureScript
                         me->SummonCreature(39721, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
                     if (VeilOfSky == true)
                         me->SummonCreature(39722, pos, TEMPSUMMON_CORPSE_DESPAWN, 1000);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->AttackStop();
+                    me->StopMoving();
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetVisible(false);
                 }
 
                 if (Phase == 0)
@@ -214,13 +235,13 @@ class boss_isiset : public CreatureScript
                     if (CelestialCallPhase1Timer <= diff && Phased == false && CelestialCall == true)
                     {
                         DoCast(me, SPELL_CELESTIAL_CALL_P1);
-                        CelestialCallPhase1Timer = 45000;
+                        CelestialCallPhase1Timer = urand(10000, 25000);
                     } else CelestialCallPhase1Timer -= diff;
 
                     if (VeilOfSkyPhase1Timer <= diff && Phased == false && VeilOfSky == true)
                     {
                         DoCast(me, SPELL_VEIL_OF_SKY_P1);
-                        VeilOfSkyPhase1Timer = 45000;
+                        VeilOfSkyPhase1Timer = urand(12000, 20000);
                     } else VeilOfSkyPhase1Timer -= diff;
                 }
 
@@ -229,13 +250,13 @@ class boss_isiset : public CreatureScript
                     if (CelestialCallPhase2Timer <= diff && Phased == false && CelestialCall == true)
                     {
                         DoCast(me, SPELL_CELESTIAL_CALL_P2);
-                        CelestialCallPhase2Timer = 45000;
+                        CelestialCallPhase2Timer = urand(10000, 25000);
                     } else CelestialCallPhase2Timer -= diff;
 
                     if (VeilOfSkyPhase2Timer <= diff && Phased == false && VeilOfSky == true)
                     {
                         DoCast(me, SPELL_VEIL_OF_SKY_P2);
-                        VeilOfSkyPhase2Timer = 45000;
+                        VeilOfSkyPhase2Timer = urand(12000, 20000);
                     } else VeilOfSkyPhase2Timer -= diff;
                 }
 
@@ -244,13 +265,13 @@ class boss_isiset : public CreatureScript
                     if (CelestialCallPhase3Timer <= diff && Phased == false && CelestialCall == true)
                     {
                         DoCast(me, SPELL_CELESTIAL_CALL_P3);
-                        CelestialCallPhase3Timer = 45000;
+                        CelestialCallPhase3Timer = urand(10000, 25000);
                     } else CelestialCallPhase3Timer -= diff;
 
                     if (VeilOfSkyPhase3Timer <= diff && Phased == false && VeilOfSky == true)
                     {
                         DoCast(me, SPELL_VEIL_OF_SKY_P3);
-                        VeilOfSkyPhase3Timer = 45000;
+                        VeilOfSkyPhase3Timer = urand(12000, 20000);
                     } else VeilOfSkyPhase3Timer -= diff;
                 }
 
@@ -258,13 +279,13 @@ class boss_isiset : public CreatureScript
                 {
                     //Talk(SAY_SUPERNOVA);
                     DoCast(me->getVictim(), SPELL_SUPERNOVA);
-                    SupernovaTimer = 15000+rand()%5000;
+                    SupernovaTimer = urand(15000, 25000);
                 } else SupernovaTimer -= diff;
 
                 if (AstralRainTimer <= diff && Phased == false && CelestialCall == true)
                 {
-                    DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true), SPELL_ASTRAL_RAIN);
-                    AstralRainTimer = 10000;
+                    me->CastSpell(me, 74370, true);
+                    AstralRainTimer = urand(10000, 12000);
                 } else AstralRainTimer -= diff;
 
                 DoMeleeAttackIfReady();
@@ -286,8 +307,8 @@ class spell_isiset_supernova : public SpellScriptLoader
 
             void Register()
             {
-                //OnUnitTargetSelect += SpellUnitTargetFn(spell_isiset_supernova_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
-                //OnUnitTargetSelect += SpellUnitTargetFn(spell_isiset_supernova_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_AREA_ENEMY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_isiset_supernova_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
+                // OnUnitTargetSelect += SpellUnitTargetFn(spell_isiset_supernova_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_AREA_ENEMY_SRC);
             }
         };
 

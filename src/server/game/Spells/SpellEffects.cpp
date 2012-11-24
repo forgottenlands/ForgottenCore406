@@ -2873,6 +2873,10 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
 void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
 {
+    // Skip Earth Spike
+    if (m_spellInfo->Id == 94974 || m_spellInfo->Id == 89882)
+        return;
+
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell [effIndex];
 
     // normal case

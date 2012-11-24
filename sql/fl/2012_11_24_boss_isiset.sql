@@ -1,0 +1,2 @@
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (74137, 'spell_isiset_supernova');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (76670, 'spell_isiset_supernova');
