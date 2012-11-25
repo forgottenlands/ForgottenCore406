@@ -3293,6 +3293,158 @@ class npc_transmogrify : public CreatureScript
         }
 };
 
+class npc_tier_vendor : public CreatureScript
+{
+    public:
+        npc_tier_vendor() : CreatureScript("npc_tier_vendor") { }
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            if (pPlayer->getClass() == 11) // Druid
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Feral", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Balance", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Restoration", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Feral", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Balance", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Restoration", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
+            } 
+            else if (pPlayer->getClass() == 5) // Priest
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Healer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head DPS", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Healer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder DPS", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+            }
+            else if (pPlayer->getClass() == 2) // Pally
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Dps", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Tank", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Healer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Dps", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Tank", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Healer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
+            }
+            else if (pPlayer->getClass() == 7) // Shaman
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Melee", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Caster", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Healer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Melee", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Caster", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Healer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
+            }
+            else if (pPlayer->getClass() == 1 || pPlayer->getClass() == 6) // War DK
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head Tank", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head DPS", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder Tank", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder DPS", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+            }
+            else if (pPlayer->getClass() == 3 || pPlayer->getClass() == 4 || pPlayer->getClass() == 8 || pPlayer->getClass() == 9) // Hunter Rogue Mage Warlock
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Head DPS", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Shoulder DPS", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);   
+            }
+
+            pPlayer->SEND_GOSSIP_MENU(51001, pCreature->GetGUID());
+            return true;
+        }
+
+        void GiveItem(uint32 itemId, Player* player, Creature* creature)
+        {
+            uint32 justiceCount = player->GetCurrency(395);
+            uint32 valorCount   = player->GetCurrency(396);
+            
+            if (justiceCount >= 350000 && valorCount >= 400000)
+            {
+                player->ModifyCurrency(395, -350000);
+                player->ModifyCurrency(396, -400000);
+                player->AddItem(itemId, 1);
+            } else
+            {
+                creature->MonsterWhisper("Non hai abbastanza Justice o Valor points, richiesti 3500 Justices e 4000 Valor points", player->GetGUID(), false);
+            }
+        }
+
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+        {
+            player->PlayerTalkClass->CloseGossip();
+            switch (action)
+            {
+                case GOSSIP_ACTION_INFO_DEF:
+                    switch (player->getClass())
+                    {
+                        case 1:  GiveItem(60328, player, creature); break;
+                        case 2:  GiveItem(60346, player, creature); break;
+                        case 3:  GiveItem(60303, player, creature); break;
+                        case 4:  GiveItem(60299, player, creature); break;
+                        case 5:  GiveItem(60258, player, creature); break;
+                        case 6:  GiveItem(60351, player, creature); break;
+                        case 7:  GiveItem(60320, player, creature); break;
+                        case 8:  GiveItem(60243, player, creature); break;
+                        case 9:  GiveItem(60249, player, creature); break;
+                        case 11: GiveItem(60286, player, creature); break;
+                    }
+                    break;
+                case GOSSIP_ACTION_INFO_DEF+1:
+                    switch (player->getClass())
+                    {
+                        case 1:  GiveItem(60325, player, creature); break;
+                        case 2:  GiveItem(60356, player, creature); break;
+                        case 3:  GiveItem(60306, player, creature); break;
+                        case 4:  GiveItem(60302, player, creature); break;
+                        case 5:  GiveItem(60256, player, creature); break;
+                        case 6:  GiveItem(60341, player, creature); break;
+                        case 7:  GiveItem(60315, player, creature); break;
+                        case 8:  GiveItem(60246, player, creature); break;
+                        case 9:  GiveItem(60252, player, creature); break;
+                        case 11: GiveItem(60282, player, creature); break;
+                    }
+                    break;
+                case GOSSIP_ACTION_INFO_DEF+2:
+                    switch (player->getClass())
+                    {
+                        case 1:  GiveItem(60331, player, creature); break;
+                        case 2:  GiveItem(60359, player, creature); break;
+                        case 5:  GiveItem(60262, player, creature); break;
+                        case 6:  GiveItem(60353, player, creature); break;
+                        case 7:  GiveItem(60308, player, creature); break;
+                        case 11: GiveItem(60277, player, creature); break;
+                    }
+                    break;
+                case GOSSIP_ACTION_INFO_DEF+3:
+                    switch (player->getClass())
+                    {
+                        case 1:  GiveItem(60327, player, creature); break;
+                        case 2:  GiveItem(60348, player, creature); break;
+                        case 5:  GiveItem(60253, player, creature); break;
+                        case 6:  GiveItem(60343, player, creature); break;
+                        case 7:  GiveItem(60322, player, creature); break;
+                        case 11: GiveItem(60289, player, creature); break;
+                    }
+                    break;
+                case GOSSIP_ACTION_INFO_DEF+4:
+                    switch (player->getClass())
+                    {
+                        case 2:  GiveItem(60358, player, creature); break;
+                        case 7:  GiveItem(60317, player, creature); break;
+                        case 11: GiveItem(60284, player, creature); break;
+                    }
+                    break;
+                 case GOSSIP_ACTION_INFO_DEF+5:
+                    switch (player->getClass())
+                    {
+                        case 2:  GiveItem(60362, player, creature); break;
+                        case 7:  GiveItem(60311, player, creature); break;
+                        case 11: GiveItem(60279, player, creature); break;
+                    }
+                    break;
+            }
+            return true;
+        }
+};
+
 void AddSC_npcs_special() {
 	new npc_air_force_bots;
 	new npc_lunaclaw_spirit;
@@ -3329,4 +3481,5 @@ void AddSC_npcs_special() {
     new npc_shadowy_apparition;
 	//new npc_guardian_of_ancient_kings;
     new npc_transmogrify;
+    new npc_tier_vendor;
 }
