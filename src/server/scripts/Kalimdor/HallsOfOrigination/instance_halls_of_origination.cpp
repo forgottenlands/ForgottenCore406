@@ -157,7 +157,6 @@ public:
                 case DATA_RAJH:
                     return uiRajh;
                 case DATA_BOSS_DOOR:
-                    sLog->outString("getdata64");
                     return uiBossDoor;
             }
             return 0;
