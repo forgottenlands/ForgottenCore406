@@ -191,6 +191,9 @@ class boss_anraphet : public CreatureScript
                                 if (Creature* beam = me->SummonCreature(41144, pos, TEMPSUMMON_MANUAL_DESPAWN, 0, 0))
                                 {
                                     beam->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                    beam->SetReactState(REACT_PASSIVE);
+                                    beam->SetSpeed(MOVE_WALK, 0.0f, true);
+                                    beam->SetSpeed(MOVE_RUN, 0.0f, true);
                                     DoZoneInCombat(beam);
                                     beam->AttackStop();
                                     beam->StopMoving();
@@ -200,17 +203,14 @@ class boss_anraphet : public CreatureScript
                             events.ScheduleEvent(EVENT_ALPHA_BEAMS, urand(8000, 12000));
                             break;
                         case EVENT_CRUMBLING_RUIN:
-                            sLog->outString("ruin");
                             me->CastSpell(me, SPELL_CRUMBLING_RUIN, true);
                             events.ScheduleEvent(EVENT_CRUMBLING_RUIN, urand(10000, 16000));
                             break;
                         case EVENT_NEMESIS_STRIKE:
-                            sLog->outString("strike");
                             me->CastSpell(me->getVictim(), SPELL_NEMESIS_STRIKE, true);
                             events.ScheduleEvent(EVENT_NEMESIS_STRIKE, urand(4000, 12000));
                             break;
                         case EVENT_OMEGA_STANCE:
-                            sLog->outString("stance");
                             DoCast(me, SPELL_OMEGA_STANCE);
                             events.ScheduleEvent(EVENT_OMEGA_STANCE, urand(18000, 30000));
                             events.ScheduleEvent(EVENT_CRUMBLING_RUIN, urand(2000, 2500));
@@ -226,7 +226,10 @@ class boss_anraphet : public CreatureScript
             void JustDied(Unit* /*who*/)
             {
                 if (instance)
+                {
                     instance->SetData(DATA_ANRAPHET_EVENT, DONE);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CRUMBLING_RUIN);
+                }
             }
         };
 

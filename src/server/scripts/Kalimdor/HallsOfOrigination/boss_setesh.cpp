@@ -181,6 +181,20 @@ class boss_setesh : public CreatureScript
 
                 if (instance)
                     instance->SetData(DATA_SETESH_EVENT, DONE);
+
+                std::list<Creature*> pCreatureList;
+                Trinity::AllCreaturesOfEntryInRange checker(me, 41208, 100.0f);
+                Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, pCreatureList, checker);
+                me->VisitNearbyObject(100.0f, searcher);
+                if(pCreatureList.empty())
+                    return;
+
+                std::list<Creature*>::iterator itr = pCreatureList.begin();
+                uint32 count = pCreatureList.size();
+                for(std::list<Creature*>::iterator iter = pCreatureList.begin(); iter != pCreatureList.end(); ++iter)
+                {
+                    (*iter)->ForcedDespawn();
+                }
             }
         };
 

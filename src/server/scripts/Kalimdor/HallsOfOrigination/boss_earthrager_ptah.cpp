@@ -130,7 +130,7 @@ class boss_ptah : public CreatureScript
 
             void EnterPhaseGround()
             {
-                events.ScheduleEvent(EVENT_FLAME_BOLT, 7500);
+                events.ScheduleEvent(EVENT_FLAME_BOLT, urand(15000, 25000));
                 events.ScheduleEvent(EVENT_RAGING_SMASH, urand(4000, 10000));
                 events.ScheduleEvent(EVENT_EARTH_POINT, 8000);
             }
@@ -167,7 +167,7 @@ class boss_ptah : public CreatureScript
                     me->CastSpell(me, SPELL_SUMMON_DUSTBONE_HORROR, true);
 
                 // Summon height scarabs
-                for (int i = 0; i < 8; i++)
+                for (int i = 0; i < 4; i++)
                     me->CastSpell(me, SPELL_SUMMON_JEWELED_SCARAB, true);
 
                 // Set deathstate
@@ -195,7 +195,7 @@ class boss_ptah : public CreatureScript
                     {
                         case EVENT_FLAME_BOLT:
                             me->CastSpell(me, SPELL_FLAME_BOLT, false);
-                            events.ScheduleEvent(EVENT_FLAME_BOLT, urand(15000, 20000));
+                            events.ScheduleEvent(EVENT_FLAME_BOLT, urand(28000, 45000));
                             return;
                         case EVENT_RAGING_SMASH:
                             DoCast(me->getVictim(), SPELL_RAGING_SMASH);

@@ -107,7 +107,7 @@ class boss_rajh : public CreatureScript
                 me->SetPower(POWER_ENERGY, me->GetMaxPower(POWER_ENERGY));
 
                 events.ScheduleEvent(EVENT_SUN_STRIKE, urand(8000, 10000));
-                events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
+                // events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
                 events.ScheduleEvent(EVENT_BLESSING_OF_THE_SUN, 1000);
                 events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, 25000);
                 events.ScheduleEvent(EVENT_SUMMON_SOLAR_WIND, 20000);
@@ -238,6 +238,20 @@ public:
         {
             // used to despawn corpse immediately
             me->DespawnOrUnsummon();
+
+            std::list<Creature*> pCreatureList;
+            Trinity::AllCreaturesOfEntryInRange checker(me, 47922, 100.0f);
+            Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, pCreatureList, checker);
+            me->VisitNearbyObject(100.0f, searcher);
+            if(pCreatureList.empty())
+                return;
+
+            std::list<Creature*>::iterator itr = pCreatureList.begin();
+            uint32 count = pCreatureList.size();
+            for(std::list<Creature*>::iterator iter = pCreatureList.begin(); iter != pCreatureList.end(); ++iter)
+            {
+                (*iter)->ForcedDespawn();
+            }
         }
     };
 };
