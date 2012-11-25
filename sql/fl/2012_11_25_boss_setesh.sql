@@ -1,0 +1,3 @@
+UPDATE `creature_template` SET `minlevel`=85, `Health_mod`=2.43, `maxlevel`=85, `exp`=3, `faction_A`=14, `faction_H`=14 WHERE  `entry`=41055 LIMIT 1;
+UPDATE `creature_template` SET `minlevel`=85, `maxlevel`=85, `exp`=3, `faction_A`=14, `faction_H`=14, `Health_mod`=5.98 WHERE  `entry`=41208 LIMIT 1;
+UPDATE `creature_template` SET `modelid2`=16925, `minlevel`=85, `maxlevel`=85, `faction_A`=14, `faction_H`=14, `flags_extra`=2 WHERE  `entry`=41126 LIMIT 1;

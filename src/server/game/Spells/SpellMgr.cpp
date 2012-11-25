@@ -4882,6 +4882,10 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 89888:
             spellInfo->EffectRadiusIndex[1] = 12;
             break;
+        case 76684: // Chaos Burn
+        case 89874:
+            spellInfo->EffectRadiusIndex[0] = 13;
+            break;
         default:
             break;
         }

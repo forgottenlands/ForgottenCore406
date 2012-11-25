@@ -64,16 +64,12 @@ enum Texts
     SAY_DEATH = 2
 };
 
-enum Gameobjects
-{
-};
-
 enum NPCs
 {
     NPC_VOID_SENTINEL       = 41208,
     NPC_VOID_SEEKER         = 41371,
     NPC_VOID_WURM           = 41374,
-    NPC_CHAOS_PORTAL        = 0
+    NPC_CHAOS_PORTAL        = 41055
 };
 
 enum Events
@@ -92,17 +88,20 @@ class boss_setesh : public CreatureScript
 
         struct boss_seteshAI : public BossAI
         {
-            boss_seteshAI(Creature* creature) : BossAI(creature, DATA_SETESH_EVENT)
+            boss_seteshAI(Creature* creature) : BossAI(creature, DATA_SETESH_EVENT), Summons(me)
             {
                 instance = me->GetInstanceScript();
             }
 
             InstanceScript* instance;
+            SummonList Summons;
 
             void Reset()
             {
                 if (instance)
                     instance->SetData(DATA_SETESH_EVENT, NOT_STARTED);
+
+                Summons.DespawnAll();
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -121,6 +120,20 @@ class boss_setesh : public CreatureScript
                 DoZoneInCombat();
             }
 
+            void JustSummoned(Creature* summon)
+            {
+                if (summon->GetEntry() ==  41126)
+                {
+                    summon->CastSpell(summon, SPELL_CHAOS_BLAST, true);
+                    DoZoneInCombat(summon);
+                    summon->SetReactState(REACT_PASSIVE);
+                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    summon->AttackStop();
+                    summon->StopMoving();
+                }
+            }
+
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
@@ -129,23 +142,20 @@ class boss_setesh : public CreatureScript
                 if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
 
+                events.Update(diff);
+
                 while(uint32 eventId = events.ExecuteEvent())
                 {
                     switch(eventId)
                     {
                         case EVENT_CHAOS_BOLT:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target, SPELL_CHAOS_BOLT);
                             events.ScheduleEvent(EVENT_CHAOS_BOLT, 10000);
                             break;
                         case EVENT_REIGN_OF_CHAOS:
-                            DoCastAOE(SPELL_REIGN_OF_CHAOS);
+                            // DoCastAOE(SPELL_REIGN_OF_CHAOS);
                             events.ScheduleEvent(EVENT_REIGN_OF_CHAOS, urand(15000, 22000));
-                            break;
-                        case EVENT_CHAOS_BLAST:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
-                                DoCast(target, SPELL_CHAOS_BLAST);
-                            events.ScheduleEvent(EVENT_CHAOS_BLAST, 15000);
                             break;
                         case EVENT_SUMMON_SEED_OF_CHAOS:
                             DoCast(SPELL_SUMMON_CHAOS_SEED);
@@ -254,6 +264,7 @@ public:
 
             SummonTimer = 1000;
             Summons.DespawnAll();
+            me->AddAura(76714, me);
         }
 
         void Summon(uint8 summon)
@@ -279,7 +290,7 @@ public:
 
         void IsSummonedBy(Unit* /*summoner*/)
         {
-            //DoCast(SPELL_INFERNAL_ERUPTION_EFFECT);
+            // DoCast(SPELL_INFERNAL_ERUPTION_EFFECT);
         }
 
         void JustSummoned(Creature* summoned)
