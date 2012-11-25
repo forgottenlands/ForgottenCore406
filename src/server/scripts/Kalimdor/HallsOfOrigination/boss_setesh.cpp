@@ -132,6 +132,8 @@ class boss_setesh : public CreatureScript
                     summon->AttackStop();
                     summon->StopMoving();
                 }
+
+                Summons.Summon(summon);
             }
 
             void UpdateAI(uint32 const diff)

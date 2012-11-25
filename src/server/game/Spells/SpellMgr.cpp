@@ -4886,6 +4886,19 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 89874:
             spellInfo->EffectRadiusIndex[0] = 13;
             break;
+        case 73872: // Sun strike
+        case 89887:
+            spellInfo->EffectRadiusIndex[1] = 27;
+            break;
+        case 76355: // Blessing of the sun
+        case 89879:
+            spellInfo->EffectRadiusIndex[0] = 22;
+            spellInfo->EffectRadiusIndex[2] = 22;
+            break;
+        case 89133: // Solar Fire
+        case 89878: 
+            spellInfo->EffectRadiusIndex[0] = 26;
+            break;
         default:
             break;
         }

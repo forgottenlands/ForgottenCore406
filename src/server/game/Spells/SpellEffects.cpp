@@ -8086,6 +8086,9 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
 
 void Spell::EffectLeapBack(SpellEffIndex effIndex)
 {
+    if (m_spellInfo->Id == 89130 || m_spellInfo->Id == 74108)
+        return;
+
     float speedxy = float(m_spellInfo->EffectMiscValue [effIndex]) / 10;
     float speedz = float(damage / 10);
     if (!speedxy)

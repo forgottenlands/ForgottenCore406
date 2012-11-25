@@ -48,7 +48,7 @@ enum Spells
     SPELL_INFERNO_LEAP_2       = 89876, //Value: 120250 to 139750
     SPELL_SUMMON_SUN_ORB       = 80352,
     SPELL_BLESSING_OF_THE_SUN  = 76352,
-    SPELL_SUMMON_SOLAR_WIND    = 74104,
+    SPELL_SUMMON_SOLAR_WIND    = 89127,
 
     //Solar Wind
     SPELL_SOLAR_WIND           = 89130,
@@ -61,14 +61,6 @@ enum Texts
     SAY_KILL     = 1,
     SAY_DEATH    = 2,
     SAY_ENERGIZE = 3
-};
-
-enum EnergizeCords
-{
-    //Find cords for the center of room
-    X = 0,
-    Y = 0,
-    Z = 0
 };
 
 enum Events
@@ -87,19 +79,22 @@ class boss_rajh : public CreatureScript
 
         struct boss_rajhAI : public BossAI
         {
-            boss_rajhAI(Creature* creature) : BossAI(creature, DATA_RAJH_EVENT)
+            boss_rajhAI(Creature* creature) : BossAI(creature, DATA_RAJH_EVENT), Summons(me)
             {
                 instance = me->GetInstanceScript();
             }
 
             InstanceScript* instance;
+            SummonList Summons;
 
             void Reset()
             {
                 if (instance)
                     instance->SetData(DATA_RAJH_EVENT, NOT_STARTED);
 
+                me->setPowerType(POWER_ENERGY);
                 me->SetPower(POWER_ENERGY, me->GetMaxPower(POWER_ENERGY));
+                Summons.DespawnAll();
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -111,19 +106,33 @@ class boss_rajh : public CreatureScript
 
                 me->SetPower(POWER_ENERGY, me->GetMaxPower(POWER_ENERGY));
 
-                events.ScheduleEvent(EVENT_SUN_STRIKE, 10000);
+                events.ScheduleEvent(EVENT_SUN_STRIKE, urand(8000, 10000));
                 events.ScheduleEvent(EVENT_INFERNO_LEAP, 15000);
-                events.ScheduleEvent(EVENT_BLESSING_OF_THE_SUN, 12000);
+                events.ScheduleEvent(EVENT_BLESSING_OF_THE_SUN, 1000);
                 events.ScheduleEvent(EVENT_SUMMON_SUN_ORB, 25000);
                 events.ScheduleEvent(EVENT_SUMMON_SOLAR_WIND, 20000);
 
                 DoZoneInCombat();
             }
 
+            void JustSummoned(Creature* summon)
+            {
+                if (summon->GetEntry() == 39635)
+                {
+                    summon->AddAura(74109, summon);
+                    summon->AddAura(74107, summon);
+                    summon->SetSpeed(MOVE_WALK, 0.5f, true);
+                    summon->SetSpeed(MOVE_RUN, 0.5f, true);
+                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->GetMotionMaster()->MoveRandom(20.0f);
+                }
+
+                Summons.Summon(summon);
+            }
+
             void EnergizeSun()
             {
-                //DoScriptText(SAY_ENERGIZE, me);
-                me->GetMotionMaster()->MovePoint(0, X, Y, Z);
                 DoCastAOE(SPELL_BLESSING_OF_THE_SUN);
             }
 
@@ -134,6 +143,11 @@ class boss_rajh : public CreatureScript
 
                 if (me->HasUnitState(UNIT_STAT_CASTING))
                     return;
+                
+                if (me->HasAura(SPELL_BLESSING_OF_THE_SUN))
+                    return;
+    
+                events.Update(diff);
 
                 while(uint32 eventId = events.ExecuteEvent())
                 {
@@ -141,7 +155,7 @@ class boss_rajh : public CreatureScript
                     {
                         case EVENT_SUN_STRIKE:
                             DoCast(me->getVictim(), SPELL_SUN_STRIKE);
-                            events.ScheduleEvent(EVENT_SUN_STRIKE, 10000);
+                            events.ScheduleEvent(EVENT_SUN_STRIKE, urand(8000, 10000));
                             break;
                         case EVENT_INFERNO_LEAP:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, true))
@@ -151,7 +165,7 @@ class boss_rajh : public CreatureScript
                         case EVENT_BLESSING_OF_THE_SUN:
                             if (me->GetPower(POWER_ENERGY) == 0)
                                 EnergizeSun();
-                            events.ScheduleEvent(EVENT_BLESSING_OF_THE_SUN, 15000);
+                            events.ScheduleEvent(EVENT_BLESSING_OF_THE_SUN, 1000);
                             break;
                         case EVENT_SUMMON_SUN_ORB:
                             DoCast(SPELL_SUMMON_SUN_ORB);
@@ -175,6 +189,8 @@ class boss_rajh : public CreatureScript
 
                 if (instance)
                     instance->SetData(DATA_RAJH_EVENT, DONE);
+
+                Summons.DespawnAll();
             }
         };
 
@@ -206,12 +222,16 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            DoCast(me, SPELL_SOLAR_FIRE);
+            me->StopMoving();
+            me->AttackStop();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
         void Reset()
         {
             me->SetReactState(REACT_PASSIVE);
+            DoCast(me, SPELL_SOLAR_FIRE);
         }
 
         void JustDied(Unit* /*killer*/)
@@ -222,8 +242,58 @@ public:
     };
 };
 
+class mob_solar_wind_v : public CreatureScript
+{
+public:
+    mob_solar_wind_v() : CreatureScript("mob_solar_wind_v") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new mob_solar_wind_vAI(creature);
+    }
+
+    struct mob_solar_wind_vAI : public ScriptedAI
+    {
+        mob_solar_wind_vAI(Creature* creature) : ScriptedAI(creature), Summons(me)
+        {}
+
+        SummonList Summons;
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            me->GetMotionMaster()->MoveRandom(20.0f);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            Summons.Summon(summon);
+        }
+
+        void Reset()
+        {
+            me->GetMotionMaster()->MoveRandom(20.0f);
+            me->AddAura(74109, me);
+            me->AddAura(74107, me);
+            me->SetSpeed(MOVE_WALK, 0.5f, true);
+            me->SetSpeed(MOVE_RUN, 0.5f, true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void JustDied(Unit* /*killer*/)
+        {
+            // used to despawn corpse immediately
+            me->DespawnOrUnsummon();
+            Summons.DespawnAll();
+        }
+    };
+};
+
 void AddSC_boss_rajh()
 {
     new boss_rajh;
     new mob_solar_wind;
+    new mob_solar_wind_v;
 }

@@ -1,0 +1,2 @@
+UPDATE `creature_template` SET `modelid2`=11686, `minlevel`=85,  `ScriptName`='mob_solar_wind_v', `maxlevel`=85, `exp`=3, `faction_A`=14, `faction_H`=14 WHERE  `entry`=39635;
+UPDATE `creature_template` SET `modelid2`=11686, `minlevel`=85, `maxlevel`=85, `exp`=3, `faction_A`=14, `faction_H`=14, `flags_extra`=2 WHERE  `entry`=47922 LIMIT 1;

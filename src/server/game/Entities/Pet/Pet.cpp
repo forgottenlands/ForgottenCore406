@@ -696,7 +696,8 @@ void Pet::Update(uint32 diff)
 void Creature::Regenerate(Powers power)
 {
     // Conclave of Winds shouldent regen energy
-    if (GetEntry() == 45870 || GetEntry() == 45871 || GetEntry() == 45872 || GetEntry() == 39731 || GetEntry() == 48751)
+    if (GetEntry() == 45870 || GetEntry() == 45871 || GetEntry() == 45872 || GetEntry() == 39731 || GetEntry() == 48751 
+        ||  GetEntry() == 39378 ||  GetEntry() == 48815)
         return;
 
     uint32 curValue = GetPower(power);
