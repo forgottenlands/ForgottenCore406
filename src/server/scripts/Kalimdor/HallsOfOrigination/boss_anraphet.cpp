@@ -204,7 +204,6 @@ class boss_anraphet : public CreatureScript
                             break;
                         case EVENT_CRUMBLING_RUIN:
                             me->CastSpell(me, SPELL_CRUMBLING_RUIN, true);
-                            events.ScheduleEvent(EVENT_CRUMBLING_RUIN, urand(10000, 16000));
                             break;
                         case EVENT_NEMESIS_STRIKE:
                             me->CastSpell(me->getVictim(), SPELL_NEMESIS_STRIKE, true);

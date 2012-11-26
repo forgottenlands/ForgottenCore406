@@ -5914,18 +5914,29 @@ void AuraEffect::HandleAuraModIncreaseEnergyPercent(
     }
 }
 
-void AuraEffect::HandleAuraModIncreaseHealthPercent(
-        AuraApplication const *aurApp, uint8 mode, bool apply) const {
-    if (!(mode
-            & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+void AuraEffect::HandleAuraModIncreaseHealthPercent(AuraApplication const *aurApp, uint8 mode, bool apply) const 
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
 
     Unit *target = aurApp->GetTarget();
 
     // Unit will keep hp% after MaxHealth being modified if unit is alive.
     float percent = target->GetHealthPct();
-    target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, float(GetAmount()),
-            apply);
+    float amount = float(GetAmount());
+
+    // Custom handled cases
+    switch (GetId())
+    {
+        case 75609: // Crumbling Ruin (Anraphaet HoO)
+        case 91206:
+            if (amount == -100.0f)
+                amount = -90.0f;
+            break;
+    }
+
+    target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, amount, apply);
+
     if (target->isAlive())
         target->SetHealth(target->CountPctFromMaxHealth(int32(percent)));
 }
