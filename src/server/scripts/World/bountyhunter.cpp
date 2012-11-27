@@ -62,7 +62,7 @@ class npc_b_hunter : public CreatureScript
                 bool OnGossipHello(Player * player, Creature * creature)
                 {
 					    //Primo gossip: mi fa inserire la bounty (rimanda al GossipSelectCode piu sotto)
-                        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_BATTLE, MSG_PLACE_BOUNTY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1, "Inserisci il nome del personaggio da uccidere", 0, true);
+                        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_BATTLE, MSG_PLACE_BOUNTY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1, "", 0, true);
                         //Se la bounty non è vuota, faccio mostrare l'opzione per vedere la lista bounties (opzione 2)
 						if(!Bounty.empty())
                                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Mostra la lista taglie", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
