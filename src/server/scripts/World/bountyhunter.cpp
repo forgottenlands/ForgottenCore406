@@ -99,9 +99,7 @@ class npc_b_hunter : public CreatureScript
  
                         string name = code;
                         Player * hunted = NULL;
-						player->MonsterSay("DIO BONO",LANG_UNIVERSAL,NULL);
-
-						
+											
                         switch(action)
                         {
                            case GOSSIP_ACTION_INFO_DEF+1:
@@ -185,19 +183,24 @@ class bounty_kills : public PlayerScript
  
            void OnPVPKill(Player * killer, Player * victim)
            {
-                   if(killer->GetGUID() == victim->GetGUID() || Bounty.empty())
-                           return;
- 
-                   for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i)
-                   {
-                           if(i->second.hunted == victim->GetGUID())
-                           {
-                                   killer->ModifyMoney(Bounty[victim->GetGUID()].gold);
-                                   ChatHandler(killer).PSendSysMessage("E' stato aggiunto %u oro per la tua uccisione!", Bounty[victim->GetGUID()].gold);
-                                   Bounty.erase(victim->GetGUID());
-                                   DoSendMessageToWorld(3, victim->GetName(), killer->GetName());
-                           }
-                   }
+			   if(killer){
+				   if(victim){
+
+					   if(killer->GetGUID() == victim->GetGUID() || Bounty.empty())
+							   return;
+
+					   for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i)
+					   {
+							   if(i->second.hunted == victim->GetGUID())
+							   {
+									   killer->ModifyMoney(Bounty[victim->GetGUID()].gold);
+									   //ChatHandler(killer).PSendSysMessage("E' stato aggiunto %u oro per la tua uccisione!", Bounty[victim->GetGUID()].gold);
+									   Bounty.erase(victim->GetGUID());
+									   DoSendMessageToWorld(3, victim->GetName(), killer->GetName());
+							   }
+					   }
+				   }
+			   }
            }
 };
  
