@@ -77,6 +77,7 @@ class npc_b_hunter : public CreatureScript
  
                         switch(actions)
                         {
+
                            case GOSSIP_ACTION_INFO_DEF+2:
                                    for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i)
                                            ChatHandler(player).PSendSysMessage("Taglie attuali: \n Name: %s, Valore: %u, Taglia: %s", i->second.name.c_str(), i->second.gold, i->second.bounty.c_str());
@@ -98,10 +99,13 @@ class npc_b_hunter : public CreatureScript
  
                         string name = code;
                         Player * hunted = NULL;
- 
+						player->MonsterSay("DIO BONO",LANG_UNIVERSAL,NULL);
+
+						
                         switch(action)
                         {
                            case GOSSIP_ACTION_INFO_DEF+1:
+							       
                                    for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i)
                                    {
                                            if(i->second.bounty == player->GetName())
@@ -127,10 +131,10 @@ class npc_b_hunter : public CreatureScript
                                                    return false;
                                            }
                                    }
- 
+                                   
                                    if(player->GetMoney() >= BOUNTY_AMOUNT_GOLD)
                                    {
-                                           player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_BATTLE, MSG_PLACE_BOUNTY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1, "", 0, true);
+                                           //player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_BATTLE, MSG_PLACE_BOUNTY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1, "", 0, true);
                                            player->ModifyMoney(-BOUNTY_AMOUNT_GOLD);
                                    }
                                    else
@@ -152,6 +156,7 @@ class npc_b_hunter : public CreatureScript
                                    if(!hunted)
                                    {
                                            ChatHandler(player).PSendSysMessage("Il giocatore %s non e' online.", name.c_str());
+										   player->ModifyMoney(BOUNTY_AMOUNT_GOLD);
                                            player->PlayerTalkClass->CloseGossip();
                                            return false;
                                    }
@@ -169,6 +174,7 @@ class npc_b_hunter : public CreatureScript
                         hunted = NULL;
                         name = "";
                         return false;
+						
                 }
 };
  
