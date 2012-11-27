@@ -218,7 +218,7 @@ class bounty_kills : public PlayerScript
 								       uint64 killerguid = killer->GetGUID();
 									   uint64 victimguid = victim->GetGUID();
 									   //Salvo la kill sul database a fini statistici
-								       CharacterDatabase.PExecute("INSERT INTO bounty_kills (guidPlayer, entryQuest, time) VALUES(%u, %u, NOW())", killerguid, victimguid);  
+								       CharacterDatabase.PExecute("INSERT INTO bounty_kills (killer, victim, date) VALUES(%u, %u, NOW())", killerguid, victimguid);  
 									   //Do' i soldi al killer
 									   killer->ModifyMoney(Bounty[victim->GetGUID()].gold);
 									   //Cancello la entry per questa bounty
