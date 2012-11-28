@@ -598,12 +598,15 @@ public:
             isFirstTron = (Data == 0) ? false : true;
         }
 
-        void DamageTaken(Unit* /*who*/, uint32& damage)
+        void DamageTaken(Unit* who, uint32& damage)
         {
             if (Creature* omnotron = ObjectAccessor::GetCreature(*me,instance->GetData64(BOSS_OMNOTRON)))
             {
                 if(damage >= omnotron->GetHealth())
                 {
+                    if (!who)
+                        return;
+
                     omnotron->AI()->DoAction(ACTION_OMNNOTRON_EVENT_FINISHED);
 
                     Creature* trons[4];
@@ -620,6 +623,11 @@ public:
                                 trons[i]->ForcedDespawn();
                         }
                     }
+                    me->SetLootMode(5);
+                    if (me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                        who->SummonGameObject(8000008, -324.768f, -379.851f, 213.76f, 1.593f, 0.0f, 0.0f, 0.0f, 0.0f, 100000000);
+                    else
+                        who->SummonGameObject(8000009, -324.768f, -379.851f, 213.76f, 1.593f, 0.0f, 0.0f, 0.0f, 0.0f, 100000000);
                 }
                 else
                     omnotron->SetHealth(omnotron->GetHealth()-damage);
