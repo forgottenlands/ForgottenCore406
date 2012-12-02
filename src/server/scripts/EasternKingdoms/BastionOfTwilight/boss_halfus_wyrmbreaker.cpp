@@ -88,6 +88,8 @@ class boss_halfus_wyrmbreaker : public CreatureScript
 
 			void EnterCombat(Unit* /*who*/)
 			{
+                DoZoneInCombat(me);
+
                 instance->SetData(DATA_WYRMBREAKER, IN_PROGRESS);
 
                 // Increased Attack Speed
@@ -103,6 +105,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                     DoZoneInCombat(proto);
                     proto->SetReactState(REACT_PASSIVE);
                     proto->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    proto->Attack(me->getVictim(), true);
                     proto->AttackStop();
                     proto->StopMoving();
 
@@ -146,7 +149,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                             // Cast barrage on random players
                             if (Creature* proto = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
                             {
-                                for (uint8 i = 0; i < RAID_MODE(urand(1, !proto->HasAura(SPELL_TIME_DILATATION) ? 2 : 3), urand(3, !proto->HasAura(SPELL_TIME_DILATATION) ? 4 : 8)); ++i)
+                                for (uint8 i = 0; i < RAID_MODE(urand(1, !proto->HasAura(SPELL_TIME_DILATATION) ? 4 : 6), urand(3, !proto->HasAura(SPELL_TIME_DILATATION) ? 8 : 16)); ++i)
                                 {
                                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, 0))
                                     {
@@ -158,12 +161,12 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                                 }
                                 
                                 ++barrageCount;
-                                if (barrageCount == (proto->HasAura(SPELL_TIME_DILATATION) ? 2 : 5))
+                                if (barrageCount == (proto->HasAura(SPELL_TIME_DILATATION) ? 3 : 8))
                                 {
                                     barrageCount = 0;
                                     events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(15000, 20000));
                                 } else
-                                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, !proto->HasAura(SPELL_TIME_DILATATION) ? 3500 : 1000);
+                                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, !proto->HasAura(SPELL_TIME_DILATATION) ? 2500 : 1000);
                             }
                             break;
                         case EVENT_ENRAGE:
@@ -174,7 +177,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                             me->CastSpell(me, SPELL_FURIOUS_ROAR, false);
                             if (roarCount < 3)
                             {
-                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, 2500);
+                                events.ScheduleEvent(EVENT_FURIOUS_ROAR, 3000);
                             }
                             else
                             {
