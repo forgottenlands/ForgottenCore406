@@ -84,6 +84,22 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 barrageCount = 0;
                 roarCount = 0;
                 firstFuriosCasted = false;
+
+                if (Creature* dragon = me->FindNearestCreature(NPC_NETHER_SCION, 500.0f, false))
+                    if (!dragon->isAlive())
+                        dragon->Respawn(true);
+
+                if (Creature* dragon = me->FindNearestCreature(NPC_STORM_RIDER, 500.0f, false))
+                    if (!dragon->isAlive())
+                        dragon->Respawn(true);
+
+                if (Creature* dragon = me->FindNearestCreature(NPC_SLATE_DRAKE, 500.0f, false))
+                    if (!dragon->isAlive())
+                        dragon->Respawn(true);
+
+                if (Creature* dragon = me->FindNearestCreature(NPC_TIME_WARDEN, 500.0f, false))
+                    if (!dragon->isAlive())
+                        dragon->Respawn(true);
 			}
 
 			void EnterCombat(Unit* /*who*/)
@@ -120,6 +136,8 @@ class boss_halfus_wyrmbreaker : public CreatureScript
 			void JustDied()
 			{
                 instance->SetData(DATA_WYRMBREAKER, DONE);
+                if (Creature* proto = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
+                    proto->DisappearAndDie();
 			}
 
             void DamageTaken(Unit* who, uint32 &damage)
@@ -164,7 +182,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                                 if (barrageCount == (proto->HasAura(SPELL_TIME_DILATATION) ? 3 : 8))
                                 {
                                     barrageCount = 0;
-                                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(15000, 20000));
+                                    events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, urand(15000, 17000));
                                 } else
                                     events.ScheduleEvent(EVENT_FIREBALL_BARRAGE, !proto->HasAura(SPELL_TIME_DILATATION) ? 2500 : 1000);
                             }
@@ -234,7 +252,16 @@ class npc_halfus_dragon : public CreatureScript
             void JustDied(Unit* killer)
             {
                 if (Creature* halfus = me->FindNearestCreature(BOSS_WYRMBREAKER, 500.0f, true))
-                    me->AddAura(SPELL_DRAGONS_VEGEANCE, halfus);
+                    if (halfus->HasAura(SPELL_DRAGONS_VEGEANCE))
+                    {
+                        if (Aura* vengeance = halfus->GetAura(SPELL_DRAGONS_VEGEANCE))
+                        {
+                            uint8 stacks = vengeance->GetStackAmount();
+                            stacks++;
+                            halfus->SetAuraStack(SPELL_DRAGONS_VEGEANCE, halfus, stacks);
+                        }
+                    }else
+                        me->AddAura(SPELL_DRAGONS_VEGEANCE, halfus);
             }
 
 			void UpdateAI(const uint32 uiDiff)
@@ -266,8 +293,7 @@ class npc_halfus_dragon : public CreatureScript
             
             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); 
             creature->setFaction(14);
-            creature->Attack(player, true);
-            creature->GetMotionMaster()->MoveChase(player, 1.0f, 1.0f);
+            creature->SetReactState(REACT_AGGRESSIVE);
 
             if (Creature* halfus = creature->FindNearestCreature(BOSS_WYRMBREAKER, 500.0f, true))
             {
