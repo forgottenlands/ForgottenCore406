@@ -8,7 +8,9 @@
 using namespace std;
  
 #define MSG_PLACE_BOUNTY "Voglio inserire una taglia [10g]"
- 
+static QueryResult BountyGoldQuery;
+static QueryResult EnableQuery;
+
 /* Bounty Misc */
 void DoSendMessageToWorld(int msg, string name, string playerName)
 {
@@ -35,13 +37,7 @@ void DoSendMessageToWorld(int msg, string name, string playerName)
         }
         sWorld->SendGlobalText(ss.str().c_str(), NULL);
 }
- 
-/* Bounty Enumeration */
-enum eGold
-{
-        BOUNTY_AMOUNT_GOLD = 100000
-};
- 
+  
 /* Bounty Map */
 struct BountyInfo
 {
@@ -58,11 +54,17 @@ class npc_b_hunter : public CreatureScript
 {
     public:
                 npc_b_hunter() : CreatureScript("npc_bounty_hunter") { }
- 
+                
                 bool OnGossipHello(Player * player, Creature * creature)
                 {
 					    //Primo gossip: mi fa inserire la bounty (rimanda al GossipSelectCode piu sotto)
-                        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_BATTLE, MSG_PLACE_BOUNTY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1, "", 0, true);
+                        EnableQuery = CharacterDatabase.Query("SELECT valore FROM bounty_options WHERE opzione=1");
+                        uint32 enable = EnableQuery->Fetch()->GetUInt32();
+                        if(enable == 1){
+                            if(player->getLevel()==85){
+                                player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_BATTLE, MSG_PLACE_BOUNTY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1, "", 0, true);
+                            }
+                        }
                         //Se la bounty non è vuota, faccio mostrare l'opzione per vedere la lista bounties (opzione 2)
 						if(!Bounty.empty())
                                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Mostra la lista taglie", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
@@ -114,8 +116,11 @@ class npc_b_hunter : public CreatureScript
                            //Azione 1, post inserimento nome
                            case GOSSIP_ACTION_INFO_DEF+1:
 
+                                   //vado a pescare sul db l'opzione 2, cioe il prezzo in gold del bounty hunter
+                                   BountyGoldQuery = CharacterDatabase.Query("SELECT valore FROM bounty_options WHERE opzione=2");
+                                   uint32 bountygold = BountyGoldQuery->Fetch()->GetUInt32();
                                    //non hai abbastanza cash, non puoi far partire la taglia
-                                   if(player->GetMoney() < BOUNTY_AMOUNT_GOLD)
+                                   if(player->GetMoney() < bountygold)
                                    {
                                            ChatHandler(player).SendSysMessage("Non hai abbastanza oro!");
                                            player->PlayerTalkClass->CloseGossip();
@@ -168,11 +173,11 @@ class npc_b_hunter : public CreatureScript
                                    
                                    // CREO LA BOUNTY
                                    // Levo il cash al player che crea la bounty
-								   player->ModifyMoney(-BOUNTY_AMOUNT_GOLD);
+								   player->ModifyMoney(- (bountygold));
                                    //ASSEGNO NELL'ARRAY DELLE BOUNTY, I PARAMETRI PER LA NUOVA BOUNTY
                                    Bounty[hunted->GetGUID()].hunted = hunted->GetGUID();
                                    Bounty[hunted->GetGUID()].hunter = player->GetGUID();
-                                   Bounty[hunted->GetGUID()].gold = BOUNTY_AMOUNT_GOLD;
+                                   Bounty[hunted->GetGUID()].gold = bountygold;
                                    Bounty[hunted->GetGUID()].name = name.c_str();
                                    Bounty[hunted->GetGUID()].bounty = player->GetName();
                                    // Avviso il mondo che la caccia è iniziata
