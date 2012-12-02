@@ -4899,6 +4899,22 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 89878: 
             spellInfo->EffectRadiusIndex[0] = 26;
             break;
+        case 83733: // Fireball Barrage (Slow)
+            spellInfo->speed = 15.0f;
+            break;
+        case 83720: // Fireball Barrage (Fast)
+            spellInfo->speed = 200.0f;
+            break;
+        case 84593: // Stone grip
+            spellInfo->EffectAmplitude[0] = 12000;
+            break;
+        case 83710: // Furious Roar
+        case 86169: 
+        case 86170:
+        case 86171:
+            spellInfo->EffectRadiusIndex[0] = 28;
+            spellInfo->EffectRadiusIndex[1] = 28;
+            break;
         default:
             break;
         }

@@ -176,7 +176,7 @@ public:
 					{
 						if (!TimeWarden->HasAura(SPELL_UNRESPONSIVE_DRAKE))
 						{
-							TimeWarden->AddAura(SPELL_DANCING_FLAMES,creature);
+							// TimeWarden->AddAura(SPELL_DANCING_FLAMES,creature);
 						}
 					}
                     break;
