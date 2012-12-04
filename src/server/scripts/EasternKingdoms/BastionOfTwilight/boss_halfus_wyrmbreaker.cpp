@@ -295,7 +295,7 @@ class npc_halfus_dragon : public CreatureScript
             creature->setFaction(14);
             creature->SetReactState(REACT_AGGRESSIVE);
 
-            if (Creature* halfus = creature->FindNearestCreature(BOSS_WYRMBREAKER, 500.0f, true))
+            if (Creature* halfus = creature->FindNearestCreature(creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ? 46209 : BOSS_WYRMBREAKER, 500.0f, true))
             {
                 switch (creature->GetEntry())
                 {
