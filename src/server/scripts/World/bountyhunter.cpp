@@ -275,7 +275,7 @@ class npc_b_hunter : public CreatureScript
                                    Bounty[hunted->GetGUID()].announced=0;
                                    // preparo l'avvisaglia
                                    ChatHandler(player).PSendSysMessage("Taglia inserita per %s - diventera attiva fra 2 minuti", name.c_str());
-                                   ChatHandler(hunted).PSendSysMessage("Attenzione, %s ha messo una taglia su di te! Si attivera fra 2 minuti", player->GetName());
+                                   // ChatHandler(hunted).PSendSysMessage("Attenzione, %s ha messo una taglia su di te! Si attivera fra 2 minuti", player->GetName());
                                    CheckAnnounceableBounties();
 								   player->PlayerTalkClass->CloseGossip();
                                    break;
