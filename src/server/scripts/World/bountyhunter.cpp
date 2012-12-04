@@ -12,6 +12,22 @@ static QueryResult BountyGoldQuery;
 static QueryResult EnableQuery;
 static QueryResult EnableHuntedQuery;
 static QueryResult EnableDualBox;
+static double acttime = 120;
+
+/* Bounty Map */
+struct BountyInfo
+{
+        string name;
+        string bounty;
+        uint64 hunted;
+        uint64 hunter;
+        uint32 gold;
+        time_t inserttime;
+        uint32 announced;
+};
+ 
+map<uint64, BountyInfo> Bounty;
+
 
 /* Bounty Misc */
 void DoSendMessageToWorld(int msg, string name, string playerName)
@@ -21,7 +37,7 @@ void DoSendMessageToWorld(int msg, string name, string playerName)
         {
                 ss << "|cffFF0000Una taglia e' stata messa sulla testa di "
                         << name.c_str()
-                        << "!!!|r";
+                        << "!|r";
         }
         else if (msg == 2)
         {
@@ -39,19 +55,54 @@ void DoSendMessageToWorld(int msg, string name, string playerName)
         }
         sWorld->SendGlobalText(ss.str().c_str(), NULL);
 }
-  
-/* Bounty Map */
-struct BountyInfo
-{
-        string name;
-        string bounty;
-        uint64 hunted;
-        uint64 hunter;
-        uint32 gold;
-};
- 
-map<uint64, BountyInfo> Bounty;
- 
+
+//questa funzione mi ritorna l'opzione richiesta fetchandola da database
+uint32 GetOptionValue(uint32 option){
+    uint32 value;
+    switch(option){
+        //opzione1: trinità attivo
+        case 1:
+            EnableQuery = CharacterDatabase.Query("SELECT valore FROM bounty_options WHERE opzione=1");
+            value = EnableQuery->Fetch()->GetUInt32();
+            break;
+        //opzione2: costo in gold
+        case 2:
+            BountyGoldQuery = CharacterDatabase.Query("SELECT valore FROM bounty_options WHERE opzione=2");
+            value = BountyGoldQuery->Fetch()->GetUInt32();
+            break;
+        //opzione3: i player sotto taglia possono mettere taglia (1 vero 0 falso)
+        case 3:
+            EnableHuntedQuery = CharacterDatabase.Query("SELECT valore FROM bounty_options WHERE opzione=3");
+            value = EnableHuntedQuery->Fetch()->GetUInt32();
+            break;
+
+        //opzione4: è possibile mettere una taglia a chi gioca dallo stesso indirizzo ip (controllo dualbox) (1 vero 0 falso)
+        case 4:
+            EnableDualBox = CharacterDatabase.Query("SELECT valore FROM bounty_options WHERE opzione=4");
+            value = EnableDualBox->Fetch()->GetUInt32();
+            break;
+
+        default:
+            break;
+    }
+    return value;
+}
+
+//questa funzione fa lo spam delle bounty ancora non annunciate
+void CheckAnnounceableBounties(){
+    if(!Bounty.empty()){
+        for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i){
+            if(i->second.announced == 0){
+                if(difftime(time(NULL),i->second.inserttime)>acttime){
+                    DoSendMessageToWorld(1, i->second.name, "");
+                    Bounty[i->second.hunted].announced = 1;
+                }
+            }
+        }
+    }
+}
+
+
 class npc_b_hunter : public CreatureScript
 {
     public:
@@ -60,8 +111,8 @@ class npc_b_hunter : public CreatureScript
                 bool OnGossipHello(Player * player, Creature * creature)
                 {
 					    //Primo gossip: mi fa inserire la bounty (rimanda al GossipSelectCode piu sotto)
-                        EnableQuery = CharacterDatabase.Query("SELECT valore FROM bounty_options WHERE opzione=1");
-                        uint32 enable = EnableQuery->Fetch()->GetUInt32();
+                        
+                        uint32 enable = GetOptionValue(1);
                         if(enable == 1){
                             if(player->getLevel()==85){
                                 player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_BATTLE, MSG_PLACE_BOUNTY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1, "", 0, true);
@@ -75,6 +126,7 @@ class npc_b_hunter : public CreatureScript
 						player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "Non importa..", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
                         //Abilito il menù
 						player->SEND_GOSSIP_MENU(1, creature->GetGUID());
+                        CheckAnnounceableBounties();
                         return true;
                 }
  
@@ -84,27 +136,38 @@ class npc_b_hunter : public CreatureScript
                         player->PlayerTalkClass->ClearMenus();
                         if(sender != GOSSIP_SENDER_MAIN)
                                 return false;
-                        int diobono = 0;
+                        int deleteflag = 0;
                         switch(actions)
                         {
 						   //mostro la lista bounties al player (opzione 2)
                           case GOSSIP_ACTION_INFO_DEF+2:
-                               ChatHandler(player).PSendSysMessage("Taglie attuali:");
-                                   for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i)
-                                           ChatHandler(player).PSendSysMessage("\n Nome: %s, Ricercato da: %s", i->second.name.c_str(), i->second.bounty.c_str());
+                                   ChatHandler(player).PSendSysMessage("Taglie attuali:");
+                                   if(!Bounty.empty()){
+                                       for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); i++){
+                                            if(difftime(time(NULL),i->second.inserttime)>acttime){
+                                               ChatHandler(player).PSendSysMessage("\n Nome: %s, Ricercato da: %s", i->second.name.c_str(), i->second.bounty.c_str());
+                                            }
+                                            if(Bounty.empty())
+                                                break;
+                                       }
+                                   }
                                    player->PlayerTalkClass->CloseGossip();
                                    break;
                            //cerco il nome da me inserito e lo deletto
                           case GOSSIP_ACTION_INFO_DEF+4:
-                                diobono = 0;
-                                for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i){
-                                    if(i->second.hunter == player->GetGUID()){
-                                        Bounty.erase(i->second.hunted);
-                                        ChatHandler(player).PSendSysMessage("Taglia cancellata!");
-                                        diobono = 1;
+                                deleteflag = 0;
+                                if(!Bounty.empty()){          
+                                    for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i){
+                                        if(i->second.hunter == player->GetGUID()){
+                                            Bounty.erase(i->second.hunted);
+                                            ChatHandler(player).PSendSysMessage("Taglia cancellata!");
+                                            deleteflag = 1;
+                                        }
+                                        if(Bounty.empty())
+                                                break;
                                     }
                                 }
-                                if (diobono ==0){
+                                if (deleteflag ==0){
                                     ChatHandler(player).PSendSysMessage("Non hai inserito nessuna taglia!");
                                 }
                                 player->PlayerTalkClass->CloseGossip();
@@ -123,7 +186,6 @@ class npc_b_hunter : public CreatureScript
                         player->PlayerTalkClass->ClearMenus();
                         if(sender != GOSSIP_SENDER_MAIN)
                                 return false;
-                        
                         //Salvo il nome inserito dal player
                         string name = code;
                         //Inizializzo il puntatore al personaggio "cacciato"
@@ -133,14 +195,11 @@ class npc_b_hunter : public CreatureScript
                         {
                            //Azione 1, post inserimento nome
                            case GOSSIP_ACTION_INFO_DEF+1:
-
-                                   //vado a pescare sul db l'opzione 2, cioe il prezzo in gold del bounty hunter
-                                   BountyGoldQuery = CharacterDatabase.Query("SELECT valore FROM bounty_options WHERE opzione=2");
-                                   EnableHuntedQuery = CharacterDatabase.Query("SELECT valore FROM bounty_options WHERE opzione=3");
-                                   EnableDualBox = CharacterDatabase.Query("SELECT valore FROM bounty_options WHERE opzione=4");
-                                   uint32 enablehunted = EnableHuntedQuery->Fetch()->GetUInt32();
-                                   uint32 bountygold = BountyGoldQuery->Fetch()->GetUInt32();
-                                   uint32 enabledualbox = EnableDualBox->Fetch()->GetUInt32();
+                                   //prendo utilizzando la funzione getoptionvalue(definita sopra questa classe)
+                                   //tutti i valori delle opzioni che mi servono
+                                   uint32 bountygold = GetOptionValue(2);
+                                   uint32 enablehunted = GetOptionValue(3);
+                                   uint32 enabledualbox = GetOptionValue(4);
                                    //non hai abbastanza cash, non puoi far partire la taglia
                                    if(player->GetMoney() < bountygold)
                                    {
@@ -168,7 +227,7 @@ class npc_b_hunter : public CreatureScript
                                    if(hunted->GetSession()){
                                        if(player->GetSession()){
                                            if((hunted->GetSession()->GetRemoteAddress() == player->GetSession()->GetRemoteAddress()) && (enabledualbox == 0)){
-                                           ChatHandler(player).PSendSysMessage("Perche dualboxi figliolo? Sei stato loggato non riprovarci");
+                                           ChatHandler(player).PSendSysMessage("Stai mettendo la taglia su qualcuno col tuo stesso IP. Possibile dualbox.");
                                            CharacterDatabase.PExecute("INSERT INTO bounty_kills (killer, victim, date) VALUES(%u, 0, NOW())", player->GetGUID());  
                                            player->PlayerTalkClass->CloseGossip();
                                            return false;
@@ -212,10 +271,12 @@ class npc_b_hunter : public CreatureScript
                                    Bounty[hunted->GetGUID()].gold = bountygold;
                                    Bounty[hunted->GetGUID()].name = name.c_str();
                                    Bounty[hunted->GetGUID()].bounty = player->GetName();
-                                   // Avviso il mondo che la caccia è iniziata
-                                   ChatHandler(player).PSendSysMessage("|cffFF0000Taglia inserita per %s!|r", name.c_str());
-                                   ChatHandler(hunted).PSendSysMessage("Attenzione, %s ha messo una taglia su di te!", player->GetName());
-                                   DoSendMessageToWorld(1, name.c_str(), "");
+                                   Bounty[hunted->GetGUID()].inserttime = time(NULL);
+                                   Bounty[hunted->GetGUID()].announced=0;
+                                   // preparo l'avvisaglia
+                                   ChatHandler(player).PSendSysMessage("Taglia inserita per %s - diventera attiva fra 2 minuti", name.c_str());
+                                   ChatHandler(hunted).PSendSysMessage("Attenzione, %s ha messo una taglia su di te! Si attivera fra 2 minuti", player->GetName());
+                                   CheckAnnounceableBounties();
 								   player->PlayerTalkClass->CloseGossip();
                                    break;
                         }
@@ -225,6 +286,8 @@ class npc_b_hunter : public CreatureScript
                         return false;
 						
                 }
+
+
 };
  
 class bounty_kills : public PlayerScript
@@ -235,41 +298,57 @@ class bounty_kills : public PlayerScript
 		   //Questa funzione viene chiamata da Unit.cpp ogni qualvolta avviene una kill in pvp
            void OnPVPKill(Player * killer, Player * victim)
            {
+               if(Bounty.empty())
+                   return;
 			   //verifico esistenza del killer e il fatto che sia un normale player
-			   if(killer && !(killer->isGameMaster())){
-				   //verifico esistenza della victim e il fatto che sia un normale player
-				   if(victim && !(victim->isGameMaster())){
+			       if(killer){
+				       //verifico esistenza della victim e il fatto che sia un normale player
+				       if(victim){
 
-					   //verifico esistenza della victim e il fatto che sia un normale player
-					   if(killer->GetGUID() == victim->GetGUID() || Bounty.empty())
-							   return;
+					       //controllo che killer e vittima non siano uguali o che la lista bounty sia vuota
+					       if(killer->GetGUID() == victim->GetGUID())
+							       return;
 
-					   //giro la lista delle bounty e vado a selezionare la bounty appena avvenuta
-					   //(guardo la victim che mi viene passata come argomento)
-					   for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i)
-					   {
-							   if(i->second.hunted == victim->GetGUID())
-							   {
-								       //mi salvo i guid di killer e vittima
-								       uint64 killerguid = killer->GetGUID();
-									   uint64 victimguid = victim->GetGUID();
-									   //Salvo la kill sul database a fini statistici
-								       CharacterDatabase.PExecute("INSERT INTO bounty_kills (killer, victim, date) VALUES(%u, %u, NOW())", killerguid, victimguid);  
-									   //Do' i soldi al killer
-									   killer->ModifyMoney(Bounty[victim->GetGUID()].gold);
-									   //Cancello la entry per questa bounty
-									   Bounty.erase(victim->GetGUID());
-									   //Annuncio al mondo l'uccisione
-									   DoSendMessageToWorld(3, victim->GetName(), killer->GetName());
-							   }
-					   }
-				   }
-			   }
+					       //giro la lista delle bounty e vado a selezionare la bounty appena avvenuta
+					       //(guardo la victim che mi viene passata come argomento)
+					       for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); i++)
+					       {
+							       if(i->second.hunted == victim->GetGUID())
+							       {
+                                       if(difftime(time(NULL),i->second.inserttime)>acttime){
+								           //mi salvo i guid di killer e vittima
+								           uint64 killerguid = killer->GetGUID();
+									       uint64 victimguid = victim->GetGUID();
+									       //Salvo la kill sul database a fini statistici
+								           CharacterDatabase.PExecute("INSERT INTO bounty_kills (killer, victim, date) VALUES(%u, %u, NOW())", killerguid, victimguid);  
+									       //Do' i soldi al killer: x4 se è la stessa persona che ha messo la bounty, x2 se normale
+                                           if(i->second.hunter == killer->GetGUID()){
+									        killer->ModifyMoney((Bounty[victim->GetGUID()].gold)*4);
+                                           }
+                                           else {
+                                               killer->ModifyMoney((Bounty[victim->GetGUID()].gold)*2);
+                                           }
+									       //Cancello la entry per questa bounty
+                                           if(!Bounty.empty())
+									            Bounty.erase(victim->GetGUID());
+									       //Annuncio al mondo l'uccisione
+									       DoSendMessageToWorld(3, victim->GetName(), killer->GetName());
+                                       }
+                                       else{
+                                           ChatHandler(killer).PSendSysMessage("Troppo presto! La taglia non era ancora attiva!");
+                                       }
+							       }
+					       }
+				       }
+			       }
            }
 };
+
+
+
  
 void AddSC_bounties_hunters()
-{
+{       
         new npc_b_hunter;
         new bounty_kills;
 }
