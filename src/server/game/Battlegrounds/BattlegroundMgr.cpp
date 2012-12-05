@@ -1075,11 +1075,11 @@ BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgType
             switch(arenaType)
             {
                 case ARENA_TYPE_2v2:
-                    return BATTLEGROUND_QUEUE_NONE;
+                    return BATTLEGROUND_QUEUE_2v2;
                 case ARENA_TYPE_3v3:
                     return BATTLEGROUND_QUEUE_3v3;
                 case ARENA_TYPE_5v5:
-                    return BATTLEGROUND_QUEUE_NONE;
+                    return BATTLEGROUND_QUEUE_5v5;
                 default:
                     return BATTLEGROUND_QUEUE_NONE;
             }
