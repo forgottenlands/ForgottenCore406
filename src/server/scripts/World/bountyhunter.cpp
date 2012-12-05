@@ -234,6 +234,11 @@ class npc_b_hunter : public CreatureScript
                                            }
                                        }
                                    }
+                                   if(hunted->getLevel() != 85){
+                                       ChatHandler(player).PSendSysMessage("Il ricercato non è di livello 85 - non puoi inserire la taglia");
+                                       player->PlayerTalkClass->CloseGossip();
+                                       return false;
+                                   }
 
                                    //scorro l'array delle taglie
                                    for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i)
@@ -275,7 +280,7 @@ class npc_b_hunter : public CreatureScript
                                    Bounty[hunted->GetGUID()].announced=0;
                                    // preparo l'avvisaglia
                                    ChatHandler(player).PSendSysMessage("Taglia inserita per %s - diventera attiva fra 2 minuti", name.c_str());
-                                   // ChatHandler(hunted).PSendSysMessage("Attenzione, %s ha messo una taglia su di te! Si attivera fra 2 minuti", player->GetName());
+                                   //ChatHandler(hunted).PSendSysMessage("Attenzione, %s ha messo una taglia su di te! Si attivera fra 2 minuti", player->GetName());
                                    CheckAnnounceableBounties();
 								   player->PlayerTalkClass->CloseGossip();
                                    break;
@@ -345,10 +350,132 @@ class bounty_kills : public PlayerScript
 };
 
 
+//Inserisco il comando custom per le taglie in PVP
+
+class bounty_chat : public CommandScript
+{
+   public:
+           bounty_chat() : CommandScript("bounty_chat") { }
+           
+           ChatCommand * GetCommands() const {
+               static ChatCommand bountyCommandTable[]={
+               {"bounty", SEC_PLAYER, false, &HandleBountyAddCommand,"",NULL},
+               {"mostwanted", SEC_PLAYER, false, &HandleBountyListCommand,"",NULL},
+               {NULL, 0, false, NULL,"",NULL}
+               };
+               return bountyCommandTable;
+           }
+		   
+           static bool HandleBountyAddCommand(ChatHandler *handler, char const *args){
+
+                if(*args){
+                    if(Player *player = handler->GetSession()->GetPlayer()){
+                      if(player->GetBattleground()){
+                        string name = args;
+                        Player * hunted = NULL;
+                        uint32 enabledbounty = GetOptionValue(1);
+                        uint32 bountygold = GetOptionValue(2);
+                        uint32 enablehunted = GetOptionValue(3);
+                        uint32 enabledualbox = GetOptionValue(4);		
+                        if (enabledbounty !=1){
+                            ChatHandler(player).SendSysMessage("Trinità è disabilitato...");
+                            return false;
+                        }
+                        if(player->GetMoney() < bountygold )
+                        {
+                            ChatHandler(player).SendSysMessage("Non hai abbastanza oro!");
+                            return false;
+                        }
+
+                        if(!name.empty())
+                            hunted = sObjectAccessor->FindPlayerByName(name.c_str());
+
+                        if(name == player->GetName())
+                        {
+                            ChatHandler(player).SendSysMessage("Non puoi mettere una taglia su te stesso!");
+                            return false;
+                        }
+ 
+                        if(!hunted)
+                        {
+                            ChatHandler(player).PSendSysMessage("Il giocatore %s non e' online.", name.c_str());
+                            return false;
+                        }
+
+                        if(hunted->GetSession()){
+                            if(player->GetSession()){
+                                if((hunted->GetSession()->GetRemoteAddress() == player->GetSession()->GetRemoteAddress()) && (enabledualbox == 0)){
+                                    ChatHandler(player).PSendSysMessage("Stai mettendo la taglia su qualcuno col tuo stesso IP. Possibile dualbox.");
+                                    CharacterDatabase.PExecute("INSERT INTO bounty_kills (killer, victim, date) VALUES(%u, 0, NOW())", player->GetGUID());  
+                                    return false;
+                                }
+                            }
+                        }
+
+                        if(hunted->getLevel() != 85){
+                            ChatHandler(player).PSendSysMessage("Il ricercato non è di livello 85 - non puoi inserire la taglia");
+                            return false;
+                        }
+
+                
+                        for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); ++i)
+                        {
+                            if(i->second.bounty == player->GetName())
+                            {
+                                ChatHandler(player).SendSysMessage("Hai gia inserito una taglia!!");
+                                return false;
+                            }
+                            if((i->second.hunted == player->GetGUID()) && (enablehunted==0))
+                            {
+                                ChatHandler(player).SendSysMessage("Non puoi inserire una taglia.. sei TU un most wanted!");
+                                player->PlayerTalkClass->CloseGossip();
+                                return false;
+                            }
+                            if(i->second.hunted == hunted->GetGUID())
+                            {
+                                ChatHandler(player).PSendSysMessage("Attenzione, %s ha gia una taglia sulla sua testa... dagli la caccia!", i->second.name.c_str());
+                                player->PlayerTalkClass->CloseGossip();
+                                return false;
+                            }
+                        }
+                        
+                        player->ModifyMoney(-(bountygold));
+                        Bounty[hunted->GetGUID()].hunted = hunted->GetGUID();
+                        Bounty[hunted->GetGUID()].hunter = player->GetGUID();
+                        Bounty[hunted->GetGUID()].gold = bountygold;
+                        Bounty[hunted->GetGUID()].name = name.c_str();
+                        Bounty[hunted->GetGUID()].bounty = player->GetName();
+                        Bounty[hunted->GetGUID()].inserttime = time(NULL);
+                        Bounty[hunted->GetGUID()].announced=0;
+                        ChatHandler(player).PSendSysMessage("Taglia inserita per %s - diventera attiva fra 2 minuti", name.c_str());
+                        return true;
+                    }
+                  }
+                }
+                return false;
+            }
+            static bool HandleBountyListCommand(ChatHandler *handler, char const *args){
+                if(Player *player = handler->GetSession()->GetPlayer()){
+                    ChatHandler(player).PSendSysMessage("Taglie attuali:");
+                    if(!Bounty.empty()){
+                        for(map<uint64, BountyInfo>::const_iterator i = Bounty.begin(); i != Bounty.end(); i++){
+                            if(difftime(time(NULL),i->second.inserttime)>acttime){
+                                ChatHandler(player).PSendSysMessage("\n Nome: %s, Ricercato da: %s", i->second.name.c_str(), i->second.bounty.c_str());
+                                return true;
+                            }
+                            if(Bounty.empty())
+                                break;
+                        }
+                    }
+                }
+                return false;
+            }
+};
 
  
 void AddSC_bounties_hunters()
 {       
         new npc_b_hunter;
         new bounty_kills;
+        new bounty_chat;
 }
