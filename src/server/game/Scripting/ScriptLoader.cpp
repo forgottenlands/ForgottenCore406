@@ -662,6 +662,7 @@ void AddSC_boss_ascendant_council();
 void AddSC_boss_halfus_wyrmbreaker();
 void AddSC_boss_theralion();
 void AddSC_instance_the_bastion_of_twilight();
+void AddSC_mob_trash_throne_of_tides();
 
 // battlegrounds
 
@@ -1352,6 +1353,7 @@ void AddNorthrendScripts() {
     AddSC_boss_karsh_steelbender();
     AddSC_boss_beauty();
     AddSC_boss_ascendant_lord_obsidius();
+    AddSC_mob_trash_throne_of_tides();
 
 #endif
 }

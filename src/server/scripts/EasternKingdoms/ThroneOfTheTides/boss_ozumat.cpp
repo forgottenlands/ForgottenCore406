@@ -1,22 +1,6 @@
 /*
-* Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.org/>
-*
-* Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
-*
-* Copyright (C) 2011 - 2012 Naios <https://github.com/Naios>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
+* Copyright (C) 2011-2012 ProjectStudioMirage <http://www.studio-mirage.fr/>
+* Copyright (C) 2011-2012 https://github.com/Asardial
 */
 
 #include "ScriptPCH.h"
@@ -30,249 +14,265 @@
 #define SAY_DEATH "Your kind... cannot be... trusted..."
 #define SAY_CLEANSED "My waters are cleansed! Drink in their power!"
 
-Position const SpawnPositions[] =
+Creature* Ozumat;
+Creature* Neptulon;
+
+enum Phases
 {
-    {-155.955f, 952.67f, 230.456f, 1.1f},
-    {-105.204f, 979.93f, 229.862f, 2.9f},
-    {-172.205f, 1012.91f, 231.33f, 5.5f},
-    {-137.0736f, 973.488f, 230.355f, 2.0832f},
-    {-143.2496f, 1005.569f, 229.8465f, 4.4472f},
-    {-163.4171f, 978.427f, 229.31f, 0.4833f},
+    PHASE_NULL                    = 0, // Used to avoid wrong behaviour
+    PHASE_FILTHY_INVADERS_1       = 1, // Starting phase
+    PHASE_FILTHY_INVADERS_2       = 2, // Murlocs
+    PHASE_FILTHY_INVADERS_3       = 3, // Mindlashers
+    PHASE_FILTHY_INVADERS_4       = 4, // Behemont
+    PHASE_BEAST_RETURN            = 5, // Real phase 2
+    PHASE_TIDAL_SURGE             = 6, // Real phase 3
 };
 
-Position const OzumatPosition[2] =
+const Position spawns[] =
 {
-    {-154.037f, 960.586f, 314.759f, 1.2f},
-    {-187.9f, 939.332f, 254.46f, 3.7f},
+    {-122.412041f, 947.492188f, 231.579025f, 2.279974f},
+    {-118.400780f, 1014.799866f, 230.195724f, 4.366778f},
 };
 
-enum Spells
-{
-    SPELL_GROUND_EFFECT = 83607,
-
-    SPELL_ENTANGLING_GRASP = 83463,
-    SPELL_NEPTULON_BEAM_VISUAL = 79511,
-
-    SPELL_TIDAL_SURGE = 76133,
-    SPELL_BLIGHT_OF_OZUMAT_VISUAL = 83672,
-    SPELL_BLIGHT_OF_OZUMAT_VISUAL_GROUND_EFFECT = 83525,
-    SPELL_SUMMON_BLIGHT_OF_OZUMAT = 83524,
-
-    // Voidzone Damage
-    SPELL_BLIGHT_OF_OZUMAT_DAMAGE_ZONE = 83608, // HC: 91494
-
-    // Phase 3 AOE
-    SPELL_BLIGHT_OF_OZUMAT_DAMAGE_AOE = 83561, // HC: 91495   
-};  
-
-class mob_neptulon : public CreatureScript
+class npc_neptulon : public CreatureScript
 {
 public:
-    mob_neptulon() : CreatureScript("mob_neptulon") { }
+    npc_neptulon() : CreatureScript("npc_neptulon") { }
 
     CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_neptulonAI (creature);
+        return new npc_neptulonAI (creature);
     }
 
-    struct mob_neptulonAI : public ScriptedAI
+    struct npc_neptulonAI : public ScriptedAI
     {
-        mob_neptulonAI(Creature* creature) : ScriptedAI(creature)
+        npc_neptulonAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            Neptulon = me;
         }
 
+        bool InProgress, sumonslasher, summonbehemont, ozumatSummoned, flagged, slasherphased;
+        uint32 phase;
+        uint32 summonMurlocTimer;
+        uint32 MindlasherTimer;
+        std::list<uint64> sumMurlocs;
+        std::list<uint64> sumMindlasher;
+        std::list<uint64> sumSapper;
+        uint32 behemontTimer;
+        uint32 phase2_timer;
         InstanceScript* instance;
-
-        uint8 waveCount;
-        uint32 generalTimer;
-        uint32 playerAliveChecker;
-        uint8 nextStep;
+        uint64 ozumatGUID;
+        uint32 deadSappers;
 
         void Reset()
         {
-            if (instance)
-                instance->SetData(DATA_OZUMAT, NOT_STARTED);
+            InProgress = false;
+            sumSapper.clear();
+            sumMindlasher.clear();
+            sumMurlocs.clear();
+            phase = PHASE_FILTHY_INVADERS_1;
+            MindlasherTimer     = 20000;
+            sumonslasher        = false;
+            behemontTimer       = 30000;
+            summonbehemont      = false;
+            summonMurlocTimer   = 8000;
+            phase2_timer        = 60000;
+            ozumatGUID          = 0;
+            ozumatSummoned      = false;
+            flagged             = false;
+            deadSappers         = 0;
+            slasherphased       = false;
+        }
 
-            if (instance && instance->GetData(DATA_LADY_NAZJAR) == DONE)
-                if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
-                    ozumat->AI()->DoAction(ACTION_OZUMAT_PREPARE_EVENT);
+        void SummonedCreatureDespawn(Creature* summon)
+        {
+            switch(summon->GetEntry())
+            {
+                case NPC_SAPPER:
+                    deadSappers += 1;
+                    break;
+            }
+        }
 
-            me->RemoveAllAuras();
-            me->CastStop();
+        void DespawnSummons()
+        {
+            for(std::list<uint64>::iterator itr = sumMurlocs.begin(); itr != sumMurlocs.end(); ++itr)
+                if(Creature* creature = Unit::GetCreature(*me, (*itr)))
+                    creature->DisappearAndDie();
 
-            waveCount = 0;
-            nextStep = 3;
-            generalTimer = 10000;
-            playerAliveChecker = 1500;
-            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-            DespawnCreatures(NPC_BLIGHT_OF_OZUMAT);
-            DespawnCreatures(NPC_OZUMAT_VISUAL_TRIGGER);
+            for(std::list<uint64>::iterator itr = sumMindlasher.begin(); itr != sumMindlasher.end(); ++itr)
+                if(Creature* creature = Unit::GetCreature(*me, (*itr)))
+                    creature->DisappearAndDie();
+
+            for(std::list<uint64>::iterator itr = sumSapper.begin(); itr != sumSapper.end(); ++itr)
+                if(Creature* creature = Unit::GetCreature(*me, (*itr)))
+                    creature->DisappearAndDie();
+
+            Ozumat->DisappearAndDie();
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            switch (summon->GetEntry())
+            {
+                case NPC_DEEP_MURLOC:
+                    sumMurlocs.push_back(summon->GetGUID());
+                    summon->AI()->AttackStart(me);
+                    break;
+                case NPC_MINDLASHER:
+                    sumMindlasher.push_back(summon->GetGUID());
+                    summon->AI()->AttackStart(me);
+                    break;
+                case NPC_BEHEMOTH:
+                    summon->AI()->AttackStart(me);
+                    break;
+                case NPC_SAPPER:
+                    sumSapper.push_back(summon->GetGUID());
+                    break;
+                case BOSS_OZUMAT:
+                    ozumatGUID = summon->GetGUID();
+                    break;
+            }
+        }
+
+        void JustDied(Unit* killer)
+        {
+            if (killer)
+                me->MonsterSay(SAY_DEATH,LANG_UNIVERSAL, NULL);
+            DespawnSummons();
+        }
+
+        void SummonAdd(uint32 entry, uint32 count)
+        {
+            if (entry == BOSS_OZUMAT)
+            {
+                me->SummonCreature(entry, -161.927246f, 1003.904419f, 230.404358f, 5.801692f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                return;
+            }
+
+            if (entry == NPC_SAPPER)
+            {
+                me->SummonCreature(entry, -143.599869f, 985.389221f, 230.390076f, 0.024302f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                me->SummonCreature(entry, -130.816040f, 968.372253f, 230.172058f, 1.370475f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                me->SummonCreature(entry, -140.050064f, 1004.192871f, 229.926407f, 5.370507f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                return;
+            }
+
+            for (uint32 x = 0; x <= count; ++x)
+               me->SummonCreature(entry, RAND(spawns[0], spawns[1]), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
         }
 
         void UpdateAI(const uint32 diff)
         {
-            if(waveCount == 0)
+            if (!InProgress)
                 return;
 
-            if (playerAliveChecker <= diff)
-            {	
-                if(!isPlayerAlive())
-                    Reset();
-
-                playerAliveChecker = 1500;
-            } else playerAliveChecker -= diff;
-
-            if (generalTimer <= diff)
-            {	
-                HandleWave();
-
-                generalTimer = 10000;
-            } else generalTimer -= diff;
-        }
-
-        void SummonedCreatureDies(Creature* summon, Unit* /*killer*/)
-        {
-            if(summon->GetEntry() == NPC_FACELESS_SAPPER && nextStep > 0)
-                nextStep--;
-
-            if(nextStep == 0)
+            if (phase == PHASE_FILTHY_INVADERS_1)
             {
-                waveCount=8;
-                HandleWave();
+                me->SetOrientation(0.166467f);
+                phase = PHASE_FILTHY_INVADERS_2;
+                me->MonsterSay(SAY_1, LANG_UNIVERSAL, NULL);
             }
-        }
 
-        void HandleWave()
-        {          
-            if(waveCount < 6)
-            { // Phase 1
+            if (summonMurlocTimer <= diff)
+            {
+                if (phase == PHASE_FILTHY_INVADERS_2)
+                    SummonAdd(NPC_DEEP_MURLOC, 6);
 
-                waveCount++;
+                if (sumMurlocs.size() >= 6*3)
+                    phase = PHASE_NULL;
 
-                uint32 summonEntry;
-                uint8 p = urand(0,2);
+                summonMurlocTimer = 5000;
+            } else summonMurlocTimer -= diff;
 
-                if(waveCount == 1)
+            if (MindlasherTimer <= diff)
+            {
+                if (phase == PHASE_FILTHY_INVADERS_3)
                 {
-                    me->MonsterSay(SAY_1,0,0);
-                    DoCastAOE(SPELL_NEPTULON_BEAM_VISUAL,true);
-                    DoZoneInCombat(me);
-
-                    if (Creature* ozumat = ObjectAccessor::GetCreature(*me,instance->GetData64(BOSS_OZUMAT)))
-                        ozumat->AI()->DoAction(ACTION_OZUMAT_PREPARE_EVENT);
-
-                }else if (waveCount == 6)
-                {
-                    for(uint8 i = 3; i <= 5; i++)
-                        if(Creature* summon = me->SummonCreature(NPC_FACELESS_SAPPER, SpawnPositions[i],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                        {                  
-                            summon->AI()->DoZoneInCombat(summon);
-                            summon->SetReactState(REACT_PASSIVE);
-                            summon->SetFacingToObject(me);
-                            summon->CastSpell(me, SPELL_ENTANGLING_GRASP, true);
-                        }
-
-                        if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
-                            ozumat->AI()->DoAction(ACTION_OZUMAT_START_EVENT);
-
-                        Position myPos;
-                        me->GetPosition(&myPos);
-                        me->SummonCreature(NPC_OZUMAT_VISUAL_TRIGGER, myPos, TEMPSUMMON_MANUAL_DESPAWN);
-
-                        waveCount=7;
-                        return;
+                    SummonAdd(NPC_MINDLASHER, 1);
                 }
 
-                switch(urand(0,2))
+                if (sumMindlasher.size() >= 3 && !slasherphased)
                 {
-
-                case 0:
-                    summonEntry = NPC_DEEP_MURLOC_INVADER;
-                    break;
-                case 1:
-                    summonEntry = NPC_UNYIELDING_BEHEMOTH;
-                    break;
-                case 2:
-                    summonEntry = NPC_VICIOUS_MINDLASHER;
-                    break;
+                    me->MonsterYell(SAY_2, LANG_UNIVERSAL, NULL);
+                    phase = PHASE_NULL;
+                    slasherphased = true;
                 }
 
-                for(uint8 i = 0; i <= (summonEntry == NPC_DEEP_MURLOC_INVADER ? 2 : 0); i++)
-                    if(Creature* summon = me->SummonCreature(summonEntry, SpawnPositions[p],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                    {                  
-                        summon->AI()->DoZoneInCombat(summon);
-                    }
+                if (phase != PHASE_FILTHY_INVADERS_3 && !sumonslasher)
+                {
+                    SummonAdd(NPC_MINDLASHER, 1);
+                    phase = PHASE_FILTHY_INVADERS_3;
+                    sumonslasher = true;
+                }
+                MindlasherTimer = 12000;
+            } else MindlasherTimer -= diff;
 
-            }else if(waveCount == 7)
-            { // Phase 2
+            if (behemontTimer <= diff)
+            {
+                if (summonbehemont == false)
+                {
+                    SummonAdd(NPC_BEHEMOTH, 1);
+                    summonbehemont = true;
+                }
+            } else behemontTimer -= diff;
 
-                if(Creature* summon = me->SummonCreature(NPC_BLIGHT_BEAST, SpawnPositions[urand(0,2)],TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                    summon->AI()->DoZoneInCombat(summon);
+            if (phase2_timer <= diff && phase != PHASE_BEAST_RETURN)
+            {
+                phase = PHASE_BEAST_RETURN;
+                me->MonsterYell(SAY_3, LANG_UNIVERSAL, NULL);
+            } else phase2_timer -= diff;
 
-            }else if(waveCount == 8)
-            { // Phase 3
-
-                if (Creature* ozumat = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_OZUMAT)))
-                    ozumat->AI()->DoAction(ACTION_OZUMAT_FINAL_PHASE);
-
-                DespawnCreatures(NPC_BLIGHT_OF_OZUMAT);
-                instance->DoCastSpellOnPlayers(SPELL_TIDAL_SURGE);
-                waveCount= 9;
-
-            }else if(waveCount == 9)
-            { // End encounter and Spawn Chest
-                DespawnCreatures(NPC_OZUMAT_VISUAL_TRIGGER);
+            if (phase == PHASE_BEAST_RETURN)
+            {
+                if (ozumatSummoned == false)
+                {
+                    SummonAdd(NPC_SAPPER, 3);
+                    phase = PHASE_NULL;
+                    ozumatSummoned = true;
+                }
             }
-        }
+            if (deadSappers >= 3 && phase != PHASE_TIDAL_SURGE)
+                phase = PHASE_TIDAL_SURGE;
 
-        bool isPlayerAlive()
-        {
-            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-
-            if (!PlayerList.isEmpty())
-                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                    if(i->getSource()->isAlive() && !i->getSource()->isGameMaster())
-                        return true;
-
-            return false;
-        };
-
-        void DespawnCreatures(uint32 entry)
-        {
-            std::list<Creature*> creatures;
-            GetCreatureListWithEntryInGrid(creatures, me, entry, 100.0f);
-
-            if (creatures.empty())
-                return;
-
-            for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
-                (*iter)->DespawnOrUnsummon();
+            if (phase == PHASE_TIDAL_SURGE)
+            {
+                if (flagged == false)
+                {
+                    SummonAdd(BOSS_OZUMAT, 1);
+                    Ozumat->setFaction(14);
+                    if (instance)
+                        instance->DoCastSpellOnPlayers(76133);
+                    me->MonsterYell(SAY_CLEANSED,LANG_UNIVERSAL, NULL);
+                    flagged = true;
+                }
+            }
         }
     };
 
-    bool OnGossipHello(Player* pPlayer, Creature* creature)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
-
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_READY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-        pPlayer->SEND_GOSSIP_MENU(1,creature->GetGUID());
-
+        player->PlayerTalkClass->ClearMenus();
+        if (action == 1000) // Start battle
+        {
+            CAST_AI(npc_neptulon::npc_neptulonAI, creature->AI())->InProgress = true;
+            CAST_AI(npc_neptulon::npc_neptulonAI, creature->AI())->DoZoneInCombat();
+        }
         return true;
     }
 
-    bool OnGossipSelect(Player* pPlayer, Creature* creature, uint32 uiSender, uint32 uiAction)
+    bool OnGossipHello(Player* player, Creature* creature)
     {
-        pPlayer->PlayerTalkClass->ClearMenus();
-
-        pPlayer->CLOSE_GOSSIP_MENU();
-
-        creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-        if (InstanceScript* instance = creature->GetInstanceScript())
-            instance->SetData(DATA_OZUMAT, IN_PROGRESS);
-
-        CAST_AI(mob_neptulon::mob_neptulonAI, creature->AI())->HandleWave();
-
+        InstanceScript* instance = creature->GetInstanceScript();
+        if (instance)
+        {
+            if (instance->GetData(DATA_LADY_NAZJAR_EVENT) == DONE && instance->GetData(DATA_COMMANDER_ULTHOK_EVENT) == DONE && instance->GetData(DATA_ERUNAK_STONESPEAKER_EVENT) == DONE) // If everything is already finished
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_READY, GOSSIP_SENDER_MAIN, 1000);
+                player->PlayerTalkClass->SendGossipMenu(player->GetGossipTextId(creature), creature->GetGUID());
+            }
+        }
         return true;
     }
 };
@@ -280,7 +280,7 @@ public:
 class boss_ozumat : public CreatureScript
 {
 public:
-    boss_ozumat() : CreatureScript("boss_ozumat") { }
+    boss_ozumat() : CreatureScript("boss_ozumat") {}
 
     CreatureAI* GetAI(Creature* creature) const
     {
@@ -292,108 +292,38 @@ public:
         boss_ozumatAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
-            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
-            creature->SetReactState(REACT_PASSIVE);
+            Ozumat = me;
+            me->setFaction(14);
         }
 
         InstanceScript* instance;
-        uint32 abilityTimer;
-        uint8 phase;
+
+        bool Finished;
 
         void Reset()
         {
-            phase = 0;
-        };
+            Finished = false;
+        }
 
         void UpdateAI(const uint32 diff)
         {
-            if (phase == 0)
-                return;
-
-            if(me->GetHealthPct() < 5)
-                EndEncounter();
-
-            if (abilityTimer <= diff)
-            {	
-                if(phase == 1)
-                {
-                    if(Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200, true))
-                        target->CastSpell(target, SPELL_SUMMON_BLIGHT_OF_OZUMAT, true);
-
-                    abilityTimer = 15000;
-                } else if (phase == 2)
-                {
-                    Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-                    if (!PlayerList.isEmpty())
-                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                            me->AddAura(SPELL_BLIGHT_OF_OZUMAT_DAMAGE_AOE,  i->getSource());
-
-                    if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
-                        me->SetFacingToObject(neptulon);
-
-                    abilityTimer = 6000;
-                }
-
-            } else abilityTimer -= diff;
-        }
-
-        void DoAction(const int32 action)
-        {
-            switch(action)
+            if(me->HealthBelowPct(5) && Finished == false)
             {
-            case ACTION_OZUMAT_PREPARE_EVENT:
-                me->RemoveAllAuras();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
-                me->SetReactState(REACT_PASSIVE);
-                me->GetMotionMaster()->MovePoint(0, OzumatPosition[0]);
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
-                phase = 0;
-                break;
-
-            case ACTION_OZUMAT_START_EVENT:
-                DoCastAOE(SPELL_BLIGHT_OF_OZUMAT_VISUAL);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
-                DoZoneInCombat(me);
-                abilityTimer = 3000;
-                phase = 1;
-                break;
-
-            case ACTION_OZUMAT_FINAL_PHASE:
-                me->RemoveAllAuras();
-                me->GetMotionMaster()->MovePoint(0, OzumatPosition[1]);
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
-                phase = 2;
-                break;
+                me->setFaction(35);
+                me->SummonGameObject(DUNGEON_MODE(GO_OZUMAT_CHEST_NORMAL, GO_OZUMAT_CHEST_NORMAL), -125.950981f, 983.343201f, 230.335464f, 3.635565f, 0, 0, 0, 0, 9000000);
+                Neptulon->SetVisible(false);
+                me->CombatStop();
+                if (instance)
+                    instance->DoRemoveAurasDueToSpellOnPlayers(76133);
+                me->SetVisible(false);
+                Finished = true;
             }
-        }
-
-        void JustDied(Unit* killer)
-        {
-            EndEncounter();
-        };
-
-        void EndEncounter()
-        {
-            me->SummonGameObject(RAID_MODE(GO_OZUMAT_CHEST_NORMAL, GO_OZUMAT_CHEST_NORMAL), -161.932f, 984.396f, 229.421f, 0.006f,0,0,0,0,0);
-
-            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
-            if (!PlayerList.isEmpty())
-                for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                    i->getSource()->RemoveAura(SPELL_TIDAL_SURGE);
-
-            if (Creature* neptulon = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_NEPTULON)))
-                neptulon->DisappearAndDie();
-
-            if (instance)
-                instance->SetData(DATA_OZUMAT, DONE);
-
-            me->DisappearAndDie();
         }
     };
 };
 
 void AddSC_ozumat()
 {
-    new mob_neptulon();
+    new npc_neptulon();
     new boss_ozumat();
 }
