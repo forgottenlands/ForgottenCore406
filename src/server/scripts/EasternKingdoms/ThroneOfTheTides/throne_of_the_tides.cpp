@@ -70,7 +70,7 @@ public:
                 {
                     if (Player* target = me->FindNearestPlayer(143.0f, true))
                     {
-                        if (!target->isGameMaster() && target->GetDistance(EventPositions[0]) < 15.f)
+                        if (target->GetDistance(EventPositions[0]) < 15.f)
                         {
                             if(GameObject* door = me->FindNearestGameObject(GO_COMMANDER_ULTHOK_DOOR, 30.0f))
                                 instance->HandleGameObject(0, false, door);
@@ -105,7 +105,7 @@ public:
                 if (timer <= diff)
                 {
                     if(Player* target = me->FindNearestPlayer(143.0f, true))
-                        if (!target->isGameMaster() && target->GetDistance(me) < 143)
+                        if (target->GetDistance(me) < 143)
                         {
                             for(uint8 i = 0; i <= 6; i++)
                             {
