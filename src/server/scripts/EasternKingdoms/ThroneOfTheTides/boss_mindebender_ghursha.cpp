@@ -209,6 +209,7 @@ public:
 
         InstanceScript* instance;
         EventMap events;
+              
 
         void Reset()
         {
@@ -217,7 +218,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            //events.ScheduleEvent(EVENT_ENSLAVE, 13000);
+            events.ScheduleEvent(EVENT_ENSLAVE, 10000);
             events.ScheduleEvent(EVENT_ABSORB_MAGIC, 20000);
             events.ScheduleEvent(EVENT_MIND_FOG, urand(6000,12000));
             events.ScheduleEvent(EVENT_UNRELENTING_AGONY, 10000);
@@ -227,17 +228,28 @@ public:
         {
             if (!UpdateVictim() || me->HasUnitState(UNIT_STAT_CASTING))
                 return;
-
+            
             events.Update(diff);
-
+            Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
             while (uint32 eventId = events.ExecuteEvent())
             {
+                int count=0;
                 switch (eventId)
                 {
 
                 case EVENT_ENSLAVE:
-                    
-                    events.ScheduleEvent(EVENT_ENSLAVE, 31000);
+                    if (!PlayerList.isEmpty()){
+                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i){
+                            if(Player *player = i->getSource()){
+                                if(player->HasAura(SPELL_ENSLAVE_BUFF)){
+                                    count++;}}}}
+                    if(count==0){
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true)){
+                            DoCast(target, SPELL_ENSLAVE);
+                        }
+                    }
+                    else
+                        events.ScheduleEvent(EVENT_ENSLAVE, 31000);
                     break;
                 case EVENT_ABSORB_MAGIC:
                     DoCast(me, SPELL_ABSORB_MAGIC);
