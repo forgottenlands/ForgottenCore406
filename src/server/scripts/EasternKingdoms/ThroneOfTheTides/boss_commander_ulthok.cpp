@@ -1,27 +1,23 @@
 /*
- * Copyright (C) 2011-2012 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2006-2010 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
-/* ScriptData
-SDName: Boss Commander Ulthok
-SD%Complete: 99%
-SDComment: need to do flying part with squeeze - hack added.
-SDCategory: Throne of the Tides
-EndScriptData */
+* Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.org/>
+*
+* Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+*
+* Copyright (C) 2011 - 2012 Naios <https://github.com/Naios>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "ScriptPCH.h"
 #include "throne_of_the_tides.h"
@@ -34,8 +30,13 @@ enum Spells
 {
     SPELL_ENRAGE                = 76100,
     SPELL_CURSE_OF_FATIGUE      = 76094,
-    SPELL_PULL_TARGET           = 67357, // HACK!!
+    SPELL_PULL_TARGET           = 67357,
+    SPELL_DARK_FISSURE_GROW     = 91375,
 };
+
+// 76066 - Visual
+// 76085 ?
+// 91371 - Visual mit wachstum
 
 enum Yells
 {
@@ -48,7 +49,7 @@ enum Yells
 class boss_commander_ulthok : public CreatureScript
 {
 public:
-    boss_commander_ulthok() : CreatureScript("boss_commander_ulthok") {}
+    boss_commander_ulthok() : CreatureScript("boss_commander_ulthok") { }
 
     struct boss_commander_ulthokAI : public ScriptedAI
     {
@@ -65,9 +66,12 @@ public:
         Unit* SqueezeTarget;
 
         InstanceScript *instance;
+        Vehicle* vehicle;
 
         void Reset()
         {
+            DespawnDarkFissures();
+
             DarkFissureTimer = 22500;
             EnrageTimer = urand(12000,18000);
             SqueezeTimer = 25500;
@@ -77,16 +81,18 @@ public:
             me->GetMotionMaster()->MoveTargetedHome();
 
             if (instance)
-                instance->SetData(DATA_COMMANDER_ULTHOK_EVENT, NOT_STARTED);
+                instance->SetData(DATA_COMMANDER_ULTHOK, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
+            me->RemoveAllAuras();
+
             DoScriptText(SAY_AGGRO, me);
             DoScriptText(SAY_AGGRO_WHISP, me);
 
             if (instance)
-                instance->SetData(DATA_COMMANDER_ULTHOK_EVENT, IN_PROGRESS);
+                instance->SetData(DATA_COMMANDER_ULTHOK, IN_PROGRESS);
         }
 
         void UpdateAI(const uint32 diff)
@@ -116,6 +122,7 @@ public:
             {
                 DoCast(SqueezeTarget, SPELL_PULL_TARGET, true);
                 DoCast(SqueezeTarget, SPELL_SQUEEZE, true);
+
                 SqueezeTimer = 22500;
             } else SqueezeTimer -= diff;
 
@@ -128,19 +135,34 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*pKiller*/)
         {
+            DespawnDarkFissures();
+
             DoScriptText(SAY_DEATH, me);
             DoScriptText(SAY_DEATH_WHISP, me);
 
             if (instance)
-                instance->SetData(DATA_COMMANDER_ULTHOK_EVENT, DONE);
+                instance->SetData(DATA_COMMANDER_ULTHOK, DONE);
         }
+
+    private:
+        void DespawnDarkFissures()
+		{
+			std::list<Creature*> creatures;
+			GetCreatureListWithEntryInGrid(creatures, me, NPC_DARK_FISSURE, 150.0f);
+
+			if (creatures.empty())
+				return;
+
+			for (std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+				(*iter)->DespawnOrUnsummon();
+		}
     };
 
-    CreatureAI* GetAI(Creature *creature) const
+    CreatureAI* GetAI(Creature *pCreature) const
     {
-        return new boss_commander_ulthokAI (creature);
+        return new boss_commander_ulthokAI (pCreature);
     }
 };
 
