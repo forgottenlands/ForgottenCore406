@@ -4,7 +4,6 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
-#define SPELL_CORRUPTION RAND(81836,81831,82125,82170)
 #define TARGETS_10_H 3
 #define TARGETS_25_H 3
 #define TARGETS_10_R 5
@@ -12,9 +11,15 @@
 #define TARGETS_10_RH 8
 #define TARGETS_25_RH 8
 
-enum spell
+enum spell_c
 {
     // Chogall
+    SPELL_CORRUPTED_BLOOD                 = 93189,
+    SPELL_CORRUPTION_ACCELERATED          = 81836,
+    SPELL_CORRUPTION_SICKNESS             = 93202,
+    SPELL_CORRUPTION_MALFORMATION         = 82125,
+    SPELL_CORRUPTION_ABSOLUTE             = 82170,
+    
     SPELL_FURY_CHOGALL                    = 82524, // Seulement le tank
     // P1
     SPELL_SUMMON_CORRUPTING_ADHERENT      = 82712, // 1 N, 3 H - SUMMON
@@ -168,7 +173,6 @@ public:
             spellsLocked = false;
             UpdatePhase(PHASE_NON);
             DespawnMinions();
-
             _Reset();
             instance->SetData(DATA_CHOGALL_EVENT, NOT_STARTED);
         }
@@ -178,6 +182,7 @@ public:
             _EnterCombat();
 
             Talk(SAY_AGGRO);
+            DoZoneInCombat(me);
 
             events.ScheduleEvent(EVENT_NEW_PHASE, urand(10000,12000));
             events.ScheduleEvent(EVENT_TWISTED_DEVOTION, urand(12000,22000));
@@ -344,7 +349,8 @@ public:
                     break;
 
                 case EVENT_CORRUPTION:
-                    DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 100,true), SPELL_CORRUPTION);
+                    //qua andrà fatto in modo di gestire in base agli stack il comportamento. sarebbe molto meglio farlo con lo spellscript penso
+                    DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 100,true), SPELL_CORRUPTION_ACCELERATED);
                     events.ScheduleEvent(EVENT_CORRUPTION, urand(18000,32000));
                     break;
 
@@ -522,7 +528,7 @@ public:
 /**************************
 ** NPC Blood Of The Old God
 ***************************/
-#define SPELL_CORRUPTION_BOG RAND(82170,82125,81831,81836)
+
 class npc_blood_of_the_old_god : public CreatureScript
 {
 public:
@@ -557,7 +563,7 @@ public:
             if(uiCorruption <= diff)
             {
                 if (Unit *player = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                DoCast(player, SPELL_CORRUPTION_BOG);
+                DoCast(player, SPELL_CORRUPTION_ACCELERATED);
                 uiCorruption = 12000;
             } else uiCorruption -= diff;
 
