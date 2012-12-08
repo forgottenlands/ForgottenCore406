@@ -298,7 +298,7 @@ class npc_waterspout_trigger : public CreatureScript
 };
 
 /***********************
-** WaterSpout trigger
+** MOVIE SPELL
 ************************/
 #define MOVIE_AREA_LADY_NAZJAR 169
 // id Spell 82964
