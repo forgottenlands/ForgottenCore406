@@ -265,14 +265,14 @@ public:
     bool OnGossipHello(Player* player, Creature* creature)
     {
         InstanceScript* instance = creature->GetInstanceScript();
-       /* if (instance)
+        if (instance)
         {
-            if ((instance->GetData(DATA_LADY_NAZJAR_EVENT) == DONE && instance->GetData(DATA_COMMANDER_ULTHOK_EVENT) == DONE && instance->GetData(DATA_ERUNAK_STONESPEAKER_EVENT) == DONE) || player->isGameMaster()) // If everything is already finished
-            {*/
+            if (instance->GetData(DATA_LADY_NAZJAR_EVENT) == DONE && instance->GetData(DATA_ERUNAK_STONESPEAKER_EVENT) == DONE)
+            {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_READY, GOSSIP_SENDER_MAIN, 1000);
                 player->PlayerTalkClass->SendGossipMenu(player->GetGossipTextId(creature), creature->GetGUID());
-            /*}
-        }*/
+            }
+        }
         return true;
     }
 };
@@ -317,6 +317,13 @@ public:
                     instance->DoRemoveAurasDueToSpellOnPlayers(76133);
                 me->SetVisible(false);
                 Finished = true;
+            }
+        }
+
+        void DamageTaken(Unit *who, uint32 &damage)
+        {
+            if(me->HealthBelowPct(5)){
+                damage = 0;
             }
         }
     };

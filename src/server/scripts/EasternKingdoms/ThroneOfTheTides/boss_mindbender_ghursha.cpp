@@ -240,9 +240,9 @@ public:
         {
             Enslaved = false;
             pErunak->HandleEmoteCommand(68);
-            pErunak->setFaction(35);
+            //pErunak->setFaction(35);
             me->SetReactState(REACT_AGGRESSIVE);
-            me->setFaction(26);
+            me->setFaction(14);
             DoScriptText(SAY_PHASE_1_END_MINDBENDER, me);
 
             TargetTimer = 3000;

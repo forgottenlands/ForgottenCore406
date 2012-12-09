@@ -378,37 +378,40 @@ public:
  
 struct mob_chasseur_gloubelinAI : public ScriptedAI
 {
-mob_chasseur_gloubelinAI(Creature *c) : ScriptedAI(c) {}
+    mob_chasseur_gloubelinAI(Creature *c) : ScriptedAI(c) {}
 
-uint32 attaque_sournoise;
-uint32 lance_empoisonnee;
+    uint32 attaque_sournoise;
+    uint32 lance_empoisonnee;
 
-void Reset()
-{
-attaque_sournoise = 10000;
-lance_empoisonnee = 8000;
-}
+    void Reset()
+    {
+        attaque_sournoise = 10000;
+        lance_empoisonnee = 8000;
+    }
 
-void UpdateAI(const uint32 diff)
-{
-if (!UpdateVictim())
- return;
+    void UpdateAI(const uint32 diff)
+        {
+        if (!UpdateVictim())
+         return;
  
-if (attaque_sournoise<= diff)
-{
-DoCast(me->getVictim(), spell_attaque_sournoise);
-attaque_sournoise = 10000;
-} else attaque_sournoise-= diff;
+        if (attaque_sournoise<= diff)
+        {
+            DoCast(me->getVictim(), spell_attaque_sournoise);
+            attaque_sournoise = 10000;
+        }
+        else attaque_sournoise-= diff;
 
-if (lance_empoisonnee<= diff)
-{
-if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-DoCast(pTarget, spell_lance_empoisonnee);
-lance_empoisonnee = 8000;
-} else lance_empoisonnee-= diff;
-
-DoMeleeAttackIfReady();
- }
+        if (lance_empoisonnee<= diff)
+        {
+            if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true)){
+                DoCast(pTarget, spell_lance_empoisonnee);
+                lance_empoisonnee = 8000;
+            } 
+        }
+        else lance_empoisonnee-= diff;
+        DoMeleeAttackIfReady();
+    }
+    
  };
  
 CreatureAI* GetAI(Creature* pCreature) const
