@@ -242,6 +242,7 @@ public:
             pErunak->HandleEmoteCommand(68);
             pErunak->setFaction(35);
             me->SetReactState(REACT_AGGRESSIVE);
+            me->SetFaction(26);
             DoScriptText(SAY_PHASE_1_END_MINDBENDER, me);
 
             TargetTimer = 3000;
