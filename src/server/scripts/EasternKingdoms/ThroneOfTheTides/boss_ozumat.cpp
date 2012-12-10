@@ -302,29 +302,21 @@ public:
 
         void Reset()
         {
-            Finished = false;
+
         }
 
         void UpdateAI(const uint32 diff)
         {
-            if(me->HealthBelowPct(5) && Finished == false)
-            {
-                me->setFaction(35);
-                me->SummonGameObject(DUNGEON_MODE(GO_OZUMAT_CHEST_NORMAL, GO_OZUMAT_CHEST_NORMAL), -125.950981f, 983.343201f, 230.335464f, 3.635565f, 0, 0, 0, 0, 9000000);
-                Neptulon->SetVisible(false);
-                me->CombatStop();
-                if (instance)
-                    instance->DoRemoveAurasDueToSpellOnPlayers(76133);
-                me->SetVisible(false);
-                Finished = true;
-            }
+            DoMeleeAttackIfReady();
         }
 
-        void DamageTaken(Unit *who, uint32 &damage)
-        {
-            if(me->HealthBelowPct(5)){
-                damage = 0;
-            }
+        
+        void JustDied(Unit *killer){
+            if(killer)
+                killer->SummonGameObject(DUNGEON_MODE(GO_OZUMAT_CHEST_NORMAL, GO_OZUMAT_CHEST_NORMAL), -125.950981f, 983.343201f, 230.335464f, 3.635565f, 0, 0, 0, 0, 9000000);
+            if (instance)
+                    instance->DoRemoveAurasDueToSpellOnPlayers(76133);
+            me->DespawnOrUnsummon();
         }
     };
 };
