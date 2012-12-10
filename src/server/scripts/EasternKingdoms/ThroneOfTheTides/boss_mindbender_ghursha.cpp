@@ -152,14 +152,10 @@ public:
                 me->CombatStop(true);
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SummonCreature(BOSS_MINDBENDER_GHURSHA, me->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN);
                 me->setFaction(35);
-                me->HandleEmoteCommand(68);
-
+                //me->HandleEmoteCommand(68);
                 DoScriptText(SAY_PHASE_1_END_ERUNAK, me);
-                Position pos;
-
-                me->GetPosition(&pos);
-                me->SummonCreature(BOSS_MINDBENDER_GHURSHA, pos, TEMPSUMMON_MANUAL_DESPAWN);
                 phased = true;
             }
 
@@ -220,7 +216,7 @@ public:
 
         void Reset()
         {
-            me->DespawnOrUnsummon(10000);
+            //me->DespawnOrUnsummon(10000);
         }
 
         void JustReachedHome()
@@ -239,7 +235,7 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             Enslaved = false;
-            pErunak->HandleEmoteCommand(68);
+            //pErunak->HandleEmoteCommand(68);
             //pErunak->setFaction(35);
             me->SetReactState(REACT_AGGRESSIVE);
             me->setFaction(14);
