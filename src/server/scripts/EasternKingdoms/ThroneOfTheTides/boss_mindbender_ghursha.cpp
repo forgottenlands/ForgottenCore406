@@ -243,74 +243,63 @@ public:
             if (!UpdateVictim() || me->HasUnitState(UNIT_STAT_CASTING))
                 return;
 
-            events.Update(diff);
-
-            while (uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
+            
+            if (TargetTimer <= diff && Enslaved == false)
                 {
+                    EnslaveTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true); // Don't CS the tank
+                    TargetTimer = 1000;
+                } 
+            else TargetTimer -= diff;
 
-                case EVENT_ENSLAVE:
-                        if (TargetTimer <= diff && Enslaved == false)
-                        {
-                            EnslaveTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true); // Don't CS the tank
-                            TargetTimer = 1000;
-                        } else TargetTimer -= diff;
+            if (EnslaveEndTimer <= diff && Enslaved == true){
+                me->SetReactState(REACT_AGGRESSIVE);
+                EnslaveTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true); // Don't CS the tank
+                EnslaveTarget->RemoveAurasDueToSpell(SPELL_ENSLAVE);
+                EnslaveTarget->RemoveAurasDueToSpell(SPELL_ENSLAVE_BUFF);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                Enslaved = false;
+                EnslaveTimer = 30000;
+                AbsorbMagicTimer = 20000;
+                MindFogTimer = urand(6000,12000);
+                UnrelentingAgonyTimer = 10000;
+                EnslaveEndTimer = 90000;
+            } else EnslaveEndTimer -= diff;
 
-                        if (EnslaveEndTimer <= diff && Enslaved == true)
-                        {
-                            me->SetReactState(REACT_AGGRESSIVE);
-                            EnslaveTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true); // Don't CS the tank
-                            EnslaveTarget->RemoveAurasDueToSpell(SPELL_ENSLAVE);
-                            EnslaveTarget->RemoveAurasDueToSpell(SPELL_ENSLAVE_BUFF);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            Enslaved = false;
-                            EnslaveTimer = 30000;
-                            AbsorbMagicTimer = 20000;
-                            MindFogTimer = urand(6000,12000);
-                            UnrelentingAgonyTimer = 10000;
-                            EnslaveEndTimer = 90000;
-                        } else EnslaveEndTimer -= diff;
+            if (EnslaveTimer <= diff && Enslaved == false){
+                if (EnslaveTarget){
+                    DoZoneInCombat();
+                    me->SetReactState(REACT_PASSIVE);
+                    DoCast(EnslaveTarget, SPELL_ENSLAVE);
+                    DoCast(EnslaveTarget, SPELL_ENSLAVE_BUFF);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    DoScriptText(RAND(SAY_MIND_CONTROL_1,SAY_MIND_CONTROL_2,SAY_MIND_CONTROL_3), me);
+                    Enslaved = true;
+                    EnslaveTimer = 180000;
+                    AbsorbMagicTimer = 180000;
+                    MindFogTimer = 180000;
+                    UnrelentingAgonyTimer = 180000;
+                    EnslaveEndTimer = DUNGEON_MODE(60000,30000);
+                    CastTimer = 2000;
+                }
+                EnslaveTimer = 1000;
+            } 
+            else EnslaveTimer -= diff;
+            if (EnslaveTarget && Enslaved == true)
+                if (EnslaveTarget->HealthBelowPct(50)){
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    EnslaveTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true);
+                    EnslaveTarget->RemoveAurasDueToSpell(SPELL_ENSLAVE);
+                    EnslaveTarget->RemoveAurasDueToSpell(SPELL_ENSLAVE_BUFF);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    Enslaved = false;
+                    EnslaveTimer = 30000;
+                    AbsorbMagicTimer = 20000;
+                    MindFogTimer = urand(6000,12000);
+                    UnrelentingAgonyTimer = 10000;
+                }
 
-                        if (EnslaveTimer <= diff && Enslaved == false)
-                        {
-                            if (EnslaveTarget)
-                            {
-                                DoZoneInCombat();
-                                me->SetReactState(REACT_PASSIVE);
-                                DoCast(EnslaveTarget, SPELL_ENSLAVE);
-                                DoCast(EnslaveTarget, SPELL_ENSLAVE_BUFF);
-                                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                                DoScriptText(RAND(SAY_MIND_CONTROL_1,SAY_MIND_CONTROL_2,SAY_MIND_CONTROL_3), me);
-                                Enslaved = true;
-                                EnslaveTimer = 180000;
-                                AbsorbMagicTimer = 180000;
-                                MindFogTimer = 180000;
-                                UnrelentingAgonyTimer = 180000;
-                                EnslaveEndTimer = DUNGEON_MODE(60000,30000);
-                                CastTimer = 2000;
-                            }
-                            EnslaveTimer = 1000;
-                        } else EnslaveTimer -= diff;
-
-                        if (EnslaveTarget && Enslaved == true)
-                            if (EnslaveTarget->HealthBelowPct(50))
-                            {
-                                me->SetReactState(REACT_AGGRESSIVE);
-                                EnslaveTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true);
-                                EnslaveTarget->RemoveAurasDueToSpell(SPELL_ENSLAVE);
-                                EnslaveTarget->RemoveAurasDueToSpell(SPELL_ENSLAVE_BUFF);
-                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                                Enslaved = false;
-                                EnslaveTimer = 30000;
-                                AbsorbMagicTimer = 20000;
-                                MindFogTimer = urand(6000,12000);
-                                UnrelentingAgonyTimer = 10000;
-                            }
-
-                        if (CastTimer <= diff && Enslaved == true)
-                        {
-                            if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, NotCharmedTargetSelector()))
+                if (CastTimer <= diff && Enslaved == true){
+                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, NotCharmedTargetSelector()))
                             {
                                 switch(EnslaveTarget->getClass())
                                 {
@@ -363,25 +352,26 @@ public:
                             }
                             CastTimer = 3000;
                         } else CastTimer -= diff;
-                    break;
-                case EVENT_ABSORB_MAGIC:
-                    DoCast(me, SPELL_ABSORB_MAGIC);
-                    events.ScheduleEvent(EVENT_ABSORB_MAGIC, 20000);
-                    break;
-                case EVENT_MIND_FOG:
-                    DoCast(me, SPELL_MIND_FOG_SUMMON);
-                    events.ScheduleEvent(EVENT_MIND_FOG, urand(6000,12000));
-                    break;
-                case EVENT_UNRELENTING_AGONY:
-                    DoCastAOE(SPELL_UNRELENTING_AGONY);
-                    events.ScheduleEvent(EVENT_UNRELENTING_AGONY, 10000);
-                    break;
+  
+                        if (AbsorbMagicTimer <= diff && Enslaved == false)
+                        {
+                            DoCast(me, SPELL_ABSORB_MAGIC);
+                            AbsorbMagicTimer = urand(15000, 20000);
+                        } else AbsorbMagicTimer -= diff;
 
-                default:
-                    break;
-                }
-            }		
+                        if (MindFogTimer <= diff && Enslaved == false)
+                        {
+                            DoCast(me, SPELL_MIND_FOG_SUMMON);
+                            DoScriptText(SAY_MIND_FOG, me);
+                            MindFogTimer = 18000;
+                        } else MindFogTimer -= diff;
 
+                        if (UnrelentingAgonyTimer <= diff && Enslaved == false)
+                        {
+                            DoCastAOE(SPELL_UNRELENTING_AGONY);
+                            UnrelentingAgonyTimer = 20000;
+                        } else UnrelentingAgonyTimer -= diff;        
+		
             DoMeleeAttackIfReady();
         }
 
