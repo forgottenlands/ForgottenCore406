@@ -142,7 +142,7 @@ public:
         void JustDied(Unit* /*pKiller*/)
         {
             DoCastAOE(SPELL_PLAY_MOVIE, true);
-            me->SummonCreature(BOSS_COMMANDER_ULTHOK, 53.106316f, 802.355957f, 805.731812f, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+            me->SummonCreature(BOSS_COMMANDER_ULTHOK, 53.106316f, 802.355957f, 805.731812f, 0, TEMPSUMMON_MANUAL_DESPAWN);
             DoScriptText(SAY_DEATH, me);
             RemoveSummons();
 
