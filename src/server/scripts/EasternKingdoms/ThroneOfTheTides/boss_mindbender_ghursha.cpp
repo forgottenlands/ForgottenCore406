@@ -10,9 +10,6 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
-Creature* pErunak;
-Creature* pMindbender;
-
 // Erunak Stonespeaker
 #define SPELL_EARTH_SHARDS 84931 // VISUAL - missle?
 #define SPELL_EARTH_SHARD_AURA 84935
@@ -62,7 +59,6 @@ public:
         boss_erunak_stonespeakerAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             pInstance = pCreature->GetInstanceScript();
-            pErunak = me;
         }
 
         std::list<uint64> SummonList;
@@ -83,9 +79,16 @@ public:
             LavaBoltTimer = 10000;
             MagmaSplashTimer = 15000;
             phased = false;
-
-            if (pInstance)
-                pInstance->SetData(DATA_ERUNAK_STONESPEAKER_EVENT, NOT_STARTED);
+            me->RemoveAllAuras();
+            if (pInstance){
+                if(pInstance->GetData(DATA_ERUNAK_STONESPEAKER_EVENT) == NOT_STARTED){
+                    pInstance->SetData(DATA_ERUNAK_STONESPEAKER_EVENT, NOT_STARTED);
+                }
+                if(pInstance->GetData(DATA_ERUNAK_STONESPEAKER_EVENT) == DONE){
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->setFaction(35);
+                }
+            }
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -151,11 +154,11 @@ public:
             {
                 me->CombatStop(true);
                 me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->SummonCreature(BOSS_MINDBENDER_GHURSHA, me->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->setFaction(35);
                 //me->HandleEmoteCommand(68);
-                DoScriptText(SAY_PHASE_1_END_ERUNAK, me);
+                //DoScriptText(SAY_PHASE_1_END_ERUNAK, me);
                 phased = true;
             }
 
@@ -163,12 +166,12 @@ public:
         }
     };
 
-    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+    /*bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
     {
         pPlayer->PlayerTalkClass->ClearMenus();
         return true;
-    }
-
+    }*/
+    /*
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
         if (pCreature->isQuestGiver())
@@ -177,7 +180,7 @@ public:
         pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
 
         return true;
-    }
+    }*/
 
     CreatureAI* GetAI(Creature *pCreature) const
     {
@@ -196,7 +199,6 @@ public:
         boss_mindbender_ghurshaAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             pInstance = pCreature->GetInstanceScript();
-            pMindbender = me;
         }
 
         std::list<uint64> SummonList;
@@ -217,19 +219,20 @@ public:
         void Reset()
         {
             //me->DespawnOrUnsummon(10000);
+            me->RemoveAllAuras();
         }
 
         void JustReachedHome()
         {
-            pErunak->SetReactState(REACT_AGGRESSIVE);
-            pErunak->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            pErunak->setFaction(16);
+            /*pErunak->SetReactState(REACT_AGGRESSIVE);
+            //pErunak->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            //pErunak->setFaction(16);
             CAST_AI(boss_erunak_stonespeaker::boss_erunak_stonespeakerAI, pErunak->AI())->phased = false;
             pErunak->GetMotionMaster()->MoveTargetedHome();
             me->DespawnOrUnsummon();
 
             if (pInstance)
-                pInstance->SetData(DATA_ERUNAK_STONESPEAKER_EVENT, NOT_STARTED);
+                pInstance->SetData(DATA_ERUNAK_STONESPEAKER_EVENT, NOT_STARTED);*/
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -257,7 +260,7 @@ public:
             {
                 if (Creature* pTemp = Unit::GetCreature(*me, *itr))
                     if (pTemp)
-                        pTemp->DisappearAndDie();
+                        pTemp->DespawnOrUnsummon();
             }
             SummonList.clear();
         }
@@ -403,11 +406,11 @@ public:
                 MindFogTimer = 18000;
             } else MindFogTimer -= diff;
 
-            if (UnrelentingAgonyTimer <= diff && Enslaved == false)
+            /*if (UnrelentingAgonyTimer <= diff && Enslaved == false)
             {
                 DoCastAOE(SPELL_UNRELENTING_AGONY);
                 UnrelentingAgonyTimer = 20000;
-            } else UnrelentingAgonyTimer -= diff;
+            } else UnrelentingAgonyTimer -= diff;*/
 
             DoMeleeAttackIfReady();
         }
@@ -415,11 +418,10 @@ public:
         void JustDied(Unit* /*pKiller*/)
         {
             DoScriptText(SAY_DEATH, me);
-            DoScriptText(SAY_WIN_ERUNAK, pErunak);
+            //DoScriptText(SAY_WIN_ERUNAK, pErunak);
             RemoveSummons();
-            pErunak->setFaction(35);
-			pErunak->AttackStop();
-
+            //pErunak->setFaction(35);
+			//pErunak->AttackStop();
             if (pInstance)
                 pInstance->SetData(DATA_ERUNAK_STONESPEAKER_EVENT, DONE);
         }
