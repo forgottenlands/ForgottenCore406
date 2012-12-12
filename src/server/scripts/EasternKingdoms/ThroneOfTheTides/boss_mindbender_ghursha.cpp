@@ -149,7 +149,7 @@ public:
                 Position pos;
                 me->GetPosition(&pos);
 
-                me->SummonCreature(BOSS_MINDBENDER_GHURSHA,pos,TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 2000);
+                me->SummonCreature(BOSS_MINDBENDER_GHURSHA, pos, TEMPSUMMON_MANUAL_DESPAWN, 100000);
             }
 
             events.Update(diff);
