@@ -378,6 +378,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             instance->SetData(DATA_MINDEBENDER_GHURSHA, DONE);
+            instance->SetData(DATA_ERUNAK_STONESPEAKER_EVENT, DONE);
         }
     };
 };
