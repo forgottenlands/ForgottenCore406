@@ -299,14 +299,19 @@ public:
         InstanceScript* instance;
 
         bool Finished;
-
+        bool blightcasted;
         void Reset()
         {
-
+            blightcasted=false;
         }
 
         void UpdateAI(const uint32 diff)
         {
+
+            if(blightcasted==false){
+               DoCastAOE(83525);
+               blightcasted=true;
+            }
             DoMeleeAttackIfReady();
         }
 
@@ -316,8 +321,7 @@ public:
                 killer->SummonGameObject(DUNGEON_MODE(GO_OZUMAT_CHEST_NORMAL, GO_OZUMAT_CHEST_HEROIC), -125.950981f, 983.343201f, 230.335464f, 3.635565f, 0, 0, 0, 0, 9000000);
             if (instance)
                     instance->DoRemoveAurasDueToSpellOnPlayers(76133);
-            me->DespawnOrUnsummon();
-
+            
             if (!me->GetMap()->GetPlayers().isEmpty())
                {
                    for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
@@ -326,6 +330,8 @@ public:
                            i->getSource()->CompleteQuest(5000006);
                    }
                }
+            me->DespawnOrUnsummon();
+
         }
     };
 };
