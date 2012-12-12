@@ -64,6 +64,11 @@ public:
             if(!instance)
                 return;
 
+            if(instance->GetData(DATA_LADY_NAZJAR) == DONE){
+                me->DisappearAndDie();
+                return;
+            }
+
             if (!eventProgress)
             {
                 if (timer <= diff)
