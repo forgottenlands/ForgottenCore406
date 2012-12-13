@@ -1,22 +1,6 @@
 /*
-* Copyright (C) 2005 - 2011 MaNGOS <http://www.getmangos.org/>
-*
-* Copyright (C) 2008 - 2011 TrinityCore <http://www.trinitycore.org/>
-*
-* Copyright (C) 2011 ArkCORE <http://www.arkania.net/>
-*
-* This program is free software; you can redistribute it and/or modify it
-* under the terms of the GNU General Public License as published by the
-* Free Software Foundation; either version 2 of the License, or (at your
-* option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-* more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
+* Copyright (C) 2011-2012 ProjectStudioMirage <http://www.studio-mirage.fr/>
+* Copyright (C) 2011-2012 https://github.com/Asardial
 */
 
 #include "blackwing_descent.h"
@@ -290,9 +274,6 @@ public:
             case NPC_LORD_VICTOR_NEFARIAN:
                 return uiLordVictorNefarian; 
                 break;
-            case GOB_DOOR_PRE_BOSSES:
-                return gobPreBossDoor;
-                break;
 
             }
 
@@ -314,7 +295,7 @@ public:
                 {
                 case DATA_MAGMAW:
                 case DATA_OMNOTRON_DEFENSE_SYSTEM:
-                    HandleGameObject(gobPreBossDoor, GetBossState(DATA_MAGMAW) == DONE && GetBossState(DATA_OMNOTRON_DEFENSE_SYSTEM)==DONE);
+                    HandleGameObject(gobPreBossDoor, GetBossState(DATA_MAGMAW)==DONE && GetBossState(DATA_OMNOTRON_DEFENSE_SYSTEM)==DONE);
                     break;
 
                 case DATA_MALORIAK:
