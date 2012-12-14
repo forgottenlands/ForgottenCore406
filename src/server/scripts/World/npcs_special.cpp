@@ -3445,6 +3445,32 @@ class npc_tier_vendor : public CreatureScript
         }
 };
 
+
+class npc_tawn_winterbluff : public CreatureScript
+{
+    public:
+        npc_tawn_winterbluff() : CreatureScript("npc_tawn_winterbluff") { }
+
+        bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+        {
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "We are joining an assoult on Lorthuna's Gat. You are needed", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            pPlayer->SEND_GOSSIP_MENU(1, pCreature->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+        {
+            player->PlayerTalkClass->CloseGossip();
+            switch (action)
+            {
+                case GOSSIP_ACTION_INFO_DEF:
+                    player->CompleteQuest(26827);
+                    break;
+            }
+            return true;
+        }
+};
+
 void AddSC_npcs_special() {
 	new npc_air_force_bots;
 	new npc_lunaclaw_spirit;
