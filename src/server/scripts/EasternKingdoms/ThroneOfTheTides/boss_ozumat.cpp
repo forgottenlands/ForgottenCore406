@@ -320,7 +320,10 @@ public:
             if(killer)
                 killer->SummonGameObject(DUNGEON_MODE(GO_OZUMAT_CHEST_NORMAL, GO_OZUMAT_CHEST_HEROIC), -125.950981f, 983.343201f, 230.335464f, 3.635565f, 0, 0, 0, 0, 9000000);
             if (instance)
+            {
                     instance->DoRemoveAurasDueToSpellOnPlayers(76133);
+                    instance->DoCompleteAchievement(me->GetMap()->IsHeroic() ? 5061 : 4839);
+            }
             
             if (!me->GetMap()->GetPlayers().isEmpty())
                {
@@ -330,6 +333,7 @@ public:
                            i->getSource()->CompleteQuest(5000006);
                    }
                }
+
             me->DespawnOrUnsummon();
 
         }
