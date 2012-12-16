@@ -584,13 +584,29 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                     case 65279:
                     {
                         // Guessed: exponential diminution until max range of spell (100yd)
-                        float radius = GetSpellRadiusForHostile(
-                                sSpellRadiusStore.LookupEntry(
-                                        m_spellInfo->EffectRadiusIndex [0]));
-                        if (!radius) return;
+                        float radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex [0]));
+                        if (!radius) 
+                            return;
                         float distance = m_caster->GetDistance2d(unitTarget);
-                        if (distance > radius) damage = 0;
-                        else damage *= pow(1.0f - distance / radius, 2);
+                        if (distance > radius)
+                            damage = 0;
+                        else 
+                            damage *= pow(1.0f - distance / radius, 2);
+                        break;
+                    }
+                    case 86844: // Devouring Flames
+                    case 92872:
+                    case 92873:
+                    case 92874:
+                    {
+                        float radius = 100.0f;
+                        if (!radius) 
+                            return;
+                        float distance = m_caster->GetDistance2d(unitTarget);
+                        if (distance > radius)
+                            damage = 0;
+                        else 
+                            damage *= pow(1.0f - distance / (radius) , 2);
                         break;
                     }
                         // Rocket Barrage, Goblin racial spell

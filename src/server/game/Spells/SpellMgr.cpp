@@ -4915,6 +4915,37 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectRadiusIndex[0] = 28;
             spellInfo->EffectRadiusIndex[1] = 28;
             break;
+        case 86825: // Blackout (dmg)
+        case 92879:
+        case 92880:
+        case 92881:
+            spellInfo->EffectRadiusIndex[0] = 14;
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+            break;
+        case 86844: // Devouring Flames
+        case 92872:
+        case 92873:
+        case 92874:
+            spellInfo->EffectRadiusIndex[0] = 81;
+            break;
+        case 86014: // Twilight Meteorite speed % share dmg
+        case 92863:
+        case 92864:
+        case 92865:
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+            // no break
+        case 86369: // Twilight Blast Speed
+        case 92898:
+        case 92899:
+        case 92900:
+            spellInfo->speed = 40.0f;
+            break;
+        case 86371: // Twilight Blast range
+        case 92903:
+        case 92904:
+        case 92905:
+            spellInfo->EffectRadiusIndex[0] = 14;
+            break;
         default:
             break;
         }

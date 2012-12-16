@@ -58,6 +58,7 @@ public:
 			 uiProtoBehemoth = 0 ;
 			 uiTimeWarden = 0;
              uiCyclonWinds = 0;
+             uiTeralionValionaHP = 0;
              if (instance->IsHeroic())
                  uiSinestra = 0;
              uiAscendantCouncilPhase = 1;
@@ -239,6 +240,10 @@ public:
                 case DATA_SINESTRA_EVENT:
                     uiEncounter[4] = data;
                     break;
+                case DATA_VALIONA_TERALION_HP:
+                    uiTeralionValionaHP = data;
+                    data = 0;
+                    break;
 			}
 
 			if (data == DONE)
@@ -254,6 +259,7 @@ public:
                 case DATA_COUNCIL_EVENT:					return uiEncounter[2];
 				case DATA_CHOGALL_EVENT:					return uiEncounter[3];
                 case DATA_SINESTRA_EVENT:                   return uiEncounter[4];
+                case DATA_VALIONA_TERALION_HP:              return uiTeralionValionaHP;
             }
 
             return 0;
@@ -448,6 +454,7 @@ public:
 		uint64 uiTimeWarden;
         uint64 uiValionaTheralionHealth;
         uint64 uiCyclonWinds;
+        uint32 uiTeralionValionaHP;
 		uint32 uiRandomDragons[3];
 		uint32 uiRandomNumber;
 		uint32 uiHalfusNormalTimer;

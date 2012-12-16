@@ -3508,4 +3508,5 @@ void AddSC_npcs_special() {
 	//new npc_guardian_of_ancient_kings;
     new npc_transmogrify;
     new npc_tier_vendor;
+    new npc_tawn_winterbluff;
 }
