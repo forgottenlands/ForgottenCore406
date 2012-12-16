@@ -394,7 +394,7 @@ class boss_valiona : public CreatureScript
                 if (instance)
                 {
                     instance->SetData(DATA_VALIONA_TERALION_HP, me->GetMaxHealth());
-                    instance->SetData(DATA_VALIONA, NOT_STARTED);
+                    instance->SetData(DATA_VALIONA_THERALION_EVENT, NOT_STARTED);
                 }
             }
 
@@ -405,7 +405,7 @@ class boss_valiona : public CreatureScript
                 if (instance->GetData(DATA_FIEND_KILLS) >= 6)
                     instance->DoCompleteAchievement(4852);
 
-                instance->SetData(DATA_VALIONA, DONE);
+                instance->SetData(DATA_VALIONA_THERALION_EVENT, DONE);
             }
             
             void DamageTaken(Unit* who, uint32 &damage)
@@ -499,7 +499,7 @@ class boss_valiona : public CreatureScript
                                 dazzlingCount++;
                             }
                             if (dazzlingCount < 6)
-                                events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 3500, 0, 0);
+                                events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 4500, 0, 0);
                             else
                                 events.ScheduleEvent(EVENT_THERALION_LAND, 1000, 0, 0);
                             break;
@@ -546,7 +546,7 @@ class boss_valiona : public CreatureScript
                         events.ScheduleEvent(EVENT_BLACKOUT, 45000, 0, 0);
                         events.ScheduleEvent(EVENT_DEVOURING_FLAMES, 40000, 0, 0);
                         events.ScheduleEvent(EVENT_TWILIGHT_SHIFT, 20000, 0, 0);
-                        events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 95000, 0, 0);
+                        events.ScheduleEvent(EVENT_DAZZLING_DESTRUCTION, 102000, 0, 0);
                         events.ScheduleEvent(EVENT_THERALION_TWILIGHT_BLASE, urand(3000, 4000), 0, 0);
                         break;
                     case ACTION_VALIONA_LAND_MOVE:
@@ -583,6 +583,8 @@ class boss_valiona : public CreatureScript
                             theralion->AI()->DoAction(ACTION_THERALION_FLY);
                     }
                 }
+
+                instance->SetData(DATA_VALIONA_THERALION_EVENT, IN_PROGRESS);
 
                 me->AI()->DoAction(ACTION_VALIONA_LAND);
             }

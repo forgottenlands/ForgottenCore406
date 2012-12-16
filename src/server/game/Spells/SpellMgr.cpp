@@ -4938,15 +4938,17 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 92859:
         case 92860:
         case 92861:
-        case 86386: // Dazzling destruction speed
-        case 92920:
-        case 92921:
-        case 92922:
         case 86369: // Twilight Blast Speed
         case 92898:
         case 92899:
         case 92900:
             spellInfo->speed = 50.0f;
+            break;
+        case 86386: // Dazzling destruction speed
+        case 92920:
+        case 92921:
+        case 92922:
+            spellInfo->speed = 30.0f;
             break;
         case 86371: // Twilight Blast range
         case 92903:
