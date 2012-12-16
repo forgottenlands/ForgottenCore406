@@ -5638,6 +5638,16 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
         {
             switch (dummySpell->Id)
             {
+                case 86622: // Engulfing Magic
+                case 95639:
+                case 95640:
+                case 95641:
+                    if (Unit* boss = triggeredByAura->GetCaster())
+                    {
+                        int32 bp0 = damage;
+                        CastCustomSpell(pVictim, 86631,  &bp0, NULL, NULL, true, 0, 0, boss->GetGUID());
+                    }
+                    break;
                 // Bane of Havoc track spell
                 case 85466:
                     if (!ToPlayer() || !pVictim)
