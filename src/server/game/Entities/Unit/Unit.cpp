@@ -9696,6 +9696,29 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
+        //killing machine
+		case 51123:
+		case 51127:
+		case 51128:
+			if(HasAura(90459))    //controllo set 4 pezzi
+				if(HasAura(90507))
+				{
+
+					if(Aura* buff = GetAura(90507))	//stack buff
+					{
+						uint8 stack = buff->GetStackAmount();
+						if(stack +1 > 3)
+							stack = 3;
+						else
+							stack ++;
+						buff->SetStackAmount(stack);
+					}
+				}
+				else
+				{
+					AddAura(90507,this);
+				}
+        break;
         case 62600: //Savage Defense (proc fix) 
         { 
             Player* pl = ToPlayer();
