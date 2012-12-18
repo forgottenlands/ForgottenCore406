@@ -788,6 +788,39 @@ class npc_twilight_portal_bot : public CreatureScript
             player->PlayerTalkClass->CloseGossip();
             return true;
         }
+
+        struct npc_twilight_portal_botAI : public ScriptedAI
+        {
+            npc_twilight_portal_botAI(Creature* c) : ScriptedAI(c)
+            { }
+
+            InstanceScript* instance;
+            uint32 timer;
+
+            void Reset()
+            {
+                timer = 1000;
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (timer <= diff)
+                {
+                    if (!me->HasAura(86291))
+                        me->AddAura(86291, me);
+
+                    timer = 1000;
+                } else
+                    timer -= diff;
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_twilight_portal_botAI(creature);
+        }
 };
 
 class npc_twilight_fiend : public CreatureScript
