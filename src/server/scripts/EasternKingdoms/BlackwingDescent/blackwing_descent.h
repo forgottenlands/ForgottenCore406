@@ -1,54 +1,54 @@
 /*
-* Copyright (C) 2011-2012 ProjectStudioMirage <http://www.studio-mirage.fr/>
-* Copyright (C) 2011-2012 https://github.com/Asardial
-*/
+ * Copyright (C) 2005 - 2012 MaNGOS <http://www.getmangos.org/>
+ *
+ * Copyright (C) 2008 - 2012 TrinityCore <http://www.trinitycore.org/>
+ *
+ * Copyright (C) 2011 - 2012 ArkCORE <http://www.arkania.net/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#ifndef DEF_BLACKWING_DESCEND_H
-#define DEF_BLACKWING_DESCEND_H
+#ifndef DEF_BLACKWING_DESCENT_H
+#define DEF_BLACKWING_DESCENT_H
 
 enum Data
 {
     //Encounters
     DATA_MAGMAW,
     DATA_OMNOTRON_DEFENSE_SYSTEM,
-    DATA_TOXITRON,
     DATA_MALORIAK,
     DATA_CHIMAERON,
     DATA_ATRAMEDES,
     DATA_NEFARIAN,
-    DATA_ANCIEN_BELL,
     DATA_ABBERATIONS_LEFT,
-    DATA_SPIRIT_SHADOWFORGE,
-    DATA_SPIRIT_BURNINEYE,
-    DATA_SPIRIT_IRONSTAR,
-    DATA_SPIRIT_THAURISSAN,
-    DATA_SPIRIT_ANVILRAGE,
-    DATA_SPIRIT_COREHAMMER,
-    DATA_SPIRIT_ANGERFORGE,
-    DATA_SPIRIT_MOLTENFIST,
-};
-
-enum Data64
-{
-    DATA_ONYXIA,
-    DATA_PROTOTYPE,
 };
 
 enum Creatures
 {
     BOSS_MAGMAW                     = 41570,
-    BOSS_OMNOTRON	               = 42186,
+	BOSS_OMNOTRON	                = 42186,
     BOSS_MALORIAK                   = 41378,
     BOSS_ATRAMEDES                  = 41442,
     BOSS_CHIMAERON                  = 43296,
     BOSS_NEFARIAN                   = 41376,
 
 	// Magmaw
-    NPC_MAGMAWS_HEAD                = 42347,
-    NPC_IGNITION_TRIGGER            = 49447,    
-    NPC_LAVA_PARASITE               = 41806,
-    NPC_PILLAR_OF_FLAME_TRIGGER     = 41843,
-    NPC_BLAZING_BONE_CONSTRUCT      = 49416,
+	NPC_MAGMAWS_HEAD                = 42347,
+	NPC_IGNITION_TRIGGER            = 49447,
+	NPC_LAVA_PARASITE               = 41806,
+	NPC_PILLAR_OF_FLAME_TRIGGER     = 41843,
+	NPC_BLAZING_BONE_CONSTRUCT      = 49416,
     NPC_DRAGONID_DRUDGE             = 42362,
 
     // Omnotron Defense System
@@ -92,11 +92,9 @@ enum Creatures
 
     // Nefarian
     NPC_ONYXIA                      = 41270,
-    NPC_WAR_OS                      = 41918,
-    NPC_PROTOTYPE                   = 41948,
 
     // Misc
-    NPC_NEFARIAN_HELPER_HEROIC      = 49427,
+	NPC_NEFARIAN_HELPER_HEROIC      = 49427,
     NPC_LORD_VICTOR_NEFARIAN        = 41379,
 };
 
@@ -107,7 +105,6 @@ enum Gameobjects
     GOB_ONYXIA_PLATFORM             = 207834,
     GOB_MALORIAKS_CAULDRON          = 203306,
     GOB_NEFARIANS_THRONE            = 202832,
-    GOB_ANCIEN_BELL                 = 204276,
 };
 
 #endif
