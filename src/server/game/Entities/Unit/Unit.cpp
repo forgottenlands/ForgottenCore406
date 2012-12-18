@@ -5638,6 +5638,16 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
         {
             switch (dummySpell->Id)
             {
+                case 86622: // Engulfing Magic
+                case 95639:
+                case 95640:
+                case 95641:
+                    if (Unit* boss = triggeredByAura->GetCaster())
+                    {
+                        int32 bp0 = damage;
+                        CastCustomSpell(pVictim, 86631,  &bp0, NULL, NULL, true, 0, 0, boss->GetGUID());
+                    }
+                    break;
                 // Bane of Havoc track spell
                 case 85466:
                     if (!ToPlayer() || !pVictim)
@@ -9686,6 +9696,29 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
+        //killing machine
+		case 51123:
+		case 51127:
+		case 51128:
+			if(HasAura(90459))    //controllo set 4 pezzi
+				if(HasAura(90507))
+				{
+
+					if(Aura* buff = GetAura(90507))	//stack buff
+					{
+						uint8 stack = buff->GetStackAmount();
+						if(stack +1 > 3)
+							stack = 3;
+						else
+							stack ++;
+						buff->SetStackAmount(stack);
+					}
+				}
+				else
+				{
+					AddAura(90507,this);
+				}
+        break;
         case 62600: //Savage Defense (proc fix) 
         { 
             Player* pl = ToPlayer();

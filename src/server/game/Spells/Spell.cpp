@@ -2091,6 +2091,9 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     if (modOwner)
                         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
                     target = SearchNearbyTarget(range, SPELL_TARGETS_ENTRY, SpellEffIndex(i));
+
+                    if (m_spellInfo->Id == 86840)
+                        target = m_originalCaster;
                     break;
             }
 

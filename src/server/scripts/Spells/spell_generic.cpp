@@ -925,6 +925,42 @@ public:
         }
 };
 
+class spell_gen_jade_crystal : public SpellScriptLoader {
+public:
+        spell_gen_jade_crystal() : SpellScriptLoader("spell_gen_jade_crystal") { }
+
+        class spell_gen_jade_crystal_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_jade_crystal_SpellScript)
+            
+            void BeforeEffect(SpellEffIndex /*effIndex*/) 
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!target)
+                    return;
+
+                if (!caster)
+                    return;
+
+                if (caster->ToPlayer())
+                    caster->ToPlayer()->CompleteQuest(26377);
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_gen_jade_crystal_SpellScript::BeforeEffect, EFFECT_1, SPELL_EFFECT_APPLY_AURA);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_gen_jade_crystal_SpellScript();
+        }
+};
+
+
 void AddSC_generic_spell_scripts() 
 {
 	new spell_gen_absorb0_hitlimit1();
@@ -948,4 +984,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_vengeance();
     new spell_gen_launch();
     new spell_gen_forged_fury();
+    new spell_gen_jade_crystal();
 }

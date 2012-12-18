@@ -4915,6 +4915,79 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectRadiusIndex[0] = 28;
             spellInfo->EffectRadiusIndex[1] = 28;
             break;
+        case 86825: // Blackout (dmg)
+        case 92879:
+        case 92880:
+        case 92881:
+            spellInfo->EffectRadiusIndex[0] = 14;
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+            break;
+        case 86844: // Devouring Flames
+        case 92872:
+        case 92873:
+        case 92874:
+            spellInfo->EffectRadiusIndex[0] = 81;
+            break;
+        case 86014: // Twilight Meteorite share dmg
+        case 92863:
+        case 92864:
+        case 92865:
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+            break;
+        case 86013: // Twilight Meteorite speed
+        case 92859:
+        case 92860:
+        case 92861:
+        case 86369: // Twilight Blast Speed
+        case 92898:
+        case 92899:
+        case 92900:
+            spellInfo->speed = 50.0f;
+            break;
+        case 86386: // Dazzling destruction speed
+        case 92920:
+        case 92921:
+        case 92922:
+            spellInfo->speed = 30.0f;
+            break;
+        case 86371: // Twilight Blast range
+        case 92903:
+        case 92904:
+        case 92905:
+            spellInfo->EffectRadiusIndex[0] = 14;
+            break;
+        case 86406: // Dazzling Destruction range
+        case 92926:
+        case 92927:
+        case 92928:
+            spellInfo->EffectRadiusIndex[0] = 32;
+            spellInfo->EffectRadiusIndex[1] = 32;
+            break;
+        case 86622: // Engulfing Magic
+        case 95639:
+        case 95640:
+        case 95641:
+            spellInfo->Effect[2] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectBasePoints[2] = 1;
+            spellInfo->EffectApplyAuraName[2] = SPELL_AURA_DUMMY;
+            spellInfo->EffectImplicitTargetA[2] = 1;
+            spellInfo->EffectImplicitTargetB[2] = 0;
+            break;
+        case 86631: // Engulfing Magic dmg
+            spellInfo->EffectRadiusIndex[0] = 13;
+            break;
+        case 86505: // Fabulous flames range
+        case 92907:
+        case 92908:
+        case 92909:
+            spellInfo->EffectRadiusIndex[0] = 32;
+            break;
+        case 74807: // Twilight Realm
+            spellInfo->EffectMiscValue[0] = 33;
+            break;
+        case 93055: // Shifting Reality
+            spellInfo->EffectRadiusIndex[0] = 14;
+            break;
         default:
             break;
         }
