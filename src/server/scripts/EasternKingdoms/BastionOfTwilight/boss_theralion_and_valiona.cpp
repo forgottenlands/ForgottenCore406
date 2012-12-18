@@ -133,7 +133,7 @@ class boss_theralion : public CreatureScript
                 if (instance)
                 {
                     instance->SetData(DATA_VALIONA_TERALION_HP, me->GetMaxHealth());
-                    instance->SetData(DATA_THERALION, NOT_STARTED);
+                    instance->SetData(DATA_VALIONA_THERALION_EVENT, NOT_STARTED);
                 }
             }
 
@@ -215,6 +215,8 @@ class boss_theralion : public CreatureScript
                     }
                 }
 
+                instance->SetData(DATA_VALIONA_THERALION_EVENT, IN_PROGRESS);
+
                 events.ScheduleEvent(EVENT_ENGULFING_MAGIC, 35000, 0, 0);
                 events.ScheduleEvent(EVENT_TWILIGHT_SHIFT_THERALION, 20000, 0, 0);
                 events.ScheduleEvent(EVENT_FABULOUS_FLAMES, urand(10000, 16000), 0, 0);
@@ -243,7 +245,7 @@ class boss_theralion : public CreatureScript
                        i->getSource()->ModifyCurrency(396, 105 * PLAYER_CURRENCY_PRECISION);
                    }
                 }
-                instance->SetData(DATA_THERALION, DONE);
+                instance->SetData(DATA_VALIONA_THERALION_EVENT, DONE);
             }
 
             void UpdateAI(const uint32 diff)

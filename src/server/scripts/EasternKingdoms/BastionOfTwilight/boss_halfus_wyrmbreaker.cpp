@@ -78,7 +78,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
 
 			void Reset()
 			{
-                instance->SetData(DATA_WYRMBREAKER, NOT_STARTED);
+                instance->SetData(DATA_WYRMBREAKER_EVENT, NOT_STARTED);
                 events.Reset();
                 me->ClearUnitState(UNIT_STAT_STUNNED);
                 barrageCount = 0;
@@ -106,7 +106,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
 			{
                 DoZoneInCombat(me);
 
-                instance->SetData(DATA_WYRMBREAKER, IN_PROGRESS);
+                instance->SetData(DATA_WYRMBREAKER_EVENT, IN_PROGRESS);
 
                 // Increased Attack Speed
                 me->AddAura(SPELL_FRENZIED_ASSAULT, me);
@@ -135,9 +135,12 @@ class boss_halfus_wyrmbreaker : public CreatureScript
 
 			void JustDied()
 			{
-                instance->SetData(DATA_WYRMBREAKER, DONE);
-                if (Creature* proto = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
-                    proto->DisappearAndDie();
+                if (instance)
+                {
+                    instance->SetData(DATA_WYRMBREAKER_EVENT, DONE);
+                    if (Creature* proto = me->GetCreature(*me, instance->GetData64(NPC_PROTO_BEHEMOTH)))
+                        proto->DisappearAndDie();
+                }
 			}
 
             void DamageTaken(Unit* who, uint32 &damage)
