@@ -46,13 +46,8 @@ enum Texts
     SAY_MON4 = 4,
 };
 
-enum council_nums
+enum council_npcs
 {
-    //BOSS_ELEMENTIU_MONSTROSITY	= 43735,
-    //BOSS_IGNACIUS	= 43686,
-    //BOSS_FELUDIUS	= 43687,
-    //BOSS_TERRASTRA	= 43689,
-    //BOSS_ARION	= 43688,
     NPC_GRAVITY_WELL = 44824,
     NPC_VIOLENT_CYCLONE = 44747,
     NPC_ASCENDANT_PLUME_STALKER = 45420,
@@ -65,36 +60,51 @@ enum council_spells
 {
     // P2 & 3
     SPELL_ELEMENTALE_STATIS = 82285,
+    
     // P1
     // Feludius
     SPELL_HYDROLANCE = 82752,
     SPELL_WATERBOMB = 82699,
+    SPELL_WATERBOMB2 = 82700,
+    SPELL_WATERLOGGED =  82762,
     SPELL_HEART_OF_ICE = 82655,
+    SPELL_HEART_OF_ICE2 = 82667,
     SPELL_GLACIATE = 82746,
     SPELL_FROZEN = 82772,
-    SPELL_FIXER = 00000,
+    SPELL_FROZEN2 = 92505,
+
     // Ignacious
     SPELL_INFERNO_LEAP = 82857,
+    SPELL_INFERNO_LEAP2 = 92521,
     SPELL_INFERNO_RUSH = 82859,
+    SPELL_INFERNO_RUSH2 = 92523,
     SPELL_RISING_FLAMES = 82636,
     SPELL_BURNING_BLOOD = 82660,
     SPELL_FLAME_TORRENT = 82777,
+    SPELL_FLAME_TORRENT2 = 92518,
     SPELL_AEGIS_OF_FLAMES = 82631,
-    SPELL_SHADOW_BREATH = 00000,
+    SPELL_AEGIS_OF_FLAMES2 = 92512,
+
     // P2
     // Arion
     SPELL_CALL_WINDS_SUMMON = 83491,
     SPELL_DISPERSE = 83087,
     SPELL_LIGHTNING_BLAST = 83070,
     SPELL_LIGHTNING_ROD = 83099,
+    SPELL_CHAIN_LIGHTNING = 83300,
     SPELL_THUNDERSHOCK = 83067,
-    SPELL_LASHING_WINDS = 00000,
+    SPELL_THUNDERSHOCK2 = 92470,
+    SPELL_LASHING_WINDS = 83491,
     // Terrestra
     SPELL_ERUPTION = 83675,
+    SPELL_ERUPTION2 = 95321,
     SPELL_GRAVITY_WELL_SUMMON = 83572,
     SPELL_HARDEN_SKIN = 83718,
+    SPELL_HARDEN_SKIN2 = 92542,
     SPELL_QUAKE = 83565,
-    SPELL_GROUNDED = 00000,
+    SPELL_QUAKE2 = 92545,
+    SPELL_GRAVITY_CORE = 92075,
+
     // P3
     // Monstrosity
     SPELL_CRYOGENIC_AURA = 82752,
@@ -560,7 +570,7 @@ public:
                     break;
 					
                     case EVENT_LAVA_SEED:
-                        DoCastAOE(SPELL_SHADOW_BREATH);
+                        DoCastAOE(SPELL_LAVA_SEED);
                     events.ScheduleEvent(EVENT_LAVA_SEED, urand(16000,23000));
                     break;
 					
@@ -898,7 +908,7 @@ public:
 
 		bool Validate(SpellEntry const * /*spellEntry*/)
 		{
-			if (!sSpellStore.LookupEntry(SPELL_GROUNDED)) // HERE SPELL
+            if (!sSpellStore.LookupEntry(SPELL_GRAVITY_CORE)) // HERE SPELL
 				return false;
 			return true;
 		}
@@ -1048,13 +1058,13 @@ class trash_deluge_link : public CreatureScript
                 if(uiFrostWhirl <= uiDiff)
                 {
                     if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        DoCast(pTarget, SPELL_FIXER);
+                        DoCast(pTarget, SPELL_FROST_WHIRL);
                     uiFrostWhirl = 12000;
                 } else uiFrostWhirl -= uiDiff;
 
                 if(uiColdTouched <= uiDiff)
                 {
-                    DoCastAOE(SPELL_FIXER);
+                    DoCastAOE(SPELL_COLD_TOUCHED);
                     uiColdTouched = 1000;
                 } else uiColdTouched -= uiDiff;
 
