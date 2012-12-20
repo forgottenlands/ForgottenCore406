@@ -9697,7 +9697,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     switch (auraSpellInfo->Id)
     {
         // impact
-        case 64343:
+        case 12357:
+        case 11103:
             if (ToPlayer())
                 ToPlayer()->RemoveSpellCooldown(2136, true);
             break;
@@ -9713,10 +9714,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
 					{
 						uint8 stack = buff->GetStackAmount();
 						if(stack +1 > 3)
-							stack = 3;
-						else
+                        {
+                            buff->RefreshDuration();
+                        }else
+                        {
 							stack ++;
-						buff->SetStackAmount(stack);
+                            buff->SetStackAmount(stack);
+                        }
 					}
 				}
 				else
