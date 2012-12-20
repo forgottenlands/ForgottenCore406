@@ -9696,6 +9696,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
     // Custom triggered spells
     switch (auraSpellInfo->Id)
     {
+        // impact
+        case 64343:
+            if (ToPlayer())
+                ToPlayer()->RemoveSpellCooldown(2136, true);
+            break;
         //killing machine
 		case 51123:
 		case 51127:

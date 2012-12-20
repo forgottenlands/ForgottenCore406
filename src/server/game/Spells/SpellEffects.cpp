@@ -6060,6 +6060,33 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
         {
             switch (m_spellInfo->Id)
             {
+                // Impact
+                case 12355:
+                    if (!unitTarget)
+                        return;
+
+                    if (!GetCaster())
+                        return;
+
+                    if (Unit* stunned = m_targets.getUnitTarget())
+                    {
+                        Unit::AuraEffectList const& dotList = stunned->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+                        if (unitTarget->GetGUID() !=  stunned->GetGUID())
+                        {
+                            for (Unit::AuraEffectList::const_iterator itr = dotList.begin(); itr != dotList.end(); ++itr)
+                            {
+                                if (!(*itr))
+                                    return;
+
+                                if (!(*itr)->GetSpellProto())
+                                    return;
+
+                                if ((*itr)->GetSpellProto()->SchoolMask == SPELL_SCHOOL_MASK_FIRE && (*itr)->GetCasterGUID() == GetCaster()->GetGUID())
+                                    m_caster->AddAura((*itr)->GetId(), unitTarget);
+                            }
+                        }
+                    }                    
+                break;
                 //Teleport to Lake Wintergrasp
                 case 58622:
                 {

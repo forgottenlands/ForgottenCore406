@@ -4988,6 +4988,9 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 93055: // Shifting Reality
             spellInfo->EffectRadiusIndex[0] = 14;
             break;
+        case 12355: // impact range
+            spellInfo->EffectRadiusIndex[1] = 32;
+            break;
         default:
             break;
         }
