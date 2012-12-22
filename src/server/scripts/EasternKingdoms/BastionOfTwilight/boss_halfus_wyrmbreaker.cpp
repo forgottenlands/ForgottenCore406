@@ -85,21 +85,45 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 roarCount = 0;
                 firstFuriosCasted = false;
 
-                if (Creature* dragon = me->FindNearestCreature(NPC_NETHER_SCION, 500.0f, false))
+                if (Creature* dragon = me->GetCreature(*me, instance->GetData64(NPC_NETHER_SCION)))
+                {
                     if (!dragon->isAlive())
                         dragon->Respawn(true);
+                    else
+                        dragon->AI()->EnterEvadeMode();
+                }
 
-                if (Creature* dragon = me->FindNearestCreature(NPC_STORM_RIDER, 500.0f, false))
+                if (Creature* dragon = me->GetCreature(*me, instance->GetData64(NPC_STORM_RIDER)))
+                {
                     if (!dragon->isAlive())
                         dragon->Respawn(true);
+                    else
+                        dragon->AI()->EnterEvadeMode();
+                }
 
-                if (Creature* dragon = me->FindNearestCreature(NPC_SLATE_DRAKE, 500.0f, false))
+                if (Creature* dragon = me->GetCreature(*me, instance->GetData64(NPC_SLATE_DRAKE)))
+                {
                     if (!dragon->isAlive())
                         dragon->Respawn(true);
+                    else
+                        dragon->AI()->EnterEvadeMode();
+                }
 
-                if (Creature* dragon = me->FindNearestCreature(NPC_TIME_WARDEN, 500.0f, false))
+                if (Creature* dragon = me->GetCreature(*me, instance->GetData64(NPC_TIME_WARDEN)))
+                {
                     if (!dragon->isAlive())
                         dragon->Respawn(true);
+                    else
+                        dragon->AI()->EnterEvadeMode();
+                }
+
+                if (Creature* dragon = me->GetCreature(*me, instance->GetData64(NPC_PROTO_BEHEMOTH)))
+                {
+                    if (!dragon->isAlive())
+                        dragon->Respawn(true);
+                    else
+                        dragon->AI()->EnterEvadeMode();
+                }
 			}
 
 			void EnterCombat(Unit* /*who*/)
@@ -115,7 +139,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 me->AddAura(SPELL_MALEVOLENT_STRIKE_TRIG, me);
 
                 // Firball Barrage activator
-                if (Creature* proto = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
+                if (Creature* proto = me->GetCreature(*me, instance->GetData64(NPC_PROTO_BEHEMOTH)))
                 {
                     me->AddAura(SPELL_DANCING_FLAMES, proto);
                     DoZoneInCombat(proto);
@@ -133,7 +157,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                 events.ScheduleEvent(EVENT_ENRAGE, 360000);
 			}
 
-			void JustDied()
+			void JustDied(Unit* killer)
 			{
                 if (instance)
                 {
@@ -168,7 +192,7 @@ class boss_halfus_wyrmbreaker : public CreatureScript
                     {
                         case EVENT_FIREBALL_BARRAGE:
                             // Cast barrage on random players
-                            if (Creature* proto = me->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
+                            if (Creature* proto = me->GetCreature(*me, instance->GetData64(NPC_PROTO_BEHEMOTH)))
                             {
                                 for (uint8 i = 0; i < RAID_MODE(urand(1, !proto->HasAura(SPELL_TIME_DILATATION) ? 4 : 6), urand(3, !proto->HasAura(SPELL_TIME_DILATATION) ? 8 : 16)); ++i)
                                 {
@@ -254,7 +278,7 @@ class npc_halfus_dragon : public CreatureScript
 
             void JustDied(Unit* killer)
             {
-                if (Creature* halfus = me->FindNearestCreature(BOSS_WYRMBREAKER, 500.0f, true))
+                if (Creature* halfus = me->GetCreature(*me, pInstance->GetData64(DATA_WYRMBREAKER)))
                     if (halfus->HasAura(SPELL_DRAGONS_VEGEANCE))
                     {
                         if (Aura* vengeance = halfus->GetAura(SPELL_DRAGONS_VEGEANCE))
@@ -298,26 +322,32 @@ class npc_halfus_dragon : public CreatureScript
             creature->setFaction(14);
             creature->SetReactState(REACT_AGGRESSIVE);
 
-            if (Creature* halfus = creature->FindNearestCreature(creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ? 46209 : BOSS_WYRMBREAKER, 500.0f, true))
+            if (InstanceScript* instance = creature->GetInstanceScript())
             {
-                switch (creature->GetEntry())
+                if (Creature* halfus = creature->GetCreature(*creature, instance->GetData64(DATA_WYRMBREAKER))) 
                 {
-                    case NPC_SLATE_DRAKE:
-                        creature->AddAura(SPELL_STONE_TOUCH, halfus);
-                        break;
-                    case NPC_NETHER_SCION:
-                        creature->AddAura(SPELL_NETHER_BLINDNESS, halfus);
-                        break;
-                    case NPC_TIME_WARDEN:
-                        if (Creature* proto = creature->FindNearestCreature(NPC_PROTO_BEHEMOTH, 500.0f, true))
-                            creature->AddAura(SPELL_TIME_DILATATION, proto);
-                        break;
-                }
+                    switch (creature->GetEntry())
+                    {
+                        case NPC_SLATE_DRAKE:
+                            creature->AddAura(SPELL_STONE_TOUCH, halfus);
+                            break;
+                        case NPC_NETHER_SCION:
+                            creature->AddAura(SPELL_NETHER_BLINDNESS, halfus);
+                            break;
+                        case NPC_TIME_WARDEN:
+                            if (InstanceScript* instance = creature->GetInstanceScript())
+                            {
+                                if (Creature* proto = creature->GetCreature(*creature, instance->GetData64(NPC_PROTO_BEHEMOTH)))
+                                    creature->AddAura(SPELL_TIME_DILATATION, proto);
+                            }
+                            break;
+                    }
 
-                if (!halfus->isInCombat())
-                {
-                    halfus->Attack(player, true);
-                    halfus->GetMotionMaster()->MoveChase(player, 1.0f, 1.0f);
+                    if (!halfus->isInCombat())
+                    {
+                        halfus->Attack(player, true);
+                        halfus->GetMotionMaster()->MoveChase(player, 1.0f, 1.0f);
+                    }
                 }
             }
             creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
