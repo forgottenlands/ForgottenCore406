@@ -1704,6 +1704,19 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
                         AddPctN(damage, pct);
                     }
                 }
+                
+                // Deadly Poison
+                if (GetSpellProto()->Id == 2818 && GetBase()->GetCaster() && GetBase()->GetCaster()->ToPlayer())
+                {
+                     if (GetBase()->GetCaster()->HasAuraType(SPELL_AURA_MASTERY) && GetBase()->GetCaster()->getClass() == CLASS_ROGUE)
+                     {
+                         if (GetBase()->GetCaster()->ToPlayer()->GetTalentBranchSpec(GetBase()->GetCaster()->ToPlayer()->GetActiveSpec()) == BG_ROGUE_ASSASINATION)
+                         {
+                             uint32 pct = uint32(28.0f + 3.5f * GetBase()->GetCaster()->ToPlayer()->GetMasteryPoints());
+                             AddPctN(damage, pct);
+                         }
+                     }
+                }
 
                 if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_GENERIC)
                 {

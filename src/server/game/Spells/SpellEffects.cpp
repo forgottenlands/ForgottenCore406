@@ -1231,6 +1231,19 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
             }
         }
 
+        // Instant Poison
+        if (m_spellInfo->Id == 8680 && m_caster &&  m_caster->ToPlayer())
+        {
+             if (m_caster->HasAuraType(SPELL_AURA_MASTERY) && m_caster->getClass() == CLASS_ROGUE)
+             {
+                 if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BG_ROGUE_ASSASINATION)
+                 {
+                     uint32 pct = uint32(28.0f + 3.5f * m_caster->ToPlayer()->GetMasteryPoints());
+                     AddPctN(damage, pct);
+                 }
+             }
+        }
+
         // Master Demonologist (Warlock Demonology Mastery)
         if (m_caster->HasAuraType(SPELL_AURA_MASTERY) && m_caster->GetShapeshiftForm() == FORM_METAMORPHOSIS && m_caster->getClass() == CLASS_WARLOCK)
         {
