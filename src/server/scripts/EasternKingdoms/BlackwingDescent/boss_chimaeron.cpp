@@ -131,6 +131,7 @@ public:
             if(Creature* nefarianHelperheroic = me->FindNearestCreature(NPC_NEFARIAN_HELPER_HEROIC,50.0f,true))
                 nefarianHelperheroic->ForcedDespawn();
 
+            instance->SetData(DATA_CHIMAERON, NOT_STARTED);
             _Reset();
         }
 
@@ -147,6 +148,7 @@ public:
             events.ScheduleEvent(EVENT_CAUSTIC_SLIME, urand(10000,12000));
             events.ScheduleEvent(EVENT_BREAK, urand(14000,16000));
             events.ScheduleEvent(EVENT_CHECK_POS, 1000);
+            instance->SetData(DATA_CHIMAERON, IN_PROGRESS);
             _EnterCombat();
         }
 
@@ -260,6 +262,7 @@ public:
                 nefarianHelperheroic->ForcedDespawn();
 
             _JustDied();
+            instance->SetData(DATA_CHIMAERON, DONE);
         }
     };
 };
