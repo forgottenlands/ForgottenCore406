@@ -362,8 +362,8 @@ void BattlegroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
     if (group->ArenaType && group->IsRated && group->Players.empty() && sWorld->getBoolConfig(CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE))
     {
         ArenaTeam *Team = sObjectMgr->GetArenaTeamById(group->ArenaTeamId);
-        if (Team)
-            sWorld->SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT, "Team", group->ArenaType, group->ArenaType, "_");
+        /*if (Team)
+            sWorld->SendWorldText(LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT, "Team", group->ArenaType, group->ArenaType, "_");*/
     }
 
     //if player leaves queue and he is invited to rated arena match, then he have to loose
