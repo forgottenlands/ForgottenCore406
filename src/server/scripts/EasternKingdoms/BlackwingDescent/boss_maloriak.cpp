@@ -166,6 +166,7 @@ public:
             spellsLocked = false;
             UpdatePhase(PHASE_NON);
             DespawnMinions();
+            instance->SetData(DATA_MALORIAK, NOT_STARTED);
 
             _Reset();
         }
@@ -175,6 +176,8 @@ public:
             _EnterCombat();
 
             DoScriptText(SAY_AGGRO, me);
+
+            instance->SetData(DATA_MALORIAK, IN_PROGRESS);
 
             events.ScheduleEvent(EVENT_NEW_PHASE, urand(10000,12000));
             events.ScheduleEvent(EVENT_REMEDY, urand(15000,18000));
@@ -382,6 +385,7 @@ public:
             DoScriptText(SAY_DEATH, me);
             DespawnMinions();
 
+            instance->SetData(DATA_MALORIAK, DONE);
             _JustDied();
         }
 

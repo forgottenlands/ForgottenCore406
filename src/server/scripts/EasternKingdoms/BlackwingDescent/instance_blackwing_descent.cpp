@@ -301,7 +301,60 @@ public:
 
         uint32 GetData(uint32 type)
         {
+            switch (type)
+            {
+                case DATA_MAGMAW:
+					return uiEncounter[0];
+					break;
+				case DATA_OMNOTRON_DEFENSE_SYSTEM:
+					return uiEncounter[1];
+					break;
+				case DATA_MALORIAK:
+					return uiEncounter[2];
+					break;
+				case DATA_CHIMAERON:
+					return uiEncounter[3];
+					break;
+                case DATA_ATRAMEDES:
+                    return uiEncounter[4];
+                    break;
+                case DATA_NEFARIAN:
+                    return uiEncounter[5];
+                    break;
+                case DATA_ABBERATIONS_LEFT:
+                    return uiEncounter[6];
+                    break;
+            }
+
             return Encounter[type];
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            switch (type)
+            {
+                case DATA_MAGMAW:
+					uiEncounter[0] = data;
+					break;
+				case DATA_OMNOTRON_DEFENSE_SYSTEM:
+					uiEncounter[1] = data;
+					break;
+				case DATA_MALORIAK:
+					uiEncounter[2] = data;
+					break;
+				case DATA_CHIMAERON:
+					uiEncounter[3] = data;
+					break;
+                case DATA_ATRAMEDES:
+                    uiEncounter[4] = data;
+                    break;
+                case DATA_NEFARIAN:
+                    uiEncounter[5] = data;
+                    break;
+                case DATA_ABBERATIONS_LEFT:
+                    uiEncounter[6] = data;
+                    break;
+            }
         }
 
         bool SetBossState(uint32 data, EncounterState state) {
