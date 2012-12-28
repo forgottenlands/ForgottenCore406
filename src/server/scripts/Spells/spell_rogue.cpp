@@ -488,13 +488,18 @@ public:
         {
 			if(GetCaster()->HasAura(14171) || GetCaster()->HasAura(14172))
 			{
+				uint8 npt = 2;
 				if(Aura* rupture = GetTargetUnit()->GetAura(1943))
 				{
 					if(uint8 cp = GetCaster()->ToPlayer()->GetComboPoints())
 					{
-						uint8 p = ((rand()%5)+1);
+						uint8 p;
+						if(GetCaster()->HasAura(14172))
+							p = (rand()%5)+1;
+						else
+							p = (rand()%10)-4;
 						if(p /  (6 - cp) >=1)
-							rupture->RefreshDuration();
+						rupture->RefreshDuration();
 					}
 				}
 			}
