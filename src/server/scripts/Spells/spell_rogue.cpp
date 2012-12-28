@@ -475,6 +475,43 @@ public:
 	}
 };
 
+class spell_rog_eviscerate: public SpellScriptLoader 
+{
+public:
+	spell_rog_eviscerate() : SpellScriptLoader("spell_rog_eviscerate") { }
+
+	class spell_rog_eviscerate_SpellScript: public SpellScript 
+    {
+		PrepareSpellScript(spell_rog_eviscerate_SpellScript)
+
+		void HandleDummy()
+        {
+			if(GetCaster()->HasAura(14171) || GetCaster()->HasAura(14172))
+			{
+				if(Aura* rupture = GetTargetUnit()->GetAura(1943))
+				{
+					if(uint8 cp = GetCaster()->ToPlayer()->GetComboPoints())
+					{
+						uint8 p = ((rand()%5)+1);
+						if(p /  (6 - cp) >=1)
+							rupture->RefreshDuration();
+					}
+				}
+			}
+		}
+
+		void Register() 
+        {
+			OnHit += SpellHitFn(spell_rog_eviscerate_SpellScript::HandleDummy);
+		}
+	};
+
+	SpellScript *GetSpellScript() const 
+    {
+		return new spell_rog_eviscerate_SpellScript();
+	}
+};
+
 void AddSC_rogue_spell_scripts() {
 	new spell_rog_cheat_death();
 	new spell_rog_nerves_of_steel();
@@ -484,4 +521,5 @@ void AddSC_rogue_spell_scripts() {
 	new spell_rog_deadly_poison();
 	new spell_rog_vanish_buff();
     new spell_rogue_blind();
+	new spell_rog_eviscerate();
 }
