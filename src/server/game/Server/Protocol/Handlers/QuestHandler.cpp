@@ -208,6 +208,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket & recv_data) {
 			if (_player->CanCompleteQuest(quest))
 				_player->CompleteQuest(quest);
 
+            if (!pObject)
+                return;
+
 			switch (pObject->GetTypeId()) {
 			case TYPEID_UNIT:
 				sScriptMgr->OnQuestAccept(_player, (pObject->ToCreature()),
