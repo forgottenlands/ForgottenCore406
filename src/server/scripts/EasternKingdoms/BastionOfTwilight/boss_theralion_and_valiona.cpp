@@ -228,8 +228,12 @@ class boss_theralion : public CreatureScript
             {
                 summons.DespawnAll();
 
-                if (me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                if (me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                     killer->SummonGameObject(8000015, -741.23f, -686.75, 831.88f, 1.593f, 0.0f, 0.0f, 0.0f, 0.0f, 100000000);
+                else if (me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                    killer->SummonGameObject(8000018, -741.23f, -686.75, 831.88f, 1.593f, 0.0f, 0.0f, 0.0f, 0.0f, 100000000);
+                else if (me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
+                    killer->SummonGameObject(8000017, -741.23f, -686.75, 831.88f, 1.593f, 0.0f, 0.0f, 0.0f, 0.0f, 100000000);
                 else 
                     killer->SummonGameObject(8000016, -741.23f, -686.75, 831.88f, 1.593f, 0.0f, 0.0f, 0.0f, 0.0f, 100000000);
 
