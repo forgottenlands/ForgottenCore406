@@ -3423,24 +3423,17 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
                     SKILL_ENGINEERING)) AddPctN(addhealth, 25);
         }
         // Swiftmend - consumes Regrowth or Rejuvenation
-        else if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND
-                && unitTarget->HasAuraState(AURA_STATE_SWIFTMEND, m_spellInfo,
-                        m_caster))
+        else if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND && unitTarget->HasAuraState(AURA_STATE_SWIFTMEND, m_spellInfo, m_caster))
         {
-            Unit::AuraEffectList const& RejorRegr =
-                    unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_HEAL);
+            Unit::AuraEffectList const& RejorRegr = unitTarget->GetAuraEffectsByType(SPELL_AURA_PERIODIC_HEAL);
             // find most short by duration
             AuraEffect *targetAura = NULL;
-            for (Unit::AuraEffectList::const_iterator i = RejorRegr.begin();
-                    i != RejorRegr.end(); ++i)
+            for (Unit::AuraEffectList::const_iterator i = RejorRegr.begin(); i != RejorRegr.end(); ++i)
             {
-                if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
-                        && (*i)->GetSpellProto()->SpellFamilyFlags [0] & 0x50)
+                if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && (*i)->GetSpellProto()->SpellFamilyFlags [0] & 0x50)
                 {
-                    if (!targetAura
-                            || (*i)->GetBase()->GetDuration()
-                                    < targetAura->GetBase()->GetDuration()) targetAura =
-                            *i;
+                    if (!targetAura || (*i)->GetBase()->GetDuration() < targetAura->GetBase()->GetDuration())
+                        targetAura = *i;
                 }
             }
 
@@ -3453,27 +3446,25 @@ void Spell::SpellDamageHeal(SpellEffIndex effIndex)
             }
 
             int32 tickheal = targetAura->GetAmount();
-            if (Unit* auraCaster = targetAura->GetCaster()) tickheal =
-                    auraCaster->SpellHealingBonus(unitTarget,
-                            targetAura->GetSpellProto(), effIndex, tickheal,
-                            DOT);
+            if (Unit* auraCaster = targetAura->GetCaster()) 
+                tickheal = auraCaster->SpellHealingBonus(unitTarget, targetAura->GetSpellProto(), effIndex, tickheal, DOT);
             //int32 tickheal = targetAura->GetSpellProto()->EffectBasePoints[idx] + 1;
             //It is said that talent bonus should not be included
 
             int32 tickcount = 0;
             // Rejuvenation
-            if (targetAura->GetSpellProto()->SpellFamilyFlags [0] & 0x10) tickcount =
-                    4;
+            if (targetAura->GetSpellProto()->SpellFamilyFlags [0] & 0x10)
+                tickcount = 4;
             // Regrowth
             else
             // if (targetAura->GetSpellProto()->SpellFamilyFlags[0] & 0x40)
-            tickcount = 6;
+                tickcount = 6;
 
-            addhealth += tickheal * tickcount;
+            addhealth = tickheal * tickcount;
 
             // Glyph of Swiftmend
-            if (!caster->HasAura(54824)) unitTarget->RemoveAura(
-                    targetAura->GetId(), targetAura->GetCasterGUID());
+            if (!caster->HasAura(54824)) 
+                unitTarget->RemoveAura(targetAura->GetId(), targetAura->GetCasterGUID());
 
             //addhealth += tickheal * tickcount;
             //addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth, HEAL, unitTarget);
