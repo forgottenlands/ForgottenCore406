@@ -2128,53 +2128,6 @@ public:
 };
 
 /*######
- # npc_shadowfiend
- ######*/
-
-#define MANA_LEECH                        28305
-#define GLYPH_OF_SHADOWFIEND_MANA         58227
-#define GLYPH_OF_SHADOWFIEND              58228
-
-class npc_shadowfiend: public CreatureScript {
-public:
-	npc_shadowfiend() :
-			CreatureScript("npc_shadowfiend") {
-	}
-
-	struct npc_shadowfiendAI: public ScriptedAI {
-		npc_shadowfiendAI(Creature* pCreature) :
-				ScriptedAI(pCreature) {
-		}
-
-        void Reset()
-        {
-            if (me->isSummon())
-                if (Unit* pOwner = me->ToTempSummon()->GetSummoner())
-                    if (Unit* pet = pOwner->GetGuardianPet())
-                        pet->CastSpell(pet, MANA_LEECH, true);
-        }
-
-		void DamageTaken(Unit* /*pKiller*/, uint32 &damage) {
-			if (me->isSummon())
-				if (Unit* pOwner = CAST_SUM(me)->GetSummoner()) {
-					if (pOwner->HasAura(GLYPH_OF_SHADOWFIEND))
-						if (damage >= me->GetHealth())
-							pOwner->CastSpell(pOwner, GLYPH_OF_SHADOWFIEND_MANA,
-									true);
-				}
-		}
-
-		void UpdateAI(const uint32 /*diff*/) {
-			DoMeleeAttackIfReady();
-		}
-	};
-
-	CreatureAI *GetAI(Creature *creature) const {
-		return new npc_shadowfiendAI(creature);
-	}
-};
-
-/*######
  # npc_wormhole
  ######*/
 
@@ -3493,7 +3446,6 @@ void AddSC_npcs_special() {
 	new npc_ebon_gargoyle;
 	new mob_mojo;
 	new npc_training_dummy;
-	new npc_shadowfiend;
 	new npc_wormhole;
 	new npc_pet_trainer;
 	new npc_locksmith;
