@@ -6367,7 +6367,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     if (procSpell->Id == 34913) //ignite should ignore molten armor critical hits
                         return false;
 
-                    basepoints0 = (CalculatePct(damage, triggerAmount)/2);
+                    basepoints0 = (CalculatePctN(damage, triggerAmount)/2);
 
                     triggered_spell_id = 12654;
                     basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
