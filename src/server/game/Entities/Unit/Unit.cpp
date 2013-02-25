@@ -6364,10 +6364,26 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 case 11120:
                 case 12846:
                 {
+                    switch (dummySpell->Id)
+                    {
+                        case 11119:
+                            basepoints0 = int32(0.04f * damage);
+                            break;
+                        case 11120:
+                            basepoints0 = int32(0.08f * damage);
+                            break;
+                        case 12846:
+                            basepoints0 = int32(0.12f * damage);
+                            break;
+                        default:
+                            sLog->outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)", dummySpell->Id);
+                            return false;
+                    }
+
                     if (procSpell->Id == 34913) //ignite should ignore molten armor critical hits
                         return false;
 
-                    basepoints0 = (CalculatePctN(damage, triggerAmount)/2);
+                    basepoints0 *= 0.5f;
 
                     triggered_spell_id = 12654;
                     basepoints0 += pVictim->GetRemainingDotDamage(GetGUID(), triggered_spell_id);
