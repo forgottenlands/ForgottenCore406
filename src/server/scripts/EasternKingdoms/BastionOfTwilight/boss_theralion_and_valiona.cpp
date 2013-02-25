@@ -479,14 +479,16 @@ class boss_valiona : public CreatureScript
                             events.ScheduleEvent(EVENT_DEVOURING_FLAMES, urand(40000, 45000), 0, 0);
                             break;
                         case EVENT_TWILIGHT_SHIFT:
-                            me->CastSpell(me->getVictim(), SPELL_TWILIGHT_SHIFT, true);
-
-                            if (me->getVictim()->HasAura(SPELL_TWILIGHT_SHIFT) && me->getVictim()->GetAura(SPELL_TWILIGHT_SHIFT)->GetStackAmount() >= 5)
+                            if (me->getVictim())
                             {
-                                me->getVictim()->CastCustomSpell(me->getVictim(), SPELL_SHIFTING_REALITY, NULL, NULL, NULL, true, 0, 0 , me->GetGUID());
-                                me->getVictim()->RemoveAura(SPELL_TWILIGHT_SHIFT);
-                            }
+                                me->CastSpell(me->getVictim(), SPELL_TWILIGHT_SHIFT, true);
 
+                                if (me->getVictim()->HasAura(SPELL_TWILIGHT_SHIFT) && me->getVictim()->GetAura(SPELL_TWILIGHT_SHIFT)->GetStackAmount() >= 5)
+                                {
+                                    me->getVictim()->CastCustomSpell(me->getVictim(), SPELL_SHIFTING_REALITY, NULL, NULL, NULL, true, 0, 0 , me->GetGUID());
+                                    me->getVictim()->RemoveAura(SPELL_TWILIGHT_SHIFT);
+                                }
+                            }
                             events.ScheduleEvent(EVENT_TWILIGHT_SHIFT, urand(20000, 25000), 0, 0);
                             break;
                         case EVENT_DAZZLING_DESTRUCTION:
