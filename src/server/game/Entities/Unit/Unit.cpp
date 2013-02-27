@@ -7457,6 +7457,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
             // Wild Quiver Hunter Marksmanship Mastery 
             if (dummySpell->Id == 76659)
             {
+                if (triggerAmount == 0)
+                    return false;
+
                 if (Player* caster = ToPlayer())
                 {
                     int32 chance = int32(14.4f + 1.8f * caster->GetMasteryPoints());
