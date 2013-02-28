@@ -8181,6 +8181,9 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     break;
                 // Elemental Overload (Shaman Elemental mastery)
                 case 77222:
+                    if (triggerAmount == 0)
+                        return false;
+
                     if (Player* caster = ToPlayer())
                     {
                         if (procSpell->Id == 403 || procSpell->Id == 51505 || procSpell->Id == 421)
@@ -12608,7 +12611,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         break;
                     case SPELLFAMILY_SHAMAN:
                         // Lava Burst
-                        if (spellProto->SpellFamilyFlags [1] & 0x00001000)
+                        if (spellProto->SpellFamilyFlags [1] & 0x00001000 || spellProto->Id == 77451)
                         {
                             if (pVictim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0, 0, GetGUID()))
                                 if (pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE) > -100) 
