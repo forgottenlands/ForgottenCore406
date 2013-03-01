@@ -3923,7 +3923,7 @@ void SpellMgr::LoadSpellCustomAttr() {
 			spellInfo->SpellFamilyName = SPELLFAMILY_WARRIOR;
 			count++;
 		case 12712: //Two-Handed Weapon Specialization
-			spellInfo->EffectBasePoints[0] = 20;
+			spellInfo->StackAmount = 0;
             count++;
 			break;
         case 77515: // Mastery: Dreadblade

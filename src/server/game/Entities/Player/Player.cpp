@@ -8233,33 +8233,24 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemPrototype const *proto, ScalingS
         UpdateDamagePhysical(attType);
 }
 
-void Player::_ApplyWeaponDependentAuraMods(Item *item,
-        WeaponAttackType attackType, bool apply) {
-    AuraEffectList const& auraCritList = GetAuraEffectsByType(
-            SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
-    for (AuraEffectList::const_iterator itr = auraCritList.begin();
-            itr != auraCritList.end(); ++itr)
+void Player::_ApplyWeaponDependentAuraMods(Item *item, WeaponAttackType attackType, bool apply)
+{
+    AuraEffectList const& auraCritList = GetAuraEffectsByType(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
+    for (AuraEffectList::const_iterator itr = auraCritList.begin(); itr != auraCritList.end(); ++itr)
         _ApplyWeaponDependentAuraCritMod(item, attackType, *itr, apply);
 
-    AuraEffectList const& auraDamageFlatList = GetAuraEffectsByType(
-            SPELL_AURA_MOD_DAMAGE_DONE);
-    for (AuraEffectList::const_iterator itr = auraDamageFlatList.begin();
-            itr != auraDamageFlatList.end(); ++itr)
+    AuraEffectList const& auraDamageFlatList = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE);
+    for (AuraEffectList::const_iterator itr = auraDamageFlatList.begin(); itr != auraDamageFlatList.end(); ++itr)
         _ApplyWeaponDependentAuraDamageMod(item, attackType, *itr, apply);
 
-    AuraEffectList const& auraDamagePCTList = GetAuraEffectsByType(
-            SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-    for (AuraEffectList::const_iterator itr = auraDamagePCTList.begin();
-            itr != auraDamagePCTList.end(); ++itr)
+    AuraEffectList const& auraDamagePCTList = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    for (AuraEffectList::const_iterator itr = auraDamagePCTList.begin(); itr != auraDamagePCTList.end(); ++itr)
         _ApplyWeaponDependentAuraDamageMod(item, attackType, *itr, apply);
 
     float mod = 100.0f;
-    AuraEffectList const& auraDamagePctList = GetAuraEffectsByType(
-            SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-    for (AuraEffectList::const_iterator itr = auraDamagePctList.begin();
-            itr != auraDamagePctList.end(); ++itr)
-        if ((apply && item->IsFitToSpellRequirements((*itr)->GetSpellProto()))
-                || HasItemFitToSpellRequirements((*itr)->GetSpellProto(), item))
+    AuraEffectList const& auraDamagePctList = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    for (AuraEffectList::const_iterator itr = auraDamagePctList.begin(); itr != auraDamagePctList.end(); ++itr)
+        if ((apply && item->IsFitToSpellRequirements((*itr)->GetSpellProto())) || HasItemFitToSpellRequirements((*itr)->GetSpellProto(), item))
             mod += (*itr)->GetAmount();
 
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, mod / 100.0f);
@@ -8291,15 +8282,21 @@ void Player::_ApplyWeaponDependentAuraCritMod(Item *item,
         HandleBaseModValue(mod, FLAT_MOD, float(aura->GetAmount()), apply);
 }
 
-void Player::_ApplyWeaponDependentAuraDamageMod(Item *item,
-        WeaponAttackType attackType, AuraEffect const* aura, bool apply) {
+void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, WeaponAttackType attackType, AuraEffect const* aura, bool apply) 
+{
+    bool canUseAttackType = false;
+    canUseAttackType = CanUseAttackType(attackType);
+
+    // Two-Handed specialization should be applied/removed always
+    if (aura && aura->GetId() == 12712)
+        canUseAttackType = true;
+
     //don't apply mod if item is broken
-    if (item->IsBroken() || !CanUseAttackType(attackType))
+    if (item->IsBroken() || !canUseAttackType)
         return;
 
     // ignore spell mods for not wands
-    if ((aura->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL) == 0
-            && (getClassMask() & CLASSMASK_WAND_USERS) == 0)
+    if ((aura->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL) == 0 && (getClassMask() & CLASSMASK_WAND_USERS) == 0)
         return;
 
     // generic not weapon specific case processes in aura code
@@ -8307,18 +8304,19 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item *item,
         return;
 
     UnitMods unitMod = UNIT_MOD_END;
-    switch (attackType) {
-    case BASE_ATTACK:
-        unitMod = UNIT_MOD_DAMAGE_MAINHAND;
-        break;
-    case OFF_ATTACK:
-        unitMod = UNIT_MOD_DAMAGE_OFFHAND;
-        break;
-    case RANGED_ATTACK:
-        unitMod = UNIT_MOD_DAMAGE_RANGED;
-        break;
-    default:
-        return;
+    switch (attackType) 
+    {
+        case BASE_ATTACK:
+            unitMod = UNIT_MOD_DAMAGE_MAINHAND;
+            break;
+        case OFF_ATTACK:
+            unitMod = UNIT_MOD_DAMAGE_OFFHAND;
+            break;
+        case RANGED_ATTACK:
+            unitMod = UNIT_MOD_DAMAGE_RANGED;
+            break;
+        default:
+            return;
     }
 
     UnitModifierType unitModType = TOTAL_VALUE;
@@ -8333,18 +8331,15 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item *item,
         return;
     }
 
-    if (item->IsFitToSpellRequirements(aura->GetSpellProto())) {
-        HandleStatModifier(unitMod, unitModType, float(aura->GetAmount()),
-                apply);
-        ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, aura->GetAmount(),
-                apply);
+    if (item->IsFitToSpellRequirements(aura->GetSpellProto())) 
+    {
+        HandleStatModifier(unitMod, unitModType, float(aura->GetAmount()), apply);
+        ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, aura->GetAmount(), apply);
 
         if (unitModType == TOTAL_PCT)
-            ApplyModSignedFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT,
-                    aura->GetAmount() / 100.0f, apply);
+            ApplyModSignedFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, aura->GetAmount() / 100.0f, apply);
         else
-            ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,
-                    aura->GetAmount(), apply);
+            ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, aura->GetAmount(), apply);
     }
 }
 
