@@ -6367,13 +6367,13 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                     switch (dummySpell->Id)
                     {
                         case 11119:
-                            basepoints0 = int32(0.04f * damage);
+                            basepoints0 = int32(0.0533f * damage);
                             break;
                         case 11120:
-                            basepoints0 = int32(0.08f * damage);
+                            basepoints0 = int32(0.1066f * damage);
                             break;
                         case 12846:
-                            basepoints0 = int32(0.12f * damage);
+                            basepoints0 = int32(0.16f * damage);
                             break;
                         default:
                             sLog->outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)", dummySpell->Id);
@@ -12001,18 +12001,33 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     switch (spellProto->SpellFamilyName)
     {
         case SPELLFAMILY_MAGE:
-            // Ice Lance
-            if (spellProto->SpellIconID == 186)
+            // Mana Adept - Arcane Mastery
+            if (owner->getClass() == CLASS_MAGE)
             {
-                if (pVictim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
+                if (owner->HasAuraType(SPELL_AURA_MASTERY))
                 {
-                    // Glyph of Ice Lance
-                    if (owner->HasAura(56377) && pVictim->getLevel() > owner->getLevel())
-                        DoneTotalMod *= 1.05f;
-
-                    // Damages doubled against frozen targets.
-                    DoneTotalMod *= 2.0f;
+                    if (owner->ToPlayer()->GetTalentBranchSpec(owner->ToPlayer()->GetActiveSpec()) == BS_MAGE_ARCANE)
+                    {
+                        // [1 + (0.12 + 0.015*M)*(mana atm)/(max mana)]*100%
+                        float manaPct = 100.f * owner->GetPower(POWER_MANA) / owner->GetMaxPower(POWER_MANA);
+                        DoneTotalMod *= (1+ ((0.12f + (owner->ToPlayer()->GetMasteryPoints() * 0.015f)) * manaPct/100));
+                    }
                 }
+            }
+
+            // Flashburn - Fire Mastery
+            if (owner->getClass() == CLASS_MAGE && 
+                spellProto->SchoolMask == SPELL_SCHOOL_MASK_FIRE && 
+                damagetype == DOT &&
+                spellProto->SpellIconID != 33)
+            { //mastery will not affects combustion
+               if (owner->HasAuraType(SPELL_AURA_MASTERY))
+               {
+                   if (owner->ToPlayer()->GetTalentBranchSpec(owner->ToPlayer()->GetActiveSpec()) == BS_MAGE_FIRE)
+                   {
+                       DoneTotalMod *=  (1.22f + (owner->ToPlayer()->GetMasteryPoints() * 0.028f));
+                   }
+               }
             }
 
             // Frostburn Frost Mastery
@@ -12027,17 +12042,35 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 }
             }
 
-            // Mana Adept - Arcane Mastery
-            if (owner->getClass() == CLASS_MAGE)
+            // Ice Lance
+            if (spellProto->SpellIconID == 186)
             {
-                if (owner->HasAuraType(SPELL_AURA_MASTERY))
+                if (pVictim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                 {
-                    if (owner->ToPlayer()->GetTalentBranchSpec(owner->ToPlayer()->GetActiveSpec()) == BS_MAGE_ARCANE)
-                    {
-                        // [1 + (0.12 + 0.015*M)*(mana atm)/(max mana)]*100%
-                        float manaPct = 100.f * owner->GetPower(POWER_MANA) / owner->GetMaxPower(POWER_MANA);
-                        DoneTotalMod *= (1+ ((0.12f + (owner->ToPlayer()->GetMasteryPoints() * 0.015f)) * manaPct/100));
-                    }
+                    // Glyph of Ice Lance
+                    if (owner->HasAura(56377) && pVictim->getLevel() > owner->getLevel())
+                        DoneTotalMod *= 1.05f;
+
+                    // Damages doubled against frozen targets.
+                    DoneTotalMod *= 2.0f;
+                }
+            }
+
+            //Molten Fury
+            if (pVictim->GetHealthPct() <= 35.0f && 
+                owner->ToPlayer() && 
+                owner->getClass() == CLASS_MAGE && 
+                GetAuraEffect(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, SPELLFAMILY_MAGE, 2129, EFFECT_0) &&
+                spellProto->SpellIconID != 33)
+            {//this will not affects combustion
+                if (Aura* aura = GetAuraEffect(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS, SPELLFAMILY_MAGE, 2129, EFFECT_0)->GetBase()){
+                    uint32 BP = 12;
+                    if (aura->GetId() == 31680)      //rank 2
+                        BP = 8;
+                    else if (aura->GetId() == 31679) //rank 1
+                        BP = 4;
+
+                    DoneTotalMod *= 1 + (BP / 100.0f);
                 }
             }
 

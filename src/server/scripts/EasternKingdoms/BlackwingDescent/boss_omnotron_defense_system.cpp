@@ -43,7 +43,7 @@
 #define SAY_ACTIVATION_MAGMATRON "Magmatron unit activated."
 #define SAY_ACTIVATION_ELECTRON "Electron unit activated."
 #define SAY_ACTIVATION_ARCANOTRON "Arcanotron unit activated."
-#define SAY_REROUTING_ENERGY "Defense systems obliterated. P    owering down...."
+#define SAY_REROUTING_ENERGY "Rerouting excess energy to Magmatron unit. Engage flamethrower device."
 
 enum Spells
 {
