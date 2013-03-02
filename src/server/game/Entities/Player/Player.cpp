@@ -8287,11 +8287,9 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, WeaponAttackType att
     bool canUseAttackType = false;
     canUseAttackType = CanUseAttackType(attackType);
 
-    if (aura)
-    { // Two-Handed Specialization and Assassin's Resolve should be always applied/removed
-        if (aura->GetId() == 12712 || aura && aura->GetId() ==84601)
+    // Two-Handed Specialization and Assassin's Resolve should be always applied/removed
+    if (aura && (aura->GetId() == 12712 || aura->GetId() ==84601))
         canUseAttackType = true;
-    }
 
     //don't apply mod if item is broken
     if (item->IsBroken() || !canUseAttackType)
