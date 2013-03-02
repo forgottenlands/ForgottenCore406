@@ -21215,56 +21215,54 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot,
             break;
     }
 
-    if (crItem->ExtendedCost) {
-        ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(
-                crItem->ExtendedCost);
-        if (!iece) {
-            sLog->outError("Item %u have wrong ExtendedCost field value %u",
-                    pProto->ItemId, crItem->ExtendedCost);
+    if (crItem->ExtendedCost) 
+    {
+        ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
+        if (!iece) 
+        {
+            sLog->outError("Item %u have wrong ExtendedCost field value %u", pProto->ItemId, crItem->ExtendedCost);
             return false;
         }
 
         // item base price
-        for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i) {
-            if (iece->RequiredItem[i]
-                    && !HasItemCount(iece->RequiredItem[i],
-                            (iece->RequiredItemCount[i] * count))) {
+        for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i) 
+        {
+            if (iece->RequiredItem[i] && !HasItemCount(iece->RequiredItem[i], (iece->RequiredItemCount[i] * count))) 
+            {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
             }
         }
 
         // currency price
-        for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i) {
-            switch (iece->RequiredCurrency[i]) {
-            case NULL:
-                break;
-            case CURRENCY_TYPE_CONQUEST_POINTS: // There are currencies that include multiplier in dbc
-            case CURRENCY_TYPE_HONOR_POINTS:
-            case CURRENCY_TYPE_JUSTICE_POINTS:
-            case CURRENCY_TYPE_VALOR_POINTS:
-                if (!HasCurrency(iece->RequiredCurrency[i],
-                        iece->RequiredCurrencyCount[i])) {
-                    SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL,
-                            NULL);
-                    return false;
-                }
-                break;
-            default: // other ones need multiplier
-                if (!HasCurrency(
-                        iece->RequiredCurrency[i],
-                        iece->RequiredCurrencyCount[i]
-                                * PLAYER_CURRENCY_PRECISION)) {
-                    SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL,
-                            NULL);
-                    return false;
+        for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
+        {
+            switch (iece->RequiredCurrency[i])
+            {
+                case NULL:
+                    break;
+                case CURRENCY_TYPE_CONQUEST_POINTS: // There are currencies that include multiplier in dbc
+                case CURRENCY_TYPE_HONOR_POINTS:
+                case CURRENCY_TYPE_JUSTICE_POINTS:
+                case CURRENCY_TYPE_VALOR_POINTS:
+                    if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i])) 
+                    {
+                        SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+                        return false;
+                    }
+                    break;
+                default: // other ones need multiplier
+                    if (!HasCurrency(iece->RequiredCurrency[i], iece->RequiredCurrencyCount[i] * PLAYER_CURRENCY_PRECISION)) 
+                    {
+                        SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+                        return false;
                 }
             }
         }
 
         // check for personal arena rating requirement
-        if (GetMaxPersonalArenaRatingRequirement(iece->RequiredArenaSlot)
-                < iece->RequiredPersonalArenaRating) {
+        if (GetMaxPersonalArenaRatingRequirement(0) < iece->RequiredPersonalArenaRating) 
+        {
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
             return false;
