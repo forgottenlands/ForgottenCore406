@@ -3927,6 +3927,10 @@ void SpellMgr::LoadSpellCustomAttr() {
 			spellInfo->StackAmount = 0;
             count++;
 			break;
+        case 84601: //Assassin's Resolve
+            spellInfo->StackAmount = 0;
+            count++;
+            break;
         case 77515: // Mastery: Dreadblade
             spellInfo->EffectBasePoints[0] = 20;
             count++;
