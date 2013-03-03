@@ -3091,6 +3091,11 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(
         if (spellproto->Mechanic == MECHANIC_TURN)
             return DIMINISHING_NONE;
         break;
+    case SPELLFAMILY_SHAMAN:
+        // Earth's Grasp
+        if (spellproto->Id == 64695)
+            return DIMINISHING_NONE;
+        break;
     case SPELLFAMILY_MAGE: {
         // Frostbite
         if (spellproto->SpellFamilyFlags[1] & 0x80000000)

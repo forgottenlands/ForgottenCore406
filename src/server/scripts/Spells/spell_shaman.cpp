@@ -239,9 +239,34 @@ public:
         {
             Unit* target = GetTarget();
             if (Unit *caster = aurEff->GetBase()->GetCaster()->GetOwner())
-                if (AuraEffect* aur = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2289, 0))
-                    if (roll_chance_i(aur->GetBaseAmount()))
-                        target->CastSpell(caster, SHAMAN_TOTEM_SPELL_EARTHEN_POWER, true, NULL, aurEff);
+            {
+                Unit* target = GetTarget();
+                Unit* totem = GetCaster();
+
+                if (!totem || !target)
+                    return;
+
+                if (Unit* caster = aurEff->GetBase()->GetCaster()->GetOwner())
+                {
+                    // Earthen Power
+                    if (AuraEffect* aur = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 2289, 0))
+                        if (roll_chance_i(aur->GetBaseAmount()))
+                            target->CastSpell(caster, SHAMAN_TOTEM_SPELL_EARTHEN_POWER, true, NULL, aurEff);
+
+                    // Earth's Grasp               
+                    if (GetEffect(0)->GetAmount() == 0)
+                    {
+                        if ((caster->HasAura(51483) && roll_chance_i(50)) || caster->HasAura(51485))
+                        {
+                            if (!target->HasAura(64695))
+                                totem->CastSpell(target, 64695, true);
+
+                            // Only at apply (hacky way)
+                            GetEffect(0)->SetAmount(10);
+                        }
+                    }
+                }
+            }
         }
 
         void Register() 
