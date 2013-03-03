@@ -5710,6 +5710,14 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id == 781 && !m_caster->isInCombat())
                     return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
+                // Rocket Jump
+                if (m_spellInfo->Id == 69070)
+                {
+                    if (m_caster->HasUnitState(UNIT_STAT_ROOT))
+                        return SPELL_FAILED_ROOTED;
+                    break;
+                }
+
                 Unit* target = m_targets.getUnitTarget();
                 if (m_caster == target && m_caster->HasUnitState(UNIT_STAT_ROOT))
                 {
@@ -5726,6 +5734,24 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (Battleground const* bg = m_caster->ToPlayer()->GetBattleground()) 
                         if (bg->GetStatus() == STATUS_IN_PROGRESS) 
                             return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+                break;
+            case SPELL_EFFECT_APPLY_AURA:
+                // Spell 36554 (Shadowstep) can't be used while rooted
+                if (m_spellInfo->Id == 36554)
+                {
+                    if (m_caster->HasUnitState(UNIT_STAT_ROOT))
+                        return SPELL_FAILED_ROOTED;
+                    break;
+                }
+                break;
+            case SPELL_EFFECT_JUMP_DEST:
+                // Heroic Leap
+                if (m_spellInfo->Id == 6544 || m_spellInfo->Id == 49376)
+                {
+                    if (m_caster->HasUnitState(UNIT_STAT_ROOT))
+                        return SPELL_FAILED_ROOTED;
+                    break;
+                }
                 break;
             default:
                 break;
