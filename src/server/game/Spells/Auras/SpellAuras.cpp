@@ -902,8 +902,7 @@ void Aura::HandleAllEffects(AuraApplication const * aurApp, uint8 mode,
 }
 
 void Aura::SetNeedClientUpdateForTargets() const {
-    for (ApplicationMap::const_iterator appIter = m_applications.begin();
-            appIter != m_applications.end(); ++appIter)
+    for (ApplicationMap::const_iterator appIter = m_applications.begin(); appIter != m_applications.end(); ++appIter)
         appIter->second->SetNeedClientUpdate();
 }
 
@@ -1104,10 +1103,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             // Improved Serpent Sting
             if (GetId() == 1978)
             {
-                if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 536, 0))
+                if (caster)
                 {
-                    int32 basepoints0 = aurEff->GetAmount() * (caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4f + (460 * 15 / 3)) / 100;
-                    caster->CastCustomSpell(target, 83077, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
+                    if (AuraEffect* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 536, 0))
+                    {
+                        int32 basepoints0 = aurEff->GetAmount() * (caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.4f + (460 * 15 / 3)) / 100;
+                        caster->CastCustomSpell(target, 83077, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
+                    }
                 }
             }
             if (GetId() == 82925) // Master Marksman
