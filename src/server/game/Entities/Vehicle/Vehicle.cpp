@@ -430,7 +430,7 @@ void Vehicle::RemovePassenger(Unit *unit)
     }
 
     if (me->GetTypeId() == TYPEID_UNIT && me->ToCreature() && me->ToCreature()->IsAIEnabled)
-        if (unit && seat)
+        if (unit && seat->first)
             me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, false);
 
     // only for flyable vehicles
