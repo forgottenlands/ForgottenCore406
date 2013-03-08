@@ -402,7 +402,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] = { &AuraEffect::HandleNULL, /
         &AuraEffect::HandleNULL, //343
         &AuraEffect::HandleNULL, //344
         &AuraEffect::HandleNULL, //345
-        &AuraEffect::HandleNULL, //346
+        &AuraEffect::HandleAuraProgressBar, // 346 SPELL_AURA_PROGRESS_BAR
         &AuraEffect::HandleNULL, //347
         &AuraEffect::HandleNULL, //348
         &AuraEffect::HandleNULL, //349
@@ -7843,4 +7843,21 @@ void AuraEffect::HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mo
             target->GetSession()->SendPacket(&data);
         }
     }
+}
+
+void AuraEffect::HandleAuraProgressBar(AuraApplication const * aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    Player* target = aurApp->GetTarget()->ToPlayer();
+    if (!target)
+        return;
+
+    if (apply)
+    {
+        target->SetPower(POWER_ALTERNATIVE_POWER, 0);
+        target->SetMaxPower(POWER_ALTERNATIVE_POWER, 100);
+    } else
+        target->SetPower(POWER_ALTERNATIVE_POWER, 0);
 }

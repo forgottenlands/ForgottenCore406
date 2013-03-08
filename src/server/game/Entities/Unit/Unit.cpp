@@ -15570,10 +15570,6 @@ void Unit::SetPower(Powers power, uint32 val)
     data << uint32(val);
     SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
 
-    if (power == POWER_SOUND)
-    {
-        sLog->outString("power.. %d", val);
-    }
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
     {

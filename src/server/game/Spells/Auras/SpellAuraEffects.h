@@ -485,6 +485,7 @@ public:
 	void HandleAuraModFakeInebriation(AuraApplication const * aurApp,
 			uint8 mode, bool apply) const;
 	void HandleAuraReplaceSpell(AuraApplication const * aurApp, uint8 mode, bool apply) const;
+    void HandleAuraProgressBar(AuraApplication const * aurApp, uint8 mode, bool apply) const;
 };
 
 namespace Trinity {
