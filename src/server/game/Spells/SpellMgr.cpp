@@ -4996,6 +4996,68 @@ void SpellMgr::LoadSpellCustomAttr() {
         case 12355: // impact range
             spellInfo->EffectRadiusIndex[1] = 32;
             break;
+        case 93103: // Corrupted blood
+        case 81571: // Unleashed Shadows
+        case 93221:
+        case 93222:
+        case 93223:
+            spellInfo->EffectRadiusIndex[0] = 28;
+            break;
+        case 91317: // Warshipping
+        case 93365:
+        case 93366: 
+        case 93367:
+            spellInfo->EffectMiscValue[2] = 0;
+            break;
+        case 81713: // Depravity
+        case 93175: 
+        case 93176:
+        case 93177:
+            spellInfo->EffectRadiusIndex[0] = 9;
+            spellInfo->EffectRadiusIndex[1] = 9;
+            break;
+        case 81532: // Blaze
+            spellInfo->EffectRadiusIndex[1] = 8;
+            break;
+        case 81538: // Blaze aura
+        case 93212:
+        case 93213:
+        case 93214:
+            spellInfo->EffectRadiusIndex[0] = 8;
+            break;
+        case 82919: // Sprayed Corruption
+        case 93108:
+        case 93110: 
+        case 93109:
+            spellInfo->EffectRadiusIndex[0] = 9;
+            spellInfo->EffectRadiusIndex[1] = 9;
+            break;
+        case 81761: // Spilled Blood of the Old God
+        case 93172:
+        case 93173:
+        case 93174:
+            spellInfo->EffectRadiusIndex[0] = 13;
+            spellInfo->EffectRadiusIndex[1] = 13;
+            break;
+        case 81689: // Corrupting Crash
+        case 93184:
+        case 93185:
+        case 93186:
+            spellInfo->EffectRadiusIndex[0] = 14;
+            spellInfo->EffectRadiusIndex[1] = 14;
+            break;
+        case 82363: // Corruption of the Old God
+        case 93169:
+        case 93170:
+        case 93171:
+            spellInfo->EffectRadiusIndex[0] = 28;
+            spellInfo->EffectRadiusIndex[1] = 28;
+            break;
+        case 82433: // Darkened Creations
+            spellInfo->EffectImplicitTargetA[0] = 72;
+            spellInfo->EffectImplicitTargetB[0] = 0;
+            spellInfo->EffectRadiusIndex[0] = 9;
+            break;
         default:
             break;
         }

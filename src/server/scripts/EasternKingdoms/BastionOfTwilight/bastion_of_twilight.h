@@ -75,6 +75,11 @@ enum CreatureIds
     NPC_FABOLOUS_FLAME = 46448,
 };
 
+enum goId 
+{
+    GO_TWILIGHT_PORTAL_1 = 205950,
+    GO_TWILIGHT_PORTAL_2 = 205951,
+};
 enum Spells
 {
     SPELL_MALEVOLENT_STRIKES_DEBUFF = 83908,

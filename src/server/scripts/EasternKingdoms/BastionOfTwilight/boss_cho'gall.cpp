@@ -24,7 +24,7 @@
 enum spell_c
 {
     // Chogall
-    SPELL_CORRUPTED_BLOOD                 = 93189,
+    SPELL_CORRUPTED_BLOOD                 = 93103,
     SPELL_CORRUPTION_ACCELERATED          = 81836,
     SPELL_CORRUPTION_SICKNESS             = 93202,
     SPELL_CORRUPTION_MALFORMATION         = 82125,
@@ -33,13 +33,15 @@ enum spell_c
     SPELL_FURY_CHOGALL                    = 82524,
 
     // P1
-    SPELL_SUMMON_CORRUPTING_ADHERENT      = 82712,
+    SPELL_SUMMON_CORRUPTING_ADHERENT      = 81628,
     SPELL_CONVERSION                      = 91303, 
+    SPELL_WORSHIPPING                     = 91317,
     SPELL_TWISTED_DEVOTION                = 91331, 
     SPELL_FLAME_ORDER                     = 81171,
     SPELL_FLAMING_DESTRUCTION             = 81194, 
     SPELL_SHADOW_ORDER                    = 81556,
     SPELL_EMPOWERED_SHADOW                = 81572,
+    SPELL_BLAZE_AURA                      = 81536,
 
     // P2 - 25% PV
     SPELL_DARKENED_CREATIONS              = 82433,
@@ -55,7 +57,6 @@ enum spell_c
     SPELL_PORTAL_SHADOW_VISUAL            = 49666,
     SPELL_PORTAL_SHADOW_VISUAL_RAYON      = 70685,
     SPELL_DEBILITING_BEAM                 = 82411,
-    SPELL_DEBILITING_BEAM_H               = 93133,
 
     // Trash HM
     SPELL_SHADOW_SHELL                    = 93311,
@@ -67,12 +68,26 @@ enum spell_c
 enum Nums
 {
     NPC_BLOOD_OF_THE_OLD_GOD              = 43707,
+    NPC_SPILLED_BLOOD                     = 5043585,
+    NPC_BLAZE                             = 43585,
     NPC_CORRUPTING_ADHERENT               = 43622,
-    NPC_CREATION_ASSOMBRIE                = 44045,
+    NPC_DARKENED_CREATION                 = 44045,
     NPC_SHADOW_LORD                       = 43592,
     NPC_FIRE_LORD                         = 43406,
     NPC_SPIKED_TENTACLE                   = 50264,
     GO_CHOGALL_FLOOR                      = 205898,
+};
+
+enum events
+{
+    EVENT_CONVERSION = 1,
+    EVENT_FURY_OF_CHOGALL,
+    EVENT_FLAME_ORDERS,
+    EVENT_SHADOW_ORDERS,
+    EVENT_CORRUPTING_ADHERENT,
+    EVENT_SUMMON_CORRUPTING_ADHERENT,
+    EVENT_FESTER_BLOOD,
+    EVENT_DARKENED_CREATIONS,
 };
 
 /**************
@@ -98,10 +113,50 @@ public:
 
         InstanceScript* instance;
         EventMap events;
+        uint8 phase;
+
+        void ResetCharmedPlayers()
+        {
+            if (me->GetMap() && !me->GetMap()->GetPlayers().isEmpty())
+            {
+                for (Map::PlayerList::const_iterator i = me->GetMap()->GetPlayers().begin(); i != me->GetMap()->GetPlayers().end(); ++i)
+                {
+                    if (i->getSource() && i->getSource()->isCharmed())
+                        i->getSource()->RemoveCharmedBy(me->ToUnit());
+                }
+            }
+        }
+
+        void DamageTaken(Unit* who, uint32 &damage)
+        {
+            if (me->GetHealthPct() <= 25.0f && phase == 0)
+            {
+                phase = 1;
+                me->CastSpell(me, SPELL_CORRUPTION_OF_THE_OLD_GOD, false);
+                me->AddAura(82356, me);
+                events.ScheduleEvent(EVENT_DARKENED_CREATIONS, urand(3000, 6000));
+            }
+        }
 
         void Reset()
         {
             events.Reset();
+
+            phase = 0;
+
+            summons.DespawnAll();
+            
+            std::list<Creature*> unitList;
+            me->GetCreatureListWithEntryInGrid(unitList, 50264, 100.0f);
+            for (std::list<Creature*>::const_iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                (*itr)->DisappearAndDie();
+
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD);
+            instance->DoRemoveAurasDueToSpellOnPlayers(93318);
+            instance->DoRemoveAurasDueToSpellOnPlayers(82170);
+            instance->DoRemoveAurasDueToSpellOnPlayers(82193);
+
+            ResetCharmedPlayers();
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -110,12 +165,49 @@ public:
 
             DoZoneInCombat(me);
 
+            phase = 0;
+
+            // Corrupted Blood on all
+            me->CastSpell(me, SPELL_CORRUPTED_BLOOD, true);
+
+            // Events
+            events.ScheduleEvent(EVENT_CONVERSION, 10000);
+            events.ScheduleEvent(EVENT_FURY_OF_CHOGALL, urand(45000, 50000));
+            events.ScheduleEvent(EVENT_FLAME_ORDERS, urand(7000, 10000));
+            events.ScheduleEvent(EVENT_CORRUPTING_ADHERENT, 60000);
             instance->SetData(DATA_CHOGALL_EVENT, IN_PROGRESS);
         }
 
-        void JustSummoned(Creature *summon)
+        void JustSummoned(Creature* summon)
         {
             summons.Summon(summon);
+
+            DoZoneInCombat(summon);
+            switch (summon->GetEntry())
+            {
+                case NPC_CORRUPTING_ADHERENT:
+                case NPC_DARKENED_CREATION:
+                    summon->AI()->AttackStart(me->getVictim());
+                    break;
+                case NPC_BLAZE:
+                    summon->AddAura(SPELL_BLAZE_AURA, summon);
+                    summon->SetReactState(REACT_PASSIVE);
+                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    summon->Attack(me->getVictim(), true);
+                    summon->AttackStop();
+                    summon->StopMoving();
+                    break;
+                case NPC_SPILLED_BLOOD:
+                    summon->AddAura(SPELL_SPILLED_BLOOD_OF_THE_OLD_GOD, summon);
+                    summon->AI()->DoAction(100);
+                    summon->SetReactState(REACT_PASSIVE);
+                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    summon->Attack(me->getVictim(), true);
+                    summon->AttackStop();
+                    summon->StopMoving();
+                    break;
+
+            }
         }
 
         void UpdateAI(const uint32 diff)
@@ -128,6 +220,86 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_CONVERSION:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                        {
+                            if (target->GetGUID() != me->getVictim()->GetGUID())
+                            {
+                                target->SetCharmedBy(me, CHARM_TYPE_CONVERT);
+                                target->CastSpell(me, SPELL_WORSHIPPING, true);
+                            }
+                            else
+                            {
+                                events.ScheduleEvent(EVENT_CONVERSION, 1000);
+                                break;
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_CONVERSION, 21000);
+                        break;
+                    case EVENT_FURY_OF_CHOGALL:
+                        me->CastSpell(me->getVictim(), SPELL_FURY_CHOGALL, false);
+                        events.ScheduleEvent(EVENT_FURY_OF_CHOGALL, urand(45000, 50000));
+                        break;
+                    case EVENT_FLAME_ORDERS:
+                        me->AddAura(SPELL_FLAMING_DESTRUCTION, me);
+                        events.ScheduleEvent(EVENT_SHADOW_ORDERS, urand(20000, 25000));
+                        break;
+                    case EVENT_SHADOW_ORDERS:
+                        me->AddAura(SPELL_EMPOWERED_SHADOW, me);
+                        events.ScheduleEvent(EVENT_FLAME_ORDERS, urand(20000, 25000));
+                        break;
+                    case EVENT_CORRUPTING_ADHERENT:
+                        me->CastSpell(me, SPELL_SUMMON_CORRUPTING_ADHERENT, false);
+                        events.ScheduleEvent(EVENT_SUMMON_CORRUPTING_ADHERENT, 1600);
+                        events.ScheduleEvent(EVENT_FESTER_BLOOD, 40000);
+                        break;
+                    case EVENT_SUMMON_CORRUPTING_ADHERENT:
+                    {
+                        if (me->GetMap() && me->GetMap()->IsHeroic())
+                        {
+                            if (GameObject* portal = me->FindNearestGameObject(GO_TWILIGHT_PORTAL_1, 500.0f))
+                            {
+                                portal->SetGoState(GO_STATE_ACTIVE);
+                                me->CastSpell(portal->GetPositionX(), portal->GetPositionY(), portal->GetPositionZ(), 81611, false);
+                            }
+
+                            if (GameObject* portal = me->FindNearestGameObject(GO_TWILIGHT_PORTAL_2, 500.0f))
+                            {
+                                portal->SetGoState(GO_STATE_ACTIVE);
+                                me->CastSpell(portal->GetPositionX(), portal->GetPositionY(), portal->GetPositionZ(), 81618, false);
+                            }
+                        }
+                        else
+                        {
+                            uint8 portalNumber = urand(0, 1);
+                            if (GameObject* portal = me->FindNearestGameObject(portalNumber == 1 ? GO_TWILIGHT_PORTAL_1 : GO_TWILIGHT_PORTAL_2, 500.0f))
+                            {
+                                portal->SetGoState(GO_STATE_ACTIVE);
+                                me->CastSpell(portal->GetPositionX(), portal->GetPositionY(), portal->GetPositionZ(), portalNumber == 1 ? 81611: 81618, false);
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_CORRUPTING_ADHERENT, 90000);
+                        break;
+                    }
+                    case EVENT_FESTER_BLOOD:
+                    {
+                        std::list<Creature*> unitList;
+                        me->GetCreatureListWithEntryInGrid(unitList, NPC_CORRUPTING_ADHERENT, 100.0f);
+                        for (std::list<Creature*>::const_iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                        {
+                            if ((*itr)->isDead())
+                                me->SummonCreature(NPC_SPILLED_BLOOD, (*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ(), (*itr)->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0);
+                            else
+                                (*itr)->AddAura(SPELL_FESTERING_BLOOD, (*itr));
+                        }
+                        break;
+                    }
+                    case EVENT_DARKENED_CREATIONS:
+                        for (uint8 i = 0; i < 4; i++)
+                            me->CastSpell(me, 82433, false);
+
+                        events.ScheduleEvent(EVENT_DARKENED_CREATIONS, 30000);
+                        break;
                     default:
                         break;
                 }
@@ -139,12 +311,500 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             _JustDied();
+            ResetCharmedPlayers();
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CORRUPTED_BLOOD);
+            instance->DoRemoveAurasDueToSpellOnPlayers(93318);
+            instance->DoRemoveAurasDueToSpellOnPlayers(82170);
+            instance->DoRemoveAurasDueToSpellOnPlayers(82193);
             instance->SetData(DATA_CHOGALL_EVENT, DONE);
         }
     };
 };
 
+enum spilledEvents
+{
+    EVENT_SUMMON = 1,
+    EVENT_DESPAWN,
+};
+
+class npc_spilled_blood : public CreatureScript
+{
+public:
+    npc_spilled_blood() : CreatureScript("npc_spilled_blood") { }
+
+    struct npc_spilled_bloodAI : public ScriptedAI
+    {
+        npc_spilled_bloodAI(Creature* c) : ScriptedAI(c), summons(me)
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        InstanceScript* instance;
+        EventMap events;
+        SummonList summons;
+
+        void DoAction(const int32 actionId)
+        {
+            switch (actionId)
+            {
+                case 100:
+                    events.ScheduleEvent(EVENT_SUMMON, urand(5000, 8000));
+                    events.ScheduleEvent(EVENT_DESPAWN, 45000);
+                    break;
+            }
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            summons.Summon(summon);
+        }
+
+        void Reset()
+        {
+            summons.DespawnAll();
+            if (Creature* chogall = me->GetCreature(*me, instance->GetData64(DATA_CHOGALL)))
+                DoZoneInCombat(chogall);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SUMMON:
+                        Position pos;
+
+                        for (uint8 i = 0; i < 4; i++)
+                        {
+                            me->GetPosition(&pos);
+                            pos.m_positionX += float(urand(1, 3));
+                            pos.m_positionY += float(urand(1, 3));
+                            me->SummonCreature(NPC_BLOOD_OF_THE_OLD_GOD, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+                        }
+                        break;
+                    case EVENT_DESPAWN:
+                        me->DisappearAndDie();
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_spilled_bloodAI(creature);
+    }
+};
+
+class spell_whorshipping : public SpellScriptLoader
+{
+    public:
+        spell_whorshipping() : SpellScriptLoader("spell_whorshipping") { }
+
+        class spell_whorshipping_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_whorshipping_AuraScript);
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* owner = GetUnitOwner())
+                {
+                    if (owner->isCharmed() && owner->GetCharmer())
+                        owner->RemoveCharmedBy(owner->GetCharmer());
+                }
+            }
+
+            void OnPeriodic(AuraEffect const* /*aurEff*/)
+            {
+                if (Unit* owner = GetUnitOwner())
+                {
+                    if (owner->isCharmed() && owner->GetCharmer())
+                        owner->AddAura(SPELL_TWISTED_DEVOTION, owner->GetCharmer());
+                }
+                
+                PreventDefaultAction();
+            }
+
+            void Register()
+            {
+                OnEffectRemove += AuraEffectRemoveFn(spell_whorshipping_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_MOD_FACTION, AURA_EFFECT_HANDLE_REAL);
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_whorshipping_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_whorshipping_AuraScript();
+        }
+};
+
+class spell_depravity : public SpellScriptLoader
+{
+    public:
+        spell_depravity() : SpellScriptLoader("spell_depravity") { }
+        class spell_depravity_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_depravity_SpellScript);
+            void onDmg()
+            {
+                if (!GetHitUnit())
+                    return;
+                
+                GetHitUnit()->SetPower(POWER_ALTERNATIVE_POWER, GetHitUnit()->GetPower(POWER_ALTERNATIVE_POWER) + 10);
+                GetHitUnit()->CheckCorruption();
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_depravity_SpellScript::onDmg);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_depravity_SpellScript();
+        }
+};
+
+class spell_sprayed_corruption : public SpellScriptLoader
+{
+    public:
+        spell_sprayed_corruption() : SpellScriptLoader("spell_sprayed_corruption") { }
+        class spell_sprayed_corruption_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_sprayed_corruption_SpellScript);
+            void onDmg()
+            {
+                if (!GetHitUnit())
+                    return;
+                
+                GetHitUnit()->SetPower(POWER_ALTERNATIVE_POWER, GetHitUnit()->GetPower(POWER_ALTERNATIVE_POWER) + 5);
+                GetHitUnit()->CheckCorruption();
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_sprayed_corruption_SpellScript::onDmg);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_sprayed_corruption_SpellScript();
+        }
+};
+
+class spell_spilled_blood_of_the_old_god : public SpellScriptLoader
+{
+    public:
+        spell_spilled_blood_of_the_old_god() : SpellScriptLoader("spell_spilled_blood_of_the_old_god") { }
+        class spell_spilled_blood_of_the_old_god_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_spilled_blood_of_the_old_god_SpellScript);
+            void onDmg()
+            {
+                if (!GetHitUnit())
+                    return;
+                
+                GetHitUnit()->SetPower(POWER_ALTERNATIVE_POWER, GetHitUnit()->GetPower(POWER_ALTERNATIVE_POWER) + 5);
+                GetHitUnit()->CheckCorruption();
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_spilled_blood_of_the_old_god_SpellScript::onDmg);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_spilled_blood_of_the_old_god_SpellScript();
+        }
+};
+
+class spell_corrupting_crash : public SpellScriptLoader
+{
+    public:
+        spell_corrupting_crash() : SpellScriptLoader("spell_corrupting_crash") { }
+        class spell_corrupting_crash_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_corrupting_crash_SpellScript);
+            void onDmg()
+            {
+                if (!GetHitUnit())
+                    return;
+                
+                GetHitUnit()->SetPower(POWER_ALTERNATIVE_POWER, GetHitUnit()->GetPower(POWER_ALTERNATIVE_POWER) + 10);
+                GetHitUnit()->CheckCorruption();
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_corrupting_crash_SpellScript::onDmg);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_corrupting_crash_SpellScript();
+        }
+};
+
+class spell_corruption_of_the_old_god : public SpellScriptLoader
+{
+    public:
+        spell_corruption_of_the_old_god() : SpellScriptLoader("spell_corruption_of_the_old_god") { }
+
+        class spell_corruption_of_the_old_god_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_corruption_of_the_old_god_SpellScript);
+            void onDmg()
+            {
+                if (!GetHitUnit())
+                    return;
+                
+                GetHitUnit()->SetPower(POWER_ALTERNATIVE_POWER, GetHitUnit()->GetPower(POWER_ALTERNATIVE_POWER) + 1);
+                GetHitUnit()->CheckCorruption();
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_corruption_of_the_old_god_SpellScript::onDmg);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_corruption_of_the_old_god_SpellScript();
+        }
+};
+
+class spell_corruption_sickness : public SpellScriptLoader
+{
+    public:
+        spell_corruption_sickness() : SpellScriptLoader("spell_corruption_sickness") { }
+
+        class spell_corruption_sickness_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_corruption_sickness_SpellScript);
+            void onDmg()
+            {
+                if (!GetHitUnit())
+                    return;
+                
+                GetHitUnit()->SetPower(POWER_ALTERNATIVE_POWER, GetHitUnit()->GetPower(POWER_ALTERNATIVE_POWER) + 5);
+                GetHitUnit()->CheckCorruption();
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_corruption_sickness_SpellScript::onDmg);
+            }
+        };
+
+        SpellScript *GetSpellScript() const
+        {
+            return new spell_corruption_sickness_SpellScript();
+        }
+};
+
+class spell_corruption_accelerated : public SpellScriptLoader
+{
+    public:
+        spell_corruption_accelerated() : SpellScriptLoader("spell_corruption_accelerated") { }
+
+        class spell_corruption_accelerated_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_corruption_accelerated_AuraScript);
+
+            void OnPeriodic(AuraEffect const* /*aurEff*/)
+            {
+                if (Unit* owner = GetUnitOwner())
+                {
+                    owner->SetPower(POWER_ALTERNATIVE_POWER, owner->GetPower(POWER_ALTERNATIVE_POWER) + 2);
+                    owner->CheckCorruption();
+                }
+                
+                PreventDefaultAction();
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_corruption_accelerated_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_corruption_accelerated_AuraScript();
+        }
+};
+
+enum darkenedEvents 
+{
+    EVENT_DEBILITATING_BEAM = 1,
+};
+
+class npc_darkened_creation : public CreatureScript
+{
+    public:
+        npc_darkened_creation() : CreatureScript("npc_darkened_creation") { }
+
+        struct npc_darkened_creationAI : public ScriptedAI
+        {
+            npc_darkened_creationAI(Creature* pCreature) : ScriptedAI(pCreature)
+            { 
+                instance = me->GetInstanceScript(); 
+            }
+            
+            InstanceScript* instance;
+            EventMap events;
+
+            void Reset()
+            {
+                events.Reset();
+            }
+
+            void EnterCombat(Unit* victim) 
+            {
+                events.ScheduleEvent(EVENT_DEBILITATING_BEAM, urand(3000, 5000));
+                DoZoneInCombat(me);
+            }
+
+            void AttackStart(Unit* who)
+            {
+                if (!who)
+                    return;
+
+                AttackStartNoMove(who);
+            }
+
+            void UpdateAI(const uint32 diff)
+            {             
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                switch (events.ExecuteEvent())
+                {
+                    case EVENT_DEBILITATING_BEAM:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            me->CastSpell(target, SPELL_DEBILITING_BEAM, false);
+                        
+                        events.ScheduleEvent(EVENT_DEBILITATING_BEAM, urand(6000, 8000));
+                        break;
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* pCreature) const
+        {
+            return new npc_darkened_creationAI(pCreature);
+        }
+};
+
+
+class npc_spiked_tentacle : public CreatureScript
+{
+    public:
+        npc_spiked_tentacle() : CreatureScript("npc_spiked_tentacle") { }
+
+        struct npc_spiked_tentacleAI : public ScriptedAI
+        {
+            npc_spiked_tentacleAI(Creature* pCreature) : ScriptedAI(pCreature)
+            { 
+                instance = me->GetInstanceScript(); 
+            }
+            
+            InstanceScript* instance;
+            EventMap events;
+
+            void Reset()
+            {
+                events.Reset();
+            }
+
+            void EnterCombat(Unit* victim) 
+            {
+                DoZoneInCombat(me);
+            }
+
+            void AttackStart(Unit* who)
+            {
+                if (!who)
+                    return;
+
+                AttackStartNoMove(who);
+            }
+
+            void UpdateAI(const uint32 diff)
+            {             
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+            }
+        };
+
+        CreatureAI* GetAI(Creature* pCreature) const
+        {
+            return new npc_spiked_tentacleAI(pCreature);
+        }
+};
+
+class spell_debilitating_beam : public SpellScriptLoader {
+public:
+	spell_debilitating_beam() : SpellScriptLoader("spell_debilitating_beam") 
+    { }
+
+	class spell_debilitating_beam_AuraScript: public AuraScript 
+    {
+		PrepareAuraScript(spell_debilitating_beam_AuraScript);
+
+        void PeriodicTick(AuraEffect const* aurEff)
+        {
+            if (!GetTarget())
+                return;
+            
+            if (GetTarget()->GetMap() && GetTarget()->GetMap()->IsHeroic())
+            {
+                GetTarget()->SetPower(POWER_ALTERNATIVE_POWER, GetTarget()->GetPower(POWER_ALTERNATIVE_POWER) + 2);
+                GetTarget()->CheckCorruption();
+            }
+        }
+
+		void Register() 
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_debilitating_beam_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+		}
+	};
+
+	AuraScript *GetAuraScript() const 
+    {
+		return new spell_debilitating_beam_AuraScript();
+	}
+};
+
 void AddSC_boss_chogall()
 {
     new boss_chogall();
+    new npc_spilled_blood();
+    new spell_whorshipping();
+    new spell_depravity();
+    new spell_sprayed_corruption();
+    new spell_spilled_blood_of_the_old_god();
+    new spell_corrupting_crash();
+    new spell_corruption_of_the_old_god();
+    new npc_darkened_creation();
+    new spell_debilitating_beam();
+    new spell_corruption_accelerated();
+    new spell_corruption_sickness();
+    new npc_spiked_tentacle();
 }
