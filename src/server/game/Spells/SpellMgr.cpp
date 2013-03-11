@@ -5058,6 +5058,30 @@ void SpellMgr::LoadSpellCustomAttr() {
             spellInfo->EffectImplicitTargetB[0] = 0;
             spellInfo->EffectRadiusIndex[0] = 9;
             break;
+        case 82285:// Elemental Stasis
+        case 82746:// Glaciate
+        case 92506:    
+        case 92507:    
+        case 92508:    
+        case 92548:    
+            spellInfo->EffectRadiusIndex[0] = 22;
+            break;
+        case 83067:// Thundershock
+        case 92469:
+        case 92470:
+        case 92471:
+        case 83565:// Quake
+        case 92544:
+        case 92545:
+        case 92546:
+            spellInfo->EffectRadiusIndex[0] = 12;
+            break;
+        case 83070:// Lightning Blast
+        case 92454:
+        case 92455:
+        case 92456:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            break;
         default:
             break;
         }
