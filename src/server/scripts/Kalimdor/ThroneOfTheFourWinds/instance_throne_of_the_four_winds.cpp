@@ -123,11 +123,11 @@ public:
                     if (data == IN_PROGRESS && conclave[0] != SPECIAL)
                     {
                         if (Creature* nezir = instance->GetCreature(NezirGUID))
-                            if (!nezir->isInCombat())
+                            if (!nezir->isInCombat() && nezir->IsAIEnabled())
                                 nezir->AI()->DoAction(ACTION_NEZIR_ENTER_IN_COMBAT);
 
                         if (Creature* rohash = instance->GetCreature(RohashGUID))
-                            if (!rohash->isInCombat())
+                            if (!rohash->isInCombat() && rohash->IsAIEnabled())
                                 rohash->AI()->DoAction(ACTION_ROHASH_ENTER_IN_COMBAT);
                     }
                     conclave[0] = data;
@@ -136,11 +136,11 @@ public:
                     if (data == IN_PROGRESS  && conclave[1] != SPECIAL)
                     {
                         if (Creature* anshal = instance->GetCreature(AnshalGUID))
-                            if (!anshal->isInCombat())
+                            if (!anshal->isInCombat() && anshal->IsAIEnabled())
                                 anshal->AI()->DoAction(ACTION_ANSHAL_ENTER_IN_COMBAT);
 
                         if (Creature* rohash = instance->GetCreature(RohashGUID))
-                            if (!rohash->isInCombat())
+                            if (!rohash->isInCombat() && rohash->IsAIEnabled())
                                 rohash->AI()->DoAction(ACTION_ROHASH_ENTER_IN_COMBAT);
                     }
                     conclave[1] = data;
@@ -149,11 +149,11 @@ public:
                     if (data == IN_PROGRESS && conclave[2] != SPECIAL)
                     {
                         if (Creature* nezir = instance->GetCreature(NezirGUID))
-                            if (!nezir->isInCombat())
+                            if (!nezir->isInCombat() && nezir->IsAIEnabled())
                                 nezir->AI()->DoAction(ACTION_NEZIR_ENTER_IN_COMBAT);
 
                         if (Creature* anshal = instance->GetCreature(AnshalGUID))
-                            if (!anshal->isInCombat())
+                            if (!anshal->isInCombat() && anshal->IsAIEnabled())
                                 anshal->AI()->DoAction(ACTION_ANSHAL_ENTER_IN_COMBAT);
                     }
                     conclave[2] = data;
