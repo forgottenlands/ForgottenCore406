@@ -134,7 +134,7 @@ public:
                 phase = 1;
                 me->CastSpell(me, SPELL_CORRUPTION_OF_THE_OLD_GOD, false);
                 me->AddAura(82356, me);
-                events.ScheduleEvent(EVENT_DARKENED_CREATIONS, urand(3000, 6000));
+                events.ScheduleEvent(EVENT_DARKENED_CREATIONS, urand(8000, 12000));
             }
         }
 
@@ -146,6 +146,8 @@ public:
 
             summons.DespawnAll();
             
+            instance->SetData(DATA_CHOGALL_EVENT, NOT_STARTED);
+
             std::list<Creature*> unitList;
             me->GetCreatureListWithEntryInGrid(unitList, 50264, 100.0f);
             for (std::list<Creature*>::const_iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
@@ -298,7 +300,7 @@ public:
                         for (uint8 i = 0; i < 4; i++)
                             me->CastSpell(me, 82433, false);
 
-                        events.ScheduleEvent(EVENT_DARKENED_CREATIONS, 30000);
+                        events.ScheduleEvent(EVENT_DARKENED_CREATIONS, urand(60000, 70000));
                         break;
                     default:
                         break;
