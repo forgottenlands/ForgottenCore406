@@ -134,6 +134,8 @@ public:
                 phase = 1;
                 me->CastSpell(me, SPELL_CORRUPTION_OF_THE_OLD_GOD, false);
                 me->AddAura(82356, me);
+                events.CancelEvent(EVENT_CORRUPTING_ADHERENT);
+                events.CancelEvent(EVENT_SUMMON_CORRUPTING_ADHERENT);
                 events.ScheduleEvent(EVENT_DARKENED_CREATIONS, urand(8000, 12000));
             }
         }
