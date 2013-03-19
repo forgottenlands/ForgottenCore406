@@ -122,9 +122,9 @@ enum spell_c
     SPELL_RISING_FLAMES_BUFF     = 82639, //funziona
     SPELL_FIRE_IMBUED            = 82663, //funziona
     // Arion
-        SPELL_THUNDERSHOCK           = 83067, //funziona
-        SPELL_LIGHTNING_ROD          = 83099, //funziona
-        SPELL_CHAIN_LIGHTNING        = 83300, //non fa danno
+    SPELL_THUNDERSHOCK           = 83067, //funziona
+    SPELL_LIGHTNING_ROD          = 83099, //funziona
+    SPELL_CHAIN_LIGHTNING        = 83300, //non fa danno
     SPELL_DISPERSION             = 83087, //teleport da scriptare
     SPELL_LIGHTNING_BLAST        = 83070, //non fa danno
     SPELL_CALL_WINDS             = 83491, //funziona
@@ -272,39 +272,48 @@ public:
  
         bool eventActive;
  
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            me->SetVisible(false);
+            
+            ascendant[0] = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_IGNACIOUS));
+            ascendant[1] = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_FELUDIUS));
+            ascendant[2] = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARION));
+            ascendant[3] = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TERRASTRA));
+           
+            for(uint8 i = 0; i<=3; i++)
+            {
+                if(ascendant[i] == NULL)
+                    return;
+
+                ascendant[i]->SetMaxHealth(ascendant[i]->GetMaxHealth());
+            }
+
+            eventActive = false;
+            initialized = true;
+            phase       = 0;
+            count       = 0;
+            killtimer   = 0;
+            zap = 1;
+            phasechange = false;
+            DoAction(COUNCIL_EVENT_RESET);
+            chaintargets[0]=NULL;
+            chaintargets[1]=NULL;
+            chaintargets[2]=NULL;
+        }
+
         void UpdateAI(const uint32 diff)
         {
-            if(!initialized)
-            {
-                ascendant[0] = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_IGNACIOUS));
-                ascendant[1] = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_FELUDIUS));
-                ascendant[2] = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_ARION));
-                ascendant[3] = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_TERRASTRA));
-               
-                for(uint8 i = 0; i<=3; i++)
-                {
-                    if(ascendant[i] == NULL)
-                        return;
-                    me->SetMaxHealth(ascendant[i]->GetMaxHealth());
-                }
- 
-                eventActive = true;
-                initialized = true;
-                phase       = 0;
-                count       = 0;
-                killtimer   = 0;
-                zap = 1;
-                phasechange = false;
-                DoAction(COUNCIL_EVENT_RESET);
-                chaintargets[0]=NULL;
-                chaintargets[1]=NULL;
-                chaintargets[2]=NULL;
-            }
-            else
-            {
+                if (!UpdateVictim())
+                    return;
+
                 if (killtimer>=diff)
                     killtimer -= diff;
+
                 events.Update(diff);
+
                 while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch(eventId)
@@ -327,6 +336,7 @@ public:
                                 if (*itr)
                                     (*itr)->DespawnOrUnsummon();
                             }
+
                             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_STATIC_OVERLOAD);
                             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GRAVITY_CORE);
                             //visibility
@@ -338,6 +348,8 @@ public:
                             ascendant[1]->SetVisible(false);
                             ascendant[2]->SetVisible(true);
                             ascendant[3]->SetVisible(true);
+                            ascendant[0]->AttackStop();
+                            ascendant[1]->AttackStop();
                             ascendant[0]->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                             ascendant[1]->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                             ascendant[2]->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
@@ -347,6 +359,9 @@ public:
                             ascendant[3]->MonsterYell(SAY_AGGRO4, 0, 0);
                             DoPlaySoundToSet(ascendant[3], SOU_AGGRO4);
  
+                            DoZoneInCombat(ascendant[3]);
+                            DoZoneInCombat(ascendant[2]);
+
                             //AI schedules                            
                             events.ScheduleEvent(EVENT_CYCLONE, 6000);                            
                             events.ScheduleEvent(EVENT_GRAVITY_WELL, 7000);
@@ -824,7 +839,6 @@ public:
                     }
                 }
             DoMeleeAttackIfReady();
-            }
         }
  
         void DoAction(const int32 action)
@@ -832,10 +846,12 @@ public:
             switch(action)
             {
             case COUNCIL_START_EVENT:
- 
+                if (phase != 0 || eventActive)
+                    return;
+
                 if (instance)
                     instance->SetData(DATA_COUNCIL_EVENT, IN_PROGRESS);
- 
+
                 eventActive = true;
                 events.Reset();
                 //visibility
@@ -846,6 +862,10 @@ public:
                 ascendant[3]->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 ascendant[3]->SetVisible(false);
  
+                DoZoneInCombat(me);
+                DoZoneInCombat(ascendant[0]);
+                DoZoneInCombat(ascendant[1]);
+
                 //AI schedules
                 ascendant[0]->MonsterYell(SAY_AGGRO1, 0, 0);
                 DoPlaySoundToSet(ascendant[0], SOU_AGGRO1);
@@ -926,7 +946,6 @@ public:
                     ascendant[3]->MonsterYell(SAY_MONSTR1, 0, 0);
                     DoPlaySoundToSet(ascendant[3], SOU_MONSTR1);
                     ascendant[3]->GetMotionMaster()->MovePoint(0, center[0]);
- 
                     events.ScheduleEvent(EVENT_SAY, 3000);
                 }
                 break;
@@ -971,6 +990,10 @@ public:
             DoPlaySoundToSet(me, SOU_DEATH);
             std::list<Creature*> unitList;
             me->GetCreatureListWithEntryInGrid(unitList, NPC_LIQUID_ICE, 100.0f);
+
+            for (uint8 i = 0; i < 4; i++)
+                ascendant[i]->DisappearAndDie();
+
             for (std::list<Creature*>::const_iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
             {// this will despawn the cyclones
                 if (*itr)
@@ -1047,21 +1070,28 @@ public:
  
         void EnterCombat(Unit * who)
         {
-            if (Creature* monstrosity = ObjectAccessor::GetCreature(*me,instance->GetData64(BOSS_MONSTROSITY)))
+            if (Creature* monstrosity = ObjectAccessor::GetCreature(*me,instance->GetData64(DATA_MONSTROSITY)))
                 monstrosity->AI()->DoAction(COUNCIL_START_EVENT);
+
             killtimer =0;
         }
  
         void Reset()
         {
-            if (Creature* elementium = ObjectAccessor::GetCreature(*me,instance->GetData64(BOSS_MONSTROSITY)))
+            if (me->GetEntry() != BOSS_FELUDIUS && me->GetEntry() != BOSS_IGNACIOUS)
+                me->SetVisible(false);
+
+            if (Creature* elementium = ObjectAccessor::GetCreature(*me,instance->GetData64(DATA_MONSTROSITY)))
                 elementium->AI()->DoAction(COUNCIL_EVENT_RESET);
         };
  
         void UpdateAI(const uint32 diff)
         {
+            if (!UpdateVictim())
+                return;
+
             if (killtimer>=diff)
-                    killtimer -= diff;
+                killtimer -= diff;
  
             DoMeleeAttackIfReady();
         }
@@ -1073,12 +1103,12 @@ public:
             else if (me->GetEntry() == BOSS_IGNACIOUS && who->HasAura(SPELL_FROST_IMBUED))
                 damage *=2;
  
-            if (Creature* elementium = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MONSTROSITY)))
+            if (Creature* elementium = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_MONSTROSITY)))
             {
                 elementium->SetHealth(elementium->GetHealth()-damage);
                
                 // phase change when an attack will put an ascendant under 25% hp
-                if (me->GetHealthPct() >= 25.0f )
+                if (me->GetHealthPct() <= 25.0f )
                 {
                     if (me->GetEntry() == BOSS_FELUDIUS || me->GetEntry() == BOSS_IGNACIOUS)
                         elementium->AI()->DoAction(COUNCIL_PHASE_1);
