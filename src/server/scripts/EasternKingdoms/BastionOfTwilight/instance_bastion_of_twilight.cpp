@@ -134,7 +134,7 @@ public:
 				case BOSS_CHOGALL:
 					uiChogall = creature->GetGUID();
 					break;
-                case BOSS_SINESRTA:
+                case BOSS_SINESTRA:
                     uiSinestra = creature->GetGUID();
                     break;
 				case NPC_SLATE_DRAKE:

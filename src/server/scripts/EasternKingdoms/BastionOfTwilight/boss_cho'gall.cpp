@@ -135,6 +135,7 @@ public:
                 me->CastSpell(me, SPELL_CORRUPTION_OF_THE_OLD_GOD, false);
                 me->AddAura(82356, me);
                 events.CancelEvent(EVENT_CORRUPTING_ADHERENT);
+                events.CancelEvent(EVENT_FLAME_ORDERS);
                 events.CancelEvent(EVENT_SUMMON_CORRUPTING_ADHERENT);
                 events.ScheduleEvent(EVENT_DARKENED_CREATIONS, urand(8000, 12000));
             }
@@ -178,6 +179,7 @@ public:
             events.ScheduleEvent(EVENT_CONVERSION, 10000);
             events.ScheduleEvent(EVENT_FURY_OF_CHOGALL, urand(45000, 50000));
             events.ScheduleEvent(EVENT_FLAME_ORDERS, urand(7000, 10000));
+            events.ScheduleEvent(EVENT_SHADOW_ORDERS, urand(7000, 10000));
             events.ScheduleEvent(EVENT_CORRUPTING_ADHERENT, 60000);
             instance->SetData(DATA_CHOGALL_EVENT, IN_PROGRESS);
         }
